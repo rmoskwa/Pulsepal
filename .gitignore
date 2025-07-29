@@ -2,4 +2,13 @@
 CLAUDE.md
 README_TEMPLATE.md
 examples/
+# Virtual environments
 .venv/
+.venv-wsl/
+venv/
+.env
+.env.example
+PRPs/
+requirements.txt
+test_implementation.py
+pulsepal/__pycache__/
