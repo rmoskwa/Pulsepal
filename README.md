@@ -1,6 +1,6 @@
 # 🔬 PulsePal - AI Assistant for MRI Sequence Programming
 
-**An advanced PydanticAI multi-agent system for Pulseq MRI sequence development with modern web interface**
+**A PydanticAI multi-agent system for Pulseq MRI sequence development with modern web interface**
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![PydanticAI](https://img.shields.io/badge/PydanticAI-latest-green.svg)](https://ai.pydantic.dev/)
