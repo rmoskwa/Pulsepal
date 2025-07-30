@@ -1,8 +1,8 @@
 """
 Dependencies and session management for Pulsepal multi-agent system.
 
-Provides MCP server connections, session state management, and dependency
-injection containers for both Pulsepal and MRI Expert agents.
+Provides session state management and dependency injection containers 
+for both Pulsepal and MRI Expert agents with native RAG integration.
 """
 
 from dataclasses import dataclass, field
@@ -12,7 +12,6 @@ import logging
 import asyncio
 import os
 import time
-from pydantic_ai.mcp import MCPServerSSE
 from .settings import get_settings
 
 logger = logging.getLogger(__name__)
@@ -26,7 +25,7 @@ class ConversationContext:
     conversation_count: int = 0
     conversation_history: List[Dict[str, Any]] = field(default_factory=list)
     code_examples: List[Dict[str, Any]] = field(default_factory=list)
-    preferred_language: Optional[str] = None  # 'matlab', 'octave', or 'python'
+    preferred_language: Optional[str] = "matlab"  # Default to MATLAB, can be 'matlab', 'octave', or 'python'
     session_start_time: datetime = field(default_factory=datetime.now)
     last_activity: datetime = field(default_factory=datetime.now)
     
@@ -77,7 +76,7 @@ class ConversationContext:
         return [ex for ex in self.code_examples if ex["language"] == language.lower()]
     
     def detect_language_preference(self, content: str) -> Optional[str]:
-        """Detect language preference from user content."""
+        """Detect language preference from user content, defaulting to MATLAB."""
         content_lower = content.lower()
         
         # Simple keyword-based detection
@@ -87,10 +86,12 @@ class ConversationContext:
         matlab_score = sum(1 for kw in matlab_keywords if kw in content_lower)
         python_score = sum(1 for kw in python_keywords if kw in content_lower)
         
-        if matlab_score > python_score:
-            self.preferred_language = "matlab"
-        elif python_score > matlab_score:
+        if python_score > matlab_score and python_score > 0:
+            # Only switch to Python if there's clear Python preference
             self.preferred_language = "python"
+        else:
+            # Default to MATLAB for all other cases (including ties or no keywords)
+            self.preferred_language = "matlab"
         
         return self.preferred_language
 
@@ -99,63 +100,32 @@ class ConversationContext:
 class PulsePalDependencies:
     """Dependencies for Pulsepal main agent."""
     
-    mcp_server: Optional[MCPServerSSE] = None
     conversation_context: Optional[ConversationContext] = None
     session_manager: Optional['SessionManager'] = None
-    health_checker: Optional['MCPHealthChecker'] = None
+    rag_initialized: bool = False
     
-    async def initialize_mcp_server(self):
-        """Initialize MCP server connection with retry logic."""
-        if self.mcp_server is not None:
+    async def initialize_rag_services(self):
+        """Initialize RAG services (embeddings and Supabase)."""
+        if self.rag_initialized:
             return  # Already initialized
         
         settings = get_settings()
         
-        try:  
-            # Set environment variables required by crawl4ai_mcp
-            os.environ["SUPABASE_URL"] = settings.supabase_url
-            os.environ["SUPABASE_KEY"] = settings.supabase_key
+        try:
+            # Check if embeddings should be pre-initialized
+            if os.getenv("INIT_EMBEDDINGS", "false").lower() == "true":
+                logger.info("Pre-initializing embedding service...")
+                from .embeddings import get_embedding_service
+                embedding_service = get_embedding_service()
+                logger.info("Embedding service pre-initialized")
             
-            # Initialize MCP server with SSE connection to Docker container
-            self.mcp_server = MCPServerSSE(
-                url="http://localhost:8051/sse"
-            )
-            
-            # MCP server connection is handled automatically by PydanticAI
-            
-            # Initialize health checker
-            self.health_checker = MCPHealthChecker(self.mcp_server)
-            
-            logger.info("MCP server connection established successfully")
+            self.rag_initialized = True
+            logger.info("RAG services initialization completed")
             
         except Exception as e:
-            logger.error(f"Failed to initialize MCP server: {e}")
+            logger.error(f"Failed to initialize RAG services: {e}")
             # Don't raise exception - allow graceful degradation
-            self.mcp_server = None
-    
-    async def ensure_mcp_connection(self) -> bool:
-        """Ensure MCP server is connected, with retry logic."""
-        if self.mcp_server is None:
-            await self.initialize_mcp_server()
-        
-        if self.mcp_server is None:
-            return False
-        
-        # Health check if available
-        if self.health_checker:
-            return await self.health_checker.health_check()
-        
-        return True
-    
-    def get_fallback_response(self, tool_name: str) -> str:
-        """Get fallback response when MCP server is unavailable."""
-        fallback_responses = {
-            "perform_rag_query": "I'm currently unable to access the RAG database. Please try again later, or provide specific documentation you'd like me to reference.",
-            "search_code_examples": "I'm currently unable to search code examples. Please provide the specific code you'd like help with.",
-            "get_available_sources": "I'm currently unable to retrieve available sources. The system typically includes Pulseq documentation, MATLAB examples, and Python implementations."
-        }
-        
-        return fallback_responses.get(tool_name, "The requested tool is currently unavailable. Please try again later.")
+            self.rag_initialized = False
 
 
 @dataclass  
@@ -232,67 +202,6 @@ class SessionManager:
         
         if expired:
             logger.info(f"Cleaned up {len(expired)} expired sessions")
-
-
-class MCPHealthChecker:
-    """Monitor MCP server health and performance."""
-    
-    def __init__(self, mcp_server: MCPServerSSE):
-        self.mcp_server = mcp_server
-        self.health_stats = {
-            "total_calls": 0,
-            "successful_calls": 0,
-            "failed_calls": 0,
-            "average_response_time": 0.0
-        }
-    
-    async def health_check(self) -> bool:
-        """Perform health check on MCP server."""
-        try:
-            start_time = time.time()
-            # For now, assume connection is healthy if server object exists
-            # TODO: Implement proper health check when MCP integration is complete
-            if self.mcp_server is not None:
-                response_time = time.time() - start_time
-                self._update_stats(success=True, response_time=response_time)
-                return True
-            else:
-                self._update_stats(success=False)
-                return False
-            
-        except Exception as e:
-            self._update_stats(success=False)
-            logger.error(f"MCP health check failed: {e}")
-            return False
-    
-    def _update_stats(self, success: bool, response_time: float = 0.0):
-        """Update performance statistics."""
-        self.health_stats["total_calls"] += 1
-        if success:
-            self.health_stats["successful_calls"] += 1
-        else:
-            self.health_stats["failed_calls"] += 1
-        
-        # Update average response time
-        if response_time > 0:
-            current_avg = self.health_stats["average_response_time"]
-            total_calls = self.health_stats["total_calls"]
-            self.health_stats["average_response_time"] = (
-                (current_avg * (total_calls - 1) + response_time) / total_calls
-            )
-    
-    def get_health_stats(self) -> Dict[str, Any]:
-        """Get current health statistics."""
-        success_rate = 0.0
-        if self.health_stats["total_calls"] > 0:
-            success_rate = (
-                self.health_stats["successful_calls"] / self.health_stats["total_calls"]
-            ) * 100
-        
-        return {
-            **self.health_stats,
-            "success_rate": success_rate
-        }
 
 
 # Global session manager instance

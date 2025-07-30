@@ -45,19 +45,28 @@ DO NOT provide generic responses. ALWAYS search your knowledge base using the to
 
 ## Programming Languages You Support:
 
-- **MATLAB**: Primary Pulseq environment with .seq file generation
+- **MATLAB**: Primary Pulseq environment with .seq file generation (DEFAULT for code examples)
 - **Octave**: Open-source alternative to MATLAB
 - **Python**: Using pulseq-python package for sequence programming
+
+**IMPORTANT**: When users ask for code examples without specifying a language, always provide MATLAB code by default.
 
 ## Response Guidelines:
 
 - FIRST: Use tools to search for relevant information
-- THEN: Provide answers based on the search results
-- Always check user's preferred language or detect from context
+- THEN: SEAMLESSLY INTEGRATE THE COMPLETE TOOL RESPONSES into your answer
+- Present all information as if it's coming directly from you (Pulsepal)
+- NEVER mention "MRI Expert", "delegation", or "consulting another agent"
+- For physics questions: Present the physics explanation as your own knowledge
+- For documentation questions: Present the search results as your research findings
+- For code questions: Present the code examples as your recommendations
+- Use MATLAB by default for all code examples unless user explicitly requests Python/Octave
 - Provide working, tested code examples when possible
 - Include clear comments explaining sequence logic
 - Reference specific Pulseq functions and parameters
 - Warn about potential scanner safety issues
+
+IMPORTANT: Users should feel they are always talking to just "Pulsepal". Tool responses must be seamlessly integrated without revealing the internal delegation mechanism.
 
 ## When to Delegate:
 
@@ -74,6 +83,15 @@ Keep programming questions for yourself:
 - Code debugging and optimization
 - Language-specific implementation details
 - Sequence file generation and validation
+
+## Session Memory and Context:
+
+- Use conversation history to maintain context across exchanges
+- Reference previous questions, code examples, and discussions when relevant
+- Build upon previously established concepts and preferences
+- Remember user's preferred programming language from conversation
+- Avoid repeating the same information if recently discussed
+- Connect new questions to earlier topics when appropriate
 
 Always maintain conversation context and build upon previous code examples when relevant."""
 
@@ -117,8 +135,8 @@ async def create_pulsepal_session(session_id: str = None) -> tuple[str, PulsePal
         session_manager=session_manager
     )
     
-    # Initialize MCP server connection
-    await deps.initialize_mcp_server()
+    # Initialize RAG services
+    await deps.initialize_rag_services()
     
     logger.info(f"Created Pulsepal session: {session_id}")
     return session_id, deps
@@ -146,23 +164,43 @@ async def run_pulsepal(query: str, session_id: str = None) -> tuple[str, str]:
                 conversation_context=conversation_context,
                 session_manager=session_manager
             )
-            await deps.initialize_mcp_server()
+            await deps.initialize_rag_services()
         
         # Add user query to conversation history
         deps.conversation_context.add_conversation("user", query)
         
-        # Detect language preference if not already set
-        if not deps.conversation_context.preferred_language:
+        # Detect language preference (will default to MATLAB if no clear preference)
+        if not deps.conversation_context.preferred_language or deps.conversation_context.preferred_language == "matlab":
+            # Always check for language preference, but MATLAB is default
             deps.conversation_context.detect_language_preference(query)
         
-        # Run agent
-        result = await pulsepal_agent.run(query, deps=deps)
+        # Prepare context-aware query
+        enhanced_query = query
+        if deps.conversation_context.conversation_history:
+            # Get recent conversation history for context
+            recent_history = deps.conversation_context.get_recent_conversations(5)
+            if recent_history:
+                context_summary = "Recent conversation context:\n"
+                for entry in recent_history:
+                    role = entry.get('role', 'unknown')
+                    content = entry.get('content', '')[:150]  # Limit content length for context
+                    context_summary += f"{role}: {content}...\n"
+                
+                # Add context to the query
+                enhanced_query = f"{context_summary}\nCurrent question: {query}"
+        
+        # Include preferred language context (default to MATLAB if not set)
+        preferred_lang = deps.conversation_context.preferred_language or "matlab"
+        enhanced_query += f"\n\nUser's preferred programming language: {preferred_lang}"
+        
+        # Run agent with enhanced context
+        result = await pulsepal_agent.run(enhanced_query, deps=deps)
         
         # Add assistant response to conversation history
-        deps.conversation_context.add_conversation("assistant", result.data)
+        deps.conversation_context.add_conversation("assistant", result.output)
         
         logger.info(f"Pulsepal responded to query in session {session_id}")
-        return session_id, result.data
+        return session_id, result.output
         
     except Exception as e:
         error_msg = f"Error running Pulsepal: {e}"

@@ -37,7 +37,7 @@ class Settings(BaseSettings):
         alias="LLM_MODEL" 
     )
     
-    # Supabase Configuration for MCP Server
+    # Supabase Configuration for RAG
     supabase_url: str = Field(
         ...,
         description="Supabase project URL for RAG database",
@@ -45,8 +45,15 @@ class Settings(BaseSettings):
     )
     supabase_key: str = Field(
         ...,
-        description="Supabase anon/service role key",
+        description="Supabase service role key for full access",
         alias="SUPABASE_KEY"
+    )
+    
+    # BGE Embedding Model Configuration
+    bge_model_path: str = Field(
+        default="/mnt/c/Users/Robert Moskwa/huggingface_models/hub/models--BAAI--bge-large-en-v1.5/snapshots",
+        description="Path to local BGE embedding model",
+        alias="BGE_MODEL_PATH"
     )
     
     # Session Configuration
@@ -63,16 +70,6 @@ class Settings(BaseSettings):
         description="Maximum code examples stored per session"
     )
     
-    # MCP Server Configuration
-    mcp_server_timeout: int = Field(
-        default=30,
-        description="MCP server request timeout in seconds"
-    )
-    mcp_retry_attempts: int = Field(
-        default=3,
-        description="Number of retry attempts for MCP server calls"
-    )
-    
     # RAG Configuration
     default_match_count: int = Field(
         default=5,
@@ -81,6 +78,14 @@ class Settings(BaseSettings):
     max_match_count: int = Field(
         default=20,
         description="Maximum number of RAG results allowed"
+    )
+    use_hybrid_search: bool = Field(
+        default=True,
+        description="Use hybrid search (vector + keyword) for better results"
+    )
+    use_contextual_embeddings: bool = Field(
+        default=False,
+        description="Use contextual embeddings for document chunks"
     )
 
 
