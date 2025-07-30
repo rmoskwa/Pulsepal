@@ -85,6 +85,7 @@ initialize_embeddings.py
 CHAINLIT_INTEGRATION_FIXES.md
 CHAINLIT_TESTS_SUMMARY.md
 chainlit.md
+PULSEPAL-DOCUMENTATION.md
 
 # Testing scripts (kept for development only)
 test_chainlit_quick.py
