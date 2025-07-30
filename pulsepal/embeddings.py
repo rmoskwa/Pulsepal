@@ -6,9 +6,12 @@ using a locally stored BGE model for vector creation.
 """
 
 import os
+import gc
+import asyncio
 from typing import List, Optional, Any
 import time
 import logging
+from concurrent.futures import ThreadPoolExecutor
 
 logger = logging.getLogger(__name__)
 
@@ -270,6 +273,126 @@ class LocalEmbeddingService:
                     )
                     return embeddings
 
+    async def create_embeddings_batch_async(
+        self, 
+        texts: List[str], 
+        batch_size: int = 16,
+        max_workers: int = 2
+    ) -> List[List[float]]:
+        """
+        Async batch embedding generation with memory management and parallel processing.
+        
+        Args:
+            texts: List of texts to create embeddings for
+            batch_size: Size of batches for processing
+            max_workers: Maximum number of worker threads
+            
+        Returns:
+            List of embeddings (each embedding is a list of floats)
+        """
+        if not texts:
+            return []
+
+        try:
+            loop = asyncio.get_event_loop()
+            
+            # Process in chunks to manage memory
+            all_embeddings = []
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                
+                # Create tasks for batch processing
+                tasks = []
+                for i in range(0, len(texts), batch_size):
+                    batch = texts[i:i + batch_size]
+                    task = loop.run_in_executor(
+                        executor, 
+                        self.create_embeddings_batch, 
+                        batch
+                    )
+                    tasks.append(task)
+                
+                # Process batches and collect results
+                for i, task in enumerate(asyncio.as_completed(tasks)):
+                    batch_embeddings = await task
+                    all_embeddings.extend(batch_embeddings)
+                    
+                    # Memory management - garbage collect every few batches
+                    if i % 4 == 0:
+                        gc.collect()
+                        
+            logger.info(f"Async batch processing completed: {len(all_embeddings)} embeddings")
+            return all_embeddings
+            
+        except Exception as e:
+            logger.error(f"Async batch embedding failed: {e}")
+            # Fallback to synchronous processing
+            return self.create_embeddings_batch(texts)
+
+    def create_embeddings_optimized_batch(
+        self, 
+        texts: List[str], 
+        batch_size: int = 32,
+        enable_memory_optimization: bool = True
+    ) -> List[List[float]]:
+        """
+        Optimized batch processing with adaptive batching and memory management.
+        
+        Args:
+            texts: List of texts to create embeddings for
+            batch_size: Initial batch size (will be adapted based on performance)
+            enable_memory_optimization: Whether to enable memory optimization
+            
+        Returns:
+            List of embeddings with optimized processing
+        """
+        if not texts:
+            return []
+
+        # Adaptive batch sizing based on text length
+        avg_length = sum(len(text) for text in texts) / len(texts)
+        if avg_length > 1000:  # Long texts
+            batch_size = max(8, batch_size // 2)
+        elif avg_length < 200:  # Short texts
+            batch_size = min(64, batch_size * 2)
+
+        logger.debug(f"Using optimized batch size: {batch_size} for avg text length: {avg_length}")
+
+        try:
+            results = []
+            processed_count = 0
+            
+            for i in range(0, len(texts), batch_size):
+                batch = texts[i:i + batch_size]
+                
+                # Process batch
+                batch_start = time.time()
+                batch_embeddings = self._encode_texts(batch).cpu().tolist()
+                batch_time = time.time() - batch_start
+                
+                results.extend(batch_embeddings)
+                processed_count += len(batch)
+                
+                # Memory optimization
+                if enable_memory_optimization and i % (batch_size * 4) == 0:
+                    gc.collect()
+                    # Clear GPU cache if using CUDA
+                    torch = _torch
+                    if torch and torch.cuda.is_available():
+                        torch.cuda.empty_cache()
+                
+                # Performance monitoring
+                if processed_count % (batch_size * 4) == 0:
+                    rate = len(batch) / batch_time
+                    logger.debug(f"Processed {processed_count}/{len(texts)} texts at {rate:.1f} texts/sec")
+            
+            logger.info(f"Optimized batch processing completed: {len(results)} embeddings")
+            return results
+            
+        except Exception as e:
+            logger.error(f"Optimized batch processing failed: {e}")
+            # Fallback to original batch processing
+            return self.create_embeddings_batch(texts)
+
 
 # Global instance
 _embedding_service: Optional[LocalEmbeddingService] = None
@@ -314,3 +437,43 @@ def create_embeddings_batch(texts: List[str]) -> List[List[float]]:
     """
     service = get_embedding_service()
     return service.create_embeddings_batch(texts)
+
+
+async def create_embeddings_batch_async(
+    texts: List[str], 
+    batch_size: int = 16,
+    max_workers: int = 2
+) -> List[List[float]]:
+    """
+    Create embeddings for multiple texts asynchronously with optimized processing.
+
+    Args:
+        texts: List of texts to create embeddings for
+        batch_size: Size of batches for processing
+        max_workers: Maximum number of worker threads
+
+    Returns:
+        List of embeddings (each embedding is a list of floats)
+    """
+    service = get_embedding_service()
+    return await service.create_embeddings_batch_async(texts, batch_size, max_workers)
+
+
+def create_embeddings_optimized_batch(
+    texts: List[str], 
+    batch_size: int = 32,
+    enable_memory_optimization: bool = True
+) -> List[List[float]]:
+    """
+    Create embeddings with optimized batch processing and memory management.
+
+    Args:
+        texts: List of texts to create embeddings for
+        batch_size: Initial batch size (adaptive)
+        enable_memory_optimization: Whether to enable memory optimization
+
+    Returns:
+        List of embeddings (each embedding is a list of floats)
+    """
+    service = get_embedding_service()
+    return service.create_embeddings_optimized_batch(texts, batch_size, enable_memory_optimization)

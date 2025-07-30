@@ -12,3 +12,5 @@ PRPs/
 requirements.txt
 test_implementation.py
 pulsepal/__pycache__/
+RAG_IMPROVEMENTS_SUMMARY.md
+test*.py

@@ -9,6 +9,7 @@ import logging
 from typing import List, Dict, Any, Optional
 from .supabase_client import get_supabase_client, SupabaseRAGClient
 from .settings import get_settings
+from .rag_performance import get_performance_monitor, monitor_query
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +21,7 @@ class RAGService:
         """Initialize RAG service with Supabase client."""
         self._supabase_client = None
         self.settings = get_settings()
+        self.performance_monitor = get_performance_monitor()
     
     @property
     def supabase_client(self) -> SupabaseRAGClient:
@@ -47,6 +49,10 @@ class RAGService:
         Returns:
             Formatted search results
         """
+        # Start performance monitoring
+        context = self.performance_monitor.start_query(query, "documents")
+        context["hybrid_search"] = use_hybrid
+        
         try:
             # Perform search
             if use_hybrid and self.settings.use_hybrid_search:
@@ -64,10 +70,15 @@ class RAGService:
                     filter_metadata=filter_metadata
                 )
             
+            # Record successful completion
+            self.performance_monitor.record_query_completion(context, results)
+            
             # Format results
             return self._format_rag_results(results, query)
             
         except Exception as e:
+            # Record failure
+            self.performance_monitor.record_query_completion(context, [], error=str(e))
             logger.error(f"RAG query failed: {e}")
             return f"Error performing RAG search: {str(e)}"
     
@@ -90,6 +101,10 @@ class RAGService:
         Returns:
             Formatted code examples
         """
+        # Start performance monitoring
+        context = self.performance_monitor.start_query(query, "code_examples")
+        context["hybrid_search"] = use_hybrid
+        
         try:
             # Perform search
             if use_hybrid and self.settings.use_hybrid_search:
@@ -108,10 +123,15 @@ class RAGService:
                     source_id=source_id
                 )
             
+            # Record successful completion
+            self.performance_monitor.record_query_completion(context, results)
+            
             # Format results
             return self._format_code_results(results, query)
             
         except Exception as e:
+            # Record failure
+            self.performance_monitor.record_query_completion(context, [], error=str(e))
             logger.error(f"Code search failed: {e}")
             return f"Error searching code examples: {str(e)}"
     
@@ -242,6 +262,81 @@ class RAGService:
             formatted.append("")
         
         return "\n".join(formatted)
+    
+    def get_performance_stats(self, window_minutes: Optional[int] = None) -> str:
+        """
+        Get RAG performance statistics.
+        
+        Args:
+            window_minutes: Optional time window for statistics
+            
+        Returns:
+            Formatted performance statistics
+        """
+        try:
+            stats = self.performance_monitor.get_performance_stats(window_minutes)
+            duration_percentiles = self.performance_monitor.get_percentiles("duration")
+            similarity_percentiles = self.performance_monitor.get_percentiles("similarity")
+            query_patterns = self.performance_monitor.get_query_pattern_analysis()
+            
+            formatted = ["## RAG Performance Statistics\n"]
+            
+            if window_minutes:
+                formatted.append(f"**Time Window:** Last {window_minutes} minutes\n")
+            else:
+                formatted.append("**Time Window:** All time\n")
+            
+            # Basic stats
+            formatted.extend([
+                f"**Total Queries:** {stats.total_queries}",
+                f"**Average Duration:** {stats.avg_duration:.3f}s",
+                f"**Min/Max Duration:** {stats.min_duration:.3f}s / {stats.max_duration:.3f}s",
+                f"**Average Results:** {stats.avg_result_count:.1f}",
+                f"**Average Similarity:** {stats.avg_similarity:.3f}",
+                f"**Error Rate:** {stats.error_rate:.1%}",
+                f"**Queries per Second:** {stats.queries_per_second:.2f}",
+                f"**Cache Hit Rate:** {stats.cache_hit_rate:.1%}",
+                ""
+            ])
+            
+            # Duration percentiles
+            if duration_percentiles:
+                formatted.append("### Response Time Percentiles")
+                for percentile, value in duration_percentiles.items():
+                    formatted.append(f"**{percentile.upper()}:** {value:.3f}s")
+                formatted.append("")
+            
+            # Query patterns
+            if query_patterns:
+                formatted.append("### Query Patterns")
+                formatted.append(f"**Search Type Distribution:** {query_patterns.get('search_type_distribution', {})}")
+                formatted.append(f"**Average Query Length:** {query_patterns.get('avg_query_length', 0):.1f} chars")
+                formatted.append(f"**Reranking Usage:** {query_patterns.get('reranking_usage_rate', 0):.1%}")
+                formatted.append(f"**Hybrid Search Usage:** {query_patterns.get('hybrid_search_usage_rate', 0):.1%}")
+                formatted.append(f"**Unique Queries:** {query_patterns.get('total_unique_queries', 0)}")
+                formatted.append("")
+            
+            # Slow queries
+            slow_queries = self.performance_monitor.get_slow_queries(1.0, 5)
+            if slow_queries:
+                formatted.append("### Slowest Queries (>1s)")
+                for i, q in enumerate(slow_queries, 1):
+                    formatted.append(f"{i}. **{q.duration:.3f}s** - {q.query[:50]}...")
+                formatted.append("")
+            
+            # Failed queries
+            failed_queries = self.performance_monitor.get_failed_queries(5)
+            if failed_queries:
+                formatted.append("### Recent Failed Queries")
+                for i, q in enumerate(failed_queries, 1):
+                    formatted.append(f"{i}. **Error:** {q.error} - Query: {q.query[:50]}...")
+                formatted.append("")
+            
+            return "\n".join(formatted)
+            
+        except Exception as e:
+            logger.error(f"Error getting performance stats: {e}")
+            return f"Error retrieving performance statistics: {str(e)}"
 
 
 # Global instance
