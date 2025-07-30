@@ -106,6 +106,7 @@ models/
 *.temp
 temp/
 tmp/
+READMEarchive.md
 
 # OS generated files
 .DS_Store?
