@@ -134,11 +134,27 @@ async def main(message: cl.Message):
             else:
                 result_output = result.output
         
-        # Send the response
-        await cl.Message(
-            content=result_output,
-            author="Pulsepal"
-        ).send()
+        # Send the response with streaming effect
+        msg = cl.Message(content="", author="Pulsepal")
+        
+        # Option 1: Stream by words (more natural)
+        words = result_output.split(' ')
+        for i, word in enumerate(words):
+            # Add space before word (except first word)
+            if i > 0:
+                await msg.stream_token(' ')
+            await msg.stream_token(word)
+            # Variable delay based on word length for more natural feel
+            delay = min(0.05, 0.01 + len(word) * 0.005)  # 10-50ms per word
+            await asyncio.sleep(delay)
+        
+        # Option 2: Stream by characters (uncomment to use)
+        # for char in result_output:
+        #     await msg.stream_token(char)
+        #     await asyncio.sleep(0.005)  # 5ms delay per character
+        
+        # Finalize the message
+        await msg.update()
         
         logger.info(f"Processed message in session {pulsepal_session_id}")
         
