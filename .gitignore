@@ -1,16 +1,112 @@
-.claude
-CLAUDE.md
-README_TEMPLATE.md
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
 examples/
+.chainlit
+
 # Virtual environments
 .venv/
 .venv-wsl/
 venv/
+env/
+ENV/
+
+# Environment variables (keep .env.example for reference)
 .env
-.env.example
+.env.local
+.env.development
+.env.test
+.env.production
+
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+.nox/
+coverage.xml
+*.cover
+.hypothesis/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Logs
+*.log
+logs/
+
+# Database
+*.db
+*.sqlite3
+
+# Cache directories
+.cache/
+.mypy_cache/
+.ruff_cache/
+
+# Development and internal files
+.claude/
+CLAUDE.md
+README_TEMPLATE.md
 PRPs/
-requirements.txt
-test_implementation.py
-pulsepal/__pycache__/
 RAG_IMPROVEMENTS_SUMMARY.md
-test*.py
+test_implementation.py
+test_enhanced_rag.py
+test_rag_integration.py
+initialize_embeddings.py
+CHAINLIT_INTEGRATION_FIXES.md
+CHAINLIT_TESTS_SUMMARY.md
+chainlit.md
+
+# Testing scripts (kept for development only)
+test_chainlit_quick.py
+run_chainlit_tests.py
+run_pulsepal_tests.py
+test_*.py
+pulsepal/tests/
+pytest.ini
+
+# Local model files (too large for GitHub)
+huggingface_models/
+*.bin
+*.safetensors
+models/
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+tmp/
+
+# OS generated files
+.DS_Store?
+ehthumbs.db
+Icon?

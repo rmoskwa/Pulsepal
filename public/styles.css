@@ -1,0 +1,344 @@
+/* Custom Chainlit styles for Pulsepal */
+
+/* Main theme colors */
+:root {
+  --pulsepal-primary: #1e3a8a;
+  --pulsepal-secondary: #3b82f6;
+  --pulsepal-accent: #10b981;
+  --pulsepal-warning: #f59e0b;
+  --pulsepal-error: #ef4444;
+  --pulsepal-bg-dark: #1f2937;
+  --pulsepal-bg-light: #f8fafc;
+  --pulsepal-text-primary: #1f2937;
+  --pulsepal-text-secondary: #6b7280;
+  --pulsepal-border: #e5e7eb;
+}
+
+/* Main container styling */
+.main-container {
+  background: linear-gradient(135deg, var(--pulsepal-bg-light) 0%, #ffffff 100%);
+  min-height: 100vh;
+}
+
+/* Header styling */
+.header {
+  background: linear-gradient(90deg, var(--pulsepal-primary) 0%, var(--pulsepal-secondary) 100%);
+  color: white;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.header .subtitle {
+  opacity: 0.9;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+/* Chat message styling */
+.message {
+  margin: 1rem 0;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.message.user {
+  background: linear-gradient(135deg, var(--pulsepal-secondary) 0%, #60a5fa 100%);
+  color: white;
+  margin-left: auto;
+  margin-right: 0;
+  max-width: 80%;
+}
+
+.message.assistant {
+  background: white;
+  border: 1px solid var(--pulsepal-border);
+  margin-right: auto;
+  margin-left: 0;
+  max-width: 90%;
+}
+
+.message.system {
+  background: linear-gradient(135deg, var(--pulsepal-warning) 0%, #fbbf24 100%);
+  color: white;
+  text-align: center;
+  max-width: 100%;
+}
+
+/* Code block styling */
+pre {
+  background: var(--pulsepal-bg-dark) !important;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 1rem 0;
+  overflow-x: auto;
+  position: relative;
+}
+
+pre code {
+  color: #e5e7eb !important;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+/* Language-specific syntax highlighting */
+.language-matlab pre,
+.language-octave pre {
+  border-left: 4px solid #ff6b35;
+}
+
+.language-python pre {
+  border-left: 4px solid #3776ab;
+}
+
+.language-bash pre,
+.language-shell pre {
+  border-left: 4px solid var(--pulsepal-accent);
+}
+
+/* Inline code styling */
+code {
+  background: #f3f4f6;
+  color: var(--pulsepal-primary);
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.875rem;
+}
+
+/* Step/tool execution styling */
+.step {
+  background: #f0f9ff;
+  border: 1px solid #0ea5e9;
+  border-radius: 8px;
+  padding: 0.75rem;
+  margin: 0.5rem 0;
+}
+
+.step-header {
+  color: var(--pulsepal-secondary);
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.step-content {
+  color: var(--pulsepal-text-secondary);
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+/* Loading indicator */
+.loading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--pulsepal-secondary);
+  font-style: italic;
+}
+
+.loading::before {
+  content: '🔬';
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Input area styling */
+.input-container {
+  background: white;
+  border-top: 1px solid var(--pulsepal-border);
+  padding: 1rem;
+  position: sticky;
+  bottom: 0;
+}
+
+.input-field {
+  border: 2px solid var(--pulsepal-border);
+  border-radius: 24px;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  transition: border-color 0.2s ease;
+  width: 100%;
+}
+
+.input-field:focus {
+  border-color: var(--pulsepal-secondary);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Button styling */
+.send-button {
+  background: linear-gradient(135deg, var(--pulsepal-secondary) 0%, var(--pulsepal-primary) 100%);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.send-button:hover {
+  transform: scale(1.05);
+}
+
+.send-button:active {
+  transform: scale(0.95);
+}
+
+/* Markdown content styling */
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3 {
+  color: var(--pulsepal-primary);
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.markdown-content h1 {
+  font-size: 1.5rem;
+  border-bottom: 2px solid var(--pulsepal-border);
+  padding-bottom: 0.5rem;
+}
+
+.markdown-content h2 {
+  font-size: 1.25rem;
+}
+
+.markdown-content h3 {
+  font-size: 1.125rem;
+}
+
+.markdown-content p {
+  line-height: 1.6;
+  margin: 0.75rem 0;
+}
+
+.markdown-content ul,
+.markdown-content ol {
+  padding-left: 1.5rem;
+  line-height: 1.6;
+}
+
+.markdown-content li {
+  margin: 0.25rem 0;
+}
+
+/* Blockquote styling */
+.markdown-content blockquote {
+  border-left: 4px solid var(--pulsepal-accent);
+  background: #f0fdf4;
+  padding: 1rem;
+  margin: 1rem 0;
+  border-radius: 0 8px 8px 0;
+}
+
+/* Table styling */
+.markdown-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+}
+
+.markdown-content th,
+.markdown-content td {
+  border: 1px solid var(--pulsepal-border);
+  padding: 0.75rem;
+  text-align: left;
+}
+
+.markdown-content th {
+  background: var(--pulsepal-bg-light);
+  font-weight: 600;
+  color: var(--pulsepal-primary);
+}
+
+/* Error message styling */
+.error-message {
+  background: linear-gradient(135deg, var(--pulsepal-error) 0%, #fca5a5 100%);
+  color: white;
+  padding: 1rem;
+  border-radius: 8px;
+  margin: 1rem 0;
+  border-left: 4px solid #dc2626;
+}
+
+/* Success message styling */
+.success-message {
+  background: linear-gradient(135deg, var(--pulsepal-accent) 0%, #6ee7b7 100%);
+  color: white;
+  padding: 1rem;
+  border-radius: 8px;
+  margin: 1rem 0;
+  border-left: 4px solid #059669;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .message.user,
+  .message.assistant {
+    max-width: 95%;
+  }
+  
+  .header {
+    padding: 0.75rem 1rem;
+  }
+  
+  .header h1 {
+    font-size: 1.25rem;
+  }
+  
+  pre {
+    font-size: 0.75rem;
+    padding: 0.75rem;
+  }
+}
+
+/* Animation for message appearance */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message {
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--pulsepal-secondary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--pulsepal-primary);
+}

@@ -1,0 +1,28 @@
+# PulsePal Requirements
+# Generated for dual Windows/.venv and WSL/.venv-wsl environments
+
+# Core PydanticAI dependencies
+pydantic-ai
+pydantic
+pydantic-settings
+
+# Environment and configuration
+python-dotenv
+
+# RAG and Vector Database dependencies
+supabase
+sentence-transformers
+transformers
+torch
+
+# Testing framework
+pytest
+pytest-asyncio
+
+# Web UI dependencies
+chainlit
+
+# Development dependencies
+ruff
+black
+mypy
