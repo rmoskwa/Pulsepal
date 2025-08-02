@@ -9,7 +9,8 @@ session management, and RAG capabilities without requiring API changes.
 import asyncio
 import logging
 import uuid
-from typing import Optional
+from typing import Optional, List
+import os
 
 import chainlit as cl
 from chainlit import Message
@@ -20,7 +21,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from pulsepal.main_agent import pulsepal_agent, create_pulsepal_session
-from pulsepal.dependencies import PulsePalDependencies, get_session_manager
+from pulsepal.dependencies import PulsePalDependencies, get_session_manager, SUPPORTED_LANGUAGES
 from pulsepal.settings import get_settings
 
 # Configure logging
@@ -43,24 +44,34 @@ async def start():
         cl.user_session.set("pulsepal_session_id", pulsepal_session_id)
         cl.user_session.set("pulsepal_deps", deps)
         
+        # Get supported languages for welcome message
+        lang_list = ", ".join([lang.upper() for lang in sorted(SUPPORTED_LANGUAGES.keys())])
+        
         # Send welcome message
-        welcome_msg = """🔬 **Welcome to Pulsepal!**
+        welcome_msg = f"""🔬 **Welcome to Pulsepal!**
 
 I'm your AI assistant for Pulseq MRI sequence programming. I can help you with:
 
-🧪 **Code Generation**: Create sequences in MATLAB, Octave, and Python
+🧪 **Code Generation**: Create sequences in multiple programming languages
 🐛 **Debugging**: Fix sequence errors and optimization issues  
-🔄 **Language Conversion**: Convert between MATLAB/Octave and Python  
+🔄 **Language Conversion**: Convert between different programming languages
 📚 **Documentation**: Search comprehensive Pulseq documentation
 ⚛️ **Physics**: Get expert explanations of MRI physics concepts
+📁 **File Analysis**: Upload and analyze sequence files
+
+**Supported Languages:**
+{lang_list}
 
 **Quick Examples:**
 - "How do I create a spin echo sequence in MATLAB?"
 - "Convert this MATLAB sequence to Python"
+- "Show me a C++ implementation of gradient echo"
 - "Explain k-space trajectory for EPI sequences"
-- "Show me gradient echo timing parameters"
+- "Help me debug this Julia sequence code"
 
-💡 **Tip**: I default to MATLAB code examples unless you specify Python or Octave!
+💡 **Tip**: I default to MATLAB code examples unless you specify another language!
+
+📎 **Code Analysis**: Paste code snippets directly in your messages for analysis and debugging.
 
 What would you like to know about Pulseq programming?"""
         
@@ -90,6 +101,7 @@ async def main(message: cl.Message):
                 author="System"
             ).send()
             return
+        
         
         # Show typing indicator
         async with cl.Step(name="🔬 Pulsepal is thinking...") as step:
@@ -164,6 +176,11 @@ async def main(message: cl.Message):
             content=f"❌ **Critical Error**: {e}\n\nPlease refresh the page to restart your session.",
             author="System"
         ).send()
+
+
+# Note: File upload functionality disabled due to Chainlit version compatibility
+# The @cl.on_file_upload decorator is not available in Chainlit 2.6.4
+# Users can paste code directly in messages for analysis
 
 
 @cl.on_chat_end

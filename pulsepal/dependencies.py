@@ -16,6 +16,46 @@ from .settings import get_settings
 
 logger = logging.getLogger(__name__)
 
+# Supported programming languages based on database analysis
+SUPPORTED_LANGUAGES = {
+    'c': {
+        'extensions': ['.c', '.h'], 
+        'keywords': ['#include', 'int main', 'void', 'struct'], 
+        'highlight': 'c',
+        'description': 'C programming language'
+    },
+    'cpp': {
+        'extensions': ['.cpp', '.cc', '.cxx', '.hpp'], 
+        'keywords': ['#include', 'class', 'namespace', '::', 'template'], 
+        'highlight': 'cpp',
+        'description': 'C++ programming language'
+    },
+    'julia': {
+        'extensions': ['.jl'], 
+        'keywords': ['function', 'end', 'module', 'using'], 
+        'highlight': 'julia',
+        'description': 'Julia programming language'
+    },
+    'matlab': {
+        'extensions': ['.m'], 
+        'keywords': ['function', 'end', '%', 'clear', 'clc'], 
+        'highlight': 'matlab',
+        'description': 'MATLAB programming language'
+    },
+    'octave': {
+        'extensions': ['.m'], 
+        'keywords': ['function', 'endfunction', '%', 'octave'], 
+        'highlight': 'matlab',
+        'description': 'GNU Octave (MATLAB-compatible)'
+    },
+    'python': {
+        'extensions': ['.py'], 
+        'keywords': ['import', 'def', 'class', 'from', '__init__'], 
+        'highlight': 'python',
+        'description': 'Python programming language'
+    },
+}
+
 
 @dataclass
 class ConversationContext:
@@ -76,24 +116,86 @@ class ConversationContext:
         return [ex for ex in self.code_examples if ex["language"] == language.lower()]
     
     def detect_language_preference(self, content: str) -> Optional[str]:
-        """Detect language preference from user content, defaulting to MATLAB."""
+        """Detect language preference from user content with comprehensive language support."""
         content_lower = content.lower()
         
-        # Simple keyword-based detection
-        matlab_keywords = ["matlab", ".m file", "octave", "function", "end"]
-        python_keywords = ["python", ".py", "import", "def", "__init__"]
+        # Calculate scores for each supported language
+        language_scores = {}
         
-        matlab_score = sum(1 for kw in matlab_keywords if kw in content_lower)
-        python_score = sum(1 for kw in python_keywords if kw in content_lower)
+        for lang_id, lang_config in SUPPORTED_LANGUAGES.items():
+            score = 0
+            
+            # Check for language name mentions (higher weight)
+            # Special handling for C vs C++ to avoid substring issues
+            if lang_id == 'c':
+                # Only match very specific C patterns to avoid false matches
+                c_patterns = ['c programming', 'c code', 'ansi c', 'iso c', 'pure c', 'c language']
+                # Also check for ' c ' but only if it's not part of other words
+                if any(pattern in content_lower for pattern in c_patterns):
+                    score += 5
+                elif ' c ' in content_lower and 'c++' not in content_lower:
+                    # Additional check for single ' c ' mention without c++
+                    score += 5
+            elif lang_id == 'cpp':
+                # Match c++, cpp, or c++ specific terms
+                if any(pattern in content_lower for pattern in ['c++', 'cpp', 'c plus']):
+                    score += 5
+            elif lang_id in content_lower:
+                score += 5
+            
+            # Check for file extensions
+            for ext in lang_config['extensions']:
+                if ext in content_lower:
+                    score += 2
+            
+            # Check for language-specific keywords
+            for keyword in lang_config['keywords']:
+                if keyword.lower() in content_lower:
+                    score += 1
+            
+            language_scores[lang_id] = score
         
-        if python_score > matlab_score and python_score > 0:
-            # Only switch to Python if there's clear Python preference
-            self.preferred_language = "python"
-        else:
-            # Default to MATLAB for all other cases (including ties or no keywords)
-            self.preferred_language = "matlab"
+        # Special handling for C vs C++ detection
+        if 'c' in language_scores and 'cpp' in language_scores:
+            # Check for explicit C++ indicators
+            cpp_indicators = ['c++', 'cpp', 'class', 'namespace', '::']
+            c_indicators = [' c ', 'ansi c', 'iso c', ' c code', ' c programming']
+            
+            has_cpp_indicators = any(indicator in content_lower for indicator in cpp_indicators)
+            has_c_indicators = any(indicator in content_lower for indicator in c_indicators)
+            
+            if has_cpp_indicators and not has_c_indicators:
+                # Clear C++ preference - boost C++ score and reduce C score
+                language_scores['cpp'] += 2
+                language_scores['c'] = max(0, language_scores['c'] - 1)
+            elif has_c_indicators and not has_cpp_indicators:
+                # Clear C preference - boost C score and reduce C++ score  
+                language_scores['c'] += 2
+                language_scores['cpp'] = max(0, language_scores['cpp'] - 1)
         
+        # Find the language with the highest score
+        if language_scores:
+            best_language = max(language_scores.items(), key=lambda x: x[1])
+            if best_language[1] > 0:
+                self.preferred_language = best_language[0]
+                logger.debug(f"Detected language preference: {self.preferred_language} (score: {best_language[1]})")
+                return self.preferred_language
+        
+        # Default to MATLAB if no clear preference detected
+        self.preferred_language = "matlab"
+        logger.debug("No clear language preference detected, defaulting to MATLAB")
         return self.preferred_language
+    
+    def get_supported_languages(self) -> Dict[str, Dict[str, Any]]:
+        """Get all supported programming languages with their configurations."""
+        return SUPPORTED_LANGUAGES
+    
+    def get_language_extensions(self) -> List[str]:
+        """Get all supported file extensions."""
+        extensions = []
+        for lang_config in SUPPORTED_LANGUAGES.values():
+            extensions.extend(lang_config['extensions'])
+        return list(set(extensions))  # Remove duplicates
 
 
 @dataclass
