@@ -48,32 +48,38 @@ async def start():
         lang_list = ", ".join([lang.upper() for lang in sorted(SUPPORTED_LANGUAGES.keys())])
         
         # Send welcome message
-        welcome_msg = f"""🔬 **Welcome to Pulsepal!**
+        welcome_msg = f"""🧠 **Welcome to Pulsepal - Your Intelligent MRI Programming Assistant!**
 
-I'm your AI assistant for Pulseq MRI sequence programming. I can help you with:
+I'm an advanced AI with comprehensive knowledge of MRI physics and Pulseq programming, enhanced with access to specialized documentation when needed.
 
-🧪 **Code Generation**: Create sequences in multiple programming languages
-🐛 **Debugging**: Fix sequence errors and optimization issues  
-🔄 **Language Conversion**: Convert between different programming languages
-📚 **Documentation**: Search comprehensive Pulseq documentation
-⚛️ **Physics**: Get expert explanations of MRI physics concepts
-📁 **File Analysis**: Upload and analyze sequence files
+**🚀 What's New:**
+- **Faster Responses**: I now answer general MRI and programming questions instantly
+- **Smarter Search**: I only search documentation for specific Pulseq implementations
+- **Enhanced Reasoning**: Better debugging support with step-by-step analysis
 
-**Supported Languages:**
-{lang_list}
+**💡 My Capabilities:**
+🧪 **Code Generation**: Create sequences in {lang_list}
+🐛 **Smart Debugging**: Analyze code logic and trace errors intelligently
+🔄 **Language Conversion**: Transform code between different languages
+⚛️ **MRI Physics**: Instant explanations of concepts, formulas, and principles
+📚 **Selective Search**: Access Pulseq docs only when you need specific functions
 
-**Quick Examples:**
-- "How do I create a spin echo sequence in MATLAB?"
-- "Convert this MATLAB sequence to Python"
-- "Show me a C++ implementation of gradient echo"
-- "Explain k-space trajectory for EPI sequences"
-- "Help me debug this Julia sequence code"
+**📝 Example Queries:**
 
-💡 **Tip**: I default to MATLAB code examples unless you specify another language!
+*Instant Knowledge (no search needed):*
+- "What is T1 relaxation?"
+- "Explain the difference between spin echo and gradient echo"
+- "How does k-space work?"
+- "Debug: Why is my loop infinite?"
 
-📎 **Code Analysis**: Paste code snippets directly in your messages for analysis and debugging.
+*Pulseq-Specific (selective search):*
+- "How to use mr.makeGaussPulse?"
+- "Show me the MOLLI sequence implementation"
+- "What are the parameters for pypulseq.addBlock?"
 
-What would you like to know about Pulseq programming?"""
+💡 **Pro Tip**: I default to MATLAB unless you specify another language. Just ask naturally - I'll know when to search vs. when to use my knowledge!
+
+What would you like to explore about MRI sequence programming?"""
         
         await cl.Message(content=welcome_msg).send()
         
@@ -103,48 +109,29 @@ async def main(message: cl.Message):
             return
         
         
-        # Show typing indicator
-        async with cl.Step(name="🔬 Pulsepal is thinking...") as step:
+        # Show typing indicator with intelligent status
+        async with cl.Step(name="🧠 Analyzing your query...") as step:
             try:
                 # Add user message to conversation context
                 deps.conversation_context.add_conversation("user", message.content)
                 
-                # Detect language preference if needed
-                if not deps.conversation_context.preferred_language or deps.conversation_context.preferred_language == "matlab":
-                    deps.conversation_context.detect_language_preference(message.content)
+                # Detect language preference from query
+                deps.conversation_context.detect_language_preference(message.content)
                 
-                # Prepare context-aware query
-                enhanced_query = message.content
-                if deps.conversation_context.conversation_history:
-                    # Get recent conversation history for context (last 3 exchanges)
-                    recent_history = deps.conversation_context.get_recent_conversations(6)  # 3 exchanges = 6 messages
-                    if len(recent_history) > 2:  # Only add context if there's meaningful history
-                        context_summary = "Recent conversation context:\n"
-                        for entry in recent_history[-6:-1]:  # Exclude the current message
-                            role = entry.get('role', 'unknown')
-                            content = entry.get('content', '')[:100]  # Limit for context
-                            context_summary += f"{role}: {content}...\n"
-                        
-                        enhanced_query = f"{context_summary}\nCurrent question: {message.content}"
-                
-                # Include preferred language context
-                preferred_lang = deps.conversation_context.preferred_language or "matlab"
-                enhanced_query += f"\n\nUser's preferred programming language: {preferred_lang}"
-                
-                # Run Pulsepal agent
-                result = await pulsepal_agent.run(enhanced_query, deps=deps)
+                # Simple, direct approach - let the agent's intelligence handle everything
+                result = await pulsepal_agent.run(message.content, deps=deps)
                 
                 # Add response to conversation history
-                deps.conversation_context.add_conversation("assistant", result.output)
+                deps.conversation_context.add_conversation("assistant", result.data)
                 
-                step.output = "✅ Response generated successfully"
+                step.output = "✅ Response ready"
                 
             except Exception as e:
                 logger.error(f"Error running Pulsepal agent: {e}")
                 step.output = f"❌ Error: {e}"
                 result_output = f"I apologize, but I encountered an error: {e}\n\nPlease try rephrasing your question or check that all services are running properly."
             else:
-                result_output = result.output
+                result_output = result.data
         
         # Send the response with streaming effect
         msg = cl.Message(content="", author="Pulsepal")
