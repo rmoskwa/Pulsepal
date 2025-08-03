@@ -23,6 +23,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from pulsepal.main_agent import pulsepal_agent, create_pulsepal_session
 from pulsepal.dependencies import PulsePalDependencies, get_session_manager, SUPPORTED_LANGUAGES
 from pulsepal.settings import get_settings
+from pulsepal.conversation_logger import get_conversation_logger
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -30,6 +31,9 @@ logger = logging.getLogger(__name__)
 
 # Global settings
 settings = get_settings()
+
+# Initialize conversation logger for debugging
+conversation_logger = get_conversation_logger()
 
 
 @cl.on_chat_start
@@ -43,6 +47,14 @@ async def start():
         # Store session info in Chainlit user session
         cl.user_session.set("pulsepal_session_id", pulsepal_session_id)
         cl.user_session.set("pulsepal_deps", deps)
+        
+        # Log session start for debugging
+        conversation_logger.log_conversation(
+            pulsepal_session_id,
+            "system",
+            "Session started",
+            {"event": "session_start"}
+        )
         
         # Get supported languages for welcome message
         lang_list = ", ".join([lang.upper() for lang in sorted(SUPPORTED_LANGUAGES.keys())])
@@ -115,6 +127,13 @@ async def main(message: cl.Message):
                 # Add user message to conversation context
                 deps.conversation_context.add_conversation("user", message.content)
                 
+                # Log user message for debugging
+                conversation_logger.log_conversation(
+                    pulsepal_session_id,
+                    "user",
+                    message.content
+                )
+                
                 # Detect language preference from query
                 deps.conversation_context.detect_language_preference(message.content)
                 
@@ -123,6 +142,13 @@ async def main(message: cl.Message):
                 
                 # Add response to conversation history
                 deps.conversation_context.add_conversation("assistant", result.data)
+                
+                # Log assistant response for debugging
+                conversation_logger.log_conversation(
+                    pulsepal_session_id,
+                    "assistant",
+                    result.data
+                )
                 
                 step.output = "✅ Response ready"
                 
@@ -176,6 +202,14 @@ async def end():
     try:
         pulsepal_session_id = cl.user_session.get("pulsepal_session_id")
         if pulsepal_session_id:
+            # Log session end for debugging
+            conversation_logger.log_conversation(
+                pulsepal_session_id,
+                "system",
+                "Session ended",
+                {"event": "session_end"}
+            )
+            
             # Optional: Clean up expired sessions
             session_manager = get_session_manager()
             await session_manager.cleanup_expired_sessions()

@@ -119,6 +119,16 @@ class SupabaseRAGClient:
 
     def enhance_query_for_code_search(self, query: str) -> str:
         """Enhance query for better code example matching."""
+        # For specific sequence names, don't modify them too much
+        known_sequences = ['ute', 'writeute', 'spin echo', 'gradient echo', 'epi', 'flash', 'tse', 'bssfp']
+        query_lower = query.lower()
+        
+        # Check if query contains a known sequence name
+        for seq in known_sequences:
+            if seq in query_lower:
+                return query  # Keep original query for specific sequences
+        
+        # For general queries, add context
         return f"Code example for {query}\n\nImplementation showing {query}"
 
     def preprocess_query(self, query: str, search_type: str = "documents") -> str:
@@ -220,15 +230,13 @@ class SupabaseRAGClient:
             search_count = match_count * 2 if use_reranking else match_count
 
             # Execute the search using the match_code_examples function
-            params = {"query_embedding": query_embedding, "match_count": search_count}
-
-            # Only add the filter if it's actually provided and not empty
-            if filter_metadata:
-                params["filter"] = filter_metadata
-
-            # Add source filter if provided
-            if source_id:
-                params["source_filter"] = source_id
+            # IMPORTANT: Always provide filter as empty JSONB if None (required by RPC function)
+            params = {
+                "query_embedding": query_embedding,
+                "match_count": search_count,
+                "filter": filter_metadata if filter_metadata else {},  # Always provide filter
+                "source_filter": source_id  # Can be None, SQL function handles it
+            }
 
             result = self.client.rpc("match_code_examples", params).execute()
             
@@ -370,10 +378,79 @@ class SupabaseRAGClient:
         """
         results = []
         
+        # Strategy 0: Exact sequence name search (for known sequences)
+        known_sequences = ['writeUTE', 'writeFLASH', 'writeEPI', 'writeSpinEcho', 'writeTSE', 'writeGradientEcho', 'writebSSFP']
+        
+        # Special handling for UTE queries
+        if 'ute' in query.lower():
+            # Always search for writeUTE files when UTE is mentioned
+            if table_name == "code_examples":
+                ute_query = (
+                    self.client.from_(table_name)
+                    .select("id, url, chunk_number, content, summary, metadata, source_id")
+                    .or_("url.ilike.%writeUTE%,summary.ilike.%UTE%,summary.ilike.%ultra-short echo%,summary.ilike.%ultrashort echo%")
+                )
+                if source:
+                    ute_query = ute_query.eq("source_id", source)
+                
+                ute_response = ute_query.limit(match_count).execute()
+                if ute_response.data:
+                    logger.debug(f"Found {len(ute_response.data)} UTE-specific matches")
+                    results.extend(ute_response.data)
+                    # Return immediately if we found enough UTE results
+                    if len(results) >= match_count:
+                        return results[:match_count]
+        
+        
+        # Also check for common variations
+        sequence_found = False
+        for seq_name in known_sequences:
+            # Check if sequence name or common variations are in the query
+            seq_lower = seq_name.lower()
+            query_lower = query.lower()
+            
+            # Check for exact sequence name or common variations
+            if seq_lower in query_lower or seq_lower.replace('write', '') in query_lower:
+                logger.debug(f"Found sequence match: {seq_name} in query: {query}")
+                # Search in URL and summary columns for table code_examples
+                if table_name == "code_examples":
+                    exact_query = (
+                        self.client.from_(table_name)
+                        .select("id, url, chunk_number, content, summary, metadata, source_id")
+                        .or_(f"url.ilike.%{seq_name}%,summary.ilike.%{seq_name.replace('write', '')}%")
+                    )
+                else:
+                    exact_query = (
+                        self.client.from_(table_name)
+                        .select("id, url, chunk_number, content, metadata, source_id")
+                        .or_(f"url.ilike.%{seq_name}%,content.ilike.%{seq_name}%")
+                    )
+                
+                if source:
+                    exact_query = exact_query.eq("source_id", source)
+                
+                exact_response = exact_query.limit(match_count).execute()
+                if exact_response.data:
+                    logger.debug(f"Found {len(exact_response.data)} exact matches for {seq_name}")
+                    results.extend(exact_response.data)
+                    sequence_found = True
+                break  # Only search for one sequence name
+        
+        # If we found exact matches and they're enough, return early
+        if sequence_found and len(results) >= match_count:
+            logger.debug(f"Returning {len(results)} exact matches early")
+            return results[:match_count]
+        
         # Strategy 1: Full phrase search
+        # Include summary in select for code_examples table
+        if table_name == "code_examples":
+            select_fields = "id, url, chunk_number, content, summary, metadata, source_id"
+        else:
+            select_fields = "id, url, chunk_number, content, metadata, source_id"
+        
         phrase_query = (
             self.client.from_(table_name)
-            .select("id, url, chunk_number, content, metadata, source_id")
+            .select(select_fields)
             .ilike("content", f"%{query}%")
         )
         if source:
@@ -388,9 +465,15 @@ class SupabaseRAGClient:
         if len(words) > 1:
             for word in words:
                 if len(word) > 3:  # Skip short words
+                    # Include summary in select for code_examples table
+                    if table_name == "code_examples":
+                        select_fields = "id, url, chunk_number, content, summary, metadata, source_id"
+                    else:
+                        select_fields = "id, url, chunk_number, content, metadata, source_id"
+                    
                     word_query = (
                         self.client.from_(table_name)
-                        .select("id, url, chunk_number, content, metadata, source_id")
+                        .select(select_fields)
                         .ilike("content", f"%{word}%")
                     )
                     if source:

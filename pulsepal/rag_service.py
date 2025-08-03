@@ -22,6 +22,10 @@ class RAGService:
         self._supabase_client = None
         self.settings = get_settings()
         self.performance_monitor = get_performance_monitor()
+        
+        # Configurable content preview limits - increased to provide full context to AI
+        self.doc_preview_limit = 5000  # Was hardcoded 500
+        self.code_preview_limit = 10000  # Was hardcoded 300
     
     @property
     def supabase_client(self) -> SupabaseRAGClient:
@@ -163,9 +167,14 @@ class RAGService:
             metadata = item.get("metadata", {})
             headers = metadata.get("headers", "")
             
-            # Extract content preview
+            # Extract content - use configurable limit for AI context
             content = item.get("content", "")
-            content_preview = content[:500] + "..." if len(content) > 500 else content
+            
+            # Only truncate if content is extremely long
+            if len(content) > self.doc_preview_limit:
+                content_preview = content[:self.doc_preview_limit] + f"\n... [Truncated - {len(content)} total characters]"
+            else:
+                content_preview = content
             
             # Format result
             formatted.append(f"### {i}. Result from {item.get('source_id', 'Unknown source')}")
@@ -191,10 +200,15 @@ class RAGService:
             metadata = item.get("metadata", {})
             language = metadata.get("language", "Unknown")
             
-            # Get summary and code preview
+            # Get summary and full code
             summary = item.get("summary", "No description available")
             code = item.get("content", "")
-            code_preview = code[:300] + "..." if len(code) > 300 else code
+            
+            # Only truncate if code is extremely long
+            if len(code) > self.code_preview_limit:
+                code_preview = code[:self.code_preview_limit] + f"\n% ... [Truncated - {len(code)} total characters]"
+            else:
+                code_preview = code
             
             # Format result
             formatted.append(f"### {i}. {language.upper()} Example from {item.get('source_id', 'Unknown')}")

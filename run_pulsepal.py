@@ -16,6 +16,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from pulsepal.main_agent import run_pulsepal, create_pulsepal_session
+from pulsepal.conversation_logger import get_conversation_logger
 
 
 async def single_query(question: str):
@@ -24,11 +25,20 @@ async def single_query(question: str):
     
     try:
         session_id, response = await run_pulsepal(question)
+        
+        # Log conversation if enabled
+        logger = get_conversation_logger()
+        logger.log_conversation(session_id, "user", question)
+        logger.log_conversation(session_id, "assistant", response)
+        
         print("🤖 Pulsepal:")
         print("=" * 60)
         print(response)
         print("=" * 60)
         print(f"\n💾 Session ID: {session_id}")
+        
+        if logger.enabled:
+            print(f"📝 Conversation logged to: {logger.log_dir / f'session_{session_id[:8]}.txt'}")
         
     except Exception as e:
         print(f"❌ Error: {e}")
@@ -44,7 +54,14 @@ async def interactive_mode():
     
     # Create a persistent session
     session_id, deps = await create_pulsepal_session()
-    print(f"💾 Session created: {session_id}\n")
+    print(f"💾 Session created: {session_id}")
+    
+    # Initialize logger
+    logger = get_conversation_logger()
+    if logger.enabled:
+        print(f"📝 Logging enabled: {logger.log_dir}")
+        logger.log_conversation(session_id, "system", "Interactive session started")
+    print()
     
     try:
         while True:
@@ -52,6 +69,7 @@ async def interactive_mode():
                 question = input("\n🙋 You: ").strip()
                 
                 if question.lower() in ['quit', 'exit', 'bye']:
+                    logger.log_conversation(session_id, "system", "Interactive session ended")
                     print("\n👋 Goodbye! Thanks for using Pulsepal!")
                     break
                 
@@ -61,12 +79,17 @@ async def interactive_mode():
                 print("\n🔬 Pulsepal: Thinking...")
                 session_id, response = await run_pulsepal(question, session_id)
                 
+                # Log conversation if enabled
+                logger.log_conversation(session_id, "user", question)
+                logger.log_conversation(session_id, "assistant", response)
+                
                 print("\n🤖 Pulsepal:")
                 print("-" * 50)
                 print(response)
                 print("-" * 50)
                 
             except KeyboardInterrupt:
+                logger.log_conversation(session_id, "system", "Session interrupted by user")
                 print("\n\n👋 Goodbye! Thanks for using Pulsepal!")
                 break
             except Exception as e:

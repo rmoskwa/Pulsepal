@@ -65,6 +65,7 @@ performance_metrics.py
 # Logs
 *.log
 logs/
+conversation_logs/
 
 # Database
 *.db
