@@ -7,11 +7,20 @@ and code examples, with support for various search modes and result formatting.
 
 import logging
 from typing import List, Dict, Any, Optional
+from enum import Enum
 from .supabase_client import get_supabase_client, SupabaseRAGClient
 from .settings import get_settings
 from .rag_performance import get_performance_monitor, monitor_query
 
 logger = logging.getLogger(__name__)
+
+
+class SearchType(Enum):
+    """Types of searches based on query classification."""
+    API_FUNCTION = "api_function"
+    CODE_EXAMPLE = "code_example"
+    DOCUMENTATION = "documentation"
+    UNIFIED = "unified"
 
 
 class RAGService:
@@ -33,6 +42,386 @@ class RAGService:
         if self._supabase_client is None:
             self._supabase_client = get_supabase_client()
         return self._supabase_client
+    
+    def classify_query_intent(self, query: str) -> Dict[str, Any]:
+        """
+        Classify query to determine which tables to search.
+        
+        Args:
+            query: Search query
+            
+        Returns:
+            Dictionary with classification results
+        """
+        query_lower = query.lower()
+        
+        # Keywords that indicate different search types
+        function_keywords = [
+            'make', 'add', 'calc', 'get', 'set', 'mr.', 'seq.',
+            'function', 'method', 'api', 'signature', 'parameter',
+            'returns', 'arguments', 'usage'
+        ]
+        
+        code_keywords = [
+            'example', 'code', 'implement', 'write', 'create',
+            'sequence', 'script', 'program', 'show me', 'how to',
+            'demo', 'sample'
+        ]
+        
+        doc_keywords = [
+            'explain', 'what is', 'how does', 'why', 'when',
+            'theory', 'concept', 'tutorial', 'guide', 'overview',
+            'understand', 'physics', 'principle'
+        ]
+        
+        # Known Pulseq functions (common ones)
+        pulseq_functions = [
+            'makearbitraryrf', 'maketrapezoid', 'makegausspulse',
+            'makeblockpulse', 'makesincpulse', 'makeadc',
+            'makedelay', 'makelabel', 'maketrigger',
+            'calcduration', 'calcrfbandwidth', 'calcrfphase',
+            'writeute', 'writeflash', 'writeepi', 'writespinecho',
+            'writetse', 'writegradientecho', 'writebssfp'
+        ]
+        
+        # Check if it's a direct function query
+        is_function = any(
+            func in query_lower 
+            for func in pulseq_functions
+        ) or any(
+            keyword in query_lower 
+            for keyword in function_keywords
+        )
+        
+        # Check if it needs code examples
+        needs_code = any(
+            keyword in query_lower 
+            for keyword in code_keywords
+        )
+        
+        # Check if it's conceptual
+        is_conceptual = any(
+            keyword in query_lower 
+            for keyword in doc_keywords
+        )
+        
+        # Detect language preference
+        language = None
+        if 'matlab' in query_lower or '.m' in query_lower:
+            language = 'matlab'
+        elif 'python' in query_lower or '.py' in query_lower or 'pypulseq' in query_lower:
+            language = 'python'
+        elif 'c++' in query_lower or 'cpp' in query_lower:
+            language = 'cpp'
+        
+        # Determine primary search type
+        if is_function and not needs_code:
+            primary_type = SearchType.API_FUNCTION
+        elif needs_code:
+            primary_type = SearchType.CODE_EXAMPLE
+        elif is_conceptual:
+            primary_type = SearchType.DOCUMENTATION
+        else:
+            primary_type = SearchType.UNIFIED
+        
+        # Calculate confidence
+        indicators = sum([is_function, needs_code, is_conceptual])
+        if indicators == 0:
+            confidence = 0.3  # Low confidence, will use unified search
+        elif indicators == 1:
+            confidence = 0.8  # High confidence, clear intent
+        else:
+            confidence = 0.6  # Medium confidence, mixed intent
+        
+        return {
+            'primary_type': primary_type,
+            'search_api': is_function,
+            'search_code': needs_code,
+            'search_docs': is_conceptual,
+            'language': language,
+            'confidence': confidence
+        }
+    
+    def search_api_functions(
+        self,
+        query: str,
+        match_count: int = 5,
+        language_filter: Optional[str] = None
+    ) -> str:
+        """
+        Search API reference for Pulseq functions.
+        
+        Args:
+            query: Search query
+            match_count: Number of results to return
+            language_filter: Optional language filter (matlab/python/cpp)
+            
+        Returns:
+            Formatted search results
+        """
+        context = self.performance_monitor.start_query(query, "api_functions")
+        context["language_filter"] = language_filter
+        
+        try:
+            # Don't enhance function names - keep them as-is for better matching
+            search_query = query
+            
+            # Create embedding for the query
+            from .embeddings import create_embedding
+            query_embedding = create_embedding(search_query)
+            
+            # Build RPC parameters
+            params = {
+                "query_embedding": query_embedding,
+                "match_count": match_count,
+                "filter": {}
+            }
+            
+            if language_filter:
+                params["language_filter"] = language_filter
+            
+            # Try using the match_api_functions RPC first
+            try:
+                result = self.supabase_client.client.rpc("match_api_functions", params).execute()
+                results = result.data if result.data else []
+                logger.info(f"API function search returned {len(results)} results")
+            except Exception as rpc_error:
+                logger.warning(f"RPC match_api_functions failed: {rpc_error}, falling back to direct query")
+                results = self._fallback_api_search(query, match_count, language_filter)
+            
+            # Record successful completion
+            self.performance_monitor.record_query_completion(context, results)
+            
+            # Format results
+            return self._format_api_results(results, query)
+            
+        except Exception as e:
+            # Record failure
+            self.performance_monitor.record_query_completion(context, [], error=str(e))
+            logger.error(f"API function search failed: {e}")
+            return f"Error searching API functions: {str(e)}"
+    
+    def _fallback_api_search(
+        self,
+        query: str,
+        match_count: int,
+        language_filter: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
+        """
+        Fallback API search using direct SQL query.
+        """
+        try:
+            query_builder = (
+                self.supabase_client.client.from_("api_reference")
+                .select("*")
+            )
+            
+            # Add text search across multiple columns
+            query_builder = query_builder.or_(
+                f"name.ilike.%{query}%,"
+                f"description.ilike.%{query}%,"
+                f"signature.ilike.%{query}%"
+            )
+            
+            # Add language filter if specified
+            if language_filter:
+                query_builder = query_builder.eq("language", language_filter)
+            
+            # Execute query
+            result = query_builder.limit(match_count).execute()
+            
+            if result.data:
+                logger.info(f"Fallback API search found {len(result.data)} results")
+                return result.data
+            else:
+                return []
+                
+        except Exception as e:
+            logger.error(f"Fallback API search failed: {e}")
+            return []
+    
+    def search_all_sources(
+        self,
+        query: str,
+        match_count: int = 10
+    ) -> str:
+        """
+        Search across all data sources based on query type.
+        
+        Args:
+            query: Search query
+            match_count: Total number of results to return
+            
+        Returns:
+            Formatted search results from all relevant sources
+        """
+        # Classify query
+        strategy = self.classify_query_intent(query)
+        logger.debug(f"Query classification: {strategy}")
+        
+        results = {
+            'api_functions': [],
+            'code_examples': [],
+            'documentation': [],
+            'strategy': strategy
+        }
+        
+        # Determine result distribution based on classification
+        if strategy['primary_type'] == SearchType.API_FUNCTION:
+            # Prioritize API results
+            api_count = max(1, match_count // 2)
+            code_count = max(1, match_count // 4)
+            doc_count = match_count - api_count - code_count
+        elif strategy['primary_type'] == SearchType.CODE_EXAMPLE:
+            # Prioritize code examples
+            code_count = max(1, match_count // 2)
+            api_count = max(1, match_count // 4)
+            doc_count = match_count - api_count - code_count
+        elif strategy['primary_type'] == SearchType.DOCUMENTATION:
+            # Prioritize documentation
+            doc_count = max(1, match_count // 2)
+            code_count = max(1, match_count // 4)
+            api_count = match_count - code_count - doc_count
+        else:
+            # Unified - equal distribution
+            api_count = max(1, match_count // 3)
+            code_count = max(1, match_count // 3)
+            doc_count = match_count - api_count - code_count
+        
+        # Search each relevant source
+        try:
+            if strategy['search_api'] and api_count > 0:
+                api_results = self.search_api_functions(
+                    query, 
+                    api_count,
+                    strategy.get('language')
+                )
+                # Extract results from formatted string (not ideal but maintains compatibility)
+                if "No API functions found" not in api_results:
+                    results['api_functions'] = [{'formatted_result': api_results}]
+            
+            if strategy['search_code'] and code_count > 0:
+                code_results = self.search_code_examples(
+                    query,
+                    match_count=code_count,
+                    use_hybrid=True
+                )
+                if "No code examples found" not in code_results:
+                    results['code_examples'] = [{'formatted_result': code_results}]
+            
+            if strategy['search_docs'] and doc_count > 0:
+                doc_results = self.perform_rag_query(
+                    query,
+                    match_count=doc_count,
+                    use_hybrid=True
+                )
+                if "No documentation found" not in doc_results:
+                    results['documentation'] = [{'formatted_result': doc_results}]
+            
+        except Exception as e:
+            logger.error(f"Error in unified search: {e}")
+        
+        return self._format_unified_results(results, query)
+    
+    def _format_api_results(self, results: List[Dict[str, Any]], query: str) -> str:
+        """Format API search results for display."""
+        if not results:
+            return f"No API functions found for query: '{query}'"
+        
+        formatted = [f"## Pulseq API Functions for: '{query}'\n"]
+        formatted.append(f"Found {len(results)} function(s):\n")
+        
+        for i, func in enumerate(results, 1):
+            # Extract function details
+            name = func.get("name", "Unknown")
+            language = func.get("language", "Unknown")
+            signature = func.get("signature", "")
+            description = func.get("description", "")
+            parameters = func.get("parameters", {})
+            returns = func.get("returns", "")
+            similarity = func.get("similarity", 0)
+            
+            # Format result
+            formatted.append(f"### {i}. {name} ({language.upper()})")
+            formatted.append(f"**Relevance:** {similarity:.2%}")
+            
+            if signature:
+                formatted.append(f"**Signature:**")
+                formatted.append(f"```{language}")
+                formatted.append(signature)
+                formatted.append("```")
+            
+            if description:
+                formatted.append(f"**Description:** {description}")
+            
+            if parameters and isinstance(parameters, dict):
+                formatted.append(f"**Parameters:**")
+                for param, details in parameters.items():
+                    if isinstance(details, dict):
+                        param_type = details.get('type', 'unknown')
+                        param_desc = details.get('description', 'No description')
+                        formatted.append(f"- `{param}` ({param_type}): {param_desc}")
+                    else:
+                        formatted.append(f"- `{param}`: {details}")
+            
+            if returns:
+                formatted.append(f"**Returns:** {returns}")
+            
+            formatted.append("")  # Empty line between results
+        
+        return "\n".join(formatted)
+    
+    def _format_unified_results(
+        self,
+        results: Dict[str, List[Dict]],
+        query: str
+    ) -> str:
+        """
+        Format unified search results for display.
+        """
+        formatted = [f"## Search Results for: '{query}'\n"]
+        
+        strategy = results.get('strategy', {})
+        confidence = strategy.get('confidence', 0)
+        
+        if confidence < 0.5:
+            formatted.append("*Note: Query intent unclear, showing results from all sources*\n")
+        else:
+            primary_type = strategy.get('primary_type', SearchType.UNIFIED)
+            formatted.append(f"*Detected intent: {primary_type.value.replace('_', ' ').title()}*\n")
+        
+        # Show results from each source
+        sources_shown = 0
+        
+        # API Functions
+        if results['api_functions']:
+            formatted.append("### 🔧 API Functions\n")
+            for result in results['api_functions']:
+                formatted.append(result['formatted_result'])
+            sources_shown += 1
+        
+        # Code Examples
+        if results['code_examples']:
+            if sources_shown > 0:
+                formatted.append("---\n")
+            formatted.append("### 💻 Code Examples\n")
+            for result in results['code_examples']:
+                formatted.append(result['formatted_result'])
+            sources_shown += 1
+        
+        # Documentation
+        if results['documentation']:
+            if sources_shown > 0:
+                formatted.append("---\n")
+            formatted.append("### 📚 Documentation\n")
+            for result in results['documentation']:
+                formatted.append(result['formatted_result'])
+            sources_shown += 1
+        
+        if sources_shown == 0:
+            formatted.append("No results found in any source for this query.")
+        
+        return "\n".join(formatted)
         
     def perform_rag_query(
         self,

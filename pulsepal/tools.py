@@ -272,6 +272,160 @@ async def search_pulseq_knowledge(
 Since this appears to be a Pulseq-specific question that would benefit from searching our documentation, please try rephrasing your query or ask me to explain the concept using my general knowledge instead."""
 
 
+@get_agent().tool
+async def search_pulseq_functions(
+    ctx: RunContext[PulsePalDependencies],
+    query: str,
+    language: Optional[str] = None,
+    match_count: int = 5
+) -> str:
+    """
+    Search for Pulseq API functions by name or description.
+    
+    This tool is specifically designed for finding Pulseq function definitions,
+    signatures, parameters, and usage information from the API reference.
+    
+    Args:
+        query: Function name or description to search for
+        language: Optional language filter (matlab, python, cpp)
+        match_count: Number of results to return (1-10)
+    
+    Returns:
+        str: Formatted API function results with signatures and parameters
+    """
+    try:
+        # Validate parameters
+        if match_count < 1 or match_count > 10:
+            match_count = 5
+        
+        # Normalize language filter
+        if language:
+            language = language.lower()
+            if language not in ['matlab', 'python', 'cpp']:
+                language = None
+        
+        # Get RAG service
+        rag_service = get_rag_service()
+        
+        # Search API functions
+        results = rag_service.search_api_functions(
+            query=query,
+            match_count=match_count,
+            language_filter=language
+        )
+        
+        logger.info(f"API function search completed for: {query}")
+        
+        # Log search event for debugging
+        if ctx.deps and hasattr(ctx.deps, 'conversation_context'):
+            results_count = 0 if "No API functions found" in results else results.count("###")
+            conversation_logger.log_search_event(
+                ctx.deps.conversation_context.session_id,
+                "api_functions",
+                query,
+                results_count,
+                {"language_filter": language, "match_count": match_count}
+            )
+        
+        return results
+        
+    except Exception as e:
+        logger.error(f"Pulseq function search failed: {e}")
+        
+        # Graceful fallback to general knowledge search
+        try:
+            rag_service = get_rag_service()
+            fallback_results = rag_service.perform_rag_query(
+                query=f"Pulseq function {query}",
+                match_count=match_count,
+                use_hybrid=True
+            )
+            
+            return f"API function search temporarily unavailable. Here are general search results:\n\n{fallback_results}"
+            
+        except Exception as fallback_error:
+            logger.error(f"Fallback search also failed: {fallback_error}")
+            
+            # Final fallback message
+            return f"""I encountered an error searching for the Pulseq function: "{query}". 
+
+This could be due to a temporary database issue. Please try:
+1. Rephrasing your query 
+2. Using the general search_pulseq_knowledge tool instead
+3. Asking me to explain the function concept using my general knowledge"""
+
+
+@get_agent().tool
+async def search_all_pulseq_sources(
+    ctx: RunContext[PulsePalDependencies],
+    query: str,
+    match_count: int = 10
+) -> str:
+    """
+    Search across all Pulseq data sources intelligently based on query type.
+    
+    This tool automatically classifies your query and searches the most relevant
+    sources (API functions, code examples, and/or documentation) based on what
+    you're asking for.
+    
+    Args:
+        query: Search query - can be about functions, examples, or concepts
+        match_count: Total number of results across all sources (5-20)
+    
+    Returns:
+        str: Intelligently formatted results from all relevant sources
+    """
+    try:
+        # Validate parameters
+        if match_count < 5 or match_count > 20:
+            match_count = 10
+        
+        # Get RAG service
+        rag_service = get_rag_service()
+        
+        # Perform unified search across all sources
+        results = rag_service.search_all_sources(
+            query=query,
+            match_count=match_count
+        )
+        
+        logger.info(f"Unified search completed for: {query}")
+        
+        # Log search event for debugging
+        if ctx.deps and hasattr(ctx.deps, 'conversation_context'):
+            # Count total results across all sources
+            results_count = results.count("###") + results.count("🔧") + results.count("💻") + results.count("📚")
+            conversation_logger.log_search_event(
+                ctx.deps.conversation_context.session_id,
+                "unified",
+                query,
+                results_count,
+                {"match_count": match_count}
+            )
+        
+        return results
+        
+    except Exception as e:
+        logger.error(f"Unified search failed: {e}")
+        
+        # Graceful fallback to traditional search
+        try:
+            return await search_pulseq_knowledge(
+                ctx, query, search_type="auto", match_count=match_count
+            )
+            
+        except Exception as fallback_error:
+            logger.error(f"Fallback search also failed: {fallback_error}")
+            
+            # Final fallback message
+            return f"""I encountered an error performing a comprehensive search for: "{query}". 
+
+This could be due to a temporary database issue. Please try:
+1. Using a more specific search tool (search_pulseq_functions for API functions)
+2. Breaking down your query into smaller parts
+3. Asking me to explain the concept using my general knowledge"""
+
+
 # Legacy tool aliases for backward compatibility during transition
 # These will be removed in a future update
 
