@@ -1,8 +1,8 @@
 """
-Tools for Pulsepal agent including RAG queries and MRI expert delegation.
+Tools for Pulsepal agent including RAG queries and web search.
 
-Provides comprehensive tool integration with native RAG capabilities, web search,
-and agent delegation patterns with proper error handling.
+Provides comprehensive tool integration with native RAG capabilities and web search
+with proper error handling.
 """
 
 import logging
@@ -12,8 +12,6 @@ from pydantic_ai import RunContext
 from pydantic import BaseModel, Field
 
 from .dependencies import PulsePalDependencies
-# Import at module level to avoid circular imports
-from .mri_expert_agent import consult_mri_expert
 from .settings import get_settings
 from .rag_service import get_rag_service
 from .web_search import get_web_search_service
@@ -40,10 +38,6 @@ class CodeSearchParams(BaseModel):
     match_count: int = Field(5, description="Number of results to return", ge=1, le=20)
 
 
-class MRIExpertParams(BaseModel):
-    """Parameters for MRI Expert delegation validation."""
-    question: str = Field(..., description="Physics question for MRI Expert")
-    context: Optional[str] = Field(None, description="Additional context from conversation")
 
 
 @get_agent().tool
@@ -193,48 +187,3 @@ async def get_available_sources(ctx: RunContext[PulsePalDependencies]) -> str:
 *Note: Unable to connect to live database. Showing cached source list.*"""
 
 
-@get_agent().tool
-async def delegate_to_mri_expert(
-    ctx: RunContext[PulsePalDependencies],
-    question: str,
-    context: Optional[str] = None
-) -> str:
-    """
-    Delegate physics questions to the MRI Expert for detailed explanations.
-    
-    Use this tool when users ask about MRI physics concepts, theory,
-    or need educational explanations about the science behind sequences.
-    
-    Args:
-        question: Physics question or concept to explain
-        context: Additional context from the current conversation
-    
-    Returns:
-        str: Expert physics explanation from MRI Expert agent
-    """
-    try:
-        # Validate parameters
-        params = MRIExpertParams(question=question, context=context)
-        
-        # Get recent conversation history for context
-        conversation_history = None
-        if ctx.deps.conversation_context:
-            conversation_history = ctx.deps.conversation_context.get_recent_conversations(3)
-        
-        # Delegate to MRI Expert agent
-        expert_response = await consult_mri_expert(
-            question=params.question,
-            context=params.context,
-            conversation_history=conversation_history,
-            parent_usage=ctx.usage if hasattr(ctx, 'usage') else None
-        )
-        
-        # Note: Don't add delegation info to conversation history to maintain 
-        # seamless user experience
-        
-        logger.info("Successfully delegated question to MRI Expert")
-        return expert_response
-        
-    except Exception as e:
-        logger.error(f"MRI Expert delegation failed: {e}")
-        return f"I encountered an error consulting the MRI Expert: {e}. I'll try to answer your physics question myself, though my response may be less detailed."

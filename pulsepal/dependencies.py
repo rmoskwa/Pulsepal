@@ -230,12 +230,6 @@ class PulsePalDependencies:
             self.rag_initialized = False
 
 
-@dataclass  
-class MRIExpertDependencies:
-    """Dependencies for MRI Expert sub-agent."""
-    
-    conversation_context: Optional[ConversationContext] = None
-    parent_usage: Optional[Any] = None  # Usage tracking from parent agent
 
 
 class SessionManager:

@@ -9,13 +9,11 @@ __version__ = "1.0.0"
 __author__ = "Robert Moskwa"
 
 from .main_agent import pulsepal_agent
-from .mri_expert_agent import mri_expert_agent
 from .settings import load_settings
 from .providers import get_llm_model
 
 __all__ = [
     "pulsepal_agent",
-    "mri_expert_agent",
     "load_settings",
     "get_llm_model",
 ]
