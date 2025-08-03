@@ -117,7 +117,7 @@ async def create_pulsepal_session(session_id: str = None) -> tuple[str, PulsePal
 
 async def run_pulsepal(query: str, session_id: str = None) -> tuple[str, str]:
     """
-    Run Pulsepal agent with a query.
+    Run Pulsepal agent with a query using intelligent decision-making.
     
     Args:
         query: User query for Pulseq assistance
@@ -142,38 +142,18 @@ async def run_pulsepal(query: str, session_id: str = None) -> tuple[str, str]:
         # Add user query to conversation history
         deps.conversation_context.add_conversation("user", query)
         
-        # Detect language preference (will default to MATLAB if no clear preference)
-        if not deps.conversation_context.preferred_language or deps.conversation_context.preferred_language == "matlab":
-            # Always check for language preference, but MATLAB is default
-            deps.conversation_context.detect_language_preference(query)
+        # Detect language preference from query
+        deps.conversation_context.detect_language_preference(query)
         
-        # Prepare context-aware query
-        enhanced_query = query
-        if deps.conversation_context.conversation_history:
-            # Get recent conversation history for context
-            recent_history = deps.conversation_context.get_recent_conversations(5)
-            if recent_history:
-                context_summary = "Recent conversation context:\n"
-                for entry in recent_history:
-                    role = entry.get('role', 'unknown')
-                    content = entry.get('content', '')[:150]  # Limit content length for context
-                    context_summary += f"{role}: {content}...\n"
-                
-                # Add context to the query
-                enhanced_query = f"{context_summary}\nCurrent question: {query}"
-        
-        # Include preferred language context (default to MATLAB if not set)
-        preferred_lang = deps.conversation_context.preferred_language or "matlab"
-        enhanced_query += f"\n\nUser's preferred programming language: {preferred_lang}"
-        
-        # Run agent with enhanced context
-        result = await pulsepal_agent.run(enhanced_query, deps=deps)
+        # Simple, direct approach - let the agent's intelligence handle context
+        # The agent will decide when to use tools based on the system prompt
+        result = await pulsepal_agent.run(query, deps=deps)
         
         # Add assistant response to conversation history
-        deps.conversation_context.add_conversation("assistant", result.output)
+        deps.conversation_context.add_conversation("assistant", result.data)
         
         logger.info(f"Pulsepal responded to query in session {session_id}")
-        return session_id, result.output
+        return session_id, result.data
         
     except Exception as e:
         error_msg = f"Error running Pulsepal: {e}"
