@@ -11,9 +11,7 @@ python-dotenv
 
 # RAG and Vector Database dependencies
 supabase
-sentence-transformers
-transformers
-torch
+google-generativeai>=0.3.0
 
 # Testing framework
 pytest
