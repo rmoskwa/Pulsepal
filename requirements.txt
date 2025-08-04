@@ -1,26 +1,30 @@
-# PulsePal Requirements
-# Generated for dual Windows/.venv and WSL/.venv-wsl environments
+# requirements-production.txt
+# Production requirements with pinned versions for Railway deployment
 
 # Core PydanticAI dependencies
-pydantic-ai
-pydantic
-pydantic-settings
+pydantic-ai==0.0.11
+pydantic==2.8.2
+pydantic-settings==2.3.4
 
 # Environment and configuration
-python-dotenv
+python-dotenv==1.0.1
 
 # RAG and Vector Database dependencies
-supabase
-google-generativeai>=0.3.0
+supabase==2.5.0
+google-generativeai==0.5.4
 
-# Testing framework
-pytest
-pytest-asyncio
+# Testing framework (optional for production)
+# pytest==8.2.2
+# pytest-asyncio==0.23.7
 
 # Web UI dependencies
-chainlit
+chainlit==1.1.306
 
-# Development dependencies
-ruff
-black
-mypy
+# Production web server
+fastapi==0.111.1
+uvicorn==0.30.3
+
+# Development dependencies (commented out for production)
+# ruff==0.5.5
+# black==24.4.2
+# mypy==1.11.0

@@ -25,6 +25,20 @@ from pulsepal.dependencies import PulsePalDependencies, get_session_manager, SUP
 from pulsepal.settings import get_settings
 from pulsepal.conversation_logger import get_conversation_logger
 
+# Optional authentication for deployment
+try:
+    from pulsepal.auth import check_rate_limit, get_chainlit_auth_callback
+    auth_callback = get_chainlit_auth_callback()
+    AUTH_ENABLED = True
+except ImportError:
+    # Auth module not available (moved to deployment)
+    AUTH_ENABLED = False
+    auth_callback = None
+    
+    def check_rate_limit(api_key: str, limit: int = 100) -> bool:
+        """Dummy rate limit function when auth is disabled."""
+        return True
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -109,6 +123,20 @@ What would you like to explore about MRI sequence programming?"""
 async def main(message: cl.Message):
     """Handle incoming messages and respond using Pulsepal agent."""
     try:
+        # Check rate limiting for authenticated users (if auth is enabled)
+        if AUTH_ENABLED:
+            user = cl.user_session.get("user")
+            if user and user.metadata:
+                api_key = user.metadata.get("api_key")
+                limit = user.metadata.get("limit", 100)
+                
+                if api_key and not check_rate_limit(api_key, limit):
+                    await cl.Message(
+                        content=f"⚠️ **Rate limit exceeded**. Please wait before sending more requests.\n\nYour limit: {limit} requests/hour",
+                        author="System"
+                    ).send()
+                    return
+        
         # Get session info
         pulsepal_session_id = cl.user_session.get("pulsepal_session_id")
         deps = cl.user_session.get("pulsepal_deps")

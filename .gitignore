@@ -121,3 +121,24 @@ READMEarchive.md
 .DS_Store?
 ehthumbs.db
 Icon?
+
+# Production/deployment files
+railway_env.txt
+railway_commands.sh
+alpha_api_keys.md
+alpha_users.json
+welcome_*.txt
+test_auth_*.py
+generate_alpha_keys.py
+setup_production_env.py
+alpha_users.csv
+alpha_dashboard.html
+
+# Deployment files (moved to pulsePal-deploy)
+auth.py
+health_check.py
+start_production.py
+railway.toml
+DEPLOYMENT_CHECKLIST.md
+alpha_*.md
+railway_*.txt
