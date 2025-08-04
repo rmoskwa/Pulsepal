@@ -120,6 +120,12 @@ async def main(message: cl.Message):
             ).send()
             return
         
+        # Debug logging for session continuity
+        logger.debug(f"Session {pulsepal_session_id} - History length: {len(deps.conversation_context.conversation_history)}")
+        logger.debug(f"Session {pulsepal_session_id} - Awaiting selection: {deps.conversation_context.awaiting_selection}")
+        if deps.conversation_context.conversation_history:
+            last_entry = deps.conversation_context.conversation_history[-1]
+            logger.debug(f"Session {pulsepal_session_id} - Last message: {last_entry['role']}: {last_entry['content'][:50]}...")
         
         # Show typing indicator with intelligent status
         async with cl.Step(name="🧠 Analyzing your query...") as step:
@@ -134,11 +140,44 @@ async def main(message: cl.Message):
                     message.content
                 )
                 
-                # Detect language preference from query
-                deps.conversation_context.detect_language_preference(message.content)
-                
-                # Simple, direct approach - let the agent's intelligence handle everything
-                result = await pulsepal_agent.run(message.content, deps=deps)
+                # Check if this is a selection response for pending code results
+                if deps.conversation_context.is_selection_response(message.content):
+                    # Handle the selection without invoking the full agent
+                    from pulsepal.rag_service import get_rag_service
+                    rag_service = get_rag_service()
+                    
+                    selection = message.content.lower().strip()
+                    result_text = rag_service.format_selected_code_results(
+                        deps.conversation_context.pending_code_results,
+                        selection,
+                        deps.conversation_context.last_query
+                    )
+                    
+                    # Clear pending results after selection
+                    deps.conversation_context.clear_pending_results()
+                    
+                    # Create a simple result object
+                    class SimpleResult:
+                        def __init__(self, data):
+                            self.data = data
+                    
+                    result = SimpleResult(result_text)
+                    logger.info(f"Handled code selection '{selection}' in session {pulsepal_session_id}")
+                else:
+                    # Get conversation history for context
+                    history_context = deps.conversation_context.get_formatted_history()
+                    
+                    # Create query with context
+                    if history_context:
+                        query_with_context = f"{history_context}\n\nCurrent query: {message.content}"
+                    else:
+                        query_with_context = message.content
+                    
+                    # Detect language preference from query
+                    deps.conversation_context.detect_language_preference(message.content)
+                    
+                    # Run agent with query including context
+                    result = await pulsepal_agent.run(query_with_context, deps=deps)
                 
                 # Add response to conversation history
                 deps.conversation_context.add_conversation("assistant", result.data)

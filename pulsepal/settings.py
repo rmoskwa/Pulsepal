@@ -17,75 +17,71 @@ logger = logging.getLogger(__name__)
 
 class Settings(BaseSettings):
     """Application settings with environment variable support."""
-    
+
     model_config = ConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8", 
-        case_sensitive=False,
-        extra="ignore"
+        env_file=".env", env_file_encoding="utf-8", case_sensitive=False, extra="ignore"
     )
-    
+
     # LLM Configuration (Gemini)
     google_api_key: str = Field(
-        ..., 
+        ...,
         description="Google API key for Gemini model access",
-        alias="GOOGLE_API_KEY"
+        alias="GOOGLE_API_KEY",
     )
     llm_model: str = Field(
         default="gemini-2.0-flash-exp",
         description="Gemini model name to use",
-        alias="LLM_MODEL" 
+        alias="LLM_MODEL",
     )
-    
+
     # Supabase Configuration for RAG
     supabase_url: str = Field(
-        ...,
-        description="Supabase project URL for RAG database",
-        alias="SUPABASE_URL"
+        ..., description="Supabase project URL for RAG database", alias="SUPABASE_URL"
     )
     supabase_key: str = Field(
         ...,
         description="Supabase service role key for full access",
-        alias="SUPABASE_KEY"
+        alias="SUPABASE_KEY",
     )
-    
+
     # BGE Embedding Model Configuration
     bge_model_path: str = Field(
         default="/mnt/c/Users/Robert Moskwa/huggingface_models/hub/models--BAAI--bge-large-en-v1.5/snapshots",
         description="Path to local BGE embedding model",
-        alias="BGE_MODEL_PATH"
+        alias="BGE_MODEL_PATH",
     )
-    
+
     # Session Configuration
     max_session_duration_hours: int = Field(
-        default=24,
-        description="Maximum session duration in hours"
+        default=24, description="Maximum session duration in hours"
     )
     max_conversation_history: int = Field(
-        default=100,
-        description="Maximum conversation history entries per session"
+        default=100, description="Maximum conversation history entries per session"
     )
     max_code_examples: int = Field(
-        default=50,
-        description="Maximum code examples stored per session"
+        default=50, description="Maximum code examples stored per session"
     )
-    
+
     # RAG Configuration
     default_match_count: int = Field(
-        default=5,
-        description="Default number of RAG results to return"
+        default=5, description="Default number of RAG results to return"
     )
     max_match_count: int = Field(
-        default=20,
-        description="Maximum number of RAG results allowed"
+        default=20, description="Maximum number of RAG results allowed"
     )
     use_hybrid_search: bool = Field(
         default=True,
-        description="Use hybrid search (vector + keyword) for better results"
+        description="Use hybrid search (vector + keyword) for better results",
     )
     use_contextual_embeddings: bool = Field(
-        default=False,
-        description="Use contextual embeddings for document chunks"
+        default=False, description="Use contextual embeddings for document chunks"
+    )
+
+    # Language Configuration
+    default_language: str = Field(
+        default="matlab",
+        description="Default programming language for code examples (matlab/python)",
+        alias="DEFAULT_LANGUAGE",
     )
 
 
@@ -93,15 +89,15 @@ def load_settings() -> Settings:
     """Load settings with proper error handling and environment loading."""
     # Load environment variables from .env file
     load_dotenv()
-    
+
     try:
         settings = Settings()
         logger.info("Settings loaded successfully")
         return settings
-        
+
     except Exception as e:
         error_msg = f"Failed to load settings: {e}"
-        
+
         # Provide helpful error messages for common issues
         if "google_api_key" in str(e).lower():
             error_msg += "\nMake sure to set GOOGLE_API_KEY in your .env file"
@@ -109,7 +105,7 @@ def load_settings() -> Settings:
             error_msg += "\nMake sure to set SUPABASE_URL in your .env file"
         if "supabase_key" in str(e).lower():
             error_msg += "\nMake sure to set SUPABASE_KEY in your .env file"
-            
+
         logger.error(error_msg)
         raise ValueError(error_msg) from e
 

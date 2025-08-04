@@ -365,7 +365,7 @@ class SupabaseRAGClient:
         source: Optional[str] = None
     ) -> List[Dict[str, Any]]:
         """
-        Perform multiple keyword search strategies.
+        Improved keyword search that avoids pollution from common words.
         
         Args:
             query: Search query
@@ -460,28 +460,32 @@ class SupabaseRAGClient:
         if phrase_response.data:
             results.extend(phrase_response.data)
         
-        # Strategy 2: Individual word search (if query has multiple words)
+        # Strategy 2: Individual words ONLY if they're meaningful
         words = query.split()
-        if len(words) > 1:
-            for word in words:
-                if len(word) > 3:  # Skip short words
-                    # Include summary in select for code_examples table
-                    if table_name == "code_examples":
-                        select_fields = "id, url, chunk_number, content, summary, metadata, source_id"
-                    else:
-                        select_fields = "id, url, chunk_number, content, metadata, source_id"
-                    
-                    word_query = (
-                        self.client.from_(table_name)
-                        .select(select_fields)
-                        .ilike("content", f"%{word}%")
-                    )
-                    if source:
-                        word_query = word_query.eq("source_id", source)
-                    
-                    word_response = word_query.limit(match_count // len(words)).execute()
-                    if word_response.data:
-                        results.extend(word_response.data)
+        # Filter out common words that pollute results
+        common_words = ['sequence', 'example', 'code', 'pulse', 'make', 'with', 'from', 'function', 'method']
+        meaningful_words = [w for w in words if len(w) > 3 and w.lower() not in common_words]
+        
+        # Only do word search if we have meaningful words left
+        if meaningful_words and len(results) < match_count:
+            for word in meaningful_words:
+                # Include summary in select for code_examples table
+                if table_name == "code_examples":
+                    select_fields = "id, url, chunk_number, content, summary, metadata, source_id"
+                else:
+                    select_fields = "id, url, chunk_number, content, metadata, source_id"
+                
+                word_query = (
+                    self.client.from_(table_name)
+                    .select(select_fields)
+                    .ilike("content", f"%{word}%")
+                )
+                if source:
+                    word_query = word_query.eq("source_id", source)
+                
+                word_response = word_query.limit(match_count // len(meaningful_words)).execute()
+                if word_response.data:
+                    results.extend(word_response.data)
         
         # Remove duplicates while preserving order
         seen_ids = set()
@@ -500,7 +504,8 @@ class SupabaseRAGClient:
         source: Optional[str] = None,
         search_type: str = "documents",
         use_rrf: bool = True,
-        use_reranking: bool = True
+        use_reranking: bool = True,
+        keyword_query_override: Optional[str] = None
     ) -> List[Dict[str, Any]]:
         """
         Perform advanced hybrid search combining vector and keyword search.
@@ -512,6 +517,7 @@ class SupabaseRAGClient:
             search_type: Type of search ("documents" or "code_examples")
             use_rrf: Whether to use Reciprocal Rank Fusion
             use_reranking: Whether to apply cross-encoder reranking
+            keyword_query_override: Optional override for keyword search query
             
         Returns:
             Combined and ranked search results
@@ -537,8 +543,10 @@ class SupabaseRAGClient:
                 table_name = "code_examples"
             
             # Enhanced keyword search with multiple strategies
+            # Use override query if provided, otherwise use original query
+            keyword_query = keyword_query_override if keyword_query_override else query
             keyword_results = self._multi_strategy_keyword_search(
-                query, match_count * 2, table_name, source
+                keyword_query, match_count * 2, table_name, source
             )
             
             # Combine results using RRF or simple fusion

@@ -200,33 +200,128 @@ async def search_pulseq_knowledge(
                 )
             
         elif search_type == "code":
-            results = rag_service.search_code_examples(
-                query=query,  # Use potentially enhanced query
-                match_count=params.match_count,
-                use_hybrid=True
-            )
+            # Use the new smart search strategy
+            # Classify the query to determine search approach
+            strategy, metadata = rag_service.classify_search_strategy(query)
+            
+            if strategy == "vector_enhanced":
+                # Use the search_code_examples method which has the enhanced logic
+                # This will handle the complex filtering and ranking
+                search_results = rag_service.search_code_examples(
+                    query=query,
+                    source_id=None,
+                    match_count=50,  # We'll get top 50 after filtering
+                    use_hybrid=rag_service.settings.use_hybrid_search
+                )
+                
+                # Parse the results to extract the raw results for interactive formatting
+                # Since search_code_examples returns formatted string, we need to call it differently
+                # Let's directly use the enhanced search from RAG service
+                seq_type = metadata.get("sequence_type", "")
+                raw_results = rag_service.supabase_client.perform_hybrid_search(
+                    query=query,
+                    match_count=300,
+                    search_type="code_examples",
+                    keyword_query_override=seq_type
+                )
+                
+                # Apply the new scoring method
+                if raw_results:
+                    scored_results = []
+                    for result in raw_results:
+                        # Use the rag_service's scoring method
+                        score = rag_service._score_sequence_relevance(result, seq_type)
+                        
+                        if score > 0 or len(scored_results) < 10:
+                            result['relevance_score'] = score
+                            scored_results.append(result)
+                    
+                    scored_results.sort(key=lambda x: x.get('relevance_score', 0), reverse=True)
+                    raw_results = scored_results
+            else:
+                # Hybrid search with optional filtering
+                filtered_query = metadata.get("filtered_query") if strategy == "hybrid_filtered" else None
+                raw_results = rag_service.supabase_client.perform_hybrid_search(
+                    query=query,
+                    match_count=100,  # More reasonable for hybrid search
+                    search_type="code_examples",
+                    keyword_query_override=filtered_query
+                )
+            
+            # Use interactive formatting
+            formatted_results, pending_results = rag_service.format_code_results_interactive(raw_results, query)
+            
+            # If multiple results, store them in the conversation context
+            if pending_results and ctx.deps and hasattr(ctx.deps, 'conversation_context'):
+                ctx.deps.conversation_context.set_pending_results(pending_results, query)
+                logger.info(f"Stored {len(pending_results)} pending code results for selection")
+            
+            results = formatted_results
             logger.info(f"Code search completed for: {query}")
             
             # Log search event for debugging
             if ctx.deps and hasattr(ctx.deps, 'conversation_context'):
-                results_count = 0 if "No code examples found" in results else results.count("###")
+                results_count = len(raw_results) if raw_results else 0
                 conversation_logger.log_search_event(
                     ctx.deps.conversation_context.session_id,
                     "code",
                     query,
                     results_count,
-                    {"search_type": search_type, "enhanced_query": query != params.query}
+                    {"search_type": search_type, "enhanced_query": query != params.query, "interactive": pending_results is not None}
                 )
             
-            # If no results, try with alternative query
+            # If no results and we enhanced the query, be transparent about trying alternatives
             if "No code examples found" in results and params.query != query:
+                # Be transparent about the search enhancement
+                transparency_msg = f"\n*Note: No exact matches for '{params.query}'. "
+                transparency_msg += f"I searched for related term: '{query}'*\n\n"
+                
                 # Try original query if we enhanced it
-                results = rag_service.search_code_examples(
-                    query=params.query,
-                    match_count=params.match_count,
-                    use_hybrid=True
-                )
+                # Use the same smart strategy for the fallback
+                fallback_strategy, fallback_metadata = rag_service.classify_search_strategy(params.query)
+                if fallback_strategy == "vector_enhanced":
+                    # Same logic as above for enhanced search
+                    seq_type = fallback_metadata.get("sequence_type", "")
+                    fallback_raw_results = rag_service.supabase_client.perform_hybrid_search(
+                        query=params.query,
+                        match_count=300,
+                        search_type="code_examples",
+                        keyword_query_override=seq_type
+                    )
+                    # Apply the new scoring method
+                    if fallback_raw_results:
+                        scored = []
+                        for r in fallback_raw_results:
+                            score = rag_service._score_sequence_relevance(r, seq_type)
+                            if score > 0 or len(scored) < 10:
+                                r['relevance_score'] = score
+                                scored.append(r)
+                        scored.sort(key=lambda x: x.get('relevance_score', 0), reverse=True)
+                        fallback_raw_results = scored
+                else:
+                    fallback_filtered = fallback_metadata.get("filtered_query") if fallback_strategy == "hybrid_filtered" else None
+                    fallback_raw_results = rag_service.supabase_client.perform_hybrid_search(
+                        query=params.query,
+                        match_count=100,
+                        search_type="code_examples",
+                        keyword_query_override=fallback_filtered
+                    )
                 logger.info(f"Fallback search with original query: {params.query}")
+                
+                if fallback_raw_results:
+                    fallback_formatted, fallback_pending = rag_service.format_code_results_interactive(fallback_raw_results, params.query)
+                    if fallback_pending and ctx.deps and hasattr(ctx.deps, 'conversation_context'):
+                        ctx.deps.conversation_context.set_pending_results(fallback_pending, params.query)
+                    results = transparency_msg + fallback_formatted
+                else:
+                    # Both searches failed - provide helpful message
+                    results = f"## No code examples found for: '{params.query}'\n\n"
+                    results += f"*I also searched for the enhanced term: '{query}'*\n\n"
+                    results += "This might be because:\n"
+                    results += "1. The function/sequence hasn't been implemented in the examples\n"
+                    results += "2. It uses different terminology in the codebase\n"
+                    results += "3. It might be a method of a class (e.g., seq.methodName())\n\n"
+                    results += "Would you like me to search for similar concepts or explain the theory?"
             
         else:  # documentation or auto fallback
             results = rag_service.perform_rag_query(

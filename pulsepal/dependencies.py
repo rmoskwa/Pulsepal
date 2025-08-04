@@ -68,6 +68,9 @@ class ConversationContext:
     preferred_language: Optional[str] = "matlab"  # Default to MATLAB, can be 'matlab', 'octave', or 'python'
     session_start_time: datetime = field(default_factory=datetime.now)
     last_activity: datetime = field(default_factory=datetime.now)
+    pending_code_results: Optional[List[Dict[str, Any]]] = None  # Store pending results for selection
+    awaiting_selection: bool = False  # Track if we're waiting for user selection
+    last_query: Optional[str] = None  # Store the query that generated pending results
     
     def add_conversation(self, role: str, content: str, metadata: Optional[Dict] = None):
         """Add conversation entry with automatic history management."""
@@ -111,80 +114,128 @@ class ConversationContext:
         """Get recent conversation entries."""
         return self.conversation_history[-count:] if self.conversation_history else []
     
+    def set_pending_results(self, results: List[Dict[str, Any]], query: str):
+        """Set pending code results for interactive selection."""
+        self.pending_code_results = results
+        self.awaiting_selection = True
+        self.last_query = query
+    
+    def clear_pending_results(self):
+        """Clear pending results after selection or timeout."""
+        self.pending_code_results = None
+        self.awaiting_selection = False
+        self.last_query = None
+    
+    def is_selection_response(self, query: str) -> bool:
+        """Check if query is likely a selection response."""
+        if not self.awaiting_selection:
+            return False
+        
+        query_lower = query.lower().strip()
+        
+        # Check for 'all'
+        if query_lower == 'all':
+            return True
+        
+        # Check for number
+        try:
+            num = int(query_lower)
+            if self.pending_code_results and 1 <= num <= len(self.pending_code_results):
+                return True
+        except (ValueError, TypeError):
+            pass
+        
+        return False
+    
+    def get_formatted_history(self, max_exchanges: int = 5) -> str:
+        """
+        Format recent conversation history for agent context.
+        
+        Args:
+            max_exchanges: Maximum number of user-assistant exchanges to include
+            
+        Returns:
+            Formatted string of recent conversation history
+        """
+        if not self.conversation_history:
+            return ""
+        
+        # Filter to only user and assistant messages (exclude system)
+        relevant_history = [
+            entry for entry in self.conversation_history 
+            if entry["role"] in ["user", "assistant"]
+        ]
+        
+        if not relevant_history:
+            return ""
+        
+        # Get last N exchanges (2 messages per exchange)
+        recent_messages = relevant_history[-(max_exchanges * 2):]
+        
+        # Format as conversation
+        formatted = ["Previous conversation:"]
+        for entry in recent_messages:
+            role = entry["role"].capitalize()
+            content = entry["content"]
+            # Truncate very long messages to avoid token limits
+            if len(content) > 500:
+                content = content[:500] + "... [truncated]"
+            formatted.append(f"{role}: {content}")
+        
+        return "\n".join(formatted)
+    
     def get_code_examples_by_language(self, language: str) -> List[Dict[str, Any]]:
         """Get code examples filtered by language."""
         return [ex for ex in self.code_examples if ex["language"] == language.lower()]
     
     def detect_language_preference(self, content: str) -> Optional[str]:
-        """Detect language preference from user content with comprehensive language support."""
+        """
+        Detect programming language preference from query - MATLAB by default.
+        
+        Only switches to Python if explicitly indicated.
+        
+        Args:
+            content: User query or content to analyze
+            
+        Returns:
+            Language preference (defaults to 'matlab')
+        """
         content_lower = content.lower()
         
-        # Calculate scores for each supported language
-        language_scores = {}
+        # Strong Python indicators only - must be explicit
+        python_indicators = [
+            'python', 'pypulseq', '.py', 'import ', 'pip ', 
+            'def ', 'numpy', '__init__', 'self.', 'from ', 
+            'pandas', 'matplotlib', 'pyplot'
+        ]
         
-        for lang_id, lang_config in SUPPORTED_LANGUAGES.items():
-            score = 0
-            
-            # Check for language name mentions (higher weight)
-            # Special handling for C vs C++ to avoid substring issues
-            if lang_id == 'c':
-                # Only match very specific C patterns to avoid false matches
-                c_patterns = ['c programming', 'c code', 'ansi c', 'iso c', 'pure c', 'c language']
-                # Also check for ' c ' but only if it's not part of other words
-                if any(pattern in content_lower for pattern in c_patterns):
-                    score += 5
-                elif ' c ' in content_lower and 'c++' not in content_lower:
-                    # Additional check for single ' c ' mention without c++
-                    score += 5
-            elif lang_id == 'cpp':
-                # Match c++, cpp, or c++ specific terms
-                if any(pattern in content_lower for pattern in ['c++', 'cpp', 'c plus']):
-                    score += 5
-            elif lang_id in content_lower:
-                score += 5
-            
-            # Check for file extensions
-            for ext in lang_config['extensions']:
-                if ext in content_lower:
-                    score += 2
-            
-            # Check for language-specific keywords
-            for keyword in lang_config['keywords']:
-                if keyword.lower() in content_lower:
-                    score += 1
-            
-            language_scores[lang_id] = score
+        # Only switch to Python if explicitly indicated
+        if any(indicator in content_lower for indicator in python_indicators):
+            self.preferred_language = 'python'
+            logger.debug(f"Detected explicit Python preference in query")
+            return 'python'
         
-        # Special handling for C vs C++ detection
-        if 'c' in language_scores and 'cpp' in language_scores:
-            # Check for explicit C++ indicators
-            cpp_indicators = ['c++', 'cpp', 'class', 'namespace', '::']
-            c_indicators = [' c ', 'ansi c', 'iso c', ' c code', ' c programming']
-            
-            has_cpp_indicators = any(indicator in content_lower for indicator in cpp_indicators)
-            has_c_indicators = any(indicator in content_lower for indicator in c_indicators)
-            
-            if has_cpp_indicators and not has_c_indicators:
-                # Clear C++ preference - boost C++ score and reduce C score
-                language_scores['cpp'] += 2
-                language_scores['c'] = max(0, language_scores['c'] - 1)
-            elif has_c_indicators and not has_cpp_indicators:
-                # Clear C preference - boost C score and reduce C++ score  
-                language_scores['c'] += 2
-                language_scores['cpp'] = max(0, language_scores['cpp'] - 1)
+        # Check for other language indicators (C++, Julia, etc.)
+        # But still very conservative - require explicit mentions
+        if 'c++' in content_lower or 'cpp' in content_lower:
+            self.preferred_language = 'cpp'
+            logger.debug(f"Detected explicit C++ preference in query")
+            return 'cpp'
         
-        # Find the language with the highest score
-        if language_scores:
-            best_language = max(language_scores.items(), key=lambda x: x[1])
-            if best_language[1] > 0:
-                self.preferred_language = best_language[0]
-                logger.debug(f"Detected language preference: {self.preferred_language} (score: {best_language[1]})")
-                return self.preferred_language
+        if 'julia' in content_lower:
+            self.preferred_language = 'julia'
+            logger.debug(f"Detected explicit Julia preference in query")
+            return 'julia'
         
-        # Default to MATLAB if no clear preference detected
-        self.preferred_language = "matlab"
-        logger.debug("No clear language preference detected, defaulting to MATLAB")
-        return self.preferred_language
+        # DEFAULT TO MATLAB for everything else
+        # This includes when users mention:
+        # - MATLAB explicitly
+        # - Octave
+        # - .m files
+        # - Or when no language is specified
+        self.preferred_language = 'matlab'
+        logger.debug("Defaulting to MATLAB (no explicit Python/other language indicators)")
+        return 'matlab'
     
     def get_supported_languages(self) -> Dict[str, Dict[str, Any]]:
         """Get all supported programming languages with their configurations."""

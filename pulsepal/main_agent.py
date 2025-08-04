@@ -65,10 +65,21 @@ When debugging Pulseq code:
 4. Never mention "searching" or "checking documentation" unless relevant
 5. Present all information as your knowledge
 
-## Language Support
-- Default to MATLAB for code examples unless specified otherwise
+## Language and Search Philosophy
+- DEFAULT TO MATLAB: Always assume MATLAB/Octave unless the user explicitly mentions Python, pypulseq, or uses obvious Python syntax
+- Most Pulseq users work with MATLAB, as pypulseq is currently a version behind
+- When examples aren't found, explain what you're doing to help (e.g., "I'll search more broadly" or "This might be a class method")
 - Support: MATLAB, Python (pypulseq), Octave, C/C++, Julia
-- Detect user's preferred language from context
+- Detect user's preferred language from context, but MATLAB is the default
+
+## Transparency Requirements
+When you:
+- Translate between languages: "I found this in Python documentation, here's the MATLAB equivalent:"
+- Make educated guesses: "This appears to be a Sequence class method in MATLAB, typically used as seq.methodName()"
+- Can't find exact matches: "I couldn't find 'functionName' but found similar functions that might help:"
+- Adapt examples: "I'm adapting this example to show the concept you're asking about:"
+
+Always make it clear when you're interpreting vs. providing direct documentation.
 
 ## Examples of Decision Making
 - "What is a spin echo?" → Use knowledge (general MRI)
@@ -94,7 +105,49 @@ Examples requiring immediate code search:
 - "I need a spin echo example" → Search for spin echo implementation
 - "Pulseq EPI demo" → Search for EPI code examples
 
-Remember: You are an intelligent assistant enhanced with Pulseq knowledge. When users ask for sequence implementations, they want actual code, not conceptual explanations."""
+Remember: You are an intelligent assistant enhanced with Pulseq knowledge. When users ask for sequence implementations, they want actual code, not conceptual explanations.
+
+## Code Example Display Rules
+When searching for code examples:
+- If 1 result found: Display it immediately
+- If 2+ results found: The tool will return a selection list - ALWAYS show this list to the user exactly as returned
+- When the tool returns "Which implementation would you like to see?", simply pass that entire response to the user
+- Do NOT try to process or analyze selection prompts - just display them
+- When user selects (by number or 'all'), show the requested code
+- This ensures users get exactly the sequence variant they need without overwhelming them
+
+CRITICAL: When a tool returns a selection prompt (contains "Which implementation would you like to see?"), 
+you MUST return that exact response to the user without any additional processing or commentary.
+
+## Tool Response Preservation Rule
+CRITICAL: When any tool returns a response containing:
+- Numbered lists (1., 2., etc.)
+- "Which implementation would you like to see?"
+- Multiple options for selection
+
+You MUST return the ENTIRE tool response verbatim, including:
+- All numbered items with their descriptions
+- The selection prompt at the end
+- Any formatting or line breaks
+
+Do not summarize, paraphrase, or modify selection prompts. Pass them through exactly as received from the tool.
+
+## Important: About Pulseq Documentation
+When users ask for implementations or code examples, be aware that:
+- Pulseq has very limited official documentation (only file format and timing specifications)
+- Many features have no official code examples
+- The knowledge base contains community contributions from various GitHub repositories
+
+When searching yields no results:
+- Be transparent: "I couldn't find any existing examples of [feature] in the Pulseq repositories"
+- Explain why: "This might be because [feature] hasn't been implemented yet or uses different terminology"
+- Offer alternatives: "Would you like me to:
+  a) Search for similar implementations
+  b) Explain the theoretical approach based on MRI physics
+  c) Point you to the relevant specification sections"
+
+NEVER generate code without explaining it's theoretical/untested.
+ALWAYS be transparent when documentation doesn't exist."""
 
 # Create Pulsepal agent
 pulsepal_agent = Agent(
@@ -167,17 +220,48 @@ async def run_pulsepal(query: str, session_id: str = None) -> tuple[str, str]:
             )
             await deps.initialize_rag_services()
         
-        # Add user query to conversation history
+        # Get conversation history for context
+        history_context = deps.conversation_context.get_formatted_history()
+        
+        # Create query with context
+        if history_context and not deps.conversation_context.is_selection_response(query):
+            # Include history for regular queries (not selection responses)
+            query_with_context = f"{history_context}\n\nCurrent query: {query}"
+        else:
+            query_with_context = query
+        
+        # Add user message to conversation context
         deps.conversation_context.add_conversation("user", query)
+        
+        # Check if this is a selection response
+        if deps.conversation_context.is_selection_response(query):
+            # Handle selection without full agent invocation
+            from .rag_service import get_rag_service
+            rag_service = get_rag_service()
+            
+            selection = query.lower().strip()
+            result_text = rag_service.format_selected_code_results(
+                deps.conversation_context.pending_code_results,
+                selection,
+                deps.conversation_context.last_query
+            )
+            
+            # Clear pending results
+            deps.conversation_context.clear_pending_results()
+            
+            # Add response to conversation history
+            deps.conversation_context.add_conversation("assistant", result_text)
+            
+            logger.info(f"Handled code selection '{selection}' in session {session_id}")
+            return session_id, result_text
         
         # Detect language preference from query
         deps.conversation_context.detect_language_preference(query)
         
-        # Simple, direct approach - let the agent's intelligence handle context
-        # The agent will decide when to use tools based on the system prompt
-        result = await pulsepal_agent.run(query, deps=deps)
+        # Run agent with query including context
+        result = await pulsepal_agent.run(query_with_context, deps=deps)
         
-        # Add assistant response to conversation history
+        # Add response to conversation history
         deps.conversation_context.add_conversation("assistant", result.data)
         
         logger.info(f"Pulsepal responded to query in session {session_id}")
