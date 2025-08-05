@@ -95,6 +95,8 @@ PULSEPAL-DOCUMENTATION.md
 prpPrompt.md
 CHANGELOG.md
 CURRENT-STATE-DOCUMENTATION.md
+generate_api_keys.py
+alpha_keys_backup.json
 
 # Testing scripts (kept for development only)
 test_chainlit_quick.py
@@ -116,6 +118,7 @@ models/
 temp/
 tmp/
 READMEarchive.md
+fix_core_functionality_prp.md
 
 # OS generated files
 .DS_Store?
@@ -133,6 +136,7 @@ generate_alpha_keys.py
 setup_production_env.py
 alpha_users.csv
 alpha_dashboard.html
+env_validator.py
 
 # Deployment files (moved to pulsePal-deploy)
 auth.py

@@ -25,23 +25,82 @@ from pulsepal.dependencies import PulsePalDependencies, get_session_manager, SUP
 from pulsepal.settings import get_settings
 from pulsepal.conversation_logger import get_conversation_logger
 
+# Configure logging early so it's available for auth
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Debug: Log startup information
+logger.info("=" * 60)
+logger.info("PULSEPAL CHAINLIT STARTUP")
+logger.info(f"Python path: {sys.path}")
+logger.info(f"Current directory: {os.getcwd()}")
+logger.info(f"Environment ALPHA_API_KEYS exists: {'ALPHA_API_KEYS' in os.environ}")
+if 'ALPHA_API_KEYS' in os.environ:
+    # Don't log the actual keys for security
+    logger.info(f"ALPHA_API_KEYS length: {len(os.environ['ALPHA_API_KEYS'])}")
+logger.info("=" * 60)
+
 # Optional authentication for deployment
+AUTH_ENABLED = False
 try:
-    from pulsepal.auth import check_rate_limit, get_chainlit_auth_callback
-    auth_callback = get_chainlit_auth_callback()
-    AUTH_ENABLED = True
-except ImportError:
-    # Auth module not available (moved to deployment)
-    AUTH_ENABLED = False
-    auth_callback = None
+    logger.info("Attempting to import auth module...")
+    from pulsepal.auth import check_rate_limit, validate_api_key, API_KEYS
+    logger.info(f"Auth module imported successfully. API_KEYS type: {type(API_KEYS)}, length: {len(API_KEYS)}")
+    logger.info(f"API key names: {list(API_KEYS.keys())}")
     
+    # Only enable auth if we have real API keys (not just test-key)
+    if len(API_KEYS) > 0 and not (len(API_KEYS) == 1 and "test-key" in API_KEYS):
+        AUTH_ENABLED = True
+        logger.info(f"🔐 AUTHENTICATION ENABLED with {len(API_KEYS)} API keys")
+        
+        # CRITICAL: Register auth callback HERE, before any other Chainlit decorators
+        @cl.password_auth_callback
+        def auth_callback(username: str, password: str) -> Optional[cl.User]:
+            """Authenticate user with API key as password."""
+            logger.info(f"Auth callback called with username: {username}")
+            user_info = validate_api_key(password)
+            
+            if user_info:
+                logger.info(f"✅ Successful login for: {username or user_info['email']}")
+                return cl.User(
+                    identifier=username or user_info["email"],
+                    metadata={
+                        "api_key": password,
+                        "name": user_info["name"],
+                        "limit": user_info.get("limit", 100)
+                    }
+                )
+            else:
+                logger.warning(f"❌ Failed login attempt with username: {username}")
+            return None
+            
+        logger.info("Auth callback registered successfully")
+    else:
+        logger.info("🔓 Authentication disabled - no valid API keys configured")
+        logger.info(f"Reason: len(API_KEYS)={len(API_KEYS)}, has only test-key={len(API_KEYS) == 1 and 'test-key' in API_KEYS}")
+        
+except ImportError as e:
+    # Auth module not available
+    logger.error(f"❌ Auth module import failed: {e}")
+    import traceback
+    logger.error(traceback.format_exc())
+    AUTH_ENABLED = False
+except Exception as e:
+    logger.error(f"❌ Unexpected error during auth setup: {e}")
+    import traceback
+    logger.error(traceback.format_exc())
+    AUTH_ENABLED = False
+    
+# Define fallback rate limiting if auth is disabled
+if not AUTH_ENABLED:
     def check_rate_limit(api_key: str, limit: int = 100) -> bool:
         """Dummy rate limit function when auth is disabled."""
         return True
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Final auth status
+logger.info("=" * 60)
+logger.info(f"🔒 FINAL AUTH STATUS: AUTH_ENABLED = {AUTH_ENABLED}")
+logger.info("=" * 60)
 
 # Global settings
 settings = get_settings()
@@ -73,8 +132,25 @@ async def start():
         # Get supported languages for welcome message
         lang_list = ", ".join([lang.upper() for lang in sorted(SUPPORTED_LANGUAGES.keys())])
         
+        # Get user info if authenticated
+        auth_info = ""
+        if AUTH_ENABLED:
+            user = cl.user_session.get("user")
+            logger.info(f"User session in on_chat_start: {user}")
+            if user:
+                logger.info(f"User metadata: {user.metadata if hasattr(user, 'metadata') else 'No metadata'}")
+                if hasattr(user, 'metadata') and user.metadata:
+                    user_name = user.metadata.get("name", "User")
+                    user_limit = user.metadata.get("limit", 100)
+                    auth_info = f"\n\n👤 **Welcome back, {user_name}!**\n📊 Rate limit: {user_limit} requests/hour"
+                    logger.info(f"Generated auth_info: {auth_info}")
+                else:
+                    logger.warning("User found but no metadata available")
+            else:
+                logger.warning("No user found in session during on_chat_start")
+        
         # Send welcome message
-        welcome_msg = f"""🧠 **Welcome to Pulsepal - Your Intelligent MRI Programming Assistant!**
+        welcome_msg = f"""🧠 **Welcome to Pulsepal - Your Intelligent MRI Programming Assistant!**{auth_info}
 
 I'm an advanced AI with comprehensive knowledge of MRI physics and Pulseq programming, enhanced with access to specialized documentation when needed.
 
@@ -105,6 +181,8 @@ I'm an advanced AI with comprehensive knowledge of MRI physics and Pulseq progra
 
 💡 **Pro Tip**: I default to MATLAB unless you specify another language. Just ask naturally - I'll know when to search vs. when to use my knowledge!
 
+📋 **Commands**: Type `/info` to see your account information and rate limits.
+
 What would you like to explore about MRI sequence programming?"""
         
         await cl.Message(content=welcome_msg).send()
@@ -123,19 +201,45 @@ What would you like to explore about MRI sequence programming?"""
 async def main(message: cl.Message):
     """Handle incoming messages and respond using Pulsepal agent."""
     try:
+        # Special command to check user info
+        if message.content.strip().lower() == "/info":
+            user = cl.user_session.get("user")
+            if AUTH_ENABLED and user and hasattr(user, 'metadata') and user.metadata:
+                user_name = user.metadata.get("name", "Unknown")
+                user_email = user.identifier
+                user_limit = user.metadata.get("limit", 100)
+                api_key = user.metadata.get("api_key", "Unknown")
+                
+                info_msg = f"""📋 **Your Account Information**
+                
+👤 **Name**: {user_name}
+📧 **Email**: {user_email}
+🔑 **API Key**: {api_key[:8]}...
+📊 **Rate Limit**: {user_limit} requests/hour
+🔒 **Authentication**: Enabled"""
+            else:
+                info_msg = "🔓 **Authentication**: Disabled (local mode)"
+            
+            await cl.Message(content=info_msg).send()
+            return
+        
         # Check rate limiting for authenticated users (if auth is enabled)
         if AUTH_ENABLED:
             user = cl.user_session.get("user")
-            if user and user.metadata:
+            if user and hasattr(user, 'metadata') and user.metadata:
                 api_key = user.metadata.get("api_key")
                 limit = user.metadata.get("limit", 100)
+                user_name = user.metadata.get("name", "User")
                 
                 if api_key and not check_rate_limit(api_key, limit):
+                    logger.warning(f"Rate limit exceeded for user: {user_name} (API key: {api_key[:8]}...)")
                     await cl.Message(
-                        content=f"⚠️ **Rate limit exceeded**. Please wait before sending more requests.\n\nYour limit: {limit} requests/hour",
+                        content=f"⚠️ **Rate limit exceeded**\n\nHi {user_name}, you've reached your limit of {limit} requests per hour.\n\nPlease wait a few minutes before sending more requests.",
                         author="System"
                     ).send()
                     return
+                elif api_key:
+                    logger.debug(f"Rate limit check passed for user: {user_name}")
         
         # Get session info
         pulsepal_session_id = cl.user_session.get("pulsepal_session_id")
