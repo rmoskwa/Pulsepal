@@ -97,6 +97,7 @@ CHANGELOG.md
 CURRENT-STATE-DOCUMENTATION.md
 generate_api_keys.py
 alpha_keys_backup.json
+docs/
 
 # Testing scripts (kept for development only)
 test_chainlit_quick.py

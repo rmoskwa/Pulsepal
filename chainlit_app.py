@@ -154,16 +154,18 @@ async def start():
 I'm an advanced AI with comprehensive knowledge of MRI physics and Pulseq programming, enhanced with access to specialized documentation when needed.
 
 **🚀 What's New:**
+- **Code Upload Support**: Drag and drop your .m or .py files for debugging help
 - **Faster Responses**: I now answer general MRI and programming questions instantly
 - **Smarter Search**: I only search documentation for specific Pulseq implementations
 - **Enhanced Reasoning**: Better debugging support with step-by-step analysis
 
 **💡 My Capabilities:**
 🧪 **Code Generation**: Create sequences in {lang_list}
-🐛 **Smart Debugging**: Analyze code logic and trace errors intelligently
+🐛 **Smart Debugging**: Analyze code logic and trace errors intelligently (upload your files!)
 🔄 **Language Conversion**: Transform code between different languages
 ⚛️ **MRI Physics**: Instant explanations of concepts, formulas, and principles
 📚 **Selective Search**: Access Pulseq docs only when you need specific functions
+📎 **File Upload**: Attach .m or .py files to share your code for debugging
 
 **📝 Example Queries:**
 
@@ -200,6 +202,52 @@ What would you like to explore about MRI sequence programming?"""
 async def main(message: cl.Message):
     """Handle incoming messages and respond using Pulsepal agent."""
     try:
+        # Extract code from uploaded files if present
+        code_context = ""
+        if message.elements:
+            for element in message.elements:
+                # Check if it's a file element with .m or .py extension
+                if hasattr(element, 'name') and element.name.endswith(('.m', '.py')):
+                    try:
+                        # Get file content - handle both bytes and string content
+                        if hasattr(element, 'content'):
+                            file_content = element.content.decode('utf-8') if isinstance(element.content, bytes) else element.content
+                        elif hasattr(element, 'path'):
+                            # For local file uploads, read from path
+                            with open(element.path, 'r', encoding='utf-8') as f:
+                                file_content = f.read()
+                        else:
+                            logger.warning(f"Could not extract content from file: {element.name}")
+                            continue
+                        
+                        # Check file size (limit to 1MB)
+                        if len(file_content) > 1024 * 1024:
+                            await cl.Message(
+                                content=f"⚠️ File '{element.name}' is too large (>1MB). Please reduce the file size.",
+                                author="System"
+                            ).send()
+                            continue
+                        
+                        # Add code to context
+                        code_context += f"\n\n--- Code from {element.name} ---\n{file_content}\n--- End of {element.name} ---\n"
+                        
+                        # Send confirmation to user
+                        await cl.Message(content=f"✅ Loaded file: {element.name}").send()
+                        logger.info(f"Successfully loaded file: {element.name} ({len(file_content)} bytes)")
+                        
+                    except Exception as e:
+                        logger.error(f"Error loading file {element.name}: {e}")
+                        await cl.Message(
+                            content=f"❌ Error loading file '{element.name}': {e}",
+                            author="System"
+                        ).send()
+        
+        # Combine user query with code context
+        enhanced_query = message.content
+        if code_context:
+            enhanced_query = f"{message.content}\n\nHere is my code:{code_context}"
+            logger.info(f"Enhanced query with {len(code_context)} bytes of code context")
+        
         # Special command to check user info
         if message.content.strip().lower() == "/info":
             user = cl.user_session.get("user")
@@ -260,14 +308,14 @@ async def main(message: cl.Message):
         # Show typing indicator with intelligent status
         async with cl.Step(name="🧠 Analyzing your query...") as step:
             try:
-                # Add user message to conversation context
-                deps.conversation_context.add_conversation("user", message.content)
+                # Add user message to conversation context (use enhanced_query if code was uploaded)
+                deps.conversation_context.add_conversation("user", enhanced_query)
                 
                 # Log user message for debugging
                 conversation_logger.log_conversation(
                     pulsepal_session_id,
                     "user",
-                    message.content
+                    enhanced_query
                 )
                 
                 # Get conversation history for context
@@ -275,12 +323,12 @@ async def main(message: cl.Message):
                 
                 # Create query with context
                 if history_context:
-                    query_with_context = f"{history_context}\n\nCurrent query: {message.content}"
+                    query_with_context = f"{history_context}\n\nCurrent query: {enhanced_query}"
                 else:
-                    query_with_context = message.content
+                    query_with_context = enhanced_query
                 
                 # Detect language preference from query
-                deps.conversation_context.detect_language_preference(message.content)
+                deps.conversation_context.detect_language_preference(enhanced_query)
                 
                 # Run agent with query including context
                 result = await pulsepal_agent.run(query_with_context, deps=deps)
