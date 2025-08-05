@@ -10,7 +10,7 @@ from typing import List, Dict, Any, Optional
 from enum import Enum
 from .supabase_client import get_supabase_client, SupabaseRAGClient
 from .settings import get_settings
-from .rag_performance import get_performance_monitor, monitor_query
+from .rag_performance import get_performance_monitor
 
 logger = logging.getLogger(__name__)
 
@@ -39,9 +39,25 @@ class RAGService:
 
     @property
     def supabase_client(self) -> SupabaseRAGClient:
-        """Lazy load Supabase client."""
+        """Lazy load Supabase client with retry logic."""
         if self._supabase_client is None:
-            self._supabase_client = get_supabase_client()
+            max_retries = 3
+            retry_delay = 1
+            
+            for attempt in range(max_retries):
+                try:
+                    self._supabase_client = get_supabase_client()
+                    break
+                except Exception as e:
+                    if attempt < max_retries - 1:
+                        logger.warning(f"Failed to connect to Supabase (attempt {attempt + 1}/{max_retries}): {e}")
+                        import time
+                        time.sleep(retry_delay)
+                        retry_delay *= 2  # Exponential backoff
+                    else:
+                        logger.error(f"Failed to connect to Supabase after {max_retries} attempts")
+                        raise ConnectionError(f"Unable to connect to knowledge base after {max_retries} attempts") from e
+        
         return self._supabase_client
 
     def classify_search_strategy(self, query: str) -> tuple[str, dict]:
@@ -52,8 +68,6 @@ class RAGService:
             tuple: (strategy_type, metadata)
             strategy_type: "vector_enhanced", "hybrid_filtered", "hybrid_full"
         """
-        query_lower = query.lower()
-        
         # Pattern-based sequence detection
         if self._is_sequence_query(query):
             sequence_hint = self._extract_sequence_identifier(query)
@@ -441,9 +455,12 @@ class RAGService:
         if re.search(f'{sequence_hint}.{{0,50}}(implementation|example|sequence)', summary + ' ' + content[:200]):
             score += 3.0
         
-        # Score based on file type and language
-        if metadata.get("language") in ["matlab", "python"]:
-            score += 1.0
+        # Score based on file type and language - MATLAB gets higher priority
+        language = metadata.get("language", "").lower()
+        if language == "matlab":
+            score += 5.0  # Strong preference for MATLAB
+        elif language == "python":
+            score += 1.0  # Still add points for Python, but less than MATLAB
         
         # Penalize if it's clearly not a sequence
         noise_indicators = ['musical', 'melody', 'song', 'tune', 'rhythm']
@@ -521,8 +538,9 @@ class RAGService:
                     continue
 
             # Sort results: MATLAB first if that's the preference or filter
+            # Default to MATLAB unless explicitly searching for Python
             if language_filter == "matlab" or (
-                not language_filter and self.settings.default_language == "matlab"
+                not language_filter and "python" not in query.lower() and "pypulseq" not in query.lower()
             ):
                 matlab_results = [
                     r for r in all_results if r.get("language") == "matlab"
@@ -680,7 +698,7 @@ class RAGService:
             formatted.append(f"**Relevance:** {similarity:.2%}")
 
             if signature:
-                formatted.append(f"**Signature:**")
+                formatted.append("**Signature:**")
                 formatted.append(f"```{language}")
                 formatted.append(signature)
                 formatted.append("```")
@@ -689,7 +707,7 @@ class RAGService:
                 formatted.append(f"**Description:** {description}")
 
             if parameters and isinstance(parameters, dict):
-                formatted.append(f"**Parameters:**")
+                formatted.append("**Parameters:**")
                 for param, details in parameters.items():
                     if isinstance(details, dict):
                         param_type = details.get("type", "unknown")
@@ -741,7 +759,7 @@ class RAGService:
 
             if not found_exact:
                 formatted.append(
-                    f"*Note: Exact match not found. Showing similar functions based on variations.*\n"
+                    "*Note: Exact match not found. Showing similar functions based on variations.*\n"
                 )
 
         # Group by language if mixed results
@@ -780,7 +798,7 @@ class RAGService:
             formatted.append(f"**Relevance:** {similarity:.2%}")
 
             if signature:
-                formatted.append(f"**Signature:**")
+                formatted.append("**Signature:**")
                 formatted.append(f"```{language}")
                 formatted.append(signature)
                 formatted.append("```")
@@ -789,7 +807,7 @@ class RAGService:
                 formatted.append(f"**Description:** {description}")
 
             if parameters and isinstance(parameters, dict):
-                formatted.append(f"**Parameters:**")
+                formatted.append("**Parameters:**")
                 for param, details in parameters.items():
                     if isinstance(details, dict):
                         param_type = details.get("type", "unknown")
@@ -828,14 +846,14 @@ class RAGService:
             formatted.append("**This might be a method of the Sequence class.**")
             formatted.append("\nIn MATLAB, try:")
             formatted.append("```matlab")
-            formatted.append(f"% Create sequence object first")
-            formatted.append(f"seq = mr.opts();  % or your existing sequence object")
+            formatted.append("% Create sequence object first")
+            formatted.append("seq = mr.opts();  % or your existing sequence object")
             formatted.append(f"seq.{query}(...);  % If it's a Sequence method")
             formatted.append("```")
             formatted.append("\nIn Python (pypulseq), try:")
             formatted.append("```python")
-            formatted.append(f"# Create sequence object first")
-            formatted.append(f"seq = Sequence()  # or your existing sequence object")
+            formatted.append("# Create sequence object first")
+            formatted.append("seq = Sequence()  # or your existing sequence object")
             formatted.append(f"seq.{query}(...)  # If it's a Sequence method")
             formatted.append("```")
 
@@ -997,7 +1015,7 @@ class RAGService:
             
             # Get appropriate number of results based on strategy
             if strategy == "vector_enhanced":
-                initial_match_count = 300  # Get many results for better filtering
+                initial_match_count = 50  # Reduced for better performance
             else:
                 initial_match_count = min(match_count * 3, 100)
             
@@ -1061,6 +1079,17 @@ class RAGService:
                     source=source_id,
                     search_type="code_examples"
                 )
+            
+            # Apply MATLAB preference if no language explicitly specified
+            query_lower = query.lower()
+            if results and "python" not in query_lower and "pypulseq" not in query_lower:
+                # Sort results to prioritize MATLAB examples
+                matlab_results = [r for r in results if r.get("metadata", {}).get("language", "").lower() == "matlab"]
+                other_results = [r for r in results if r.get("metadata", {}).get("language", "").lower() != "matlab"]
+                
+                # If we have MATLAB results, put them first
+                if matlab_results:
+                    results = matlab_results + other_results
             
             # Limit to requested count
             results = results[:match_count] if results else []
@@ -1136,6 +1165,14 @@ class RAGService:
             return f"No code examples found for query: '{query}'"
 
         formatted = [f"## Code Examples for: '{query}'\n"]
+        
+        # Add language preference note if applicable
+        query_lower = query.lower()
+        if results and "python" not in query_lower and "pypulseq" not in query_lower:
+            # Check if showing MATLAB results first
+            if results[0].get("metadata", {}).get("language", "").lower() == "matlab":
+                formatted.append("*Note: Showing MATLAB examples by default. Add 'python' or 'pypulseq' to your query for Python examples.*\n")
+        
         formatted.append(f"Found {len(results)} code examples:\n")
 
         for i, item in enumerate(results, 1):
@@ -1174,50 +1211,27 @@ class RAGService:
         self, results: List[Dict[str, Any]], query: str
     ) -> tuple[str, List[Dict[str, Any]]]:
         """
-        Format code search results with interactive selection for top 3 results.
-
+        Format code search results - always show the top result directly.
+        
         Returns:
-            tuple: (formatted_string, results_list) where results_list is None if single result
+            tuple: (formatted_string, None) - no longer returns pending results
         """
         if not results:
             return f"No code examples found for query: '{query}'", None
 
-        # Single result - show directly
-        if len(results) == 1:
-            return self._format_code_results(results, query), None
-
-        # Multiple results - show top 3 for selection
-        top_results = results[:3]  # Only top 3
+        # Always show the top result directly
+        top_result = results[:1]  # Just the best match
         
-        formatted = [f"## Found {len(results)} implementations for: '{query}'\n"]
-        if len(results) > 3:
-            formatted.append(f"Showing top 3 results:\n")
-
-        for i, item in enumerate(top_results, 1):
-            # Extract metadata
-            metadata = item.get("metadata", {})
-            language = metadata.get("language", "Unknown")
-            source_file = item.get("source_id", "Unknown").split("/")[-1]
-            summary = item.get("summary", "No description available")
-            code = item.get("content", "")
-            code_lines = len(code.split("\n")) if code else 0
-
-            formatted.append(
-                f"**{i}. {source_file}** ({language.upper()}, {code_lines} lines)"
-            )
-            formatted.append(f"   {summary}")
-            formatted.append("")
-
-        if len(top_results) == 2:
-            formatted.append(
-                "Which implementation would you like to see? Reply with the number (1 or 2) or 'all' to see both."
-            )
-        elif len(top_results) == 3:
-            formatted.append(
-                "Which implementation would you like to see? Reply with the number (1, 2, or 3) or 'all' to see all three."
-            )
-
-        return "\n".join(formatted), top_results  # Return only top 3 for selection
+        # Add a note if there were multiple results
+        if len(results) > 1:
+            formatted_result = f"## Found {len(results)} implementations for: '{query}'\n"
+            formatted_result += "Showing the most relevant result:\n\n"
+            formatted_result += self._format_code_results(top_result, query)
+        else:
+            # Single result - show without the "found X implementations" header
+            formatted_result = self._format_code_results(top_result, query)
+        
+        return formatted_result, None  # Always return None for pending results
 
     def format_selected_code_results(
         self, results: List[Dict[str, Any]], selection, query: str
@@ -1313,9 +1327,6 @@ class RAGService:
         try:
             stats = self.performance_monitor.get_performance_stats(window_minutes)
             duration_percentiles = self.performance_monitor.get_percentiles("duration")
-            similarity_percentiles = self.performance_monitor.get_percentiles(
-                "similarity"
-            )
             query_patterns = self.performance_monitor.get_query_pattern_analysis()
 
             formatted = ["## RAG Performance Statistics\n"]

@@ -9,11 +9,10 @@ session management, and RAG capabilities without requiring API changes.
 import asyncio
 import logging
 import uuid
-from typing import Optional, List
+from typing import Optional
 import os
 
 import chainlit as cl
-from chainlit import Message
 
 # Import existing Pulsepal components
 import sys
@@ -21,7 +20,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from pulsepal.main_agent import pulsepal_agent, create_pulsepal_session
-from pulsepal.dependencies import PulsePalDependencies, get_session_manager, SUPPORTED_LANGUAGES
+from pulsepal.dependencies import get_session_manager, SUPPORTED_LANGUAGES
 from pulsepal.settings import get_settings
 from pulsepal.conversation_logger import get_conversation_logger
 
@@ -254,7 +253,6 @@ async def main(message: cl.Message):
         
         # Debug logging for session continuity
         logger.debug(f"Session {pulsepal_session_id} - History length: {len(deps.conversation_context.conversation_history)}")
-        logger.debug(f"Session {pulsepal_session_id} - Awaiting selection: {deps.conversation_context.awaiting_selection}")
         if deps.conversation_context.conversation_history:
             last_entry = deps.conversation_context.conversation_history[-1]
             logger.debug(f"Session {pulsepal_session_id} - Last message: {last_entry['role']}: {last_entry['content'][:50]}...")
@@ -272,44 +270,20 @@ async def main(message: cl.Message):
                     message.content
                 )
                 
-                # Check if this is a selection response for pending code results
-                if deps.conversation_context.is_selection_response(message.content):
-                    # Handle the selection without invoking the full agent
-                    from pulsepal.rag_service import get_rag_service
-                    rag_service = get_rag_service()
-                    
-                    selection = message.content.lower().strip()
-                    result_text = rag_service.format_selected_code_results(
-                        deps.conversation_context.pending_code_results,
-                        selection,
-                        deps.conversation_context.last_query
-                    )
-                    
-                    # Clear pending results after selection
-                    deps.conversation_context.clear_pending_results()
-                    
-                    # Create a simple result object
-                    class SimpleResult:
-                        def __init__(self, data):
-                            self.data = data
-                    
-                    result = SimpleResult(result_text)
-                    logger.info(f"Handled code selection '{selection}' in session {pulsepal_session_id}")
+                # Get conversation history for context
+                history_context = deps.conversation_context.get_formatted_history()
+                
+                # Create query with context
+                if history_context:
+                    query_with_context = f"{history_context}\n\nCurrent query: {message.content}"
                 else:
-                    # Get conversation history for context
-                    history_context = deps.conversation_context.get_formatted_history()
-                    
-                    # Create query with context
-                    if history_context:
-                        query_with_context = f"{history_context}\n\nCurrent query: {message.content}"
-                    else:
-                        query_with_context = message.content
-                    
-                    # Detect language preference from query
-                    deps.conversation_context.detect_language_preference(message.content)
-                    
-                    # Run agent with query including context
-                    result = await pulsepal_agent.run(query_with_context, deps=deps)
+                    query_with_context = message.content
+                
+                # Detect language preference from query
+                deps.conversation_context.detect_language_preference(message.content)
+                
+                # Run agent with query including context
+                result = await pulsepal_agent.run(query_with_context, deps=deps)
                 
                 # Add response to conversation history
                 deps.conversation_context.add_conversation("assistant", result.data)
@@ -354,10 +328,62 @@ async def main(message: cl.Message):
         
         logger.info(f"Processed message in session {pulsepal_session_id}")
         
-    except Exception as e:
-        logger.error(f"Critical error in message handler: {e}")
+    except asyncio.TimeoutError:
+        logger.warning("Message processing timed out")
         await cl.Message(
-            content=f"❌ **Critical Error**: {e}\n\nPlease refresh the page to restart your session.",
+            content=(
+                "⏱️ **Request Timed Out**\n\n"
+                "The search took too long to complete. Please try:\n"
+                "- Using a more specific query\n"
+                "- Breaking your question into smaller parts\n"
+                "- Asking about general concepts instead of searching for specific implementations"
+            ),
+            author="System"
+        ).send()
+    except ConnectionError as e:
+        logger.error(f"Connection error: {e}")
+        await cl.Message(
+            content=(
+                "🔌 **Connection Error**\n\n"
+                "I'm having trouble connecting to the knowledge base. "
+                "Please check your internet connection and try again.\n\n"
+                "I can still help with general MRI physics and Pulseq concepts using my built-in knowledge."
+            ),
+            author="System"
+        ).send()
+    except Exception as e:
+        error_type = type(e).__name__
+        logger.error(f"Critical error in message handler ({error_type}): {e}")
+        
+        # Provide user-friendly error messages
+        if "supabase" in str(e).lower() or "database" in str(e).lower():
+            error_msg = (
+                "🗄️ **Knowledge Base Unavailable**\n\n"
+                "I'm experiencing issues accessing the Pulseq knowledge base. "
+                "I can still help with general MRI physics and sequence concepts using my built-in knowledge.\n\n"
+                "Try asking questions about:\n"
+                "- MRI physics principles\n"
+                "- Sequence timing and structure\n"
+                "- General Pulseq concepts"
+            )
+        elif "rate" in str(e).lower() and "limit" in str(e).lower():
+            error_msg = (
+                "⚠️ **Rate Limit Reached**\n\n"
+                "You've reached the maximum number of requests. "
+                "Please wait a moment before trying again."
+            )
+        else:
+            error_msg = (
+                "❌ **Unexpected Error**\n\n"
+                "I encountered an error while processing your request. Please try:\n"
+                "- Rephrasing your question\n"
+                "- Breaking it into smaller parts\n"
+                "- Asking about general concepts instead of specific implementations\n\n"
+                f"Error details: {error_type}"
+            )
+        
+        await cl.Message(
+            content=error_msg,
             author="System"
         ).send()
 

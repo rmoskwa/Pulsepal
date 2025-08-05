@@ -7,8 +7,6 @@ managing documentation and code examples stored in the vector database.
 
 import os
 import logging
-import gc
-import asyncio
 from typing import List, Dict, Any, Optional
 from supabase import create_client, Client
 # Lazy imports to avoid slow startup

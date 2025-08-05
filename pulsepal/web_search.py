@@ -7,7 +7,6 @@ from external sources when not available in the RAG database.
 
 import logging
 from typing import List, Dict, Any, Optional
-import os
 
 logger = logging.getLogger(__name__)
 

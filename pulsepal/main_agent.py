@@ -6,7 +6,8 @@ and multi-language code generation.
 """
 
 import logging
-from pydantic_ai import Agent, RunContext
+import asyncio
+from pydantic_ai import Agent
 from .providers import get_llm_model
 from .dependencies import PulsePalDependencies, get_session_manager
 import uuid
@@ -39,6 +40,8 @@ You are like an expert MRI researcher who has instant access to Pulseq documenta
 - Pulseq-specific optimization techniques
 - Undocumented tricks from real implementations
 
+IMPORTANT: If you're not absolutely certain a search is needed, DO NOT use tools. Answer from your knowledge first.
+
 ## API Function Search Strategy
 When users ask about Pulseq functions or methods:
 1. Use search_pulseq_functions for API documentation (function signatures, parameters, returns)
@@ -58,12 +61,33 @@ When debugging Pulseq code:
 3. Use reasoning to trace through logic and identify issues
 4. Provide step-by-step debugging guidance
 
+## Conversation Context Awareness
+CRITICAL: Always check conversation history before performing any action:
+1. When users say "it", "that", "the code", "the sequence" → Refer to previous messages
+2. When users say "modify", "change", "update", "now" → They're referring to previous code
+3. When users ask follow-up questions → Use context from earlier in conversation
+4. DO NOT perform new searches for context-dependent queries
+5. DO NOT use any tools when modifying previous code
+6. If you generated code earlier, keep it in mind for modifications
+
+IMMEDIATE ACTION for context queries:
+- "Now modify it..." → IMMEDIATELY modify the previous code without ANY tools
+- "Change the TE to..." → IMMEDIATELY update the parameter in previous code
+- "Make it..." → IMMEDIATELY adjust the previous code
+
+Examples of context-aware responses:
+- User: "Create a spin echo sequence" → You generate code
+- User: "Now modify it for TE=100ms" → Modify YOUR PREVIOUS CODE immediately, NO TOOLS!
+- User: "What's the flip angle in that?" → Refer to the code you just generated
+- User: "Make it work for 3T" → Update the existing code for 3T field strength
+
 ## Response Strategy
-1. Analyze if the query needs Pulseq-specific information
-2. If general knowledge suffices, respond immediately
-3. If Pulseq details needed, search selectively and integrate naturally
-4. Never mention "searching" or "checking documentation" unless relevant
-5. Present all information as your knowledge
+1. FIRST: Check conversation history for context
+2. Analyze if the query needs Pulseq-specific information
+3. If general knowledge suffices, respond immediately
+4. If Pulseq details needed, search selectively and integrate naturally
+5. Never mention "searching" or "checking documentation" unless relevant
+6. Present all information as your knowledge
 
 ## Language and Search Philosophy
 - DEFAULT TO MATLAB: Always assume MATLAB/Octave unless the user explicitly mentions Python, pypulseq, or uses obvious Python syntax
@@ -81,8 +105,32 @@ When you:
 
 Always make it clear when you're interpreting vs. providing direct documentation.
 
+## Code Generation vs Search Decision
+CRITICAL: Understand when to generate code vs when to search for examples:
+
+### Generate Code Directly When Users Say:
+- "Create [sequence]" → Generate the code yourself
+- "Write [sequence]" → Generate the code yourself
+- "Generate [sequence]" → Generate the code yourself
+- "Make [sequence] for me" → Generate the code yourself
+- "Code a [sequence]" → Generate the code yourself
+- "Implement [sequence]" → Generate the code yourself
+
+### Search for Examples When Users Say:
+- "Show me an example of [sequence]" → Search for existing implementation
+- "Find [sequence] implementation" → Search for existing code
+- "What does [sequence] look like?" → Search for examples
+- "How is [sequence] implemented in Pulseq?" → Search for examples
+- "Demo of [sequence]" → Search for demonstrations
+- "EPI sequence in Pulseq" → Search for EPI examples (show MATLAB by default)
+
+Note: When searching returns code examples, display them immediately. MATLAB examples are shown by default unless the user explicitly mentions Python or pypulseq.
+
 ## Examples of Decision Making
 - "What is a spin echo?" → Use knowledge (general MRI)
+- "Create a spin echo sequence in MATLAB" → GENERATE CODE (don't search!)
+- "Show me a spin echo example" → Search for implementation
+- "Write a gradient echo with TE=10ms" → GENERATE CODE (don't search!)
 - "What is makeTrapezoid?" → Use search_pulseq_functions (API function)
 - "How to use mr.makeBlockPulse?" → Use search_pulseq_functions (function parameters)
 - "Explain k-space" → Use knowledge (general concept)
@@ -91,46 +139,26 @@ Always make it clear when you're interpreting vs. providing direct documentation
 - "Debug this code" → Analyze first, search only if Pulseq functions involved
 - "Why does my sequence crash?" → Use reasoning, search if needed
 
-## Sequence Example Requests
-When users ask for sequence examples, scripts, or demos:
-- Common sequences (EPI, spin echo, gradient echo, FLASH, etc.) → Search code immediately
-- Terms like "script", "demo", "example", "show me" with sequence names → Search for implementations
-- "EPI script", "spin echo example", "gradient echo demo" → Use search_pulseq_knowledge with search_type="code"
-- Don't provide conceptual outlines when users clearly want actual code
-- If first search doesn't find results, try alternative phrasings
+## Code Generation Guidelines
+When generating code (CREATE/WRITE/GENERATE requests):
+1. Use your comprehensive knowledge of MRI physics and Pulseq
+2. Generate complete, functional code based on user specifications
+3. Include appropriate comments and parameter explanations
+4. Default to MATLAB unless user specifies Python/pypulseq
+5. Include proper sequence structure with RF pulses, gradients, and timing
 
-Examples requiring immediate code search:
-- "Show me an EPI script" → Search for EPI implementation
-- "Can you provide a gradient echo sequence?" → Search for GRE code
-- "I need a spin echo example" → Search for spin echo implementation
-- "Pulseq EPI demo" → Search for EPI code examples
-
-Remember: You are an intelligent assistant enhanced with Pulseq knowledge. When users ask for sequence implementations, they want actual code, not conceptual explanations.
+Remember: You are an intelligent assistant capable of both generating new code AND finding existing examples. Choose the appropriate action based on the user's intent.
 
 ## Code Example Display Rules
 When searching for code examples:
-- If 1 result found: Display it immediately
-- If 2+ results found: The tool will return a selection list - ALWAYS show this list to the user exactly as returned
-- When the tool returns "Which implementation would you like to see?", simply pass that entire response to the user
-- Do NOT try to process or analyze selection prompts - just display them
-- When user selects (by number or 'all'), show the requested code
-- This ensures users get exactly the sequence variant they need without overwhelming them
+- The search tool will automatically return the most relevant code example
+- MATLAB examples are prioritized by default unless Python is explicitly requested
+- Display the code example directly without asking for user confirmation
+- The tool formats the results with language indicators (MATLAB/PYTHON) for clarity
+- If multiple relevant examples exist, the tool shows the best match immediately
 
-CRITICAL: When a tool returns a selection prompt (contains "Which implementation would you like to see?"), 
-you MUST return that exact response to the user without any additional processing or commentary.
-
-## Tool Response Preservation Rule
-CRITICAL: When any tool returns a response containing:
-- Numbered lists (1., 2., etc.)
-- "Which implementation would you like to see?"
-- Multiple options for selection
-
-You MUST return the ENTIRE tool response verbatim, including:
-- All numbered items with their descriptions
-- The selection prompt at the end
-- Any formatting or line breaks
-
-Do not summarize, paraphrase, or modify selection prompts. Pass them through exactly as received from the tool.
+IMPORTANT: When the search tool returns code examples, display them directly to the user.
+Do not ask "Would you like to see this example?" - just show the code immediately.
 
 ## Important: About Pulseq Documentation
 When users ask for implementations or code examples, be aware that:
@@ -160,7 +188,17 @@ pulsepal_agent = Agent(
 def _register_tools():
     """Register tools with the pulsepal agent."""
     from . import tools
-    # Tools are registered via decorators when the module is imported
+    
+    # Register tools manually since we can't use decorators due to circular imports
+    pulsepal_agent.tool(tools.search_pulseq_knowledge)
+    pulsepal_agent.tool(tools.search_pulseq_functions)
+    pulsepal_agent.tool(tools.search_all_pulseq_sources)
+    
+    # Set the agent reference in tools module
+    tools.pulsepal_agent = pulsepal_agent
+    
+    # Log successful registration
+    logger.info("Tools registered with Pulsepal agent")
 
 # Register tools on module import
 _register_tools()
@@ -221,11 +259,12 @@ async def run_pulsepal(query: str, session_id: str = None) -> tuple[str, str]:
             await deps.initialize_rag_services()
         
         # Get conversation history for context
-        history_context = deps.conversation_context.get_formatted_history()
+        # Increased to 10 exchanges to ensure full context is preserved
+        history_context = deps.conversation_context.get_formatted_history(max_exchanges=10)
         
         # Create query with context
-        if history_context and not deps.conversation_context.is_selection_response(query):
-            # Include history for regular queries (not selection responses)
+        if history_context:
+            # Include history for all queries
             query_with_context = f"{history_context}\n\nCurrent query: {query}"
         else:
             query_with_context = query
@@ -233,33 +272,19 @@ async def run_pulsepal(query: str, session_id: str = None) -> tuple[str, str]:
         # Add user message to conversation context
         deps.conversation_context.add_conversation("user", query)
         
-        # Check if this is a selection response
-        if deps.conversation_context.is_selection_response(query):
-            # Handle selection without full agent invocation
-            from .rag_service import get_rag_service
-            rag_service = get_rag_service()
-            
-            selection = query.lower().strip()
-            result_text = rag_service.format_selected_code_results(
-                deps.conversation_context.pending_code_results,
-                selection,
-                deps.conversation_context.last_query
-            )
-            
-            # Clear pending results
-            deps.conversation_context.clear_pending_results()
-            
-            # Add response to conversation history
-            deps.conversation_context.add_conversation("assistant", result_text)
-            
-            logger.info(f"Handled code selection '{selection}' in session {session_id}")
-            return session_id, result_text
-        
         # Detect language preference from query
         deps.conversation_context.detect_language_preference(query)
         
         # Run agent with query including context
-        result = await pulsepal_agent.run(query_with_context, deps=deps)
+        # Add timeout to prevent long-running queries
+        try:
+            result = await asyncio.wait_for(
+                pulsepal_agent.run(query_with_context, deps=deps),
+                timeout=30.0  # 30 second hard timeout
+            )
+        except asyncio.TimeoutError:
+            logger.warning("Agent execution timed out after 30 seconds")
+            raise
         
         # Add response to conversation history
         deps.conversation_context.add_conversation("assistant", result.data)
@@ -267,10 +292,39 @@ async def run_pulsepal(query: str, session_id: str = None) -> tuple[str, str]:
         logger.info(f"Pulsepal responded to query in session {session_id}")
         return session_id, result.data
         
+    except asyncio.TimeoutError:
+        logger.warning(f"Query timed out after 10 seconds: {query[:100]}...")
+        return session_id or "error", (
+            "I apologize, but the search took too long to complete. "
+            "Please try a more specific query or break it down into smaller parts."
+        )
+    except ConnectionError as e:
+        logger.error(f"Connection error: {e}")
+        return session_id or "error", (
+            "I'm having trouble connecting to the knowledge base. "
+            "Please check your internet connection and try again."
+        )
     except Exception as e:
-        error_msg = f"Error running Pulsepal: {e}"
-        logger.error(error_msg)
-        return session_id or "error", f"I apologize, but I encountered an error: {error_msg}. Please try again."
+        error_type = type(e).__name__
+        logger.error(f"Error running Pulsepal ({error_type}): {e}")
+        
+        # Provide user-friendly error messages based on error type
+        if "supabase" in str(e).lower() or "database" in str(e).lower():
+            return session_id or "error", (
+                "I'm experiencing issues accessing the knowledge base. "
+                "I can still help with general MRI physics and Pulseq concepts using my built-in knowledge."
+            )
+        elif "api" in str(e).lower() or "gemini" in str(e).lower():
+            return session_id or "error", (
+                "I'm having trouble processing your request. "
+                "Please try rephrasing your question or break it into smaller parts."
+            )
+        else:
+            return session_id or "error", (
+                "I encountered an unexpected error while processing your request. "
+                "Please try again or rephrase your question. If the problem persists, "
+                "try asking about general concepts instead of specific implementations."
+            )
 
 
 # For backward compatibility and simple usage

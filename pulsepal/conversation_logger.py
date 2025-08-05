@@ -77,7 +77,7 @@ class ConversationLogger:
             readable_log = self.log_dir / f"session_{session_id[:8]}.txt"
             with open(readable_log, "a", encoding="utf-8") as f:
                 if not readable_log.exists() or readable_log.stat().st_size == 0:
-                    f.write(f"=== PulsePal Conversation Log ===\n")
+                    f.write("=== PulsePal Conversation Log ===\n")
                     f.write(f"Session ID: {session_id}\n")
                     f.write(f"Started: {datetime.now().isoformat()}\n")
                     f.write("=" * 50 + "\n\n")

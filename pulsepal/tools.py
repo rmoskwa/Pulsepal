@@ -8,20 +8,18 @@ ENHANCED VERSION: Better detection of sequence names and code requests.
 """
 
 import logging
-from typing import Optional, List, Dict, Any
+from typing import Optional
 from pydantic_ai import RunContext
 from pydantic import BaseModel, Field
 
 from .dependencies import PulsePalDependencies
-from .settings import get_settings
 from .rag_service import get_rag_service
 from .web_search import get_web_search_service
 from .conversation_logger import get_conversation_logger
+from .timeout_utils import async_timeout
 
-# Get agent reference - imported after agent creation
-def get_agent():
-    from .main_agent import pulsepal_agent
-    return pulsepal_agent
+# Agent will be set by main_agent.py after creation
+pulsepal_agent = None
 
 logger = logging.getLogger(__name__)
 conversation_logger = get_conversation_logger()
@@ -87,7 +85,7 @@ def enhance_sequence_query(query: str) -> str:
     return query
 
 
-@get_agent().tool
+@async_timeout(seconds=10)  # 10 second timeout for searches
 async def search_pulseq_knowledge(
     ctx: RunContext[PulsePalDependencies],
     query: str,
@@ -205,22 +203,12 @@ async def search_pulseq_knowledge(
             strategy, metadata = rag_service.classify_search_strategy(query)
             
             if strategy == "vector_enhanced":
-                # Use the search_code_examples method which has the enhanced logic
-                # This will handle the complex filtering and ranking
-                search_results = rag_service.search_code_examples(
-                    query=query,
-                    source_id=None,
-                    match_count=50,  # We'll get top 50 after filtering
-                    use_hybrid=rag_service.settings.use_hybrid_search
-                )
-                
-                # Parse the results to extract the raw results for interactive formatting
-                # Since search_code_examples returns formatted string, we need to call it differently
-                # Let's directly use the enhanced search from RAG service
+                # Enhanced search for MRI sequences
+                # We directly use the enhanced search from RAG service
                 seq_type = metadata.get("sequence_type", "")
                 raw_results = rag_service.supabase_client.perform_hybrid_search(
                     query=query,
-                    match_count=300,
+                    match_count=50,  # Reduced for better performance
                     search_type="code_examples",
                     keyword_query_override=seq_type
                 )
@@ -243,19 +231,13 @@ async def search_pulseq_knowledge(
                 filtered_query = metadata.get("filtered_query") if strategy == "hybrid_filtered" else None
                 raw_results = rag_service.supabase_client.perform_hybrid_search(
                     query=query,
-                    match_count=100,  # More reasonable for hybrid search
+                    match_count=50,  # Reduced for better performance
                     search_type="code_examples",
                     keyword_query_override=filtered_query
                 )
             
-            # Use interactive formatting
-            formatted_results, pending_results = rag_service.format_code_results_interactive(raw_results, query)
-            
-            # If multiple results, store them in the conversation context
-            if pending_results and ctx.deps and hasattr(ctx.deps, 'conversation_context'):
-                ctx.deps.conversation_context.set_pending_results(pending_results, query)
-                logger.info(f"Stored {len(pending_results)} pending code results for selection")
-            
+            # Format results - always shows top result directly
+            formatted_results, _ = rag_service.format_code_results_interactive(raw_results, query)
             results = formatted_results
             logger.info(f"Code search completed for: {query}")
             
@@ -267,7 +249,7 @@ async def search_pulseq_knowledge(
                     "code",
                     query,
                     results_count,
-                    {"search_type": search_type, "enhanced_query": query != params.query, "interactive": pending_results is not None}
+                    {"search_type": search_type, "enhanced_query": query != params.query}
                 )
             
             # If no results and we enhanced the query, be transparent about trying alternatives
@@ -284,7 +266,7 @@ async def search_pulseq_knowledge(
                     seq_type = fallback_metadata.get("sequence_type", "")
                     fallback_raw_results = rag_service.supabase_client.perform_hybrid_search(
                         query=params.query,
-                        match_count=300,
+                        match_count=50,  # Reduced for better performance
                         search_type="code_examples",
                         keyword_query_override=seq_type
                     )
@@ -302,16 +284,14 @@ async def search_pulseq_knowledge(
                     fallback_filtered = fallback_metadata.get("filtered_query") if fallback_strategy == "hybrid_filtered" else None
                     fallback_raw_results = rag_service.supabase_client.perform_hybrid_search(
                         query=params.query,
-                        match_count=100,
+                        match_count=50,  # Reduced for better performance
                         search_type="code_examples",
                         keyword_query_override=fallback_filtered
                     )
                 logger.info(f"Fallback search with original query: {params.query}")
                 
                 if fallback_raw_results:
-                    fallback_formatted, fallback_pending = rag_service.format_code_results_interactive(fallback_raw_results, params.query)
-                    if fallback_pending and ctx.deps and hasattr(ctx.deps, 'conversation_context'):
-                        ctx.deps.conversation_context.set_pending_results(fallback_pending, params.query)
+                    fallback_formatted, _ = rag_service.format_code_results_interactive(fallback_raw_results, params.query)
                     results = transparency_msg + fallback_formatted
                 else:
                     # Both searches failed - provide helpful message
@@ -367,7 +347,7 @@ async def search_pulseq_knowledge(
 Since this appears to be a Pulseq-specific question that would benefit from searching our documentation, please try rephrasing your query or ask me to explain the concept using my general knowledge instead."""
 
 
-@get_agent().tool
+@async_timeout(seconds=8)  # 8 second timeout for API searches
 async def search_pulseq_functions(
     ctx: RunContext[PulsePalDependencies],
     query: str,
@@ -450,7 +430,7 @@ This could be due to a temporary database issue. Please try:
 3. Asking me to explain the function concept using my general knowledge"""
 
 
-@get_agent().tool
+@async_timeout(seconds=10)  # 10 second timeout for unified searches
 async def search_all_pulseq_sources(
     ctx: RunContext[PulsePalDependencies],
     query: str,
@@ -524,7 +504,6 @@ This could be due to a temporary database issue. Please try:
 # Legacy tool aliases for backward compatibility during transition
 # These will be removed in a future update
 
-@get_agent().tool
 async def perform_rag_query(
     ctx: RunContext[PulsePalDependencies],
     query: str,
@@ -541,7 +520,6 @@ async def perform_rag_query(
     )
 
 
-@get_agent().tool  
 async def search_code_examples(
     ctx: RunContext[PulsePalDependencies],
     query: str,
@@ -558,7 +536,6 @@ async def search_code_examples(
     )
 
 
-@get_agent().tool
 async def get_available_sources(ctx: RunContext[PulsePalDependencies]) -> str:
     """
     Legacy tool: Use search_pulseq_knowledge instead.

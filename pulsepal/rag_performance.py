@@ -9,8 +9,8 @@ system resource usage.
 import time
 import logging
 import statistics
-from typing import Dict, List, Any, Optional, Tuple
-from dataclasses import dataclass, field
+from typing import Dict, List, Any, Optional
+from dataclasses import dataclass
 from collections import defaultdict, deque
 import threading
 

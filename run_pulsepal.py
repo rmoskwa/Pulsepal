@@ -21,7 +21,7 @@ from pulsepal.conversation_logger import get_conversation_logger
 
 async def single_query(question: str):
     """Handle a single question."""
-    print(f"🔬 Pulsepal: Processing your question...\n")
+    print("🔬 Pulsepal: Processing your question...\n")
     
     try:
         session_id, response = await run_pulsepal(question)

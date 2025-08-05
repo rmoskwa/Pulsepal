@@ -9,9 +9,7 @@ from dataclasses import dataclass, field
 from typing import List, Dict, Optional, Any
 from datetime import datetime, timedelta
 import logging
-import asyncio
 import os
-import time
 from .settings import get_settings
 
 logger = logging.getLogger(__name__)
@@ -68,9 +66,6 @@ class ConversationContext:
     preferred_language: Optional[str] = "matlab"  # Default to MATLAB, can be 'matlab', 'octave', or 'python'
     session_start_time: datetime = field(default_factory=datetime.now)
     last_activity: datetime = field(default_factory=datetime.now)
-    pending_code_results: Optional[List[Dict[str, Any]]] = None  # Store pending results for selection
-    awaiting_selection: bool = False  # Track if we're waiting for user selection
-    last_query: Optional[str] = None  # Store the query that generated pending results
     
     def add_conversation(self, role: str, content: str, metadata: Optional[Dict] = None):
         """Add conversation entry with automatic history management."""
@@ -114,38 +109,6 @@ class ConversationContext:
         """Get recent conversation entries."""
         return self.conversation_history[-count:] if self.conversation_history else []
     
-    def set_pending_results(self, results: List[Dict[str, Any]], query: str):
-        """Set pending code results for interactive selection."""
-        self.pending_code_results = results
-        self.awaiting_selection = True
-        self.last_query = query
-    
-    def clear_pending_results(self):
-        """Clear pending results after selection or timeout."""
-        self.pending_code_results = None
-        self.awaiting_selection = False
-        self.last_query = None
-    
-    def is_selection_response(self, query: str) -> bool:
-        """Check if query is likely a selection response."""
-        if not self.awaiting_selection:
-            return False
-        
-        query_lower = query.lower().strip()
-        
-        # Check for 'all'
-        if query_lower == 'all':
-            return True
-        
-        # Check for number
-        try:
-            num = int(query_lower)
-            if self.pending_code_results and 1 <= num <= len(self.pending_code_results):
-                return True
-        except (ValueError, TypeError):
-            pass
-        
-        return False
     
     def get_formatted_history(self, max_exchanges: int = 5) -> str:
         """
@@ -178,8 +141,9 @@ class ConversationContext:
             role = entry["role"].capitalize()
             content = entry["content"]
             # Truncate very long messages to avoid token limits
-            if len(content) > 500:
-                content = content[:500] + "... [truncated]"
+            # Increased limit to preserve code context
+            if len(content) > 2000:
+                content = content[:2000] + "... [truncated]"
             formatted.append(f"{role}: {content}")
         
         return "\n".join(formatted)
@@ -212,19 +176,19 @@ class ConversationContext:
         # Only switch to Python if explicitly indicated
         if any(indicator in content_lower for indicator in python_indicators):
             self.preferred_language = 'python'
-            logger.debug(f"Detected explicit Python preference in query")
+            logger.debug("Detected explicit Python preference in query")
             return 'python'
         
         # Check for other language indicators (C++, Julia, etc.)
         # But still very conservative - require explicit mentions
         if 'c++' in content_lower or 'cpp' in content_lower:
             self.preferred_language = 'cpp'
-            logger.debug(f"Detected explicit C++ preference in query")
+            logger.debug("Detected explicit C++ preference in query")
             return 'cpp'
         
         if 'julia' in content_lower:
             self.preferred_language = 'julia'
-            logger.debug(f"Detected explicit Julia preference in query")
+            logger.debug("Detected explicit Julia preference in query")
             return 'julia'
         
         # DEFAULT TO MATLAB for everything else
@@ -262,14 +226,12 @@ class PulsePalDependencies:
         if self.rag_initialized:
             return  # Already initialized
         
-        settings = get_settings()
-        
         try:
             # Check if embeddings should be pre-initialized
             if os.getenv("INIT_EMBEDDINGS", "false").lower() == "true":
                 logger.info("Pre-initializing embedding service...")
                 from .embeddings import get_embedding_service
-                embedding_service = get_embedding_service()
+                get_embedding_service()  # Pre-initialize without storing
                 logger.info("Embedding service pre-initialized")
             
             self.rag_initialized = True
