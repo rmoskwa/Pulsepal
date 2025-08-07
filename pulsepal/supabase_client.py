@@ -282,6 +282,7 @@ class SupabaseRAGClient:
     ) -> List[Dict[str, Any]]:
         """
         Search for code examples in Supabase using vector similarity.
+        NOTE: This searches the code_examples_legacy table.
 
         Args:
             query: Query text
@@ -306,6 +307,7 @@ class SupabaseRAGClient:
 
             # Execute the search using the match_code_examples function
             # IMPORTANT: Always provide filter as empty JSONB if None (required by RPC function)
+            # NOTE: Still using match_code_examples RPC function name for backward compatibility
             params = {
                 "query_embedding": query_embedding,
                 "match_count": search_count,
@@ -459,7 +461,7 @@ class SupabaseRAGClient:
         # Special handling for UTE queries
         if 'ute' in query.lower():
             # Always search for writeUTE files when UTE is mentioned
-            if table_name == "code_examples":
+            if table_name == "code_examples_legacy":
                 ute_query = (
                     self.client.from_(table_name)
                     .select("id, url, chunk_number, content, summary, metadata, source_id")
@@ -488,7 +490,7 @@ class SupabaseRAGClient:
             if seq_lower in query_lower or seq_lower.replace('write', '') in query_lower:
                 logger.debug(f"Found sequence match: {seq_name} in query: {query}")
                 # Search in URL and summary columns for table code_examples
-                if table_name == "code_examples":
+                if table_name == "code_examples_legacy":
                     exact_query = (
                         self.client.from_(table_name)
                         .select("id, url, chunk_number, content, summary, metadata, source_id")
@@ -555,7 +557,7 @@ class SupabaseRAGClient:
         if meaningful_words and len(results) < match_count:
             for word in meaningful_words:
                 # Include appropriate fields based on table
-                if table_name == "code_examples":
+                if table_name == "code_examples_legacy":
                     select_fields = "id, url, chunk_number, content, summary, metadata, source_id"
                 elif table_name == "api_reference":
                     select_fields = "id, name, language, signature, description, parameters, returns"
@@ -644,7 +646,7 @@ class SupabaseRAGClient:
                     source,
                     use_reranking=False  # Apply reranking after fusion
                 )
-                table_name = "code_examples"
+                table_name = "code_examples_legacy"  # Updated to use legacy table
             
             # Enhanced keyword search with multiple strategies
             # Use override query if provided, otherwise use original query

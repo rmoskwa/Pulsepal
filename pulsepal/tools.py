@@ -8,6 +8,7 @@ ENHANCED VERSION: Better detection of sequence names and code requests.
 """
 
 import logging
+import asyncio
 from typing import Optional
 from pydantic_ai import RunContext
 from pydantic import BaseModel, Field
@@ -100,6 +101,11 @@ async def search_pulseq_knowledge(
     function details, implementation examples, or version-specific information that goes beyond
     general MRI physics and programming knowledge.
     
+    When search_type="auto":
+    - Classifies intent
+    - Routes to appropriate search
+    - Formats adaptively
+    
     Args:
         query: Search query for Pulseq-specific information
         search_type: Type of search ('documentation', 'code', 'sources', or 'auto')
@@ -120,6 +126,41 @@ async def search_pulseq_knowledge(
         
         # Get RAG service
         rag_service = get_rag_service()
+        
+        # Use enhanced perform_rag_query for auto routing
+        if params.search_type == "auto":
+            # Check if async method exists, otherwise use sync version
+            if hasattr(rag_service, 'perform_rag_query') and asyncio.iscoroutinefunction(rag_service.perform_rag_query):
+                results = await rag_service.perform_rag_query(
+                    query=params.query,
+                    search_type="auto",
+                    match_count=params.match_count
+                )
+            else:
+                # Call the enhanced classification-based search
+                import asyncio
+                # Create async wrapper if needed
+                loop = asyncio.get_event_loop()
+                results = await loop.run_in_executor(
+                    None,
+                    lambda: rag_service.perform_rag_query(
+                        query=params.query,
+                        match_count=params.match_count,
+                        use_hybrid=True
+                    )
+                )
+            
+            # Log search event for debugging
+            if ctx.deps and hasattr(ctx.deps, 'conversation_context'):
+                conversation_logger.log_search_event(
+                    ctx.deps.conversation_context.session_id,
+                    "enhanced_auto",
+                    params.query,
+                    1 if results else 0,
+                    {"search_type": "auto", "enhanced": True}
+                )
+            
+            return results
         
         # Determine search strategy based on type
         if params.search_type == "auto":
@@ -527,8 +568,9 @@ async def search_code_examples(
     match_count: int = 5
 ) -> str:
     """
-    Legacy tool: Use search_pulseq_knowledge instead.
+    DEPRECATED: Use search_pulseq_knowledge with search_type='code' instead.
     Search for Pulseq code examples and implementations.
+    NOTE: This searches the code_examples_legacy table which is deprecated.
     """
     logger.warning("search_code_examples is deprecated. Use search_pulseq_knowledge instead.")
     return await search_pulseq_knowledge(
