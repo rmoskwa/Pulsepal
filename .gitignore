@@ -22,7 +22,6 @@ wheels/
 MANIFEST
 examples/
 .chainlit
-add_rag_functions.sql
 
 # Virtual environments
 .venv/
@@ -57,8 +56,6 @@ coverage.xml
 *.cover
 .hypothesis/
 TEST_RESULTS.md
-validate_intelligence.py
-performance_metrics.py
 
 # Jupyter Notebook
 .ipynb_checkpoints
@@ -84,10 +81,6 @@ CLAUDE.local.md
 README_TEMPLATE.md
 PRPs/
 RAG_IMPROVEMENTS_SUMMARY.md
-test_implementation.py
-test_enhanced_rag.py
-test_rag_integration.py
-initialize_embeddings.py
 CHAINLIT_INTEGRATION_FIXES.md
 CHAINLIT_TESTS_SUMMARY.md
 chainlit.md
@@ -98,11 +91,9 @@ CURRENT-STATE-DOCUMENTATION.md
 generate_api_keys.py
 alpha_keys_backup.json
 docs/
+recrawlDatabase/
 
-# Testing scripts (kept for development only)
-test_chainlit_quick.py
-run_chainlit_tests.py
-run_pulsepal_tests.py
+# Testing scripts
 test_*.py
 pulsepal/tests/
 pytest.ini
@@ -119,7 +110,6 @@ models/
 temp/
 tmp/
 READMEarchive.md
-fix_core_functionality_prp.md
 
 # OS generated files
 .DS_Store?
@@ -132,14 +122,10 @@ railway_commands.sh
 alpha_api_keys.md
 alpha_users.json
 welcome_*.txt
-test_auth_*.py
-generate_alpha_keys.py
-setup_production_env.py
 alpha_users.csv
 alpha_dashboard.html
-env_validator.py
 
-# Deployment files (moved to pulsePal-deploy)
+# Deployment files
 auth.py
 health_check.py
 start_production.py

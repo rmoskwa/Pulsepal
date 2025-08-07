@@ -500,18 +500,17 @@ class RAGService:
 
                     query_embedding = create_embedding(variant)
 
-                    # Build RPC parameters WITHOUT language filter initially
+                    # Build RPC parameters (match_api_reference doesn't accept filter)
                     # We'll sort by language preference later
                     params = {
                         "query_embedding": query_embedding,
-                        "match_count": match_count * 2,  # Get more results to filter
-                        "filter": {},
+                        "match_count": match_count * 2  # Get more results to filter
                     }
 
-                    # Try using the match_api_functions RPC
+                    # Try using the match_api_reference RPC (correct name from database)
                     try:
                         result = self.supabase_client.client.rpc(
-                            "match_api_functions", params
+                            "match_api_reference", params
                         ).execute()
                         variant_results = result.data if result.data else []
                     except Exception as rpc_error:

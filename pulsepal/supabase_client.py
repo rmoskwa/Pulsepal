@@ -195,6 +195,83 @@ class SupabaseRAGClient:
             logger.error(f"Error searching documents: {e}")
             return []
 
+    def search_api_reference(
+        self,
+        query: str,
+        match_count: int = 10,
+        language_filter: Optional[str] = None,
+        use_reranking: bool = True,
+    ) -> List[Dict[str, Any]]:
+        """
+        Search for API functions in Supabase using vector similarity.
+
+        Args:
+            query: Query text
+            match_count: Maximum number of results to return
+            language_filter: Optional language filter (matlab/python/cpp)
+            use_reranking: Whether to apply reranking to results
+
+        Returns:
+            List of matching API functions
+        """
+        try:
+            # Create embedding for the query
+            create_embedding_fn = _get_create_embedding()
+            query_embedding = create_embedding_fn(query)
+
+            # Get more results for reranking if enabled
+            search_count = match_count * 2 if use_reranking else match_count
+
+            # Build RPC parameters for api_reference search
+            # Note: match_api_reference doesn't accept filter parameter
+            params = {
+                "query_embedding": query_embedding,
+                "match_count": search_count
+            }
+
+            # Try using the match_api_reference RPC (correct name from database)
+            try:
+                result = self.client.rpc("match_api_reference", params).execute()
+                results = result.data if result.data else []
+                
+                # Apply language filter on the results if specified
+                if language_filter and results:
+                    results = [r for r in results if r.get('language', '').lower() == language_filter.lower()]
+            except Exception as rpc_error:
+                # Fallback to direct table query if RPC doesn't exist
+                logger.debug(f"RPC match_api_reference not available, using direct query: {rpc_error}")
+                
+                # Direct query to api_reference table
+                query_builder = self.client.from_("api_reference").select("*")
+                
+                # Add text search
+                query_builder = query_builder.or_(
+                    f"name.ilike.%{query}%,"
+                    f"description.ilike.%{query}%,"
+                    f"signature.ilike.%{query}%"
+                )
+                
+                # Add language filter if specified
+                if language_filter:
+                    query_builder = query_builder.eq("language", language_filter)
+                
+                # Execute query
+                result = query_builder.limit(search_count).execute()
+                results = result.data if result.data else []
+            
+            # Apply reranking if enabled and we have results
+            if use_reranking and results:
+                results = self.rerank_results(query, results, match_count)
+            else:
+                results = results[:match_count]
+            
+            logger.info(f"API reference search returned {len(results)} results")
+            return results
+            
+        except Exception as e:
+            logger.error(f"Error searching API reference: {e}")
+            return []
+
     def search_code_examples(
         self,
         query: str,
@@ -440,17 +517,27 @@ class SupabaseRAGClient:
             return results[:match_count]
         
         # Strategy 1: Full phrase search
-        # Include summary in select for code_examples table
+        # Include appropriate fields based on table
         if table_name == "code_examples":
             select_fields = "id, url, chunk_number, content, summary, metadata, source_id"
+        elif table_name == "api_reference":
+            select_fields = "id, name, language, signature, description, parameters, returns"
         else:
             select_fields = "id, url, chunk_number, content, metadata, source_id"
         
-        phrase_query = (
-            self.client.from_(table_name)
-            .select(select_fields)
-            .ilike("content", f"%{query}%")
-        )
+        # For api_reference, search in name and description, not content
+        if table_name == "api_reference":
+            phrase_query = (
+                self.client.from_(table_name)
+                .select(select_fields)
+                .or_(f"name.ilike.%{query}%,description.ilike.%{query}%,signature.ilike.%{query}%")
+            )
+        else:
+            phrase_query = (
+                self.client.from_(table_name)
+                .select(select_fields)
+                .ilike("content", f"%{query}%")
+            )
         if source:
             phrase_query = phrase_query.eq("source_id", source)
         
@@ -467,17 +554,27 @@ class SupabaseRAGClient:
         # Only do word search if we have meaningful words left
         if meaningful_words and len(results) < match_count:
             for word in meaningful_words:
-                # Include summary in select for code_examples table
+                # Include appropriate fields based on table
                 if table_name == "code_examples":
                     select_fields = "id, url, chunk_number, content, summary, metadata, source_id"
+                elif table_name == "api_reference":
+                    select_fields = "id, name, language, signature, description, parameters, returns"
                 else:
                     select_fields = "id, url, chunk_number, content, metadata, source_id"
                 
-                word_query = (
-                    self.client.from_(table_name)
-                    .select(select_fields)
-                    .ilike("content", f"%{word}%")
-                )
+                # For api_reference, search in name and description
+                if table_name == "api_reference":
+                    word_query = (
+                        self.client.from_(table_name)
+                        .select(select_fields)
+                        .or_(f"name.ilike.%{word}%,description.ilike.%{word}%")
+                    )
+                else:
+                    word_query = (
+                        self.client.from_(table_name)
+                        .select(select_fields)
+                        .ilike("content", f"%{word}%")
+                    )
                 if source:
                     word_query = word_query.eq("source_id", source)
                 
@@ -530,7 +627,16 @@ class SupabaseRAGClient:
                     use_reranking=False  # Apply reranking after fusion
                 )
                 table_name = "crawled_pages"
-            else:
+            elif search_type == "api_reference":
+                # For API reference, we need special handling
+                vector_results = self.search_api_reference(
+                    query,
+                    match_count * 2,
+                    language_filter=None,  # Will be filtered later
+                    use_reranking=False
+                )
+                table_name = "api_reference"
+            else:  # code_examples
                 vector_results = self.search_code_examples(
                     query,
                     match_count * 2,
