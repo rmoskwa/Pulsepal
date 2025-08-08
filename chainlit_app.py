@@ -9,8 +9,9 @@ session management, and RAG capabilities without requiring API changes.
 import asyncio
 import logging
 import uuid
-from typing import Optional
+from typing import Optional, Dict, Any
 import os
+from datetime import datetime
 
 import chainlit as cl
 
@@ -107,6 +108,41 @@ settings = get_settings()
 # Initialize conversation logger for debugging
 conversation_logger = get_conversation_logger()
 
+# Sequence Knowledge Template
+SEQUENCE_KNOWLEDGE_TEMPLATE = """# Sequence Knowledge Template
+
+## Sequence Overview
+**Sequence Type**: [e.g., Gradient Echo, Spin Echo, EPI, bSSFP]
+**Target Application**: [e.g., Brain imaging, Cardiac, Diffusion, Perfusion]
+**Development Stage**: [Initial design/Optimization/Debugging]
+
+## Imaging Goals
+- **Resolution**: [e.g., 1mm isotropic, 0.5x0.5x2mm]
+- **Scan time**: [e.g., <5 minutes, 30 seconds per volume]
+- **Contrast**: [T1/T2/T2*/PD/DWI]
+- **Coverage**: [e.g., Whole brain, Single slice, 3D volume]
+
+## Technical Constraints
+- **Scanner**: [Model and field strength, e.g., Siemens Prisma 3T]
+- **Max gradient**: [mT/m, e.g., 80 mT/m]
+- **Max slew rate**: [T/m/s, e.g., 200 T/m/s]
+- **RF limitations**: [e.g., SAR limits, B1+ inhomogeneity]
+
+## Sequence Parameters
+- **TR**: [ms]
+- **TE**: [ms]
+- **Flip angle**: [degrees]
+- **Bandwidth**: [Hz/pixel]
+- **Matrix size**: [e.g., 256x256]
+- **FOV**: [mm]
+
+## Current Focus
+[What you're working on or need help with, e.g., "Optimizing TE for better contrast", "Reducing artifacts", "Implementing parallel imaging"]
+
+## Additional Notes
+[Any other relevant information about your sequence or specific challenges]
+"""
+
 
 @cl.on_chat_start
 async def start():
@@ -123,10 +159,39 @@ async def start():
         # Log session start for debugging
         conversation_logger.log_conversation(
             pulsepal_session_id,
-            "system",
+            "system", 
             "Session started",
             {"event": "session_start"}
         )
+        
+        # Configure settings panel for sequence knowledge
+        # Add template hint in description
+        template_hint = """Example format:
+Sequence Type: [e.g., EPI, Gradient Echo]
+Target: [e.g., Brain imaging]
+TR/TE: [e.g., 2000ms/30ms]
+Current Focus: [What you need help with]
+(Click 'Show Template' button for full template)"""
+        
+        settings = [
+            cl.input_widget.TextInput(
+                id="sequence_knowledge",
+                label="🎯 Sequence Knowledge",
+                description=f"Add your sequence-specific context. {template_hint}", 
+                placeholder="Enter your sequence details here...",
+                multiline=True,
+                initial=deps.conversation_context.sequence_knowledge or "",
+                max_chars=10000
+            ),
+            cl.input_widget.Switch(
+                id="use_sequence_context",
+                label="Enable Sequence Context", 
+                initial=deps.conversation_context.use_sequence_context,
+                description="When enabled, PulsePal will consider your sequence context in all responses"
+            )
+        ]
+        
+        await cl.ChatSettings(settings).send()
         
         # Get supported languages for welcome message
         lang_list = ", ".join([lang.upper() for lang in sorted(SUPPORTED_LANGUAGES.keys())])
@@ -148,12 +213,22 @@ async def start():
             else:
                 logger.warning("No user found in session during on_chat_start")
         
+        # Note: Action buttons disabled for now - Settings panel provides all functionality
+        # Check if context is already active
+        context_status = ""
+        if deps.conversation_context.use_sequence_context and deps.conversation_context.sequence_knowledge:
+            context_status = "\n\n🎯 **[Sequence Context Active]** - Your sequence-specific knowledge is being used."
+        
         # Send welcome message
-        welcome_msg = f"""🧠 **Welcome to Pulsepal - Your Intelligent MRI Programming Assistant!**{auth_info}
+        welcome_msg = f"""🧠 **Welcome to Pulsepal - Your Intelligent MRI Programming Assistant!**{auth_info}{context_status}
 
 I'm an advanced AI with comprehensive knowledge of MRI physics and Pulseq programming, enhanced with access to specialized documentation when needed.
 
 **🚀 What's New:**
+- **🎯 Sequence Knowledge**: Add your sequence context via Settings (gear icon) for targeted assistance
+  - Open Settings and add your sequence details (e.g., "EPI sequence for fMRI at 3T")
+  - Enable "Sequence Context" toggle to activate
+  - Your context will be considered in all responses!
 - **Code Upload Support**: Drag and drop your .m or .py files for debugging help
 - **Faster Responses**: I now answer general MRI and programming questions instantly
 - **Smarter Search**: I only search documentation for specific Pulseq implementations
@@ -186,6 +261,7 @@ I'm an advanced AI with comprehensive knowledge of MRI physics and Pulseq progra
 
 What would you like to explore about MRI sequence programming?"""
         
+        # Send welcome message without actions (they're temporarily disabled)
         await cl.Message(content=welcome_msg).send()
         
         logger.info(f"Started Chainlit session with Pulsepal session: {pulsepal_session_id}")
@@ -196,6 +272,219 @@ What would you like to explore about MRI sequence programming?"""
             content=f"❌ **Error**: Failed to initialize Pulsepal session: {e}\n\nPlease refresh the page and try again.",
             author="System"
         ).send()
+
+
+@cl.action_callback("show_template")
+async def show_template_action(action: cl.Action):
+    """Display the sequence knowledge template."""
+    template_msg = f"""📝 **Sequence Knowledge Template**
+
+Here's a comprehensive template to help you structure your sequence-specific knowledge:
+
+```markdown
+{SEQUENCE_KNOWLEDGE_TEMPLATE}
+```
+
+**How to Use:**
+1. Copy the template above
+2. Fill in your sequence-specific details  
+3. Use the settings panel (⚙️ icon) to paste and enable the context
+4. Your sequence knowledge will then inform all my responses!
+
+💡 **Tip**: You can customize any section based on your specific needs. The template is designed to capture the most important sequence parameters and implementation details."""
+    
+    await cl.Message(content=template_msg).send()
+
+
+@cl.action_callback("toggle_context")
+async def toggle_context_action(action: cl.Action):
+    """Toggle sequence context on/off."""
+    deps = cl.user_session.get("pulsepal_deps")
+    if not deps:
+        await cl.Message(content="❌ Session error. Please refresh the page.").send()
+        return
+    
+    # Toggle the context
+    deps.conversation_context.use_sequence_context = not deps.conversation_context.use_sequence_context
+    
+    if deps.conversation_context.use_sequence_context:
+        if deps.conversation_context.sequence_knowledge:
+            status_msg = "🎯 **Sequence Context Enabled**\n\nYour sequence knowledge is now active and will inform all responses. You'll see the [Sequence Context Active] indicator in my messages."
+        else:
+            status_msg = "⚠️ **Context Enabled but Empty**\n\nSequence context is enabled, but no sequence knowledge has been added yet. Use the settings panel (⚙️) to add your sequence details."
+    else:
+        status_msg = "⏸️ **Sequence Context Disabled**\n\nSequence context has been turned off. I'll provide general responses without your sequence-specific knowledge."
+    
+    await cl.Message(content=status_msg).send()
+
+
+@cl.action_callback("download_context")
+async def download_context_action(action: cl.Action):
+    """Export sequence knowledge as downloadable markdown."""
+    deps = cl.user_session.get("pulsepal_deps")
+    if not deps:
+        await cl.Message(content="❌ Session error. Please refresh the page.").send()
+        return
+    
+    if not deps.conversation_context.sequence_knowledge:
+        await cl.Message(content="📄 **No Sequence Knowledge to Export**\n\nYou haven't added any sequence knowledge yet. Use the settings panel (⚙️) to add sequence details, then you can export them.").send()
+        return
+    
+    # Generate export content
+    export_content = deps.conversation_context.export_sequence_knowledge()
+    
+    # Create downloadable file
+    filename = f"sequence_knowledge_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
+    
+    # Create file element for download
+    file_element = cl.File(
+        name=filename,
+        content=export_content.encode('utf-8'),
+        display="side"
+    )
+    
+    download_msg = f"""💾 **Sequence Knowledge Exported**
+
+Your sequence knowledge has been exported as a markdown file: `{filename}`
+
+**Export Details:**
+- Session ID: {deps.conversation_context.session_id}
+- Export Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+- Context Status: {'Enabled' if deps.conversation_context.use_sequence_context else 'Disabled'}
+- Content Length: {len(deps.conversation_context.sequence_knowledge)} characters
+
+📄 The file contains your sequence knowledge with session metadata for future reference."""
+    
+    await cl.Message(
+        content=download_msg,
+        elements=[file_element]
+    ).send()
+
+
+@cl.on_settings_update
+async def update_settings(settings: Dict[str, Any]):
+    """Handle settings panel updates for sequence knowledge."""
+    deps = cl.user_session.get("pulsepal_deps")
+    if not deps:
+        await cl.Message(content="❌ Session error. Please refresh the page.").send()
+        return
+    
+    logger.info(f"Settings update received: {list(settings.keys())}")
+    
+    # Update sequence knowledge if provided
+    if "sequence_knowledge" in settings:
+        new_knowledge = settings["sequence_knowledge"].strip() if settings["sequence_knowledge"] else ""
+        old_knowledge = deps.conversation_context.sequence_knowledge or ""
+        
+        # Only update if changed
+        if new_knowledge != old_knowledge:
+            deps.conversation_context.sequence_knowledge = new_knowledge if new_knowledge else None
+            
+            if new_knowledge:
+                knowledge_msg = f"✅ **Sequence Knowledge Updated**\n\nAdded {len(new_knowledge)} characters of sequence-specific context."
+            else:
+                knowledge_msg = "🗑️ **Sequence Knowledge Cleared**\n\nSequence-specific context has been removed."
+            
+            await cl.Message(content=knowledge_msg).send()
+    
+    # Update context enable/disable setting
+    if "use_sequence_context" in settings:
+        new_setting = settings["use_sequence_context"]
+        old_setting = deps.conversation_context.use_sequence_context
+        
+        # Only update if changed
+        if new_setting != old_setting:
+            deps.conversation_context.use_sequence_context = new_setting
+            
+            if deps.conversation_context.use_sequence_context:
+                if deps.conversation_context.sequence_knowledge:
+                    context_msg = "🎯 **Sequence Context Activated**\n\nYour sequence knowledge is now active for all responses."
+                else:
+                    context_msg = "⚠️ **Context Enabled but Empty**\n\nSequence context is enabled, but no knowledge has been added yet."
+            else:
+                context_msg = "⏸️ **Sequence Context Deactivated**\n\nI'll provide general responses without sequence-specific context."
+            
+            await cl.Message(content=context_msg).send()
+
+
+# Action callbacks temporarily disabled - will be re-enabled once Chainlit Action API is clarified
+# @cl.action_callback("show_template")
+# async def show_template(action: cl.Action):
+#     """Show the sequence knowledge template."""
+#     template_msg = f"""📋 **Sequence Knowledge Template**
+#
+# Use this template to provide context about your MRI sequence. Copy and modify as needed:
+#
+# ```markdown
+# {SEQUENCE_KNOWLEDGE_TEMPLATE}
+# ```
+#
+# **How to use:**
+# 1. Copy this template
+# 2. Open Settings (gear icon)
+# 3. Paste into "Sequence Knowledge" field
+# 4. Fill in your specific details
+# 5. Enable "Sequence Context" toggle
+# 6. Click Save
+#
+# Your sequence context will then be considered in all responses!
+# """
+#     await cl.Message(content=template_msg).send()
+#
+#
+# @cl.action_callback("toggle_context")
+# async def toggle_context(action: cl.Action):
+#     """Toggle sequence context on/off."""
+#     deps = cl.user_session.get("pulsepal_deps")
+#     if not deps:
+#         await cl.Message(content="❌ Session error. Please refresh the page.").send()
+#         return
+#     
+#     # Toggle the setting
+#     deps.conversation_context.use_sequence_context = not deps.conversation_context.use_sequence_context
+#     new_state = deps.conversation_context.use_sequence_context
+#     
+#     if new_state:
+#         if deps.conversation_context.sequence_knowledge:
+#             msg = "✅ **Sequence Context Enabled**\n\nYour sequence knowledge will now be considered in all responses."
+#         else:
+#             msg = "⚠️ **Sequence Context Enabled** (but empty)\n\nAdd sequence knowledge in Settings to get targeted assistance."
+#     else:
+#         msg = "🔄 **Sequence Context Disabled**\n\nResponses will be general without sequence-specific context."
+#     
+#     await cl.Message(content=msg).send()
+#
+#
+# @cl.action_callback("download_context")
+# async def download_context(action: cl.Action):
+#     """Download sequence knowledge as markdown."""
+#     deps = cl.user_session.get("pulsepal_deps")
+#     if not deps:
+#         await cl.Message(content="❌ Session error. Please refresh the page.").send()
+#         return
+#     
+#     if not deps.conversation_context.sequence_knowledge:
+#         await cl.Message(content="⚠️ No sequence knowledge to download. Add some in Settings first!").send()
+#         return
+#     
+#     # Generate export content
+#     export_content = deps.conversation_context.export_sequence_knowledge()
+#     
+#     # Create filename with timestamp
+#     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+#     filename = f"sequence_knowledge_{timestamp}.md"
+#     
+#     # Create file element
+#     file_element = cl.File(
+#         name=filename,
+#         content=export_content.encode('utf-8'),
+#         display="inline"
+#     )
+#     
+#     await cl.Message(
+#         content=f"📥 **Sequence Knowledge Exported**\n\nDownload your sequence context as: `{filename}`",
+#         elements=[file_element]
+#     ).send()
 
 
 @cl.on_message
@@ -321,9 +610,24 @@ async def main(message: cl.Message):
                 # Get conversation history for context
                 history_context = deps.conversation_context.get_formatted_history()
                 
-                # Create query with context
+                # Get sequence context if enabled
+                sequence_context = deps.conversation_context.get_active_context()
+                
+                # Build query with all relevant context
+                context_parts = []
+                
+                # Add sequence context first if available (highest priority)
+                if sequence_context:
+                    context_parts.append(sequence_context)
+                    logger.info(f"Including sequence context: {len(sequence_context)} chars")
+                
+                # Add conversation history
                 if history_context:
-                    query_with_context = f"{history_context}\n\nCurrent query: {enhanced_query}"
+                    context_parts.append(history_context)
+                
+                # Create query with context
+                if context_parts:
+                    query_with_context = "\n\n".join(context_parts) + f"\n\nCurrent query: {enhanced_query}"
                 else:
                     query_with_context = enhanced_query
                 
@@ -352,8 +656,13 @@ async def main(message: cl.Message):
             else:
                 result_output = result.data
         
+        # Add sequence context indicator if active
+        context_prefix = ""
+        if deps.conversation_context.use_sequence_context and deps.conversation_context.sequence_knowledge:
+            context_prefix = "🎯 [Sequence Context Active] "
+        
         # Send the response with streaming effect
-        msg = cl.Message(content="", author="Pulsepal")
+        msg = cl.Message(content="", author=f"{context_prefix}Pulsepal")
         
         # Option 1: Stream by words (more natural)
         words = result_output.split(' ')
@@ -472,6 +781,23 @@ async def rag_search_step(query: str, tool_name: str) -> str:
 
 # Note: cl.on_error is not available in Chainlit 2.6.3
 # Error handling is done within individual handlers
+
+# Settings configuration for sequence knowledge
+@cl.author_rename
+def rename(original_author: str):
+    """Preserve author names including context indicators."""
+    return original_author
+
+# Configure Chainlit settings panel
+@cl.set_chat_profiles
+async def chat_profile():
+    """Set up chat profiles for different modes.""" 
+    return [
+        cl.ChatProfile(
+            name="Standard",
+            markdown_description="Standard Pulsepal mode with optional sequence context"
+        )
+    ]
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 """Environment variable validation for PulsePal deployment."""
 import os
 import json
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple
 from datetime import datetime
 
 
@@ -72,7 +72,7 @@ class EnvValidator:
         try:
             json.loads(value)
             return True
-        except:
+        except (json.JSONDecodeError, TypeError, ValueError):
             return False
     
     @staticmethod
@@ -153,7 +153,7 @@ class EnvValidator:
         is_valid, issues = cls.validate_required(verbose)
         
         # Validate optional
-        optional_results = cls.validate_optional(verbose)
+        cls.validate_optional(verbose)
         
         if verbose:
             print("\n" + "="*60)

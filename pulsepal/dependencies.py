@@ -67,6 +67,10 @@ class ConversationContext:
     session_start_time: datetime = field(default_factory=datetime.now)
     last_activity: datetime = field(default_factory=datetime.now)
     
+    # Sequence Knowledge fields
+    sequence_knowledge: Optional[str] = None
+    use_sequence_context: bool = False
+    
     def add_conversation(self, role: str, content: str, metadata: Optional[Dict] = None):
         """Add conversation entry with automatic history management."""
         settings = get_settings()
@@ -211,6 +215,47 @@ class ConversationContext:
         for lang_config in SUPPORTED_LANGUAGES.values():
             extensions.extend(lang_config['extensions'])
         return list(set(extensions))  # Remove duplicates
+    
+    def get_active_context(self) -> Optional[str]:
+        """
+        Returns formatted sequence context if enabled and available.
+        
+        Returns:
+            Formatted context string or None if disabled/empty
+        """
+        if not self.use_sequence_context or not self.sequence_knowledge:
+            return None
+        
+        return f"""SEQUENCE CONTEXT:
+{self.sequence_knowledge}
+---
+Please consider this sequence-specific context when providing assistance."""
+    
+    def export_sequence_knowledge(self) -> str:
+        """
+        Export sequence knowledge as markdown with metadata.
+        
+        Returns:
+            Markdown formatted string with sequence knowledge and metadata
+        """
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        export_content = f"""# Sequence Knowledge Export
+Generated: {timestamp}
+Session ID: {self.session_id}
+Preferred Language: {self.preferred_language}
+
+## Sequence Context
+{self.sequence_knowledge if self.sequence_knowledge else "No sequence context defined."}
+
+## Session Metadata
+- Session Start: {self.session_start_time.strftime("%Y-%m-%d %H:%M:%S")}
+- Total Conversations: {self.conversation_count}
+- Context Enabled: {self.use_sequence_context}
+- Last Activity: {self.last_activity.strftime("%Y-%m-%d %H:%M:%S")}
+"""
+        
+        return export_content
 
 
 @dataclass

@@ -356,10 +356,23 @@ async def run_pulsepal(query: str, session_id: str = None) -> tuple[str, str]:
         # Increased to 10 exchanges to ensure full context is preserved
         history_context = deps.conversation_context.get_formatted_history(max_exchanges=10)
         
-        # Create query with context
+        # Get sequence context if enabled
+        sequence_context = deps.conversation_context.get_active_context()
+        
+        # Build query with all relevant context
+        context_parts = []
+        
+        # Add sequence context first if available (highest priority)
+        if sequence_context:
+            context_parts.append(sequence_context)
+        
+        # Add conversation history
         if history_context:
-            # Include history for all queries
-            query_with_context = f"{history_context}\n\nCurrent query: {query}"
+            context_parts.append(history_context)
+        
+        # Create query with context
+        if context_parts:
+            query_with_context = "\n\n".join(context_parts) + f"\n\nCurrent query: {query}"
         else:
             query_with_context = query
         

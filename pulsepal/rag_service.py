@@ -566,7 +566,7 @@ class RAGService:
                             formatted.append("```matlab")
                             formatted.append("% First create the sequence object")
                             formatted.append("seq = mr.Sequence();")
-                            formatted.append(f"% Then use the method")
+                            formatted.append("% Then use the method")
                             formatted.append(f"{calling_pattern};")
                             formatted.append("```")
                         else:
@@ -575,7 +575,7 @@ class RAGService:
                             formatted.append("# First create the sequence object")
                             formatted.append("from pypulseq import Sequence")
                             formatted.append("seq = Sequence()")
-                            formatted.append(f"# Then use the method")
+                            formatted.append("# Then use the method")
                             formatted.append(f"{calling_pattern}")
                             formatted.append("```")
                     
@@ -1361,7 +1361,7 @@ class RAGService:
             )
             result = query_builder.limit(match_count).execute()
             return result.data if result.data else []
-        except:
+        except Exception:
             return []
     
     def _search_tutorials(self, query: str, language: str, match_count: int) -> List[Dict]:
@@ -1370,15 +1370,15 @@ class RAGService:
             query_builder = self.supabase_client.client.from_("crawled_pages").select("*")
             # Prioritize notebooks and tutorial content
             query_builder = query_builder.or_(
-                f"metadata->>file_extension.eq..ipynb,"
-                f"url.ilike.%tutorial%,"
-                f"url.ilike.%example%,"
-                f"summary.ilike.%tutorial%"
+                "metadata->>file_extension.eq..ipynb,"
+                "url.ilike.%tutorial%,"
+                "url.ilike.%example%,"
+                "summary.ilike.%tutorial%"
             )
             query_builder = query_builder.or_(f"summary.ilike.%{query}%")
             result = query_builder.limit(match_count).execute()
             return result.data if result.data else []
-        except:
+        except Exception:
             return []
     
     def _perform_simple_search(self, query: str, match_count: int) -> str:
@@ -1390,10 +1390,10 @@ class RAGService:
                 match_count=match_count
             )
             return self._format_rag_results(results, query)
-        except:
-            return f"Unable to search at this time. Please try again."
+        except Exception:
+            return "Unable to search at this time. Please try again."
 
-    def perform_rag_query(
+    def perform_rag_query(  # noqa: F811
         self,
         query: str,
         source: Optional[str] = None,
@@ -1402,6 +1402,9 @@ class RAGService:
     ) -> str:
         """
         Search the RAG database for documentation and information.
+        
+        NOTE: This is the sync version - async version exists at line 1232.
+        Both are kept for backward compatibility with tools.py executor pattern.
 
         Args:
             query: Search query
@@ -1813,7 +1816,6 @@ class RAGService:
         Handle both .ipynb JSON structure and processed content.
         """
         import json
-        import re
         
         try:
             # Check if content is JSON (raw notebook)
@@ -1864,7 +1866,7 @@ class RAGService:
                     
                     if cell_type == 'markdown':
                         # Preserve markdown for context
-                        formatted_content.append(f"% === Explanation ===")
+                        formatted_content.append("% === Explanation ===")
                         # Convert markdown to comments
                         for line in content.split('\n'):
                             if line.strip():

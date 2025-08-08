@@ -138,7 +138,6 @@ async def search_pulseq_knowledge(
                 )
             else:
                 # Call the enhanced classification-based search
-                import asyncio
                 # Create async wrapper if needed
                 loop = asyncio.get_event_loop()
                 results = await loop.run_in_executor(
