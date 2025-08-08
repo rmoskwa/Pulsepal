@@ -536,11 +536,124 @@ class RAGService:
     
     async def get_official_sequence(self, sequence_type: str) -> dict:
         """
-        Get official validated sequence from official_sequence_examples table.
-        Optimized to use ai_summary for fast retrieval, only fetching content when needed.
+        Get official validated sequence using SEMANTIC SEARCH with embeddings.
+        Now uses the enhanced official_sequence_examples view with vector similarity.
         """
         try:
-            # Normalize sequence type (handle variations)
+            logger.info(f"[GET_OFFICIAL] Starting search for: '{sequence_type}'")
+            
+            # Import embedding function
+            logger.debug("[GET_OFFICIAL] Importing create_embedding...")
+            from .embeddings import create_embedding
+            logger.debug("[GET_OFFICIAL] Successfully imported create_embedding")
+            
+            # Create embedding for the query
+            # Be more specific for certain sequence types to avoid mismatches
+            sequence_lower = sequence_type.lower()
+            
+            # Map common names to full descriptions for better semantic matching
+            specific_queries = {
+                'press': 'PRESS Point Resolved Spectroscopy localized voxel spectroscopy sequence',
+                'spectroscopy': 'MR spectroscopy PRESS localized voxel acquisition',
+                'trufisp': 'TrueFISP balanced SSFP steady state free precession imaging',
+                'trufi': 'TrueFISP balanced SSFP imaging sequence',
+                'spin echo': 'spin echo 90-180 degree RF pulse echo formation sequence',
+                'spinecho': 'spin echo 90-180 degree RF pulse echo formation sequence',
+                'epi': 'echo planar imaging EPI fast k-space traversal sequence',
+                'mprage': 'MPRAGE magnetization prepared rapid gradient echo T1-weighted 3D',
+                'ute': 'UTE ultra short echo time bone imaging sequence',
+                'tse': 'TSE turbo spin echo fast spin echo multiple 180 refocusing pulses',
+                'haste': 'HASTE half-Fourier acquisition single-shot turbo spin echo',
+                'gradient echo': 'gradient echo GRE FLASH spoiled gradient echo imaging',
+                'gre': 'gradient echo GRE FLASH spoiled gradient echo imaging',
+                'gradientecho': 'gradient echo GRE FLASH spoiled gradient echo imaging',
+                'zte': 'ZTE zero echo time radial 3D acquisition'
+            }
+            
+            # Use specific query if available, otherwise generic
+            if sequence_lower in specific_queries:
+                query_text = specific_queries[sequence_lower]
+            elif any(key in sequence_lower for key in specific_queries):
+                # Find partial match
+                for key, value in specific_queries.items():
+                    if key in sequence_lower:
+                        query_text = value
+                        break
+            else:
+                # Generic query for unknown types
+                query_text = f"{sequence_type} MRI pulse sequence implementation Pulseq"
+            
+            logger.debug(f"[GET_OFFICIAL] Creating embedding for: '{query_text}'")
+            query_embedding = create_embedding(query_text)
+            logger.debug(f"[GET_OFFICIAL] Created embedding with dimension: {len(query_embedding)}")
+            
+            # Use the new RPC function for semantic search
+            # Get top 5 matches to select the simplest among good matches
+            logger.debug("[GET_OFFICIAL] Calling RPC 'match_official_sequences'...")
+            result = self.supabase_client.rpc(
+                'match_official_sequences',
+                {
+                    'query_embedding': query_embedding,
+                    'match_count': 5,  # Get top matches to select simplest
+                    'threshold': 0.3   # Minimum similarity threshold
+                }
+            ).execute()
+            logger.debug(f"[GET_OFFICIAL] RPC returned {len(result.data) if result.data else 0} results")
+            
+            if result.data and len(result.data) > 0:
+                # Select the simplest (shortest) example among high-quality matches
+                # If the best match has >75% similarity, look for simpler alternatives within 5% similarity
+                best_match = result.data[0]
+                best_similarity = best_match['similarity']
+                
+                # If we have a good match, check if there's a simpler one that's almost as good
+                if best_similarity > 0.75 and len(result.data) > 1:
+                    similarity_threshold = best_similarity - 0.05  # Within 5% of best
+                    
+                    # Find the shortest content among high-quality matches
+                    shortest_match = best_match
+                    shortest_length = best_match.get('content_length', len(best_match['content']))
+                    
+                    for match in result.data[1:]:
+                        if match['similarity'] >= similarity_threshold:
+                            match_length = match.get('content_length', len(match['content']))
+                            if match_length < shortest_length:
+                                shortest_match = match
+                                shortest_length = match_length
+                    
+                    best_match = shortest_match
+                    logger.info(f"[GET_OFFICIAL] ✓ Selected simplest match: {best_match['file_name']}, similarity: {best_match['similarity']:.3f}, length: {shortest_length}")
+                else:
+                    logger.info(f"[GET_OFFICIAL] ✓ SEMANTIC MATCH: {best_match['file_name']}, similarity: {best_match['similarity']:.3f}")
+                
+                # Extract actual code from content (after '---' separator)
+                content = best_match['content']
+                if '---' in content:
+                    parts = content.split('---', 1)
+                    actual_code = parts[1].strip()
+                    logger.debug(f"[GET_OFFICIAL] Extracted code section: {len(actual_code)} chars")
+                    
+                    return {
+                        'content': actual_code,  # Return actual code, not AI summary
+                        'file_name': best_match['file_name'],
+                        'sequence_type': best_match['sequence_type'],
+                        'ai_summary': best_match.get('ai_summary', ''),
+                        'similarity': best_match['similarity']
+                    }
+                else:
+                    logger.warning(f"[GET_OFFICIAL] No '---' separator found, returning full content")
+                    return {
+                        'content': content,
+                        'file_name': best_match['file_name'],
+                        'sequence_type': best_match['sequence_type'],
+                        'ai_summary': best_match.get('ai_summary', ''),
+                        'similarity': best_match['similarity']
+                    }
+            
+            # Fallback to exact match if semantic search fails
+            logger.warning(f"[GET_OFFICIAL] No semantic match found for '{sequence_type}', trying exact match...")
+            
+            # Normalize sequence type for exact match fallback
             type_mapping = {
                 'epi': 'EPI',
                 'echo_planar': 'EPI',
@@ -598,9 +711,9 @@ class RAGService:
                                 'ai_summary': record.get('ai_summary', '')  # Include summary for reference
                             }
                         else:
-                            logger.warning(f"Content field is empty for id={record_id}")
+                            logger.warning(f"Content field is empty for file: {file_name}")
                     else:
-                        logger.warning(f"No content record found for id={record_id}")
+                        logger.warning(f"No content record found for file: {file_name}")
             except Exception as e:
                 logger.debug(f"official_sequence_examples query failed: {e}")
                 pass  # Table might not exist, fallback to search

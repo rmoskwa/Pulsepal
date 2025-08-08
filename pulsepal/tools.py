@@ -185,10 +185,9 @@ async def get_official_sequence_example(
         )
         
         if not result:
-            return (f"No official example found for '{sequence_type}'.\n"
-                   f"Available sequences: EPI, SpinEcho, GradientEcho, TSE, MPRAGE, "
-                   f"UTE, HASTE, TrueFISP, PRESS, Spiral\n\n"
-                   f"Try search_pulseq_knowledge for community examples.")
+            # No official example - automatically search for community examples
+            logger.info(f"No official example for '{sequence_type}', searching community examples...")
+            return await search_pulseq_knowledge(ctx, f"{sequence_type} sequence example implementation", search_type="code")
         
         # Parse content if it contains the summary separator
         content = result.get('content', '')
@@ -210,8 +209,19 @@ async def get_official_sequence_example(
             if len(parts) > 1:
                 content = parts[1].strip()
         
-        # Return the official example directly for Level 3
-        output = f"## Official Pulseq Example: {result['sequence_type']}\n"
+        # Add directive for implementation intent - interweave code sections with explanations
+        output = "[DIRECTIVE: IMPLEMENTATION RESPONSE - SECTIONED]\n"
+        output += "IMPORTANT: Break the code into logical sections and present it with interweaved explanations:\n"
+        output += "1. Start with 1-2 sentences about where the full source can be found\n"
+        output += "2. Present the code in sections, each followed by a brief explanation:\n"
+        output += "   - Show a code section (5-15 lines)\n"
+        output += "   - Explain what that section does (1-2 sentences)\n"
+        output += "   - Continue with the next code section\n"
+        output += "3. End with 1-3 questions/suggestions for the user\n"
+        output += "Use ```matlab blocks for EACH code section, not one large block.\n\n"
+        
+        # Provide source information for context
+        output += f"## Official Pulseq Example: {result['sequence_type']}\n"
         output += f"*Source: {result['file_name']}*\n\n"
         output += "```matlab\n"
         output += content[:10000]  # Limit to 10k chars

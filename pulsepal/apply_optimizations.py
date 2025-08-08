@@ -28,6 +28,16 @@ def apply_rag_optimizations():
     
     logger.info("Applying RAG optimizations...")
     
+    # DISABLED: The semantic search implementation in rag_service.py is now the optimized version
+    # We don't want to override it with the old exact-match approach
+    
+    # Mark as optimized to prevent re-application
+    rag_service._optimizations_applied = True
+    logger.info("RAG optimizations applied successfully")
+    return rag_service
+    
+    # ===== DISABLED CODE BELOW =====
+    
     # Store original methods
     rag_service._original_get_official_sequence = rag_service.get_official_sequence
     

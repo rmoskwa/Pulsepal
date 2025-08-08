@@ -60,6 +60,19 @@ class SupabaseRAGClient:
         self._reranker = None  # Lazy load cross-encoder
         logger.info("Supabase client initialized successfully")
     
+    def rpc(self, function_name: str, params: dict):
+        """
+        Call a Supabase RPC function.
+        
+        Args:
+            function_name: Name of the RPC function to call
+            params: Parameters to pass to the function
+            
+        Returns:
+            The result of the RPC call
+        """
+        return self.client.rpc(function_name, params)
+    
     def _get_reranker(self, model_path: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"):
         """Get or initialize the cross-encoder reranker."""
         # TEMPORARILY DISABLED - CrossEncoder initialization hanging on CUDA
