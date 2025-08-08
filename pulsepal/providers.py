@@ -6,6 +6,7 @@ following main_agent_reference patterns.
 """
 
 from pydantic_ai.models.gemini import GeminiModel
+from .gemini_patch import PatchedGeminiModel
 from .settings import get_settings
 import logging
 import os
@@ -29,7 +30,7 @@ def get_llm_model() -> GeminiModel:
         # Set GEMINI_API_KEY environment variable for pydantic-ai
         os.environ['GEMINI_API_KEY'] = settings.google_api_key
         
-        # Create Gemini model - it will use GEMINI_API_KEY from environment
+        # Use standard GeminiModel - patching causes compatibility issues
         model = GeminiModel(settings.llm_model)
         
         logger.info(f"Initialized Gemini model: {settings.llm_model}")

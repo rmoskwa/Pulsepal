@@ -62,6 +62,10 @@ class SupabaseRAGClient:
     
     def _get_reranker(self, model_path: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"):
         """Get or initialize the cross-encoder reranker."""
+        # TEMPORARILY DISABLED - CrossEncoder initialization hanging on CUDA
+        # This was not in the original working version
+        return None
+        
         if self._reranker is None:
             CrossEncoder = _get_cross_encoder()
             if CrossEncoder is not None:
@@ -646,7 +650,7 @@ class SupabaseRAGClient:
                     source,
                     use_reranking=False  # Apply reranking after fusion
                 )
-                table_name = "code_examples_legacy"  # Updated to use legacy table
+                table_name = "crawled_pages"  # Use crawled_pages instead of legacy table
             
             # Enhanced keyword search with multiple strategies
             # Use override query if provided, otherwise use original query

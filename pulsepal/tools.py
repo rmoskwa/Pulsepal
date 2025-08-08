@@ -86,7 +86,151 @@ def enhance_sequence_query(query: str) -> str:
     return query
 
 
-@async_timeout(seconds=10)  # 10 second timeout for searches
+async def search_pulseq_functions_fast(
+    ctx: RunContext[PulsePalDependencies],
+    query: str,
+    limit: int = 10
+) -> str:
+    """
+    Phase 1: Fast function discovery for immediate display.
+    Returns lightweight results in <50ms.
+    Used for Level 2 responses (key components).
+    """
+    try:
+        rag_service = get_rag_service()
+        results = await rag_service.search_functions_fast(query, limit)
+        
+        if not results:
+            return f"No functions found matching '{query}'. Try a different search term."
+        
+        # Format lightweight results for Level 2 response
+        output = f"## Function Search Results for: '{query}'\n\n"
+        for func in results[:5]:  # Show top 5
+            output += f"### {func['name']}\n"
+            output += f"**Signature**: `{func['signature']}`\n"
+            output += f"**Description**: {func['description']}\n"
+            if func.get('is_class_method'):
+                output += f"**Usage**: `seq.{func['name']}(...)`\n"
+            else:
+                output += f"**Usage**: `{func.get('calling_pattern', func['name'] + '(...)')}`\n"
+            output += "\n"
+        
+        if len(results) > 5:
+            output += f"\n*{len(results)-5} more results available. Use get_function_details for complete parameters.*\n"
+            
+        return output
+        
+    except Exception as e:
+        logger.error(f"Fast function search failed: {e}")
+        return "Function search temporarily unavailable. Try again or use search_pulseq_functions."
+
+async def get_function_details(
+    ctx: RunContext[PulsePalDependencies],
+    function_names: str | list[str]
+) -> str:
+    """
+    Phase 2: Get complete function details for code generation.
+    Use after search_pulseq_functions_fast to get full parameters.
+    Used for Level 3 responses (complete implementation).
+    """
+    try:
+        # Handle single function or list
+        if isinstance(function_names, str):
+            function_names = [function_names]
+            
+        rag_service = get_rag_service()
+        details = await rag_service.get_function_details(function_names)
+        
+        if not details:
+            return f"No details found for functions: {', '.join(function_names)}"
+        
+        # Format detailed results for Level 3 implementation
+        output = "## Complete Function Details\n\n"
+        for func in details:
+            output += f"### {func['name']}\n"
+            output += f"**Full Signature**: `{func['signature']}`\n"
+            if func.get('parameters'):
+                output += f"**Parameters**:\n{func['parameters']}\n"
+            if func.get('usage_examples'):
+                output += f"**Examples**:\n```matlab\n{func['usage_examples']}\n```\n"
+            if func.get('returns'):
+                output += f"**Returns**: {func['returns']}\n"
+            output += "\n---\n"
+            
+        return output
+        
+    except Exception as e:
+        logger.error(f"Function details fetch failed: {e}")
+        return "Could not retrieve function details. Use search_pulseq_functions for basic info."
+
+async def get_official_sequence_example(
+    ctx: RunContext[PulsePalDependencies],
+    sequence_type: str
+) -> str:
+    """
+    Get official, validated sequence example from Pulseq demoSeq.
+    These are tested, working examples for Pulseq v1.5.0.
+    Used for Level 3 responses (complete implementation).
+    
+    Available types: EPI, SpinEcho, GradientEcho, TSE, MPRAGE, UTE, HASTE, TrueFISP, PRESS, Spiral
+    """
+    try:
+        rag_service = get_rag_service()
+        
+        # Use timeout to prevent long-running queries
+        import asyncio
+        result = await asyncio.wait_for(
+            rag_service.get_official_sequence(sequence_type),
+            timeout=5.0  # 5 second timeout
+        )
+        
+        if not result:
+            return (f"No official example found for '{sequence_type}'.\n"
+                   f"Available sequences: EPI, SpinEcho, GradientEcho, TSE, MPRAGE, "
+                   f"UTE, HASTE, TrueFISP, PRESS, Spiral\n\n"
+                   f"Try search_pulseq_knowledge for community examples.")
+        
+        # Parse content if it contains the summary separator
+        content = result.get('content', '')
+        if not content:
+            # If content is missing, it means we only got the summary
+            # This happens when the tool fetches the wrong fields
+            logger.warning(f"No content in result for {sequence_type}, result keys: {result.keys()}")
+            # Try to use ai_summary if available
+            if 'ai_summary' in result and result['ai_summary']:
+                return (f"## {sequence_type} Sequence Summary\n\n"
+                       f"{result['ai_summary']}\n\n"
+                       f"*Note: Full implementation code not available. "
+                       f"Try search_pulseq_knowledge for complete examples.*")
+            return (f"Found {sequence_type} but content is missing.\n"
+                   f"Try search_pulseq_knowledge for community examples.")
+        if '---' in content:
+            # Extract just the code part after the summary
+            parts = content.split('---', 1)
+            if len(parts) > 1:
+                content = parts[1].strip()
+        
+        # Return the official example directly for Level 3
+        output = f"## Official Pulseq Example: {result['sequence_type']}\n"
+        output += f"*Source: {result['file_name']}*\n\n"
+        output += "```matlab\n"
+        output += content[:10000]  # Limit to 10k chars
+        if len(content) > 10000:
+            output += "\n\n% ... [truncated for display]"
+        output += "\n```\n"
+        
+        return output
+        
+    except asyncio.TimeoutError:
+        logger.warning(f"Official sequence fetch timed out for {sequence_type}")
+        return (f"Request timed out. The '{sequence_type}' sequence may be too large.\n"
+                f"Try search_pulseq_knowledge for a more targeted search.")
+    except Exception as e:
+        logger.error(f"Official sequence fetch failed: {e}")
+        # Fallback to broader search
+        return await search_pulseq_knowledge(ctx, f"{sequence_type} sequence example", search_type="code")
+
+# Removed timeout temporarily to debug
 async def search_pulseq_knowledge(
     ctx: RunContext[PulsePalDependencies],
     query: str,
@@ -238,43 +382,72 @@ async def search_pulseq_knowledge(
                 )
             
         elif search_type == "code":
-            # Use the new smart search strategy
-            # Classify the query to determine search approach
-            strategy, metadata = rag_service.classify_search_strategy(query)
-            
-            if strategy == "vector_enhanced":
-                # Enhanced search for MRI sequences
-                # We directly use the enhanced search from RAG service
-                seq_type = metadata.get("sequence_type", "")
-                raw_results = rag_service.supabase_client.perform_hybrid_search(
-                    query=query,
-                    match_count=50,  # Reduced for better performance
-                    search_type="code_examples",
-                    keyword_query_override=seq_type
-                )
-                
-                # Apply the new scoring method
-                if raw_results:
-                    scored_results = []
-                    for result in raw_results:
-                        # Use the rag_service's scoring method
-                        score = rag_service._score_sequence_relevance(result, seq_type)
-                        
-                        if score > 0 or len(scored_results) < 10:
-                            result['relevance_score'] = score
-                            scored_results.append(result)
-                    
-                    scored_results.sort(key=lambda x: x.get('relevance_score', 0), reverse=True)
-                    raw_results = scored_results
+            # First check for official sequences if it's a sequence request
+            if any(seq in query.lower() for seq in ['epi', 'spin echo', 'gradient echo', 'tse', 'mprage', 'ute', 'haste', 'trufi', 'press', 'spiral']):
+                # Use async version of search_code_examples if available
+                if hasattr(rag_service, 'search_code_examples') and asyncio.iscoroutinefunction(rag_service.search_code_examples):
+                    results = await rag_service.search_code_examples(
+                        query=query,
+                        match_count=params.match_count
+                    )
+                else:
+                    loop = asyncio.get_event_loop()
+                    results = await loop.run_in_executor(
+                        None,
+                        lambda: rag_service.search_code_examples(
+                            query=query,
+                            match_count=params.match_count
+                        )
+                    )
+                # Log and return early - we already have formatted results
+                logger.info(f"Code search completed for sequence: {query}")
+                if ctx.deps and hasattr(ctx.deps, 'conversation_context'):
+                    conversation_logger.log_search_event(
+                        ctx.deps.conversation_context.session_id,
+                        "code",
+                        query,
+                        1 if results and "No code examples found" not in results else 0,
+                        {"search_type": search_type, "sequence_search": True}
+                    )
+                return results
             else:
-                # Hybrid search with optional filtering
-                filtered_query = metadata.get("filtered_query") if strategy == "hybrid_filtered" else None
-                raw_results = rag_service.supabase_client.perform_hybrid_search(
-                    query=query,
-                    match_count=50,  # Reduced for better performance
-                    search_type="code_examples",
-                    keyword_query_override=filtered_query
-                )
+                # Use the new smart search strategy
+                # Classify the query to determine search approach
+                strategy, metadata = rag_service.classify_search_strategy(query)
+                
+                if strategy == "vector_enhanced":
+                    # Enhanced search for MRI sequences
+                    # We directly use the enhanced search from RAG service
+                    seq_type = metadata.get("sequence_type", "")
+                    raw_results = rag_service.supabase_client.perform_hybrid_search(
+                        query=query,
+                        match_count=50,  # Reduced for better performance
+                        search_type="code_examples",
+                        keyword_query_override=seq_type
+                    )
+                    
+                    # Apply the new scoring method
+                    if raw_results:
+                        scored_results = []
+                        for result in raw_results:
+                            # Use the rag_service's scoring method
+                            score = rag_service._score_sequence_relevance(result, seq_type)
+                            
+                            if score > 0 or len(scored_results) < 10:
+                                result['relevance_score'] = score
+                                scored_results.append(result)
+                        
+                        scored_results.sort(key=lambda x: x.get('relevance_score', 0), reverse=True)
+                        raw_results = scored_results
+                else:
+                    # Hybrid search with optional filtering
+                    filtered_query = metadata.get("filtered_query") if strategy == "hybrid_filtered" else None
+                    raw_results = rag_service.supabase_client.perform_hybrid_search(
+                        query=query,
+                        match_count=50,  # Reduced for better performance
+                        search_type="code_examples",
+                        keyword_query_override=filtered_query
+                    )
             
             # Format results - always shows top result directly
             formatted_results, _ = rag_service.format_code_results_interactive(raw_results, query)
@@ -468,6 +641,9 @@ This could be due to a temporary database issue. Please try:
 1. Rephrasing your query 
 2. Using the general search_pulseq_knowledge tool instead
 3. Asking me to explain the function concept using my general knowledge"""
+
+
+# REMOVED DUPLICATE - Using the optimized version at line 166 instead
 
 
 @async_timeout(seconds=10)  # 10 second timeout for unified searches

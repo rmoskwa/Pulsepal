@@ -1,56 +1,114 @@
 """
-Patch for Gemini model to handle UNEXPECTED_TOOL_CALL finish reason.
+Patch for Gemini model to properly handle unexpected finish reasons.
+
+This handles cases where Gemini returns finish reasons that aren't in pydantic-ai's expected values.
+Instead of masking these signals, we handle them appropriately based on their meaning.
 """
 
 import logging
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 from pydantic_ai.models.gemini import GeminiModel
 
 logger = logging.getLogger(__name__)
 
 
+class GeminiRecitationError(Exception):
+    """Raised when Gemini detects potential training data recitation."""
+    pass
+
+
 class PatchedGeminiModel(GeminiModel):
     """
-    Patched Gemini model that handles UNEXPECTED_TOOL_CALL finish reason.
+    Patched Gemini model that properly handles unexpected finish reasons.
     
-    This is a workaround for the issue where Gemini returns 'UNEXPECTED_TOOL_CALL'
-    as a finish reason, which isn't in pydantic-ai's expected values.
+    Instead of masking important signals like RECITATION, this patch:
+    1. Detects and raises appropriate exceptions for handling upstream
+    2. Only masks truly benign unexpected reasons
+    3. Provides context about why responses were blocked
     """
     
+    def __init__(self, *args, **kwargs):
+        """Initialize patched Gemini model."""
+        super().__init__(*args, **kwargs)
+    
     def _process_response(self, response: Dict[str, Any]) -> Dict[str, Any]:
-        """Process and patch the response if needed."""
-        # Check if response has candidates
+        """Process response and handle unexpected finish reasons appropriately."""
         if 'candidates' in response:
             for candidate in response['candidates']:
                 if 'finishReason' in candidate:
                     finish_reason = candidate['finishReason']
                     
-                    # If we see UNEXPECTED_TOOL_CALL, change it to STOP
-                    if finish_reason == 'UNEXPECTED_TOOL_CALL':
-                        logger.warning(
-                            "Patching UNEXPECTED_TOOL_CALL finish reason to STOP"
+                    # Handle RECITATION - this is important signal, not to be masked
+                    if finish_reason == 'RECITATION':
+                        logger.warning("Gemini detected potential training data recitation")
+                        
+                        # Raise a specific exception that can be caught upstream
+                        raise GeminiRecitationError(
+                            "Gemini blocked response due to potential training data recitation. "
+                            "Consider using verified database examples instead."
                         )
+                    
+                    # Handle SAFETY - also important, should not be masked
+                    elif finish_reason == 'SAFETY':
+                        logger.warning("Gemini blocked response due to safety filters")
+                        # Let this through as-is, pydantic-ai handles SAFETY
+                        pass
+                    
+                    # Handle truly unexpected but benign reasons
+                    elif finish_reason in ['OTHER', 'UNEXPECTED_TOOL_CALL']:
+                        logger.warning(f"Patching benign finish reason {finish_reason} to STOP")
                         candidate['finishReason'] = 'STOP'
                         
-                        # Also ensure there's content if missing
+                        # Ensure there's minimal content if missing
                         if 'content' not in candidate or not candidate['content']:
                             candidate['content'] = {
                                 'parts': [{
-                                    'text': "I understand your request, but I'm unable to use tools in this context. Let me help you directly instead."
+                                    'text': "I'll help you with this request."
                                 }]
                             }
+                    
+                    # Handle any other unexpected finish reasons
+                    elif finish_reason not in ['STOP', 'MAX_TOKENS', 'SAFETY']:
+                        logger.error(f"Unknown finish reason: {finish_reason}")
+                        # For truly unknown reasons, raise an error for investigation
+                        raise ValueError(
+                            f"Unexpected Gemini finish reason: {finish_reason}. "
+                            f"This needs to be handled in gemini_patch.py"
+                        )
         
         return response
     
     async def request(self, *args, **kwargs):
-        """Override request to patch responses."""
+        """Override request to handle responses properly."""
         try:
             # Call parent request method
             result = await super().request(*args, **kwargs)
             return result
+            
+        except GeminiRecitationError:
+            # Re-raise our specific error for handling upstream
+            raise
+            
         except Exception as e:
-            # If it's the specific validation error, try to handle it
-            if "UNEXPECTED_TOOL_CALL" in str(e):
-                logger.error(f"Caught UNEXPECTED_TOOL_CALL error: {e}")
-                # Re-raise for now - would need deeper integration to fix
+            error_str = str(e)
+            
+            # Check if it's a pydantic validation error for RECITATION
+            if "RECITATION" in error_str and "validation error" in error_str:
+                # Convert to our specific exception
+                raise GeminiRecitationError(
+                    "Gemini blocked response due to potential training data recitation"
+                ) from e
+            
+            # Check for other validation errors we should handle
+            elif "validation error" in error_str and any(
+                reason in error_str for reason in ["OTHER", "UNEXPECTED_TOOL_CALL"]
+            ):
+                # These are benign but we can't auto-retry
+                logger.warning(f"Unexpected finish reason that needs patching: {error_str}")
+                # Convert to a more specific error
+                raise ValueError(
+                    f"Gemini returned unexpected finish reason. Original error: {error_str}"
+                ) from e
+            
+            # Unknown error, let it propagate
             raise

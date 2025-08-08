@@ -35,7 +35,7 @@ class RAGService:
 
         # Configurable content preview limits - increased to provide full context to AI
         self.doc_preview_limit = 5000  # Was hardcoded 500
-        self.code_preview_limit = 10000  # Was hardcoded 300
+        self.code_preview_limit = 1500  # Reduced from 10000 to prevent RECITATION errors
 
     @property
     def supabase_client(self) -> SupabaseRAGClient:
@@ -482,6 +482,188 @@ class RAGService:
         
         return score
 
+    async def search_functions_fast(self, query: str, limit: int = 10) -> list[dict]:
+        """
+        Phase 1: Lightweight function discovery using api_reference table.
+        Returns only essential fields for <50ms response time.
+        """
+        try:
+            # Try RPC first if it exists
+            try:
+                result = await self.supabase_client.rpc(
+                    'match_api_reference_search',
+                    {
+                        'query_text': query,
+                        'match_count': limit
+                    }
+                ).execute()
+                
+                if result.data:
+                    return result.data
+            except:
+                pass  # RPC doesn't exist, use fallback
+            
+            # Fallback to direct table search
+            result = await self.supabase_client.table('api_reference')\
+                .select('name, signature, description, calling_pattern, is_class_method')\
+                .ilike('name', f'%{query}%')\
+                .limit(limit)\
+                .execute()
+                
+            return result.data if result.data else []
+            
+        except Exception as e:
+            logger.error(f"Fast function search failed: {e}")
+            return []
+    
+    async def get_function_details(self, function_names: list[str]) -> list[dict]:
+        """
+        Phase 2: Get complete function details using api_reference table.
+        Only called when generating actual code.
+        """
+        try:
+            # Use the api_reference table directly since api_reference_details view may not exist
+            result = await self.supabase_client.table('api_reference')\
+                .select('name, signature, parameters, usage_examples, returns, has_nargin_pattern, calling_pattern')\
+                .in_('name', function_names)\
+                .execute()
+                
+            return result.data if result.data else []
+            
+        except Exception as e:
+            logger.error(f"Failed to get function details for {function_names}: {e}")
+            return []
+    
+    async def get_official_sequence(self, sequence_type: str) -> dict:
+        """
+        Get official validated sequence from official_sequence_examples table.
+        Optimized to use ai_summary for fast retrieval, only fetching content when needed.
+        """
+        try:
+            # Normalize sequence type (handle variations)
+            type_mapping = {
+                'epi': 'EPI',
+                'echo_planar': 'EPI',
+                'spin_echo': 'SpinEcho',
+                'spinecho': 'SpinEcho',
+                'gradient_echo': 'GradientEcho',
+                'gre': 'GradientEcho',
+                'tse': 'TSE',
+                'turbo_spin': 'TSE',
+                'mprage': 'MPRAGE',
+                'ute': 'UTE',
+                'haste': 'HASTE',
+                'trufisp': 'TrueFISP',
+                'press': 'PRESS',
+                'spiral': 'Spiral'
+            }
+            
+            normalized_type = type_mapping.get(sequence_type.lower(), sequence_type)
+            
+            # First try official_sequence_examples with optimized two-step query
+            try:
+                # Step 1: Fast query using ai_summary (only ~2KB per record)
+                # Get file_name and ai_summary to identify the best match
+                # Note: Using file_name as unique identifier since table has no id column
+                summary_result = self.supabase_client.client.from_('official_sequence_examples')\
+                    .select('file_name, sequence_type, ai_summary')\
+                    .eq('sequence_type', normalized_type)\
+                    .order('file_name')\
+                    .limit(1)\
+                    .execute()
+                    
+                if summary_result.data and len(summary_result.data) > 0:
+                    # Extract record info from step 1
+                    record = summary_result.data[0]
+                    file_name = record['file_name']
+                    
+                    logger.debug(f"Found sequence in {file_name}, fetching content...")
+                    
+                    # Step 2: Fetch ONLY the content field for this specific record
+                    # Using file_name as the unique identifier
+                    content_result = self.supabase_client.client.from_('official_sequence_examples')\
+                        .select('content')\
+                        .eq('file_name', file_name)\
+                        .limit(1)\
+                        .execute()
+                    
+                    if content_result.data and len(content_result.data) > 0:
+                        content = content_result.data[0].get('content', '')
+                        if content:
+                            logger.debug(f"Got content, length: {len(content)} chars")
+                            return {
+                                'content': content,
+                                'file_name': file_name,
+                                'sequence_type': record['sequence_type'],
+                                'ai_summary': record.get('ai_summary', '')  # Include summary for reference
+                            }
+                        else:
+                            logger.warning(f"Content field is empty for id={record_id}")
+                    else:
+                        logger.warning(f"No content record found for id={record_id}")
+            except Exception as e:
+                logger.debug(f"official_sequence_examples query failed: {e}")
+                pass  # Table might not exist, fallback to search
+            
+            # Fallback: Search in crawled_pages for official sequences
+            # Use a more targeted search to avoid timeouts
+            search_query = f"{normalized_type} sequence"
+            
+            # Use the supabase client's search with limited fields
+            try:
+                # Search using vector similarity on summaries
+                raw_results = self.supabase_client.perform_hybrid_search(
+                    query=search_query,
+                    match_count=5,  # Get a few candidates
+                    search_type="code_examples"
+                )
+                
+                if raw_results:
+                    # Look for official sequences in results
+                    for result in raw_results:
+                        url = result.get('url', '').lower()
+                        content = result.get('content', '')
+                        
+                        # Check if it's from official demoSeq
+                        if 'demoseq' in url or 'official' in url:
+                            # Parse content to get just the code part
+                            if '---' in content:
+                                # Split on --- to get the full content after summary
+                                parts = content.split('---', 1)
+                                if len(parts) > 1:
+                                    content = parts[1].strip()
+                            
+                            return {
+                                'content': content,
+                                'file_name': f'{normalized_type}_example.m',
+                                'sequence_type': normalized_type
+                            }
+                    
+                    # If no official found, return the best match
+                    best_match = raw_results[0]
+                    content = best_match.get('content', '')
+                    
+                    # Parse content to get full code after summary
+                    if '---' in content:
+                        parts = content.split('---', 1)
+                        if len(parts) > 1:
+                            content = parts[1].strip()
+                    
+                    return {
+                        'content': content,
+                        'file_name': f'{normalized_type}_example.m',
+                        'sequence_type': normalized_type
+                    }
+                    
+            except Exception as e:
+                logger.error(f"Fallback search failed: {e}")
+                
+            return None
+            
+        except Exception as e:
+            logger.error(f"Official sequence fetch failed: {e}")
+            return None
+
     async def search_api_functions_enhanced(self, query: str, language: str = "matlab", match_count: int = 5) -> str:
         """
         Search for Pulseq functions using the function_calling_patterns view.
@@ -594,11 +776,13 @@ class RAGService:
             logger.error(f"Enhanced API function search failed: {e}")
             return self.search_api_functions(query, match_count, language)
 
-    def search_api_functions(
+    async def search_api_functions(
         self, query: str, match_count: int = 5, language_filter: Optional[str] = None
     ) -> str:
         """
-        Enhanced API function search with forgiveness and transparency.
+        Enhanced API function search with two-tier approach for performance.
+        Phase 1: Fast search with minimal fields
+        Phase 2: Get full details only for functions needed for code generation
 
         Args:
             query: Search query
@@ -612,77 +796,30 @@ class RAGService:
         context["language_filter"] = language_filter
 
         try:
-            # Generate search variations for more forgiving search
-            variations = self._create_search_variations(query)
-            all_results = []
-            seen_names = set()
-
-            # Try variations (limit to top 3 to avoid too many API calls)
-            for variant in variations[:3]:
-                try:
-                    # Create embedding for this variant
-                    from .embeddings import create_embedding
-
-                    query_embedding = create_embedding(variant)
-
-                    # Build RPC parameters (match_api_reference doesn't accept filter)
-                    # We'll sort by language preference later
-                    params = {
-                        "query_embedding": query_embedding,
-                        "match_count": match_count * 2  # Get more results to filter
-                    }
-
-                    # Try using the match_api_reference RPC (correct name from database)
-                    try:
-                        result = self.supabase_client.client.rpc(
-                            "match_api_reference", params
-                        ).execute()
-                        variant_results = result.data if result.data else []
-                    except Exception as rpc_error:
-                        logger.warning(
-                            f"RPC failed for variant '{variant}': {rpc_error}"
-                        )
-                        variant_results = self._fallback_api_search(
-                            variant, match_count * 2, None
-                        )
-
-                    # Add unique results
-                    for r in variant_results:
-                        name = r.get("name", "")
-                        if name and name not in seen_names:
-                            seen_names.add(name)
-                            all_results.append(r)
-
-                    # If we have enough results, stop trying variations
-                    if len(all_results) >= match_count:
-                        break
-
-                except Exception as e:
-                    logger.debug(f"Failed to search variant '{variant}': {e}")
-                    continue
-
-            # Sort results: MATLAB first if that's the preference or filter
-            # Default to MATLAB unless explicitly searching for Python
-            if language_filter == "matlab" or (
-                not language_filter and "python" not in query.lower() and "pypulseq" not in query.lower()
-            ):
-                matlab_results = [
-                    r for r in all_results if r.get("language") == "matlab"
-                ]
-                other_results = [
-                    r for r in all_results if r.get("language") != "matlab"
-                ]
-                all_results = matlab_results + other_results
-
+            # Phase 1: Fast search with minimal fields
+            fast_results = await self.search_functions_fast(query, match_count * 2)
+            
+            # Filter by language if specified
+            if language_filter:
+                fast_results = [r for r in fast_results if r.get("language") == language_filter]
+            elif "python" not in query.lower() and "pypulseq" not in query.lower():
+                # Default to MATLAB preference
+                matlab_results = [r for r in fast_results if r.get("language") == "matlab"]
+                other_results = [r for r in fast_results if r.get("language") != "matlab"]
+                fast_results = matlab_results + other_results
+            
             # Limit to requested count
-            final_results = all_results[:match_count]
-
+            final_results = fast_results[:match_count]
+            
+            # Phase 2 is only called when actually generating code
+            # For now, just return the fast search results for display
+            
             # Record successful completion
             self.performance_monitor.record_query_completion(context, final_results)
 
             # Format results with transparency about the search process
             return self._format_api_results_with_transparency(
-                final_results, query, variations
+                final_results, query, [query]
             )
 
         except Exception as e:
@@ -1889,7 +2026,7 @@ class RAGService:
             # Return original content if processing fails
             return notebook_content
 
-    def search_code_examples(
+    async def search_code_examples(
         self,
         query: str,
         source_id: Optional[str] = None,
@@ -1897,9 +2034,8 @@ class RAGService:
         use_hybrid: bool = True,
     ) -> str:
         """
-        Search for code examples with smart strategy selection.
-        NOTE: This searches the code_examples_legacy table which is deprecated.
-        Consider using search_pulseq_knowledge with appropriate filters instead.
+        Search for code examples with priority for official sequences.
+        Searches official Pulseq sequences first, then falls back to other examples.
 
         Args:
             query: Code search query
@@ -1914,6 +2050,11 @@ class RAGService:
         context = self.performance_monitor.start_query(query, "code_examples")
 
         try:
+            # REMOVED: Special handling for official sequences was returning full files (21KB)
+            # instead of search snippets, causing RECITATION errors
+            # Let the regular search path handle sequence requests like it did before
+            
+            # Continue with regular search that returns snippets
             # Classify the query to determine search strategy
             strategy, metadata = self.classify_search_strategy(query)
             context["search_strategy"] = strategy
@@ -2148,9 +2289,14 @@ class RAGService:
                 elif is_python_result:
                     formatted.append("*Language: Python (pypulseq) as requested.*\n")
         
-        formatted.append(f"Found {len(results)} code examples:\n")
+        # Only show first result to prevent RECITATION errors from large content
+        results_to_show = results[:1]  # Just the top result
+        if len(results) > 1:
+            formatted.append(f"Found {len(results)} code examples:\n")
+        else:
+            formatted.append(f"Found {len(results)} code example:\n")
 
-        for i, item in enumerate(results, 1):
+        for i, item in enumerate(results_to_show, 1):
             # Extract metadata
             metadata = item.get("metadata", {})
             language = metadata.get("language", "Unknown")
@@ -2377,6 +2523,101 @@ class RAGService:
             logger.error(f"Error getting performance stats: {e}")
             return f"Error retrieving performance statistics: {str(e)}"
 
+    async def search_functions_fast(self, query: str, limit: int = 10) -> List[Dict[str, Any]]:
+        """
+        Phase 1: Lightweight search for function discovery.
+        Uses only essential fields for fast matching.
+        
+        Args:
+            query: Search query for functions
+            limit: Maximum number of results to return
+            
+        Returns:
+            List of function matches with minimal fields
+        """
+        context = self.performance_monitor.start_query(query, "functions_fast")
+        
+        try:
+            # Create embedding for the query
+            from .embeddings import create_embedding
+            query_embedding = create_embedding(query)
+            
+            # Query the api_reference_search view (lean fields only)
+            params = {
+                "query_embedding": query_embedding,
+                "match_count": limit
+            }
+            
+            # Execute search against the lean view
+            result = self.supabase_client.client.rpc(
+                "match_api_reference_search", params
+            ).execute()
+            
+            if not result.data:
+                # Fallback to direct query
+                result = self.supabase_client.client.from_("api_reference_search").select(
+                    "name, signature, description, calling_pattern, is_class_method"
+                ).limit(limit).execute()
+            
+            self.performance_monitor.record_query_completion(context, result.data or [])
+            return result.data or []
+            
+        except Exception as e:
+            self.performance_monitor.record_query_completion(context, [], error=str(e))
+            logger.error(f"Fast function search failed: {e}")
+            return []
+    
+    async def get_function_details(self, function_name: str) -> Optional[Dict[str, Any]]:
+        """
+        Phase 2: Get complete details for code generation.
+        Fetches heavy fields only when needed.
+        
+        Args:
+            function_name: Exact name of the function
+            
+        Returns:
+            Complete function details or None if not found
+        """
+        try:
+            # Query the api_reference_details view for full details
+            result = self.supabase_client.client.from_("api_reference_details").select(
+                "name, signature, parameters, usage_examples, returns, has_nargin_pattern, calling_pattern"
+            ).eq("name", function_name).single().execute()
+            
+            return result.data
+            
+        except Exception as e:
+            logger.error(f"Failed to get function details for {function_name}: {e}")
+            return None
+    
+    async def search_official_sequences(self, sequence_type: str = None) -> List[Dict[str, Any]]:
+        """
+        Search only official, validated sequence examples.
+        
+        Args:
+            sequence_type: Optional filter for specific sequence type (e.g., 'EPI', 'SpinEcho')
+            
+        Returns:
+            List of official sequence examples
+        """
+        try:
+            # Query the official_sequence_examples view
+            # Use ai_summary instead of content for search results
+            query = self.supabase_client.client.from_("official_sequence_examples").select(
+                "url, ai_summary, file_name, sequence_type"
+            )
+            
+            # Apply sequence type filter if provided
+            if sequence_type:
+                query = query.eq("sequence_type", sequence_type)
+            
+            result = query.execute()
+            return result.data or []
+            
+        except Exception as e:
+            logger.error(f"Failed to search official sequences: {e}")
+            return []
+
 
 # Global instance
 _rag_service: Optional[RAGService] = None
@@ -2384,12 +2625,18 @@ _rag_service: Optional[RAGService] = None
 
 def get_rag_service() -> RAGService:
     """
-    Get the global RAG service instance.
+    Get the global RAG service instance with optimizations applied.
 
     Returns:
-        RAGService instance
+        RAGService instance with performance optimizations
     """
     global _rag_service
     if _rag_service is None:
         _rag_service = RAGService()
+        # Apply performance optimizations for faster data fetching
+        try:
+            from .apply_optimizations import apply_rag_optimizations
+            apply_rag_optimizations()
+        except Exception as e:
+            logger.warning(f"Could not apply RAG optimizations: {e}")
     return _rag_service
