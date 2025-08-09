@@ -165,29 +165,295 @@ async def get_function_details(
 
 async def get_official_sequence_example(
     ctx: RunContext[PulsePalDependencies],
-    sequence_type: str
+    sequence_type: str,
+    specific_file: str = None,
+    exclude_files: list[str] = None
 ) -> str:
     """
-    Get official, validated sequence example from Pulseq demoSeq.
-    These are tested, working examples for Pulseq v1.5.0.
-    Used for Level 3 responses (complete implementation).
+    Get official Pulseq sequence implementation when users ask "do you have X sequence?" or request sequence code.
     
-    Available types: EPI, SpinEcho, GradientEcho, TSE, MPRAGE, UTE, HASTE, TrueFISP, PRESS, Spiral
+    USE THIS TOOL WHEN:
+    - User asks "do you have [sequence] sequences?" 
+    - User requests "[sequence] example" or "[sequence] code"
+    - User wants to see any standard MRI sequence implementation
+    - User asks for "another" or "different" sequence example
+    
+    This tool works in two modes:
+    1. Discovery mode (specific_file=None): Returns metadata for top 5 matches, letting you choose the best one
+    2. Retrieval mode (specific_file provided): Returns full content for that specific file
+    
+    Args:
+        sequence_type: Type of sequence requested. Common values:
+            - "EPI" for echo planar imaging
+            - "SpinEcho" for spin echo sequences  
+            - "GradientEcho" or "GRE" for gradient echo
+            - "TSE" for turbo spin echo
+            - "MPRAGE" for MPRAGE sequences
+            - "UTE" for ultra-short TE
+            - "Spectroscopy" or "PRESS" for spectroscopy sequences
+            - "TrueFISP" for balanced SSFP
+            - "Spiral" for spiral trajectories
+        specific_file: Optional filename to retrieve specific sequence (e.g., "writeEpi.m")
+        exclude_files: Optional list of filenames to exclude (use when showing alternatives)
+            
+    Returns:
+        In discovery mode: Metadata for top 5 matches to help selection
+        In retrieval mode: Formatted response with GitHub link, preview, and engagement options
+        
+    IMPORTANT: When user asks for "another" example of the same sequence type:
+    1. Use the same sequence_type as before
+    2. Pass previously shown files in exclude_files
+    3. Select from remaining alternatives
     """
     try:
+        # Import the guard
+        from .official_sequence_guard import get_official_sequence_guard
+        guard = get_official_sequence_guard()
+        
         rag_service = get_rag_service()
+        
+        # Pass conversation context to rag_service for language preference detection
+        if hasattr(ctx, 'deps') and hasattr(ctx.deps, 'conversation_context'):
+            rag_service.conversation_context = ctx.deps.conversation_context
+            logger.debug(f"Passed conversation context to RAG service, language: {ctx.deps.conversation_context.preferred_language}")
         
         # Use timeout to prevent long-running queries
         import asyncio
-        result = await asyncio.wait_for(
-            rag_service.get_official_sequence(sequence_type),
-            timeout=5.0  # 5 second timeout
-        )
+        try:
+            result = await asyncio.wait_for(
+                rag_service.get_official_sequence(sequence_type, specific_file),
+                timeout=10.0  # Increased timeout for complex queries
+            )
+            logger.info(f"Tool got result for {sequence_type} (specific={specific_file}): {bool(result)}, keys: {result.keys() if result else 'None'}")
+        except asyncio.TimeoutError:
+            logger.error(f"Tool timeout for {sequence_type} after 10s")
+            raise
+        except Exception as e:
+            logger.error(f"Tool error for {sequence_type}: {str(e)}", exc_info=True)
+            raise
         
-        if not result:
+        # Log the search event AFTER getting results
+        if ctx.deps and hasattr(ctx.deps, 'conversation_context'):
+            conversation_logger.log_search_event(
+                ctx.deps.conversation_context.session_id,
+                "official_sequence",
+                sequence_type,
+                1 if result else 0,
+                {"tool": "get_official_sequence_example", "found": bool(result)}
+            )
+        
+        # Check if we got metadata (discovery mode) or full content (retrieval mode)
+        if result and 'matches' in result:
+            # Discovery mode: Got metadata for top 5 matches
+            matches = result['matches']
+            top_sim = result['top_similarity']
+            
+            # Define minimum similarity threshold for relevance
+            MIN_SIMILARITY_THRESHOLD = 0.7  # 70% similarity required
+            
+            # Check if the best match meets minimum threshold
+            if not matches or top_sim < MIN_SIMILARITY_THRESHOLD:
+                logger.info(f"Best match similarity {top_sim:.3f} is below threshold {MIN_SIMILARITY_THRESHOLD}")
+                return f"No {sequence_type} sequence examples found in the official Pulseq repository.\n\n" + \
+                       "The search didn't find any sequences closely matching your request.\n\n" + \
+                       "Would you like me to:\n" + \
+                       "1. Search for similar sequence types?\n" + \
+                       "2. Explain how to implement this sequence from scratch?\n" + \
+                       "3. Search the broader knowledge base for community examples?"
+            
+            # Check if we need to filter by sequence type
+            # Map common sequence names to their database types
+            sequence_type_map = {
+                'spectroscopy': 'Spectroscopy',
+                'press': 'Spectroscopy',
+                'mrs': 'Spectroscopy',
+                'gradientecho': 'GradientEcho',
+                'gre': 'GradientEcho',
+                'epi': 'EPI',
+                'spinecho': 'SpinEcho',
+                'tse': 'TSE',
+                'mprage': 'MPRAGE',
+                'diffusion': 'Diffusion',
+                'trufisp': 'TrueFISP',
+                'spiral': 'Spiral',
+                'ute': 'UTE',
+                'zte': 'ZTE',
+                'propeller': 'PROPELLER',
+                'blade': 'PROPELLER'  # BLADE is another name for PROPELLER
+            }
+            
+            expected_type = sequence_type_map.get(sequence_type.lower(), '')
+            
+            # If we have an expected type and the top match doesn't match, filter
+            if expected_type and matches:
+                top_match_type = matches[0].get('sequence_type', '')
+                if top_match_type != expected_type:
+                    logger.info(f"Top match type '{top_match_type}' doesn't match expected '{expected_type}', filtering...")
+                    # Filter to only matching types
+                    type_filtered = [m for m in matches if m.get('sequence_type', '') == expected_type]
+                    if type_filtered:
+                        matches = type_filtered
+                        top_sim = matches[0]['similarity'] if matches else 0
+                        logger.info(f"Filtered to {len(matches)} {expected_type} sequences")
+                    else:
+                        # No matches of the expected type found
+                        logger.info(f"No sequences of type '{expected_type}' found")
+                        return f"No {sequence_type} sequence examples found in the official Pulseq repository.\n\n" + \
+                               f"Note: The closest matches were {top_match_type} sequences, not {expected_type}.\n\n" + \
+                               "Would you like me to:\n" + \
+                               f"1. Show the {top_match_type} sequences instead?\n" + \
+                               "2. Search for similar sequence types?\n" + \
+                               "3. Explain how to implement {sequence_type} from scratch?"
+            
+            # Find the best match based on Gemini's intelligent selection criteria:
+            # 1. If top match similarity is high (>0.8), prefer simpler within 5% similarity
+            # 2. Consider user's language preference
+            # 3. Default to simplest (shortest) if within threshold
+            
+            selected = None
+            threshold = 0.05  # 5% similarity threshold
+            
+            # Get user's language preference from context
+            prefer_python = False
+            if hasattr(ctx, 'deps') and hasattr(ctx.deps, 'conversation_context'):
+                lang = getattr(ctx.deps.conversation_context, 'preferred_language', None)
+                prefer_python = (lang == 'python')
+            
+            # Apply exclusion filter if provided
+            if exclude_files:
+                exclude_files = exclude_files if isinstance(exclude_files, list) else [exclude_files]
+                # Filter out any files that have been shown before
+                matches = [m for m in matches if m['file_name'] not in exclude_files]
+                if not matches:
+                    logger.warning(f"All matches for {sequence_type} have been excluded")
+                    return f"All available {sequence_type} sequences have already been shown. Try a different sequence type."
+            
+            # First, filter by language preference if strong match exists
+            lang_filtered = [m for m in matches if m['language'] == ('Python' if prefer_python else 'MATLAB')]
+            if not lang_filtered:
+                lang_filtered = matches  # Use all if no language match
+            
+            # Find simplest within threshold
+            for match in lang_filtered:
+                if match['similarity'] >= (top_sim - threshold):
+                    if not selected or (
+                        match['complexity'] == 'basic' and selected['complexity'] == 'advanced'
+                    ) or (
+                        match['complexity'] == selected['complexity'] and 
+                        match['content_length'] < selected['content_length']
+                    ):
+                        selected = match
+            
+            # If no selection, just use the top match
+            if not selected:
+                selected = matches[0]
+            
+            logger.info(f"Selected {selected['file_name']} from {len(matches)} matches (sim={selected['similarity']:.3f}, complexity={selected['complexity']})")
+            
+            # Store information about alternatives for the response
+            # Filter to only show alternatives of the same sequence type
+            selected_type = selected.get('sequence_type', '')
+            if selected_type:
+                # Only show alternatives with matching sequence type
+                other_matches = [m for m in matches 
+                               if m['file_name'] != selected['file_name'] 
+                               and m.get('sequence_type', '') == selected_type]
+            else:
+                # Fallback if no sequence_type field
+                other_matches = [m for m in matches if m['file_name'] != selected['file_name']]
+            
+            alternatives_info = {
+                'selected': selected['file_name'],
+                'selected_type': selected_type,
+                'alternatives': other_matches[:3] if other_matches else []  # Top 3 alternatives of same type
+            }
+            
+            # Now retrieve the full content for the selected file
+            result = await asyncio.wait_for(
+                rag_service.get_official_sequence(sequence_type, selected['file_name']),
+                timeout=10.0
+            )
+            
+            if not result or 'content' not in result:
+                logger.warning(f"Failed to retrieve content for selected file: {selected['file_name']}")
+                result = None
+        
+        if not result or 'content' not in result:
             # No official example - automatically search for community examples
             logger.info(f"No official example for '{sequence_type}', searching community examples...")
-            return await search_pulseq_knowledge(ctx, f"{sequence_type} sequence example implementation", search_type="code")
+            
+            # Try different query variations for better fallback
+            fallback_queries = [
+                f"{sequence_type} sequence implementation",
+                f"{sequence_type} MRI sequence example",
+                f"{sequence_type} Pulseq code"
+            ]
+            
+            for fallback_query in fallback_queries:
+                fallback_result = await search_pulseq_knowledge(
+                    ctx, 
+                    fallback_query,
+                    search_type="code",
+                    match_count=3
+                )
+                
+                # Check if we got meaningful results
+                if fallback_result and "No code examples found" not in fallback_result:
+                    return f"## {sequence_type} Sequence (Community Examples)\n\n" + \
+                           "*Note: No official example found. Showing community implementations:*\n\n" + \
+                           fallback_result
+            
+            # If all fallbacks fail
+            return f"No {sequence_type} sequence examples found in the database.\n\n" + \
+                   "Would you like me to:\n" + \
+                   "1. Explain how to implement this sequence from scratch?\n" + \
+                   "2. Search for similar sequence types?\n" + \
+                   "3. Provide the general structure and key functions needed?"
+        
+        # Check if user is requesting full code from official sequence
+        # Get the current user query from context
+        user_query = ""
+        if hasattr(ctx, 'deps') and hasattr(ctx.deps, 'conversation_context'):
+            # Use conversation_history instead of messages
+            history = ctx.deps.conversation_context.conversation_history
+            if history:
+                # Find the last user message
+                for entry in reversed(history):
+                    if entry.get('role') == 'user':
+                        user_query = entry.get('content', '')
+                        break
+        
+        # Check if this needs RECITATION protection
+        source_info = {
+            'sequence_type': sequence_type,
+            'file_name': result.get('file_name', ''),
+            'url': result.get('url', ''),
+            'ai_summary': result.get('ai_summary', ''),
+            'table_name': 'official_sequence_examples',
+            'source': 'github.com/pulseq/pulseq'
+        }
+        
+        needs_protection, protection_message = guard.check_and_guard(user_query, source_info)
+        
+        if needs_protection:
+            # Log the prevented RECITATION
+            from .recitation_monitor import get_recitation_monitor
+            monitor = get_recitation_monitor()
+            
+            # Get session ID if available
+            session_id = None
+            if hasattr(ctx, 'deps') and hasattr(ctx.deps, 'session_manager'):
+                session_id = ctx.deps.session_manager.session_id
+            
+            monitor.log_prevented_recitation(
+                query=user_query,
+                sequence_type=sequence_type,
+                session_id=session_id
+            )
+            
+            # Return the protection message instead of the full code
+            logger.info(f"RECITATION protection activated for {sequence_type}")
+            return protection_message
         
         # Parse content if it contains the summary separator
         content = result.get('content', '')
@@ -209,32 +475,64 @@ async def get_official_sequence_example(
             if len(parts) > 1:
                 content = parts[1].strip()
         
-        # Add directive for implementation intent - interweave code sections with explanations
-        output = "[DIRECTIVE: IMPLEMENTATION RESPONSE - SECTIONED]\n"
-        output += "IMPORTANT: Break the code into logical sections and present it with interweaved explanations:\n"
-        output += "1. Start with 1-2 sentences about where the full source can be found\n"
-        output += "2. Present the code in sections, each followed by a brief explanation:\n"
-        output += "   - Show a code section (5-15 lines)\n"
-        output += "   - Explain what that section does (1-2 sentences)\n"
-        output += "   - Continue with the next code section\n"
-        output += "3. End with 1-3 questions/suggestions for the user\n"
-        output += "Use ```matlab blocks for EACH code section, not one large block.\n\n"
+        # NEW APPROACH: Provide source link + preview + engagement
+        # This avoids RECITATION while still being helpful
         
-        # Provide source information for context
-        output += f"## Official Pulseq Example: {result['sequence_type']}\n"
-        output += f"*Source: {result['file_name']}*\n\n"
+        # Extract first 50 lines as a preview (increased for better context)
+        lines = content.split('\n')
+        preview_lines = lines[:50]  # Increased preview for better context
+        
+        # Build response with source reference and preview
+        file_name = result.get('file_name', 'Unknown')
+        # Extract just the filename without path
+        short_name = file_name.split('/')[-1] if '/' in file_name else file_name
+        
+        output = f"## {short_name}\n\n"
+        output += f"🔗 **GitHub**: https://github.com/pulseq/pulseq/blob/master/{file_name}\n\n"
+        
+        # Add the AI summary if available for context
+        if 'ai_summary' in result and result['ai_summary']:
+            summary = result['ai_summary']
+            # Take first 2-3 sentences of summary
+            summary_sentences = summary.split('. ')[:3]
+            brief_summary = '. '.join(summary_sentences)
+            if not brief_summary.endswith('.'):
+                brief_summary += '.'
+            output += f"**Overview**: {brief_summary}\n\n"
+        
+        # Show a preview (safe from RECITATION)
+        output += "### Code Preview (First 50 lines):\n"
         output += "```matlab\n"
-        output += content[:10000]  # Limit to 10k chars
-        if len(content) > 10000:
-            output += "\n\n% ... [truncated for display]"
+        output += '\n'.join(preview_lines)
         output += "\n```\n"
+        output += "\n... [View full code at the GitHub link above]\n\n"
+        
+        # Add engagement questions based on sequence type
+        output += "### How Can I Help You With This Sequence?\n\n"
+        output += f"Would you like me to:\n"
+        output += f"1. **Explain** the key concepts and physics behind this {sequence_type} sequence?\n"
+        output += f"2. **Modify** specific parameters for your application (FOV, resolution, TR/TE)?\n"
+        output += f"3. **Create** a custom version with your requirements?\n"
+        output += f"4. **Debug** issues if you're implementing this sequence?\n"
+        output += f"5. **Compare** this with other {sequence_type} variants?\n\n"
+        
+        # Add information about alternatives if available
+        if 'alternatives_info' in locals() and alternatives_info.get('alternatives'):
+            output += f"📚 **Other {sequence_type} examples available:**\n"
+            for alt in alternatives_info['alternatives'][:3]:  # Show up to 3 alternatives
+                complexity_note = " (simpler)" if alt['complexity'] == 'basic' else ""
+                output += f"- `{alt['file_name']}`{complexity_note}\n"
+            output += f"\n*To see another example, just ask!*\n\n"
+        
+        output += f"💡 *Tip: You can view and download the complete code from the GitHub link above.*"
         
         return output
         
     except asyncio.TimeoutError:
-        logger.warning(f"Official sequence fetch timed out for {sequence_type}")
-        return (f"Request timed out. The '{sequence_type}' sequence may be too large.\n"
-                f"Try search_pulseq_knowledge for a more targeted search.")
+        logger.warning(f"Official sequence fetch timed out for {sequence_type} (10s timeout)")
+        # Fallback to search when timeout occurs
+        logger.info(f"Falling back to search_pulseq_knowledge for {sequence_type}")
+        return await search_pulseq_knowledge(ctx, f"{sequence_type} sequence example", search_type="code")
     except Exception as e:
         logger.error(f"Official sequence fetch failed: {e}")
         # Fallback to broader search
@@ -249,16 +547,15 @@ async def search_pulseq_knowledge(
     force_search: bool = False
 ) -> str:
     """
-    Intelligently search the Pulseq knowledge base when specific implementation details are needed.
+    Search the broader Pulseq knowledge base for documentation, functions, or community examples.
     
-    This tool is designed to be used selectively - only when the query requires specific Pulseq
-    function details, implementation examples, or version-specific information that goes beyond
-    general MRI physics and programming knowledge.
+    USE THIS TOOL ONLY WHEN:
+    - get_official_sequence_example() doesn't have the sequence you need
+    - User asks for specific function documentation (mr.makeSincPulse, etc.)
+    - User needs conceptual explanations or tutorials
+    - Searching for non-standard or custom implementations
     
-    When search_type="auto":
-    - Classifies intent
-    - Routes to appropriate search
-    - Formats adaptively
+    DO NOT USE THIS for standard sequences like EPI, GRE, TSE, etc. - use get_official_sequence_example instead.
     
     Args:
         query: Search query for Pulseq-specific information

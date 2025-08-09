@@ -35,7 +35,9 @@ class RAGService:
 
         # Configurable content preview limits - increased to provide full context to AI
         self.doc_preview_limit = 5000  # Was hardcoded 500
-        self.code_preview_limit = 1500  # Reduced from 10000 to prevent RECITATION errors
+        self.code_preview_limit = (
+            1500  # Reduced from 10000 to prevent RECITATION errors
+        )
 
     @property
     def supabase_client(self) -> SupabaseRAGClient:
@@ -43,27 +45,34 @@ class RAGService:
         if self._supabase_client is None:
             max_retries = 3
             retry_delay = 1
-            
+
             for attempt in range(max_retries):
                 try:
                     self._supabase_client = get_supabase_client()
                     break
                 except Exception as e:
                     if attempt < max_retries - 1:
-                        logger.warning(f"Failed to connect to Supabase (attempt {attempt + 1}/{max_retries}): {e}")
+                        logger.warning(
+                            f"Failed to connect to Supabase (attempt {attempt + 1}/{max_retries}): {e}"
+                        )
                         import time
+
                         time.sleep(retry_delay)
                         retry_delay *= 2  # Exponential backoff
                     else:
-                        logger.error(f"Failed to connect to Supabase after {max_retries} attempts")
-                        raise ConnectionError(f"Unable to connect to knowledge base after {max_retries} attempts") from e
-        
+                        logger.error(
+                            f"Failed to connect to Supabase after {max_retries} attempts"
+                        )
+                        raise ConnectionError(
+                            f"Unable to connect to knowledge base after {max_retries} attempts"
+                        ) from e
+
         return self._supabase_client
 
     def classify_search_strategy(self, query: str) -> tuple[str, dict]:
         """
         Classify query using pattern recognition instead of hardcoded lists.
-        
+
         Returns:
             tuple: (strategy_type, metadata)
             strategy_type: "vector_enhanced", "hybrid_filtered", "hybrid_full"
@@ -72,50 +81,50 @@ class RAGService:
         if self._is_sequence_query(query):
             sequence_hint = self._extract_sequence_identifier(query)
             return "vector_enhanced", {"sequence_type": sequence_hint}
-        
+
         # API functions - use filtered hybrid
         if self._is_api_function_query(query):
             # Remove common words that pollute results
-            common_words = ['function', 'method', 'example', 'sequence', 'pulse']
+            common_words = ["function", "method", "example", "sequence", "pulse"]
             filtered_words = [w for w in query.split() if w.lower() not in common_words]
-            return "hybrid_filtered", {"filtered_query": ' '.join(filtered_words)}
-        
+            return "hybrid_filtered", {"filtered_query": " ".join(filtered_words)}
+
         # File searches - use hybrid with URL focus
         if self._is_file_search_query(query):
             return "hybrid_full", {"focus_urls": True}
-        
+
         # General conceptual questions - use vector search
         if self._is_conceptual_query(query):
             return "vector_enhanced", {"search_type": "documentation"}
-        
+
         # Default to filtered hybrid
         return "hybrid_filtered", {}
 
     def classify_query_intent(self, query: str) -> Dict[str, Any]:
         """
         Classify user query to determine optimal search strategy.
-        
+
         Intent categories:
         - 'example_request': User wants code implementation
           Keywords: "example", "implement", "create", "write", "build"
           Action: Search .m/.py files in crawled_pages
-          
+
         - 'function_lookup': User asking about specific function
           Keywords: "mr.", "seq.", "parameters", "syntax", "how to use"
           Action: Search function_calling_patterns view
-          
-        - 'debug_request': User has code problems/errors  
+
+        - 'debug_request': User has code problems/errors
           Keywords: "error", "bug", "wrong", "debug", "not working", "dark image"
           Action: Validate functions + search for solutions
-          
+
         - 'tutorial_request': User wants step-by-step learning
           Keywords: "tutorial", "learn", "new to", "explain step by step"
           Action: Search notebooks/PDFs with educational structure
-          
+
         - 'concept_question': User asking about Pulseq concepts
           Keywords: "how do I", "what is", "why"
           Action: Search documentation in crawled_pages
-        
+
         Returns dict with:
         - 'intent': Primary intent category
         - 'confidence': Float 0-1
@@ -126,51 +135,124 @@ class RAGService:
 
         # Intent patterns with keywords and detection logic
         example_keywords = [
-            "example", "implement", "create", "write", "build", "show me", 
-            "code", "script", "demo", "sample", "how to make", "sequence for"
+            "example",
+            "implement",
+            "create",
+            "write",
+            "build",
+            "show me",
+            "code",
+            "script",
+            "demo",
+            "sample",
+            "how to make",
+            "sequence for",
         ]
-        
+
         function_keywords = [
-            "mr.", "seq.", "parameters", "syntax", "how to use", "function",
-            "method", "api", "signature", "returns", "arguments", "usage",
-            "what does", "calling pattern"
+            "mr.",
+            "seq.",
+            "parameters",
+            "syntax",
+            "how to use",
+            "function",
+            "method",
+            "api",
+            "signature",
+            "returns",
+            "arguments",
+            "usage",
+            "what does",
+            "calling pattern",
         ]
-        
+
         debug_keywords = [
-            "error", "bug", "wrong", "debug", "not working", "dark image",
-            "undefined function", "maximum gradient exceeded", "issue", "problem",
-            "fails", "crash", "doesn't work", "incorrect"
+            "error",
+            "bug",
+            "wrong",
+            "debug",
+            "not working",
+            "dark image",
+            "undefined function",
+            "maximum gradient exceeded",
+            "issue",
+            "problem",
+            "fails",
+            "crash",
+            "doesn't work",
+            "incorrect",
         ]
-        
+
         tutorial_keywords = [
-            "tutorial", "learn", "new to", "explain step by step", "guide",
-            "walkthrough", "teach", "beginner", "introduction", "getting started",
-            "step-by-step", "lesson"
+            "tutorial",
+            "learn",
+            "new to",
+            "explain step by step",
+            "guide",
+            "walkthrough",
+            "teach",
+            "beginner",
+            "introduction",
+            "getting started",
+            "step-by-step",
+            "lesson",
         ]
-        
+
         concept_keywords = [
-            "what is", "how does", "why", "when", "theory", "concept",
-            "physics", "principle", "understand", "explain", "overview",
-            "difference between", "compare"
+            "what is",
+            "how does",
+            "why",
+            "when",
+            "theory",
+            "concept",
+            "physics",
+            "principle",
+            "understand",
+            "explain",
+            "overview",
+            "difference between",
+            "compare",
         ]
 
         # Known Pulseq functions (common ones)
         pulseq_functions = [
-            "makearbitraryrf", "maketrapezoid", "makegausspulse", "makeblockpulse",
-            "makesincpulse", "makeadc", "makedelay", "makelabel", "maketrigger",
-            "calcduration", "calcrfbandwidth", "calcrfphase", "writeute", "writeflash",
-            "writeepi", "writespinecho", "writetse", "writegradientecho", "writebssfp",
-            "addblock", "write", "plot", "setdefinition"
+            "makearbitraryrf",
+            "maketrapezoid",
+            "makegausspulse",
+            "makeblockpulse",
+            "makesincpulse",
+            "makeadc",
+            "makedelay",
+            "makelabel",
+            "maketrigger",
+            "calcduration",
+            "calcrfbandwidth",
+            "calcrfphase",
+            "writeute",
+            "writeflash",
+            "writeepi",
+            "writespinecho",
+            "writetse",
+            "writegradientecho",
+            "writebssfp",
+            "addblock",
+            "write",
+            "plot",
+            "setdefinition",
         ]
 
         # Score each intent category
         scores = {
-            'example_request': sum(1 for kw in example_keywords if kw in query_lower),
-            'function_lookup': sum(1 for kw in function_keywords if kw in query_lower) + 
-                              sum(2 for func in pulseq_functions if func in query_lower),
-            'debug_request': sum(2 for kw in debug_keywords if kw in query_lower),  # Higher weight for debug
-            'tutorial_request': sum(1.5 for kw in tutorial_keywords if kw in query_lower),
-            'concept_question': sum(1 for kw in concept_keywords if kw in query_lower)
+            "example_request": sum(1 for kw in example_keywords if kw in query_lower),
+            "function_lookup": sum(1 for kw in function_keywords if kw in query_lower)
+            + sum(2 for func in pulseq_functions if func in query_lower),
+            "debug_request": sum(
+                2 for kw in debug_keywords if kw in query_lower
+            ),  # Higher weight for debug
+            "tutorial_request": sum(
+                1.5 for kw in tutorial_keywords if kw in query_lower
+            ),
+            "concept_question": sum(1 for kw in concept_keywords if kw in query_lower),
         }
 
         # Detect language preference (default to MATLAB)
@@ -192,7 +274,7 @@ class RAGService:
         else:
             # Get the intent with highest score
             primary_intent = max(scores, key=scores.get)
-            
+
             # Calculate confidence based on score strength
             total_indicators = sum(1 for s in scores.values() if s > 0)
             if total_indicators == 1 and max_score >= 2:
@@ -203,16 +285,16 @@ class RAGService:
                 confidence = 0.8  # Strong signal despite mixed intents
             else:
                 confidence = 0.5  # Mixed signals
-            
+
             # Determine search strategy based on intent
             strategy_map = {
-                'example_request': 'code_search',
-                'function_lookup': 'api_enhanced',
-                'debug_request': 'debug_validate',
-                'tutorial_request': 'tutorial_search',
-                'concept_question': 'documentation'
+                "example_request": "code_search",
+                "function_lookup": "api_enhanced",
+                "debug_request": "debug_validate",
+                "tutorial_request": "tutorial_search",
+                "concept_question": "documentation",
             }
-            search_strategy = strategy_map.get(primary_intent, 'unified')
+            search_strategy = strategy_map.get(primary_intent, "unified")
 
         # Check for specific patterns that override classification
         if "mr.write(" in query_lower or "undefined function 'mr.write'" in query_lower:
@@ -231,12 +313,14 @@ class RAGService:
             "search_strategy": search_strategy,
             "scores": scores,  # Include raw scores for transparency
             # Backward compatibility
-            "primary_type": SearchType.CODE_EXAMPLE if primary_intent == "example_request" else
-                           SearchType.API_FUNCTION if primary_intent == "function_lookup" else
-                           SearchType.DOCUMENTATION,
+            "primary_type": SearchType.CODE_EXAMPLE
+            if primary_intent == "example_request"
+            else SearchType.API_FUNCTION
+            if primary_intent == "function_lookup"
+            else SearchType.DOCUMENTATION,
             "search_api": primary_intent == "function_lookup",
             "search_code": primary_intent in ["example_request", "tutorial_request"],
-            "search_docs": primary_intent in ["concept_question", "tutorial_request"]
+            "search_docs": primary_intent in ["concept_question", "tutorial_request"],
         }
 
     def _create_search_variations(self, query: str) -> List[str]:
@@ -305,99 +389,106 @@ class RAGService:
 
         logger.debug(f"Generated variations for '{query}': {unique_variations[:5]}")
         return unique_variations
-    
+
     def _is_sequence_query(self, query: str) -> bool:
         """
         Detect if query is asking for a sequence implementation using patterns.
         """
         query_lower = query.lower()
-        
+
         # Direct indicators that user wants a sequence
         sequence_request_patterns = [
-            r'\b(show|give|provide|need|want|have|find|create)\b.*\b(sequence|implementation|script|code|example)\b',
-            r'\b(sequence|implementation|script|example|demo)\b.*\b(for|of|in)\b',
-            r'\bdo you have.*sequence\b',
-            r'\bany.*sequences?\b',
-            r'\bhow to (write|implement|create).*sequence\b'
+            r"\b(show|give|provide|need|want|have|find|create)\b.*\b(sequence|implementation|script|code|example)\b",
+            r"\b(sequence|implementation|script|example|demo)\b.*\b(for|of|in)\b",
+            r"\bdo you have.*sequence\b",
+            r"\bany.*sequences?\b",
+            r"\bhow to (write|implement|create).*sequence\b",
         ]
-        
+
         # Check for direct sequence requests
         import re
+
         for pattern in sequence_request_patterns:
             if re.search(pattern, query_lower):
                 return True
-        
+
         # MRI sequence naming patterns
         mri_sequence_patterns = [
             # Uppercase abbreviations (2-6 letters) optionally followed by sequence-related words
-            r'\b[A-Z]{2,6}\b(?:$|\s|\.|\s+(?:sequence|implementation|script|example))',
+            r"\b[A-Z]{2,6}\b(?:$|\s|\.|\s+(?:sequence|implementation|script|example))",
             # write* patterns (writeHASTE, writeEPI, etc.)
-            r'\bwrite[A-Z][a-zA-Z]+\b',
+            r"\bwrite[A-Z][a-zA-Z]+\b",
             # Common MRI sequence name patterns
-            r'\b(spin echo|gradient echo|echo planar|turbo spin|fast spin)\b',
+            r"\b(spin echo|gradient echo|echo planar|turbo spin|fast spin)\b",
             # Sequences ending with common suffixes
-            r'\b\w+(echo|flash|fisp|ssfp|epi|tse|fse|rare|haste|space)\b',
+            r"\b\w+(echo|flash|fisp|ssfp|epi|tse|fse|rare|haste|space)\b",
             # Asking for specific sequence files
-            r'\b[A-Z]{2,6}\.(m|py)\b'
+            r"\b[A-Z]{2,6}\.(m|py)\b",
         ]
-        
+
         for pattern in mri_sequence_patterns:
             if re.search(pattern, query, re.IGNORECASE):
                 return True
-        
+
         # Check if query contains MRI sequence-like abbreviations
         # But exclude if it's clearly asking for a function (mr.makeX)
-        if not re.search(r'\bmr\.\w+', query_lower):
+        if not re.search(r"\bmr\.\w+", query_lower):
             # Look for standalone uppercase abbreviations
-            uppercase_words = re.findall(r'\b[A-Z]{2,6}\b', query)
-            if uppercase_words and any(word in query_lower for word in ['sequence', 'script', 'example', 'implementation']):
+            uppercase_words = re.findall(r"\b[A-Z]{2,6}\b", query)
+            if uppercase_words and any(
+                word in query_lower
+                for word in ["sequence", "script", "example", "implementation"]
+            ):
                 return True
-        
+
         return False
 
     def _is_api_function_query(self, query: str) -> bool:
         """Detect if query is asking about API functions."""
         query_lower = query.lower()
-        
+
         # API function patterns
         api_patterns = [
-            r'\bmr\.\w+',  # mr.makeBlockPulse, mr.calcDuration
-            r'\bseq\.\w+',  # seq.addBlock
-            r'\b(make|calc|add|get|set|check)\w+\b',  # makeTrapezoid, calcGradient
-            r'\b(function|method|parameter|argument|signature)\b.*\b(for|of)\b',
-            r'what (does|is)|how to use.*function'
+            r"\bmr\.\w+",  # mr.makeBlockPulse, mr.calcDuration
+            r"\bseq\.\w+",  # seq.addBlock
+            r"\b(make|calc|add|get|set|check)\w+\b",  # makeTrapezoid, calcGradient
+            r"\b(function|method|parameter|argument|signature)\b.*\b(for|of)\b",
+            r"what (does|is)|how to use.*function",
         ]
-        
+
         import re
+
         return any(re.search(pattern, query_lower) for pattern in api_patterns)
 
     def _is_file_search_query(self, query: str) -> bool:
         """Detect if query is looking for specific files."""
         query_lower = query.lower()
-        
+
         file_patterns = [
-            r'\.(m|py|mat|seq)\b',  # File extensions
-            r'\b(file|script|code)\s+(named|called)\b',
-            r'\bwrite[A-Z]\w+\.(m|py)\b',  # writeHASTE.m, writeEPI.py
-            r'\b(find|locate|where is)\b.*\bfile\b'
+            r"\.(m|py|mat|seq)\b",  # File extensions
+            r"\b(file|script|code)\s+(named|called)\b",
+            r"\bwrite[A-Z]\w+\.(m|py)\b",  # writeHASTE.m, writeEPI.py
+            r"\b(find|locate|where is)\b.*\bfile\b",
         ]
-        
+
         import re
+
         return any(re.search(pattern, query_lower) for pattern in file_patterns)
 
     def _is_conceptual_query(self, query: str) -> bool:
         """Detect if query is asking for conceptual understanding."""
         query_lower = query.lower()
-        
+
         conceptual_patterns = [
-            r'\b(what|why|how|when|explain)\b.{0,10}\b(is|are|does|do)\b',
-            r'\b(concept|theory|principle|physics|understanding)\b',
-            r'\b(difference between|compare|versus)\b',
-            r'\btell me about\b',
-            r'\bexplain\b'
+            r"\b(what|why|how|when|explain)\b.{0,10}\b(is|are|does|do)\b",
+            r"\b(concept|theory|principle|physics|understanding)\b",
+            r"\b(difference between|compare|versus)\b",
+            r"\btell me about\b",
+            r"\bexplain\b",
         ]
-        
+
         import re
+
         return any(re.search(pattern, query_lower) for pattern in conceptual_patterns)
 
     def _extract_sequence_identifier(self, query: str) -> str:
@@ -405,81 +496,92 @@ class RAGService:
         Extract the likely sequence name from the query for better search.
         """
         import re
-        
+
         # Try to extract sequence name patterns (order matters!)
         patterns_to_extract = [
             # writeXXX pattern (highest priority)
-            (r'\bwrite([A-Z][a-zA-Z]+)\b', lambda m: m.group(1).lower()),
+            (r"\bwrite([A-Z][a-zA-Z]+)\b", lambda m: m.group(1).lower()),
             # Common sequence names (before uppercase check)
-            (r'\b(spin echo|gradient echo|echo planar|turbo spin|fast spin)\b', 
-             lambda m: m.group(1).replace(' ', '_').lower()),
+            (
+                r"\b(spin echo|gradient echo|echo planar|turbo spin|fast spin)\b",
+                lambda m: m.group(1).replace(" ", "_").lower(),
+            ),
             # Uppercase abbreviations that are likely sequence names (2-6 letters)
             # Look for sequences like TSE, EPI, FLASH, etc.
-            (r'\b([A-Z]{2,6})\b(?:\s+(?:sequence|implementation|script|example|sequences)|$)', 
-             lambda m: m.group(1).lower()),
+            (
+                r"\b([A-Z]{2,6})\b(?:\s+(?:sequence|implementation|script|example|sequences)|$)",
+                lambda m: m.group(1).lower(),
+            ),
             # Standalone uppercase words at end of sentence or followed by punctuation
-            (r'\b([A-Z]{2,6})\b(?:$|[.,!?]|\s*$)', 
-             lambda m: m.group(1).lower()),
+            (r"\b([A-Z]{2,6})\b(?:$|[.,!?]|\s*$)", lambda m: m.group(1).lower()),
             # Sequences with known suffixes (but not common words)
-            (r'\b(?!can|you|show|give|need|want|have|find|create)(\w+(?:echo|flash|fisp|ssfp|epi|tse|fse|rare|haste|space))\b', 
-             lambda m: m.group(1).lower() if len(m.group(1)) > 2 else None)
+            (
+                r"\b(?!can|you|show|give|need|want|have|find|create)(\w+(?:echo|flash|fisp|ssfp|epi|tse|fse|rare|haste|space))\b",
+                lambda m: m.group(1).lower() if len(m.group(1)) > 2 else None,
+            ),
         ]
-        
+
         for pattern, extractor in patterns_to_extract:
             match = re.search(pattern, query, re.IGNORECASE)
             if match:
                 result = extractor(match)
                 if result:  # Skip None results
                     return result
-        
+
         # Fallback: return generic "sequence"
         return "sequence"
-    
+
     def _score_sequence_relevance(self, result: Dict, sequence_hint: str) -> float:
         """
         Score result relevance for any sequence type using patterns.
         """
         score = 0.0
-        
+
         url = result.get("url", "").lower()
         summary = result.get("summary", "").lower()
         content = result.get("content", "").lower()
         metadata = result.get("metadata", {})
-        
+
         # High score for write* pattern in URL
         if f"write{sequence_hint}" in url:
             score += 10.0
         elif "write" in url and sequence_hint in url:
             score += 8.0
-        
+
         # Score for sequence name in URL (any position)
         if sequence_hint in url:
             score += 5.0
-        
+
         # Score for sequence name in summary
         if sequence_hint in summary:
             score += 5.0
             # Extra points if it's in the first 100 characters
             if sequence_hint in summary[:100]:
                 score += 2.0
-        
+
         # Check for "implementation" or "example" near sequence name
         import re
-        if re.search(f'{sequence_hint}.{{0,50}}(implementation|example|sequence)', summary + ' ' + content[:200]):
+
+        if re.search(
+            f"{sequence_hint}.{{0,50}}(implementation|example|sequence)",
+            summary + " " + content[:200],
+        ):
             score += 3.0
-        
+
         # Score based on file type and language - MATLAB gets higher priority
         language = metadata.get("language", "").lower()
         if language == "matlab":
             score += 5.0  # Strong preference for MATLAB
         elif language == "python":
             score += 1.0  # Still add points for Python, but less than MATLAB
-        
+
         # Penalize if it's clearly not a sequence
-        noise_indicators = ['musical', 'melody', 'song', 'tune', 'rhythm']
-        if any(noise in summary or noise in content[:500] for noise in noise_indicators):
+        noise_indicators = ["musical", "melody", "song", "tune", "rhythm"]
+        if any(
+            noise in summary or noise in content[:500] for noise in noise_indicators
+        ):
             score = 0.0  # Zero out score for non-MRI content
-        
+
         return score
 
     async def search_functions_fast(self, query: str, limit: int = 10) -> list[dict]:
@@ -491,31 +593,32 @@ class RAGService:
             # Try RPC first if it exists
             try:
                 result = await self.supabase_client.rpc(
-                    'match_api_reference_search',
-                    {
-                        'query_text': query,
-                        'match_count': limit
-                    }
+                    "match_api_reference_search",
+                    {"query_text": query, "match_count": limit},
                 ).execute()
-                
+
                 if result.data:
                     return result.data
             except:
                 pass  # RPC doesn't exist, use fallback
-            
+
             # Fallback to direct table search
-            result = await self.supabase_client.table('api_reference')\
-                .select('name, signature, description, calling_pattern, is_class_method')\
-                .ilike('name', f'%{query}%')\
-                .limit(limit)\
+            result = (
+                await self.supabase_client.table("api_reference")
+                .select(
+                    "name, signature, description, calling_pattern, is_class_method"
+                )
+                .ilike("name", f"%{query}%")
+                .limit(limit)
                 .execute()
-                
+            )
+
             return result.data if result.data else []
-            
+
         except Exception as e:
             logger.error(f"Fast function search failed: {e}")
             return []
-    
+
     async def get_function_details(self, function_names: list[str]) -> list[dict]:
         """
         Phase 2: Get complete function details using api_reference table.
@@ -523,264 +626,144 @@ class RAGService:
         """
         try:
             # Use the api_reference table directly since api_reference_details view may not exist
-            result = await self.supabase_client.table('api_reference')\
-                .select('name, signature, parameters, usage_examples, returns, has_nargin_pattern, calling_pattern')\
-                .in_('name', function_names)\
+            result = (
+                await self.supabase_client.table("api_reference")
+                .select(
+                    "name, signature, parameters, usage_examples, returns, has_nargin_pattern, calling_pattern"
+                )
+                .in_("name", function_names)
                 .execute()
-                
+            )
+
             return result.data if result.data else []
-            
+
         except Exception as e:
             logger.error(f"Failed to get function details for {function_names}: {e}")
             return []
-    
-    async def get_official_sequence(self, sequence_type: str) -> dict:
+
+    async def get_official_sequence(self, sequence_type: str, specific_file: str = None) -> dict:
         """
-        Get official validated sequence using SEMANTIC SEARCH with embeddings.
-        Now uses the enhanced official_sequence_examples view with vector similarity.
+        Get official validated sequence using semantic search with embeddings.
+        
+        Args:
+            sequence_type: Type of sequence to search for
+            specific_file: Optional specific filename to retrieve from search results
+            
+        Returns:
+            If specific_file is None: Returns metadata for top 5 matches
+            If specific_file is provided: Returns full content for that file
         """
         try:
             logger.info(f"[GET_OFFICIAL] Starting search for: '{sequence_type}'")
             
             # Import embedding function
-            logger.debug("[GET_OFFICIAL] Importing create_embedding...")
             from .embeddings import create_embedding
-            logger.debug("[GET_OFFICIAL] Successfully imported create_embedding")
             
-            # Create embedding for the query
-            # Be more specific for certain sequence types to avoid mismatches
-            sequence_lower = sequence_type.lower()
-            
-            # Map common names to full descriptions for better semantic matching
-            specific_queries = {
-                'press': 'PRESS Point Resolved Spectroscopy localized voxel spectroscopy sequence',
-                'spectroscopy': 'MR spectroscopy PRESS localized voxel acquisition',
-                'trufisp': 'TrueFISP balanced SSFP steady state free precession imaging',
-                'trufi': 'TrueFISP balanced SSFP imaging sequence',
-                'spin echo': 'spin echo 90-180 degree RF pulse echo formation sequence',
-                'spinecho': 'spin echo 90-180 degree RF pulse echo formation sequence',
-                'epi': 'echo planar imaging EPI fast k-space traversal sequence',
-                'mprage': 'MPRAGE magnetization prepared rapid gradient echo T1-weighted 3D',
-                'ute': 'UTE ultra short echo time bone imaging sequence',
-                'tse': 'TSE turbo spin echo fast spin echo multiple 180 refocusing pulses',
-                'haste': 'HASTE half-Fourier acquisition single-shot turbo spin echo',
-                'gradient echo': 'gradient echo GRE FLASH spoiled gradient echo imaging',
-                'gre': 'gradient echo GRE FLASH spoiled gradient echo imaging',
-                'gradientecho': 'gradient echo GRE FLASH spoiled gradient echo imaging',
-                'zte': 'ZTE zero echo time radial 3D acquisition'
-            }
-            
-            # Use specific query if available, otherwise generic
-            if sequence_lower in specific_queries:
-                query_text = specific_queries[sequence_lower]
-            elif any(key in sequence_lower for key in specific_queries):
-                # Find partial match
-                for key, value in specific_queries.items():
-                    if key in sequence_lower:
-                        query_text = value
-                        break
-            else:
-                # Generic query for unknown types
-                query_text = f"{sequence_type} MRI pulse sequence implementation Pulseq"
+            # Create simple, effective embedding query (language-agnostic)
+            query_text = f"{sequence_type} MRI pulse sequence implementation Pulseq code example"
             
             logger.debug(f"[GET_OFFICIAL] Creating embedding for: '{query_text}'")
             query_embedding = create_embedding(query_text)
             logger.debug(f"[GET_OFFICIAL] Created embedding with dimension: {len(query_embedding)}")
             
-            # Use the new RPC function for semantic search
-            # Get top 5 matches to select the simplest among good matches
+            # Use RPC function for semantic search with relaxed threshold
             logger.debug("[GET_OFFICIAL] Calling RPC 'match_official_sequences'...")
             result = self.supabase_client.rpc(
-                'match_official_sequences',
+                "match_official_sequences",
                 {
-                    'query_embedding': query_embedding,
-                    'match_count': 5,  # Get top matches to select simplest
-                    'threshold': 0.3   # Minimum similarity threshold
-                }
+                    "query_embedding": query_embedding,
+                    "match_count": 10,  # Get more matches for type filtering
+                    "threshold": 0.3,   # Lower threshold for better recall
+                },
             ).execute()
+            
             logger.debug(f"[GET_OFFICIAL] RPC returned {len(result.data) if result.data else 0} results")
             
+            # If specific file requested, find and return it
+            if specific_file and result.data:
+                for match in result.data:
+                    if match.get('file_name', '').endswith(specific_file):
+                        logger.info(f"[GET_OFFICIAL] Returning specific file: {specific_file}")
+                        return {
+                            'file_name': match.get('file_name', 'Unknown'),
+                            'url': match.get('url', ''),
+                            'content': match.get('content', ''),
+                            'similarity': match.get('similarity', 0),
+                            'description': match.get('ai_summary', ''),
+                            'sequence_type': match.get('sequence_type', ''),
+                            'trajectory_type': match.get('trajectory_type', ''),
+                            'content_length': match.get('content_length', len(match.get('content', '')))
+                        }
+                logger.warning(f"[GET_OFFICIAL] Specific file {specific_file} not found in results")
+                # Fall through to return metadata
+            
             if result.data and len(result.data) > 0:
-                # Select the simplest (shortest) example among high-quality matches
-                # If the best match has >75% similarity, look for simpler alternatives within 5% similarity
-                best_match = result.data[0]
-                best_similarity = best_match['similarity']
+                # Return metadata for top 5 matches
+                # Let Gemini decide which one to show based on user intent
+                matches_metadata = []
                 
-                # If we have a good match, check if there's a simpler one that's almost as good
-                if best_similarity > 0.75 and len(result.data) > 1:
-                    similarity_threshold = best_similarity - 0.05  # Within 5% of best
+                for match in result.data[:10]:  # Process all matches for filtering
+                    file_name = match.get('file_name', 'Unknown')
+                    content = match.get('content', '')
                     
-                    # Find the shortest content among high-quality matches
-                    shortest_match = best_match
-                    shortest_length = best_match.get('content_length', len(best_match['content']))
+                    # Extract just the filename without path
+                    short_name = file_name.split('/')[-1] if '/' in file_name else file_name
                     
-                    for match in result.data[1:]:
-                        if match['similarity'] >= similarity_threshold:
-                            match_length = match.get('content_length', len(match['content']))
-                            if match_length < shortest_length:
-                                shortest_match = match
-                                shortest_length = match_length
+                    # Detect language
+                    is_python = '.py' in file_name or 'pypulseq' in content[:500]
+                    language = 'Python' if is_python else 'MATLAB'
                     
-                    best_match = shortest_match
-                    logger.info(f"[GET_OFFICIAL] ✓ Selected simplest match: {best_match['file_name']}, similarity: {best_match['similarity']:.3f}, length: {shortest_length}")
-                else:
-                    logger.info(f"[GET_OFFICIAL] ✓ SEMANTIC MATCH: {best_match['file_name']}, similarity: {best_match['similarity']:.3f}")
+                    # Detect complexity indicators
+                    is_complex = any([
+                        'QA' in file_name,
+                        'RS' in file_name or 'rs' in file_name.lower(),  # Ramp sampling
+                        'Diffusion' in file_name,
+                        'PMC' in file_name,
+                        len(content) > 10000  # Very long files are complex
+                    ])
+                    
+                    matches_metadata.append({
+                        'file_name': short_name,
+                        'full_path': file_name,
+                        'similarity': match.get('similarity', 0),
+                        'content_length': len(content),
+                        'language': language,
+                        'complexity': 'advanced' if is_complex else 'basic',
+                        'description': match.get('ai_summary', '')[:100] if match.get('ai_summary') else '',
+                        'sequence_type': match.get('sequence_type', '')  # Add sequence type from DB
+                    })
                 
-                # Extract actual code from content (after '---' separator)
-                content = best_match['content']
-                if '---' in content:
-                    parts = content.split('---', 1)
-                    actual_code = parts[1].strip()
-                    logger.debug(f"[GET_OFFICIAL] Extracted code section: {len(actual_code)} chars")
-                    
-                    return {
-                        'content': actual_code,  # Return actual code, not AI summary
-                        'file_name': best_match['file_name'],
-                        'sequence_type': best_match['sequence_type'],
-                        'ai_summary': best_match.get('ai_summary', ''),
-                        'similarity': best_match['similarity']
-                    }
-                else:
-                    logger.warning(f"[GET_OFFICIAL] No '---' separator found, returning full content")
-                    return {
-                        'content': content,
-                        'file_name': best_match['file_name'],
-                        'sequence_type': best_match['sequence_type'],
-                        'ai_summary': best_match.get('ai_summary', ''),
-                        'similarity': best_match['similarity']
-                    }
-            
-            # Fallback to exact match if semantic search fails
-            logger.warning(f"[GET_OFFICIAL] No semantic match found for '{sequence_type}', trying exact match...")
-            
-            # Normalize sequence type for exact match fallback
-            type_mapping = {
-                'epi': 'EPI',
-                'echo_planar': 'EPI',
-                'spin_echo': 'SpinEcho',
-                'spinecho': 'SpinEcho',
-                'gradient_echo': 'GradientEcho',
-                'gre': 'GradientEcho',
-                'tse': 'TSE',
-                'turbo_spin': 'TSE',
-                'mprage': 'MPRAGE',
-                'ute': 'UTE',
-                'haste': 'HASTE',
-                'trufisp': 'TrueFISP',
-                'press': 'PRESS',
-                'spiral': 'Spiral'
-            }
-            
-            normalized_type = type_mapping.get(sequence_type.lower(), sequence_type)
-            
-            # First try official_sequence_examples with optimized two-step query
-            try:
-                # Step 1: Fast query using ai_summary (only ~2KB per record)
-                # Get file_name and ai_summary to identify the best match
-                # Note: Using file_name as unique identifier since table has no id column
-                summary_result = self.supabase_client.client.from_('official_sequence_examples')\
-                    .select('file_name, sequence_type, ai_summary')\
-                    .eq('sequence_type', normalized_type)\
-                    .order('file_name')\
-                    .limit(1)\
-                    .execute()
-                    
-                if summary_result.data and len(summary_result.data) > 0:
-                    # Extract record info from step 1
-                    record = summary_result.data[0]
-                    file_name = record['file_name']
-                    
-                    logger.debug(f"Found sequence in {file_name}, fetching content...")
-                    
-                    # Step 2: Fetch ONLY the content field for this specific record
-                    # Using file_name as the unique identifier
-                    content_result = self.supabase_client.client.from_('official_sequence_examples')\
-                        .select('content')\
-                        .eq('file_name', file_name)\
-                        .limit(1)\
-                        .execute()
-                    
-                    if content_result.data and len(content_result.data) > 0:
-                        content = content_result.data[0].get('content', '')
-                        if content:
-                            logger.debug(f"Got content, length: {len(content)} chars")
-                            return {
-                                'content': content,
-                                'file_name': file_name,
-                                'sequence_type': record['sequence_type'],
-                                'ai_summary': record.get('ai_summary', '')  # Include summary for reference
-                            }
-                        else:
-                            logger.warning(f"Content field is empty for file: {file_name}")
-                    else:
-                        logger.warning(f"No content record found for file: {file_name}")
-            except Exception as e:
-                logger.debug(f"official_sequence_examples query failed: {e}")
-                pass  # Table might not exist, fallback to search
-            
-            # Fallback: Search in crawled_pages for official sequences
-            # Use a more targeted search to avoid timeouts
-            search_query = f"{normalized_type} sequence"
-            
-            # Use the supabase client's search with limited fields
-            try:
-                # Search using vector similarity on summaries
-                raw_results = self.supabase_client.perform_hybrid_search(
-                    query=search_query,
-                    match_count=5,  # Get a few candidates
-                    search_type="code_examples"
-                )
+                # Log what we're returning
+                logger.info(f"[GET_OFFICIAL] Returning metadata for {len(matches_metadata)} matches")
+                for i, meta in enumerate(matches_metadata, 1):
+                    logger.debug(
+                        f"  {i}. {meta['file_name']}: "
+                        f"sim={meta['similarity']:.3f}, "
+                        f"len={meta['content_length']}, "
+                        f"lang={meta['language']}, "
+                        f"complexity={meta['complexity']}"
+                    )
                 
-                if raw_results:
-                    # Look for official sequences in results
-                    for result in raw_results:
-                        url = result.get('url', '').lower()
-                        content = result.get('content', '')
-                        
-                        # Check if it's from official demoSeq
-                        if 'demoseq' in url or 'official' in url:
-                            # Parse content to get just the code part
-                            if '---' in content:
-                                # Split on --- to get the full content after summary
-                                parts = content.split('---', 1)
-                                if len(parts) > 1:
-                                    content = parts[1].strip()
-                            
-                            return {
-                                'content': content,
-                                'file_name': f'{normalized_type}_example.m',
-                                'sequence_type': normalized_type
-                            }
-                    
-                    # If no official found, return the best match
-                    best_match = raw_results[0]
-                    content = best_match.get('content', '')
-                    
-                    # Parse content to get full code after summary
-                    if '---' in content:
-                        parts = content.split('---', 1)
-                        if len(parts) > 1:
-                            content = parts[1].strip()
-                    
-                    return {
-                        'content': content,
-                        'file_name': f'{normalized_type}_example.m',
-                        'sequence_type': normalized_type
-                    }
-                    
-            except Exception as e:
-                logger.error(f"Fallback search failed: {e}")
-                
+                return {
+                    'matches': matches_metadata,  # Return all matches for type filtering
+                    'query': sequence_type,
+                    'top_similarity': matches_metadata[0]['similarity'] if matches_metadata else 0
+                }
+            
+            logger.warning(f"[GET_OFFICIAL] No matches found for '{sequence_type}'")
             return None
             
         except Exception as e:
-            logger.error(f"Official sequence fetch failed: {e}")
+            logger.error(f"[GET_OFFICIAL] Official sequence fetch failed: {e}", exc_info=True)
             return None
 
-    async def search_api_functions_enhanced(self, query: str, language: str = "matlab", match_count: int = 5) -> str:
+
+    async def search_api_functions_enhanced(
+        self, query: str, language: str = "matlab", match_count: int = 5
+    ) -> str:
         """
         Search for Pulseq functions using the function_calling_patterns view.
-        
+
         This method:
         1. Queries the function_calling_patterns view for exact calling patterns
         2. Prioritizes exact function name matches
@@ -789,18 +772,20 @@ class RAGService:
            - Usage instructions (for class methods that need instantiation)
            - Parameters and description
         4. Handles both regular functions and class methods appropriately
-        
+
         Returns formatted string with clear usage examples.
         """
         context = self.performance_monitor.start_query(query, "api_functions_enhanced")
         context["language"] = language
-        
+
         try:
             # Try to use the function_calling_patterns view first
             try:
                 # Direct query to the function_calling_patterns view
-                query_builder = self.supabase_client.client.from_("function_calling_patterns").select("*")
-                
+                query_builder = self.supabase_client.client.from_(
+                    "function_calling_patterns"
+                ).select("*")
+
                 # Search across multiple fields
                 search_terms = query.lower().replace("mr.", "").replace("seq.", "")
                 query_builder = query_builder.or_(
@@ -808,27 +793,29 @@ class RAGService:
                     f"description.ilike.%{search_terms}%,"
                     f"calling_pattern.ilike.%{search_terms}%"
                 )
-                
+
                 # Language filter - default to MATLAB
                 if language.lower() == "matlab":
                     query_builder = query_builder.eq("language", "matlab")
                 elif language.lower() == "python":
                     query_builder = query_builder.eq("language", "python")
-                
+
                 # Execute query
                 result = query_builder.limit(match_count).execute()
                 enhanced_results = result.data if result.data else []
-                
+
                 # If no results from view, fall back to regular API search
                 if not enhanced_results:
-                    logger.info("No results from function_calling_patterns view, falling back to regular search")
+                    logger.info(
+                        "No results from function_calling_patterns view, falling back to regular search"
+                    )
                     return self.search_api_functions(query, match_count, language)
-                
+
                 # Format enhanced results
                 formatted = [f"## Pulseq Function Usage for: '{query}'\n"]
                 formatted.append(f"*Language: {language.upper()}*\n")
                 formatted.append(f"Found {len(enhanced_results)} function(s):\n")
-                
+
                 for i, func in enumerate(enhanced_results, 1):
                     function_name = func.get("function_name", "Unknown")
                     calling_pattern = func.get("calling_pattern", "")
@@ -836,24 +823,24 @@ class RAGService:
                     parameters = func.get("parameters", "")
                     description = func.get("description", "")
                     is_class_method = func.get("is_class_method", False)
-                    
+
                     formatted.append(f"### {i}. {function_name}")
-                    
+
                     # Highlight if it's a class method
                     if is_class_method:
                         formatted.append("**Type:** Class Method (requires instance)")
-                    
+
                     formatted.append(f"**Correct Usage:** `{calling_pattern}`")
-                    
+
                     if usage_instruction:
                         formatted.append(f"**Instructions:** {usage_instruction}")
-                    
+
                     if description:
                         formatted.append(f"**Description:** {description}")
-                    
+
                     if parameters:
                         formatted.append(f"**Parameters:** {parameters}")
-                    
+
                     # Add quick example based on pattern
                     if is_class_method:
                         if language.lower() == "matlab":
@@ -873,17 +860,21 @@ class RAGService:
                             formatted.append("# Then use the method")
                             formatted.append(f"{calling_pattern}")
                             formatted.append("```")
-                    
+
                     formatted.append("")  # Empty line between results
-                
-                self.performance_monitor.record_query_completion(context, enhanced_results)
+
+                self.performance_monitor.record_query_completion(
+                    context, enhanced_results
+                )
                 return "\n".join(formatted)
-                
+
             except Exception as view_error:
-                logger.warning(f"function_calling_patterns view query failed: {view_error}")
+                logger.warning(
+                    f"function_calling_patterns view query failed: {view_error}"
+                )
                 # Fall back to regular search
                 return self.search_api_functions(query, match_count, language)
-                
+
         except Exception as e:
             self.performance_monitor.record_query_completion(context, [], error=str(e))
             logger.error(f"Enhanced API function search failed: {e}")
@@ -911,22 +902,28 @@ class RAGService:
         try:
             # Phase 1: Fast search with minimal fields
             fast_results = await self.search_functions_fast(query, match_count * 2)
-            
+
             # Filter by language if specified
             if language_filter:
-                fast_results = [r for r in fast_results if r.get("language") == language_filter]
+                fast_results = [
+                    r for r in fast_results if r.get("language") == language_filter
+                ]
             elif "python" not in query.lower() and "pypulseq" not in query.lower():
                 # Default to MATLAB preference
-                matlab_results = [r for r in fast_results if r.get("language") == "matlab"]
-                other_results = [r for r in fast_results if r.get("language") != "matlab"]
+                matlab_results = [
+                    r for r in fast_results if r.get("language") == "matlab"
+                ]
+                other_results = [
+                    r for r in fast_results if r.get("language") != "matlab"
+                ]
                 fast_results = matlab_results + other_results
-            
+
             # Limit to requested count
             final_results = fast_results[:match_count]
-            
+
             # Phase 2 is only called when actually generating code
             # For now, just return the fast search results for display
-            
+
             # Record successful completion
             self.performance_monitor.record_query_completion(context, final_results)
 
@@ -1303,12 +1300,14 @@ class RAGService:
 
         return "\n".join(formatted)
 
-    def format_results_adaptive(self, results: List[Dict], query_intent: str, query: str) -> str:
+    def format_results_adaptive(
+        self, results: List[Dict], query_intent: str, query: str
+    ) -> str:
         """
         Format search results based on user intent.
-        
+
         Templates by intent:
-        
+
         'function_lookup':
             ## {function_name}
             **Calling Pattern:** `{correct_usage}`
@@ -1318,61 +1317,61 @@ class RAGService:
             ```matlab
             {example}
             ```
-        
+
         'example_request':
             ```matlab
             {full_code}
             ```
             **Key Points:** {brief_explanation}
             **Functions Used:** {function_list}
-        
+
         'debug_request':
             ## Issue Found
             {error_description}
-            
+
             **Problem:** {specific_issue}
             **Solution:** {how_to_fix}
-            
+
             **Corrected Code:**
             ```matlab
             {fixed_code}
             ```
-        
+
         'tutorial_request':
             ## {concept_title}
-            
+
             ### Understanding the Concept
             {explanation}
-            
+
             ### Step-by-Step Implementation
             {numbered_steps_with_code}
-            
+
             ### Complete Example
             {full_annotated_code}
-        
+
         'concept_question':
             ## {concept}
             {explanation}
-            
+
             **In Practice:**
             {practical_example}
-            
+
             **Related Functions:** {function_list}
         """
         if not results:
             return f"No results found for: '{query}'"
-        
+
         formatted = []
-        
-        if query_intent == 'function_lookup':
+
+        if query_intent == "function_lookup":
             formatted.append(f"## Function Reference for: '{query}'\n")
             for r in results[:3]:  # Limit to top 3 for function lookups
-                name = r.get('function_name', r.get('name', 'Unknown'))
-                pattern = r.get('calling_pattern', r.get('signature', ''))
-                usage = r.get('usage_instruction', '')
-                params = r.get('parameters', '')
-                desc = r.get('description', '')
-                
+                name = r.get("function_name", r.get("name", "Unknown"))
+                pattern = r.get("calling_pattern", r.get("signature", ""))
+                usage = r.get("usage_instruction", "")
+                params = r.get("parameters", "")
+                desc = r.get("description", "")
+
                 formatted.append(f"### {name}")
                 if pattern:
                     formatted.append(f"**Calling Pattern:** `{pattern}`")
@@ -1383,38 +1382,42 @@ class RAGService:
                 if params:
                     formatted.append(f"**Parameters:** {params}")
                 formatted.append("")
-                
-        elif query_intent == 'example_request':
+
+        elif query_intent == "example_request":
             formatted.append(f"## Code Example for: '{query}'\n")
             # Show the best code example immediately
             if results:
                 best = results[0]
-                content = best.get('content', '')
-                summary = best.get('summary', '')
-                url = best.get('url', '')
-                
+                content = best.get("content", "")
+                summary = best.get("summary", "")
+                url = best.get("url", "")
+
                 formatted.append("```matlab")
                 formatted.append(content[:5000] if len(content) > 5000 else content)
                 formatted.append("```")
-                
+
                 if summary:
                     formatted.append(f"\n**Key Points:** {summary[:200]}")
-                
+
                 functions = self._extract_functions_used(content)
                 if functions:
                     formatted.append(f"**Functions Used:** {', '.join(functions[:10])}")
-                
+
                 if url:
                     formatted.append(f"**Source:** {url}")
-                    
-        elif query_intent == 'debug_request':
+
+        elif query_intent == "debug_request":
             formatted.append(f"## Debugging Help for: '{query}'\n")
-            
+
             # Check for common errors
             if "mr.write" in query.lower():
                 formatted.append("### Issue Found: Incorrect Function Call")
-                formatted.append("\n**Problem:** `write` is a Sequence class method, not an mr function")
-                formatted.append("**Solution:** Use `seq.write()` instead of `mr.write()`")
+                formatted.append(
+                    "\n**Problem:** `write` is a Sequence class method, not an mr function"
+                )
+                formatted.append(
+                    "**Solution:** Use `seq.write()` instead of `mr.write()`"
+                )
                 formatted.append("\n**Corrected Code:**")
                 formatted.append("```matlab")
                 formatted.append("% Create sequence object first")
@@ -1432,62 +1435,63 @@ class RAGService:
                     formatted.append("\nRelevant documentation:")
                     for r in results[:2]:
                         formatted.append(f"- {r.get('summary', '')[:200]}")
-                        
-        elif query_intent == 'tutorial_request':
+
+        elif query_intent == "tutorial_request":
             formatted.append(f"## Tutorial: {query}\n")
             formatted.append("### Understanding the Concept")
-            
+
             if results:
                 # Use the best result for tutorial content
                 best = results[0]
-                content = best.get('content', '')
-                summary = best.get('summary', '')
-                
+                content = best.get("content", "")
+                summary = best.get("summary", "")
+
                 formatted.append(summary[:500] if summary else "")
                 formatted.append("\n### Step-by-Step Implementation")
-                
+
                 # If it's a notebook, process it for tutorial
-                if '.ipynb' in best.get('url', ''):
-                    processed = self.process_notebook_content(content, 'tutorial_request')
+                if ".ipynb" in best.get("url", ""):
+                    processed = self.process_notebook_content(
+                        content, "tutorial_request"
+                    )
                     formatted.append(processed)
                 else:
                     formatted.append("```matlab")
                     formatted.append(content[:3000] if len(content) > 3000 else content)
                     formatted.append("```")
-                    
+
         else:  # concept_question
             formatted.append(f"## Concept: {query}\n")
             if results:
                 best = results[0]
-                formatted.append(best.get('summary', best.get('content', ''))[:1000])
-                
+                formatted.append(best.get("summary", best.get("content", ""))[:1000])
+
                 formatted.append("\n**In Practice:**")
                 # Try to find a practical example
                 for r in results[1:3]:
-                    if 'example' in r.get('summary', '').lower():
-                        formatted.append(r.get('summary', '')[:300])
+                    if "example" in r.get("summary", "").lower():
+                        formatted.append(r.get("summary", "")[:300])
                         break
-                
+
                 # Extract related functions
                 all_functions = set()
                 for r in results[:3]:
-                    functions = self._extract_functions_used(r.get('content', ''))
+                    functions = self._extract_functions_used(r.get("content", ""))
                     all_functions.update(functions)
-                
+
                 if all_functions:
-                    formatted.append(f"\n**Related Functions:** {', '.join(list(all_functions)[:10])}")
-        
-        return '\n'.join(formatted)
+                    formatted.append(
+                        f"\n**Related Functions:** {', '.join(list(all_functions)[:10])}"
+                    )
+
+        return "\n".join(formatted)
 
     async def perform_rag_query(
-        self,
-        query: str,
-        search_type: str = "auto",
-        match_count: int = 10
+        self, query: str, search_type: str = "auto", match_count: int = 10
     ) -> str:
         """
         Enhanced main RAG query with intelligent routing.
-        
+
         Flow:
         1. Classify query intent
         2. Route to appropriate search method:
@@ -1498,79 +1502,92 @@ class RAGService:
            - concept_question → search documentation
         3. Format results adaptively
         4. Return formatted response
-        
+
         Ensure MATLAB is default unless Python explicitly requested.
         """
         # Start performance monitoring
         context = self.performance_monitor.start_query(query, "rag_enhanced")
-        
+
         try:
             # Classify query intent
             intent_analysis = self.classify_query_intent(query)
-            intent = intent_analysis['intent']
-            language = intent_analysis.get('language', 'matlab')
-            confidence = intent_analysis.get('confidence', 0.5)
-            search_strategy = intent_analysis.get('search_strategy', 'unified')
-            
+            intent = intent_analysis["intent"]
+            language = intent_analysis.get("language", "matlab")
+            confidence = intent_analysis.get("confidence", 0.5)
+            search_strategy = intent_analysis.get("search_strategy", "unified")
+
             context["intent"] = intent
             context["confidence"] = confidence
             context["strategy"] = search_strategy
-            
-            logger.info(f"Query intent: {intent} (confidence: {confidence:.2f}, strategy: {search_strategy})")
-            
+
+            logger.info(
+                f"Query intent: {intent} (confidence: {confidence:.2f}, strategy: {search_strategy})"
+            )
+
             results = []
-            
+
             # Route based on intent
-            if search_strategy == 'api_enhanced' or intent == 'function_lookup':
+            if search_strategy == "api_enhanced" or intent == "function_lookup":
                 # Use enhanced API search
-                api_results = await self.search_api_functions_enhanced(query, language, match_count)
+                api_results = await self.search_api_functions_enhanced(
+                    query, language, match_count
+                )
                 return api_results  # Already formatted
-                
-            elif search_strategy == 'code_search' or intent == 'example_request':
+
+            elif search_strategy == "code_search" or intent == "example_request":
                 # Search for code implementations
-                code_results = self.search_code_implementations(query, language, match_count)
+                code_results = self.search_code_implementations(
+                    query, language, match_count
+                )
                 return code_results  # Already formatted
-                
-            elif search_strategy == 'debug_validate' or intent == 'debug_request':
+
+            elif search_strategy == "debug_validate" or intent == "debug_request":
                 # First check if user provided code to validate
-                if '```' in query:  # User provided code block
+                if "```" in query:  # User provided code block
                     # Extract code from markdown
                     import re
-                    code_match = re.search(r'```(?:matlab|python)?\n(.*?)\n```', query, re.DOTALL)
+
+                    code_match = re.search(
+                        r"```(?:matlab|python)?\n(.*?)\n```", query, re.DOTALL
+                    )
                     if code_match:
                         user_code = code_match.group(1)
                         validation = self.validate_pulseq_code(user_code, language)
-                        
+
                         # Format validation results
                         formatted = ["## Code Validation Results\n"]
-                        
-                        if validation['errors']:
+
+                        if validation["errors"]:
                             formatted.append("### ❌ Errors Found:")
-                            for error in validation['errors']:
+                            for error in validation["errors"]:
                                 formatted.append(f"\n**Issue:** {error['error']}")
                                 formatted.append(f"**Found:** `{error['found_usage']}`")
-                                formatted.append(f"**Correct:** `{error['correct_usage']}`")
+                                formatted.append(
+                                    f"**Correct:** `{error['correct_usage']}`"
+                                )
                                 formatted.append(f"**Fix:** {error['fix']}")
-                        
-                        if validation['suggestions']:
+
+                        if validation["suggestions"]:
                             formatted.append("\n### 💡 Suggestions:")
-                            for suggestion in validation['suggestions']:
+                            for suggestion in validation["suggestions"]:
                                 formatted.append(f"- {suggestion}")
-                        
-                        if validation['valid_functions']:
-                            formatted.append(f"\n### ✅ Valid Functions: {', '.join(validation['valid_functions'][:10])}")
-                        
-                        return '\n'.join(formatted)
+
+                        if validation["valid_functions"]:
+                            formatted.append(
+                                f"\n### ✅ Valid Functions: {', '.join(validation['valid_functions'][:10])}"
+                            )
+
+                        return "\n".join(formatted)
                 else:
                     # Search for debug help
                     results = self._search_debug_help(query, language, match_count)
                     return self.format_results_adaptive(results, intent, query)
-                    
-            elif search_strategy == 'tutorial_search' or intent == 'tutorial_request':
+
+            elif search_strategy == "tutorial_search" or intent == "tutorial_request":
                 # Search for tutorials with notebook priority
                 results = self._search_tutorials(query, language, match_count)
                 return self.format_results_adaptive(results, intent, query)
-                
+
             else:  # documentation or unified
                 # Standard documentation search
                 # Use existing perform_rag_query logic but simplified
@@ -1586,23 +1603,27 @@ class RAGService:
                         query=query,
                         match_count=search_limit,
                     )
-                
+
                 # Limit and format
                 results = results[:match_count] if results else []
                 return self.format_results_adaptive(results, intent, query)
-                
+
         except Exception as e:
             # Record failure
             self.performance_monitor.record_query_completion(context, [], error=str(e))
             logger.error(f"Enhanced RAG query failed: {e}")
             # Fall back to simpler search
             return self._perform_simple_search(query, match_count)
-    
-    def _search_debug_help(self, query: str, language: str, match_count: int) -> List[Dict]:
+
+    def _search_debug_help(
+        self, query: str, language: str, match_count: int
+    ) -> List[Dict]:
         """Search for debugging help and solutions."""
         # Search for error-related content
         try:
-            query_builder = self.supabase_client.client.from_("crawled_pages").select("*")
+            query_builder = self.supabase_client.client.from_("crawled_pages").select(
+                "*"
+            )
             query_builder = query_builder.or_(
                 f"content.ilike.%error%,"
                 f"content.ilike.%debug%,"
@@ -1613,11 +1634,15 @@ class RAGService:
             return result.data if result.data else []
         except Exception:
             return []
-    
-    def _search_tutorials(self, query: str, language: str, match_count: int) -> List[Dict]:
+
+    def _search_tutorials(
+        self, query: str, language: str, match_count: int
+    ) -> List[Dict]:
         """Search for tutorial content with notebook priority."""
         try:
-            query_builder = self.supabase_client.client.from_("crawled_pages").select("*")
+            query_builder = self.supabase_client.client.from_("crawled_pages").select(
+                "*"
+            )
             # Prioritize notebooks and tutorial content
             query_builder = query_builder.or_(
                 "metadata->>file_extension.eq..ipynb,"
@@ -1630,14 +1655,13 @@ class RAGService:
             return result.data if result.data else []
         except Exception:
             return []
-    
+
     def _perform_simple_search(self, query: str, match_count: int) -> str:
         """Fallback simple search when enhanced search fails."""
         try:
             # Just do a basic search
             results = self.supabase_client.search_documents(
-                query=query,
-                match_count=match_count
+                query=query, match_count=match_count
             )
             return self._format_rag_results(results, query)
         except Exception:
@@ -1652,7 +1676,7 @@ class RAGService:
     ) -> str:
         """
         Search the RAG database for documentation and information.
-        
+
         NOTE: This is the sync version - async version exists at line 1232.
         Both are kept for backward compatibility with tools.py executor pattern.
 
@@ -1703,97 +1727,105 @@ class RAGService:
             logger.error(f"RAG query failed: {e}")
             return f"Error performing RAG search: {str(e)}"
 
-    def search_code_implementations(self, query: str, language: str = "matlab", match_count: int = 10) -> str:
+    def search_code_implementations(
+        self, query: str, language: str = "matlab", match_count: int = 10
+    ) -> str:
         """
         Search for code implementations in crawled_pages.
-        
+
         Steps:
         1. Determine file extensions based on language:
            - MATLAB: [".m", ".mlx", ".ipynb"]
            - Python: [".py", ".ipynb"]
-        
+
         2. Search crawled_pages with filter:
            - Use metadata->file_extension filter
            - Search both summary and content
            - Prioritize files with seq.write() (complete sequences)
-        
+
         3. Process results based on file type:
            - Regular code files: Return as-is
            - Notebooks: Process based on query intent
-        
+
         4. Format results with:
            - Full code
            - Brief explanation from summary
            - Source attribution
-        
+
         Returns formatted code examples ready for use.
         """
         context = self.performance_monitor.start_query(query, "code_implementations")
         context["language"] = language
-        
+
         try:
             # Determine file extensions based on language
             if language.lower() == "python":
                 extensions = [".py", ".ipynb"]
             else:  # Default to MATLAB
                 extensions = [".m", ".mlx", ".ipynb"]
-            
+
             # Build query for crawled_pages
-            query_builder = self.supabase_client.client.from_("crawled_pages").select("*")
-            
+            query_builder = self.supabase_client.client.from_("crawled_pages").select(
+                "*"
+            )
+
             # Filter by file extension using metadata JSONB column
             extension_filters = []
             for ext in extensions:
                 extension_filters.append(f"metadata->>file_extension.eq.{ext}")
-            
+
             if extension_filters:
                 query_builder = query_builder.or_(",".join(extension_filters))
-            
+
             # Add text search
             query_builder = query_builder.or_(
-                f"summary.ilike.%{query}%,"
-                f"content.ilike.%{query}%,"
-                f"url.ilike.%{query}%"
+                f"summary.ilike.%{query}%,content.ilike.%{query}%,url.ilike.%{query}%"
             )
-            
+
             # Execute query
-            result = query_builder.limit(match_count * 2).execute()  # Get extra for filtering
+            result = query_builder.limit(
+                match_count * 2
+            ).execute()  # Get extra for filtering
             results = result.data if result.data else []
-            
+
             # Prioritize results: 1) MATLAB with seq.write, 2) MATLAB partial, 3) Python with seq.write, 4) Python partial
             matlab_complete = []
             matlab_partial = []
             python_complete = []
             python_partial = []
             other_results = []
-            
+
             for r in results:
                 content = r.get("content", "")
                 metadata = r.get("metadata", {})
                 url = r.get("url", "").lower()
-                
+
                 # Check if complete sequence
-                is_complete = "seq.write(" in content or "seq.write (" in content or "seq.write('" in content
-                
+                is_complete = (
+                    "seq.write(" in content
+                    or "seq.write (" in content
+                    or "seq.write('" in content
+                )
+
                 # Determine language
                 is_matlab = (
-                    metadata.get("language", "").lower() == "matlab" or
-                    metadata.get("file_extension", "") == ".m" or
-                    ".m" in url or
-                    "/matlab/" in url or
-                    "mr.Sequence()" in content  # MATLAB pattern
+                    metadata.get("language", "").lower() == "matlab"
+                    or metadata.get("file_extension", "") == ".m"
+                    or ".m" in url
+                    or "/matlab/" in url
+                    or "mr.Sequence()" in content  # MATLAB pattern
                 )
-                
+
                 is_python = (
-                    metadata.get("language", "").lower() == "python" or
-                    metadata.get("file_extension", "") == ".py" or
-                    ".py" in url or
-                    "/python/" in url or
-                    "pypulseq" in url or
-                    "import pypulseq" in content or
-                    "pp.Sequence()" in content  # Python pattern
+                    metadata.get("language", "").lower() == "python"
+                    or metadata.get("file_extension", "") == ".py"
+                    or ".py" in url
+                    or "/python/" in url
+                    or "pypulseq" in url
+                    or "import pypulseq" in content
+                    or "pp.Sequence()" in content  # Python pattern
                 )
-                
+
                 # Categorize results
                 if is_matlab:
                     if is_complete:
@@ -1807,29 +1839,45 @@ class RAGService:
                         python_partial.append(r)
                 else:
                     other_results.append(r)
-            
+
             # Combine with MATLAB priority (unless Python explicitly requested)
             if language.lower() == "python":
                 # Python explicitly requested - still show Python first
-                prioritized_results = python_complete + python_partial + matlab_complete + matlab_partial + other_results
+                prioritized_results = (
+                    python_complete
+                    + python_partial
+                    + matlab_complete
+                    + matlab_partial
+                    + other_results
+                )
             else:
                 # Default to MATLAB priority
-                prioritized_results = matlab_complete + matlab_partial + other_results + python_complete + python_partial
-                
+                prioritized_results = (
+                    matlab_complete
+                    + matlab_partial
+                    + other_results
+                    + python_complete
+                    + python_partial
+                )
+
                 if matlab_complete or matlab_partial:
-                    logger.info(f"Prioritized {len(matlab_complete) + len(matlab_partial)} MATLAB results")
+                    logger.info(
+                        f"Prioritized {len(matlab_complete) + len(matlab_partial)} MATLAB results"
+                    )
                 elif python_complete or python_partial:
-                    logger.info(f"No MATLAB results found, showing {len(python_complete) + len(python_partial)} Python results")
-            
+                    logger.info(
+                        f"No MATLAB results found, showing {len(python_complete) + len(python_partial)} Python results"
+                    )
+
             # Limit to requested count
             final_results = prioritized_results[:match_count]
-            
+
             # Format results
             if not final_results:
                 return f"No code implementations found for: '{query}'"
-            
+
             formatted = [f"## Code Implementations for: '{query}'\n"]
-            
+
             # Check what language results we're actually showing
             first_result_lang = None
             if final_results:
@@ -1837,114 +1885,132 @@ class RAGService:
                 first_metadata = first_r.get("metadata", {})
                 first_url = first_r.get("url", "").lower()
                 first_content = first_r.get("content", "")
-                
-                if (first_metadata.get("language", "").lower() == "python" or
-                    ".py" in first_url or "pypulseq" in first_url or
-                    "import pypulseq" in first_content):
+
+                if (
+                    first_metadata.get("language", "").lower() == "python"
+                    or ".py" in first_url
+                    or "pypulseq" in first_url
+                    or "import pypulseq" in first_content
+                ):
                     first_result_lang = "python"
-                elif (first_metadata.get("language", "").lower() == "matlab" or
-                      ".m" in first_url or "mr.Sequence()" in first_content):
+                elif (
+                    first_metadata.get("language", "").lower() == "matlab"
+                    or ".m" in first_url
+                    or "mr.Sequence()" in first_content
+                ):
                     first_result_lang = "matlab"
-            
+
             # Add language note
             if language.lower() == "matlab" and first_result_lang == "python":
-                formatted.append("*Note: Showing Python implementation (no MATLAB version found). The MATLAB equivalent would use similar logic with mr.* functions.*\n")
+                formatted.append(
+                    "*Note: Showing Python implementation (no MATLAB version found). The MATLAB equivalent would use similar logic with mr.* functions.*\n"
+                )
             elif language.lower() == "python" and first_result_lang == "matlab":
-                formatted.append("*Note: Showing MATLAB implementation. For Python/pypulseq, adapt using pp.* functions.*\n")
+                formatted.append(
+                    "*Note: Showing MATLAB implementation. For Python/pypulseq, adapt using pp.* functions.*\n"
+                )
             else:
-                formatted.append(f"*Language: {(first_result_lang or language).upper()}*\n")
-            
+                formatted.append(
+                    f"*Language: {(first_result_lang or language).upper()}*\n"
+                )
+
             formatted.append(f"Found {len(final_results)} implementation(s):\n")
-            
+
             for i, item in enumerate(final_results, 1):
                 metadata = item.get("metadata", {})
                 file_ext = metadata.get("file_extension", "")
                 summary = item.get("summary", "No description available")
                 content = item.get("content", "")
                 url = item.get("url", "N/A")
-                
+
                 # Process notebooks if needed
                 if file_ext == ".ipynb" and "```" not in content:
                     content = self.process_notebook_content(content, "example_request")
-                
+
                 formatted.append(f"### {i}. Implementation from {url.split('/')[-1]}")
                 formatted.append(f"**Summary:** {summary[:200]}...")
                 formatted.append(f"**Source:** {url}")
-                
+
                 # Determine code language for syntax highlighting
                 code_lang = "python" if file_ext == ".py" else "matlab"
-                
+
                 formatted.append(f"\n```{code_lang}")
                 # Limit code preview if too long
                 if len(content) > 5000:
                     formatted.append(content[:5000])
-                    formatted.append(f"\n% ... [Truncated - {len(content)} total characters]")
+                    formatted.append(
+                        f"\n% ... [Truncated - {len(content)} total characters]"
+                    )
                 else:
                     formatted.append(content)
                 formatted.append("```")
-                
+
                 # Add key functions used
                 functions_used = self._extract_functions_used(content)
                 if functions_used:
-                    formatted.append(f"**Key Functions:** {', '.join(functions_used[:10])}")
-                
+                    formatted.append(
+                        f"**Key Functions:** {', '.join(functions_used[:10])}"
+                    )
+
                 formatted.append("")  # Empty line between results
-            
+
             self.performance_monitor.record_query_completion(context, final_results)
             return "\n".join(formatted)
-            
+
         except Exception as e:
             self.performance_monitor.record_query_completion(context, [], error=str(e))
             logger.error(f"Code implementation search failed: {e}")
             return f"Error searching code implementations: {str(e)}"
-    
+
     def _extract_functions_used(self, code: str) -> List[str]:
         """Extract Pulseq functions used in code."""
         import re
-        
+
         # Patterns for common Pulseq functions
         patterns = [
-            r'mr\.(\w+)\(',  # mr.functionName(
-            r'seq\.(\w+)\(',  # seq.methodName(
-            r'make(\w+)\(',  # makeTrapezoid(
-            r'calc(\w+)\(',  # calcDuration(
-            r'write(\w+)\(',  # writeHASTE(
+            r"mr\.(\w+)\(",  # mr.functionName(
+            r"seq\.(\w+)\(",  # seq.methodName(
+            r"make(\w+)\(",  # makeTrapezoid(
+            r"calc(\w+)\(",  # calcDuration(
+            r"write(\w+)\(",  # writeHASTE(
         ]
-        
+
         functions = set()
         for pattern in patterns:
             matches = re.findall(pattern, code, re.IGNORECASE)
             for match in matches:
-                if pattern.startswith('mr'):
+                if pattern.startswith("mr"):
                     functions.add(f"mr.{match}")
-                elif pattern.startswith('seq'):
+                elif pattern.startswith("seq"):
                     functions.add(f"seq.{match}")
                 else:
                     functions.add(match.lower())
-        
+
         return sorted(list(functions))
-    
-    def validate_pulseq_code(self, code: str, language: str = "matlab") -> Dict[str, Any]:
+
+    def validate_pulseq_code(
+        self, code: str, language: str = "matlab"
+    ) -> Dict[str, Any]:
         """
         Validate Pulseq function calls in user code.
-        
+
         Steps:
         1. Extract all function calls matching:
            - mr.* patterns
            - seq.* patterns
            - Common sequence operations
-        
+
         2. For each function found:
            - Query function_calling_patterns view
            - Check if calling pattern is correct
            - Identify class methods used as regular functions
-        
+
         3. Return validation results:
            - 'valid_functions': List of correctly used functions
            - 'errors': List of incorrect usage with corrections
            - 'warnings': Potential issues (deprecated, etc.)
            - 'suggestions': Improvements based on best practices
-        
+
         Example error:
         {
             'function': 'write',
@@ -1954,186 +2020,194 @@ class RAGService:
         }
         """
         import re
-        
+
         validation_results = {
-            'valid_functions': [],
-            'errors': [],
-            'warnings': [],
-            'suggestions': []
+            "valid_functions": [],
+            "errors": [],
+            "warnings": [],
+            "suggestions": [],
         }
-        
+
         # Extract function calls
         function_patterns = [
-            (r'mr\.(\w+)\s*\(', 'mr'),
-            (r'seq\.(\w+)\s*\(', 'seq'),
-            (r'(\w+)\s*=\s*make(\w+)\s*\(', 'make'),
-            (r'(\w+)\s*=\s*calc(\w+)\s*\(', 'calc'),
-            (r'write(\w+)\s*\(', 'write')
+            (r"mr\.(\w+)\s*\(", "mr"),
+            (r"seq\.(\w+)\s*\(", "seq"),
+            (r"(\w+)\s*=\s*make(\w+)\s*\(", "make"),
+            (r"(\w+)\s*=\s*calc(\w+)\s*\(", "calc"),
+            (r"write(\w+)\s*\(", "write"),
         ]
-        
+
         found_functions = []
         for pattern, prefix in function_patterns:
             matches = re.finditer(pattern, code, re.IGNORECASE)
             for match in matches:
-                if prefix == 'mr':
+                if prefix == "mr":
                     func_name = match.group(1)
-                    found_functions.append(('mr', func_name, match.start()))
-                elif prefix == 'seq':
+                    found_functions.append(("mr", func_name, match.start()))
+                elif prefix == "seq":
                     func_name = match.group(1)
-                    found_functions.append(('seq', func_name, match.start()))
-                elif prefix in ['make', 'calc', 'write']:
-                    func_name = prefix + match.group(2) if len(match.groups()) > 1 else prefix + match.group(1)
-                    found_functions.append(('function', func_name, match.start()))
-        
+                    found_functions.append(("seq", func_name, match.start()))
+                elif prefix in ["make", "calc", "write"]:
+                    func_name = (
+                        prefix + match.group(2)
+                        if len(match.groups()) > 1
+                        else prefix + match.group(1)
+                    )
+                    found_functions.append(("function", func_name, match.start()))
+
         # Common errors database
         common_errors = {
-            'mr.write': {
-                'error': 'write is a Sequence class method, not an mr function',
-                'correct': 'seq.write',
-                'fix': 'First create sequence: seq = mr.Sequence(); then use seq.write("filename.seq")'
+            "mr.write": {
+                "error": "write is a Sequence class method, not an mr function",
+                "correct": "seq.write",
+                "fix": 'First create sequence: seq = mr.Sequence(); then use seq.write("filename.seq")',
             },
-            'mr.addBlock': {
-                'error': 'addBlock is a Sequence class method',
-                'correct': 'seq.addBlock',
-                'fix': 'Use seq.addBlock(...) after creating sequence object'
+            "mr.addBlock": {
+                "error": "addBlock is a Sequence class method",
+                "correct": "seq.addBlock",
+                "fix": "Use seq.addBlock(...) after creating sequence object",
             },
-            'mr.plot': {
-                'error': 'plot is a Sequence class method',
-                'correct': 'seq.plot',
-                'fix': 'Use seq.plot() after creating sequence object'
+            "mr.plot": {
+                "error": "plot is a Sequence class method",
+                "correct": "seq.plot",
+                "fix": "Use seq.plot() after creating sequence object",
             },
-            'mr.setDefinition': {
-                'error': 'setDefinition is a Sequence class method',
-                'correct': 'seq.setDefinition',
-                'fix': 'Use seq.setDefinition(...) after creating sequence object'
-            }
+            "mr.setDefinition": {
+                "error": "setDefinition is a Sequence class method",
+                "correct": "seq.setDefinition",
+                "fix": "Use seq.setDefinition(...) after creating sequence object",
+            },
         }
-        
+
         # Validate each function
         for prefix, func_name, position in found_functions:
-            full_name = f"{prefix}.{func_name}" if prefix != 'function' else func_name
-            
+            full_name = f"{prefix}.{func_name}" if prefix != "function" else func_name
+
             # Check common errors
             if full_name in common_errors:
                 error_info = common_errors[full_name]
-                validation_results['errors'].append({
-                    'function': func_name,
-                    'found_usage': full_name,
-                    'correct_usage': error_info['correct'],
-                    'error': error_info['error'],
-                    'fix': error_info['fix'],
-                    'position': position
-                })
+                validation_results["errors"].append(
+                    {
+                        "function": func_name,
+                        "found_usage": full_name,
+                        "correct_usage": error_info["correct"],
+                        "error": error_info["error"],
+                        "fix": error_info["fix"],
+                        "position": position,
+                    }
+                )
             else:
                 # Mark as valid (could enhance with actual database lookup)
-                validation_results['valid_functions'].append(full_name)
-        
+                validation_results["valid_functions"].append(full_name)
+
         # Add suggestions based on best practices
-        if 'seq = mr.Sequence()' not in code and 'Sequence()' not in code:
-            if any('seq.' in f for f, _, _ in found_functions):
-                validation_results['suggestions'].append(
+        if "seq = mr.Sequence()" not in code and "Sequence()" not in code:
+            if any("seq." in f for f, _, _ in found_functions):
+                validation_results["suggestions"].append(
                     "Consider adding 'seq = mr.Sequence()' at the beginning of your script"
                 )
-        
-        if 'seq.write' not in code and 'write(' not in code:
-            validation_results['suggestions'].append(
+
+        if "seq.write" not in code and "write(" not in code:
+            validation_results["suggestions"].append(
                 "Don't forget to save your sequence with seq.write('filename.seq')"
             )
-        
-        if 'seq.plot' not in code:
-            validation_results['suggestions'].append(
+
+        if "seq.plot" not in code:
+            validation_results["suggestions"].append(
                 "Consider adding seq.plot() to visualize your sequence"
             )
-        
+
         return validation_results
 
     def process_notebook_content(self, notebook_content: str, query_intent: str) -> str:
         """
         Process Jupyter notebook content based on user intent.
-        
+
         For 'example_request':
         - Extract only code cells
         - Remove markdown cells
         - Concatenate code into runnable script
         - Add comment with source notebook
-        
+
         For 'tutorial_request':
         - Preserve markdown explanations
         - Keep code cells in sequence
         - Format as educational progression
         - Maintain step-by-step narrative
-        
+
         Handle both .ipynb JSON structure and processed content.
         """
         import json
-        
+
         try:
             # Check if content is JSON (raw notebook)
-            if notebook_content.strip().startswith('{'):
+            if notebook_content.strip().startswith("{"):
                 try:
                     notebook = json.loads(notebook_content)
-                    cells = notebook.get('cells', [])
+                    cells = notebook.get("cells", [])
                 except json.JSONDecodeError:
                     # Not valid JSON, treat as processed content
                     return notebook_content
             else:
                 # Already processed content, return as-is
                 return notebook_content
-            
+
             if query_intent == "example_request":
                 # Extract only code cells for runnable script
                 code_blocks = []
                 code_blocks.append("% Extracted from Jupyter notebook")
                 code_blocks.append("% Combined code cells for direct execution\n")
-                
+
                 for cell in cells:
-                    if cell.get('cell_type') == 'code':
-                        source = cell.get('source', [])
+                    if cell.get("cell_type") == "code":
+                        source = cell.get("source", [])
                         if isinstance(source, list):
-                            code = ''.join(source)
+                            code = "".join(source)
                         else:
                             code = source
-                        
+
                         # Skip empty cells
                         if code.strip():
                             code_blocks.append(code)
                             code_blocks.append("")  # Add spacing
-                
-                return '\n'.join(code_blocks)
-                
+
+                return "\n".join(code_blocks)
+
             elif query_intent == "tutorial_request":
                 # Preserve educational structure
                 formatted_content = []
-                
+
                 for i, cell in enumerate(cells):
-                    cell_type = cell.get('cell_type')
-                    source = cell.get('source', [])
-                    
+                    cell_type = cell.get("cell_type")
+                    source = cell.get("source", [])
+
                     if isinstance(source, list):
-                        content = ''.join(source)
+                        content = "".join(source)
                     else:
                         content = source
-                    
-                    if cell_type == 'markdown':
+
+                    if cell_type == "markdown":
                         # Preserve markdown for context
                         formatted_content.append("% === Explanation ===")
                         # Convert markdown to comments
-                        for line in content.split('\n'):
+                        for line in content.split("\n"):
                             if line.strip():
                                 formatted_content.append(f"% {line}")
                         formatted_content.append("")
-                        
-                    elif cell_type == 'code' and content.strip():
-                        formatted_content.append(f"% === Code Block {i+1} ===")
+
+                    elif cell_type == "code" and content.strip():
+                        formatted_content.append(f"% === Code Block {i + 1} ===")
                         formatted_content.append(content)
                         formatted_content.append("")
-                
-                return '\n'.join(formatted_content)
-            
+
+                return "\n".join(formatted_content)
+
             else:
                 # Default: return code cells with minimal context
-                return self.process_notebook_content(notebook_content, "example_request")
-                
+                return self.process_notebook_content(
+                    notebook_content, "example_request"
+                )
+
         except Exception as e:
             logger.warning(f"Error processing notebook content: {e}")
             # Return original content if processing fails
@@ -2166,22 +2240,22 @@ class RAGService:
             # REMOVED: Special handling for official sequences was returning full files (21KB)
             # instead of search snippets, causing RECITATION errors
             # Let the regular search path handle sequence requests like it did before
-            
+
             # Continue with regular search that returns snippets
             # Classify the query to determine search strategy
             strategy, metadata = self.classify_search_strategy(query)
             context["search_strategy"] = strategy
-            
+
             # Get appropriate number of results based on strategy
             if strategy == "vector_enhanced":
                 initial_match_count = 50  # Reduced for better performance
             else:
                 initial_match_count = min(match_count * 3, 100)
-            
+
             if strategy == "vector_enhanced":
                 # Enhanced search for MRI sequences
                 seq_type = metadata.get("sequence_type", "")
-                
+
                 # Try to find files with the sequence name in the URL/filename first
                 # This often gives the best results
                 if use_hybrid and self.settings.use_hybrid_search:
@@ -2191,7 +2265,7 @@ class RAGService:
                         match_count=initial_match_count,
                         source=source_id,
                         search_type="code_examples",
-                        keyword_query_override=seq_type  # Just search for the sequence type
+                        keyword_query_override=seq_type,  # Just search for the sequence type
                     )
                 else:
                     filter_metadata = {"source": source_id} if source_id else None
@@ -2200,25 +2274,27 @@ class RAGService:
                         match_count=initial_match_count,
                         filter_metadata=filter_metadata,
                         source_id=source_id,
-                        use_reranking=True
+                        use_reranking=True,
                     )
-                
+
                 # Use the new scoring method for sequences
                 if results:
                     scored_results = []
                     for result in results:
                         # Use the new _score_sequence_relevance method
                         score = self._score_sequence_relevance(result, seq_type)
-                        
+
                         # Only keep results with positive scores or ensure minimum results
                         if score > 0 or len(scored_results) < 10:
-                            result['relevance_score'] = score
+                            result["relevance_score"] = score
                             scored_results.append(result)
-                    
+
                     # Sort by relevance score
-                    scored_results.sort(key=lambda x: x.get('relevance_score', 0), reverse=True)
+                    scored_results.sort(
+                        key=lambda x: x.get("relevance_score", 0), reverse=True
+                    )
                     results = scored_results
-                
+
             elif strategy == "hybrid_filtered":
                 # Use filtered query for keyword portion
                 filtered_query = metadata.get("filtered_query", query)
@@ -2227,76 +2303,84 @@ class RAGService:
                     match_count=initial_match_count,
                     source=source_id,
                     search_type="code_examples",
-                    keyword_query_override=filtered_query  # Filtered for keywords
+                    keyword_query_override=filtered_query,  # Filtered for keywords
                 )
-                
+
             else:  # hybrid_full
                 # Standard hybrid search
                 results = self.supabase_client.perform_hybrid_search(
                     query=query,
                     match_count=initial_match_count,
                     source=source_id,
-                    search_type="code_examples"
+                    search_type="code_examples",
                 )
-            
+
             # Apply MATLAB preference if no language explicitly specified
             query_lower = query.lower()
-            if results and "python" not in query_lower and "pypulseq" not in query_lower:
+            if (
+                results
+                and "python" not in query_lower
+                and "pypulseq" not in query_lower
+            ):
                 # Sort results to prioritize MATLAB examples
                 # Check multiple fields for language identification
                 matlab_results = []
                 python_results = []
                 other_results = []
-                
+
                 for r in results:
                     # Check metadata, url, and content for language indicators
                     metadata = r.get("metadata", {})
                     url = r.get("url", "").lower()
                     content = r.get("content", "").lower()
-                    
+
                     # Determine language from multiple sources
                     is_matlab = (
-                        metadata.get("language", "").lower() == "matlab" or
-                        ".m" in url or
-                        "/matlab/" in url or
-                        "% matlab" in content[:100] or
-                        "mr.Sequence()" in r.get("content", "")  # MATLAB pattern
+                        metadata.get("language", "").lower() == "matlab"
+                        or ".m" in url
+                        or "/matlab/" in url
+                        or "% matlab" in content[:100]
+                        or "mr.Sequence()" in r.get("content", "")  # MATLAB pattern
                     )
-                    
+
                     is_python = (
-                        metadata.get("language", "").lower() == "python" or
-                        ".py" in url or
-                        "/python/" in url or
-                        "pypulseq" in url or
-                        "import pypulseq" in content or
-                        "pp.Sequence()" in r.get("content", "")  # Python pattern
+                        metadata.get("language", "").lower() == "python"
+                        or ".py" in url
+                        or "/python/" in url
+                        or "pypulseq" in url
+                        or "import pypulseq" in content
+                        or "pp.Sequence()" in r.get("content", "")  # Python pattern
                     )
-                    
+
                     if is_matlab:
                         matlab_results.append(r)
                     elif is_python:
                         python_results.append(r)
                     else:
                         other_results.append(r)
-                
+
                 # ALWAYS put MATLAB results first if they exist
                 if matlab_results:
                     results = matlab_results + other_results + python_results
-                    logger.info(f"Prioritized {len(matlab_results)} MATLAB results over {len(python_results)} Python results")
+                    logger.info(
+                        f"Prioritized {len(matlab_results)} MATLAB results over {len(python_results)} Python results"
+                    )
                 elif not python_results:
                     # No language-specific results, keep original order
                     pass
                 else:
                     # Only Python results found - still put them last and other results first
                     results = other_results + python_results
-                    logger.info(f"No MATLAB results found, showing {len(python_results)} Python results")
-            
+                    logger.info(
+                        f"No MATLAB results found, showing {len(python_results)} Python results"
+                    )
+
             # Limit to requested count
             results = results[:match_count] if results else []
-            
+
             # Record completion
             self.performance_monitor.record_query_completion(context, results)
-            
+
             # Format results
             return self._format_code_results(results, query)
 
@@ -2365,7 +2449,7 @@ class RAGService:
             return f"No code examples found for query: '{query}'"
 
         formatted = [f"## Code Examples for: '{query}'\n"]
-        
+
         # Add language preference note if applicable
         query_lower = query.lower()
         if results:
@@ -2374,34 +2458,40 @@ class RAGService:
             first_metadata = first_result.get("metadata", {})
             first_url = first_result.get("url", "").lower()
             first_content = first_result.get("content", "")
-            
+
             is_python_result = (
-                first_metadata.get("language", "").lower() == "python" or
-                ".py" in first_url or
-                "pypulseq" in first_url or
-                "import pypulseq" in first_content[:200]
+                first_metadata.get("language", "").lower() == "python"
+                or ".py" in first_url
+                or "pypulseq" in first_url
+                or "import pypulseq" in first_content[:200]
             )
-            
+
             is_matlab_result = (
-                first_metadata.get("language", "").lower() == "matlab" or
-                ".m" in first_url or
-                "mr.Sequence()" in first_content[:200]
+                first_metadata.get("language", "").lower() == "matlab"
+                or ".m" in first_url
+                or "mr.Sequence()" in first_content[:200]
             )
-            
+
             # Add appropriate note based on what we're showing vs what was requested
             if "python" not in query_lower and "pypulseq" not in query_lower:
                 # User didn't ask for Python
                 if is_python_result:
-                    formatted.append("*Note: Showing Python example (no MATLAB version found). The MATLAB equivalent would use mr.* functions instead of pp.*.*\n")
+                    formatted.append(
+                        "*Note: Showing Python example (no MATLAB version found). The MATLAB equivalent would use mr.* functions instead of pp.*.*\n"
+                    )
                 elif is_matlab_result:
-                    formatted.append("*Language: MATLAB (default). Add 'python' or 'pypulseq' to your query for Python examples.*\n")
+                    formatted.append(
+                        "*Language: MATLAB (default). Add 'python' or 'pypulseq' to your query for Python examples.*\n"
+                    )
             elif "python" in query_lower or "pypulseq" in query_lower:
                 # User asked for Python
                 if is_matlab_result:
-                    formatted.append("*Note: Showing MATLAB example (no Python version found). Adapt using pypulseq's pp.* functions.*\n")
+                    formatted.append(
+                        "*Note: Showing MATLAB example (no Python version found). Adapt using pypulseq's pp.* functions.*\n"
+                    )
                 elif is_python_result:
                     formatted.append("*Language: Python (pypulseq) as requested.*\n")
-        
+
         # Only show first result to prevent RECITATION errors from large content
         results_to_show = results[:1]  # Just the top result
         if len(results) > 1:
@@ -2446,7 +2536,7 @@ class RAGService:
     ) -> tuple[str, List[Dict[str, Any]]]:
         """
         Format code search results - always show the top result directly.
-        
+
         Returns:
             tuple: (formatted_string, None) - no longer returns pending results
         """
@@ -2455,16 +2545,18 @@ class RAGService:
 
         # Always show the top result directly
         top_result = results[:1]  # Just the best match
-        
+
         # Add a note if there were multiple results
         if len(results) > 1:
-            formatted_result = f"## Found {len(results)} implementations for: '{query}'\n"
+            formatted_result = (
+                f"## Found {len(results)} implementations for: '{query}'\n"
+            )
             formatted_result += "Showing the most relevant result:\n\n"
             formatted_result += self._format_code_results(top_result, query)
         else:
             # Single result - show without the "found X implementations" header
             formatted_result = self._format_code_results(top_result, query)
-        
+
         return formatted_result, None  # Always return None for pending results
 
     def format_selected_code_results(
@@ -2636,97 +2728,112 @@ class RAGService:
             logger.error(f"Error getting performance stats: {e}")
             return f"Error retrieving performance statistics: {str(e)}"
 
-    async def search_functions_fast(self, query: str, limit: int = 10) -> List[Dict[str, Any]]:
+    async def search_functions_fast(
+        self, query: str, limit: int = 10
+    ) -> List[Dict[str, Any]]:
         """
         Phase 1: Lightweight search for function discovery.
         Uses only essential fields for fast matching.
-        
+
         Args:
             query: Search query for functions
             limit: Maximum number of results to return
-            
+
         Returns:
             List of function matches with minimal fields
         """
         context = self.performance_monitor.start_query(query, "functions_fast")
-        
+
         try:
             # Create embedding for the query
             from .embeddings import create_embedding
+
             query_embedding = create_embedding(query)
-            
+
             # Query the api_reference_search view (lean fields only)
-            params = {
-                "query_embedding": query_embedding,
-                "match_count": limit
-            }
-            
+            params = {"query_embedding": query_embedding, "match_count": limit}
+
             # Execute search against the lean view
             result = self.supabase_client.client.rpc(
                 "match_api_reference_search", params
             ).execute()
-            
+
             if not result.data:
                 # Fallback to direct query
-                result = self.supabase_client.client.from_("api_reference_search").select(
-                    "name, signature, description, calling_pattern, is_class_method"
-                ).limit(limit).execute()
-            
+                result = (
+                    self.supabase_client.client.from_("api_reference_search")
+                    .select(
+                        "name, signature, description, calling_pattern, is_class_method"
+                    )
+                    .limit(limit)
+                    .execute()
+                )
+
             self.performance_monitor.record_query_completion(context, result.data or [])
             return result.data or []
-            
+
         except Exception as e:
             self.performance_monitor.record_query_completion(context, [], error=str(e))
             logger.error(f"Fast function search failed: {e}")
             return []
-    
-    async def get_function_details(self, function_name: str) -> Optional[Dict[str, Any]]:
+
+    async def get_function_details(
+        self, function_name: str
+    ) -> Optional[Dict[str, Any]]:
         """
         Phase 2: Get complete details for code generation.
         Fetches heavy fields only when needed.
-        
+
         Args:
             function_name: Exact name of the function
-            
+
         Returns:
             Complete function details or None if not found
         """
         try:
             # Query the api_reference_details view for full details
-            result = self.supabase_client.client.from_("api_reference_details").select(
-                "name, signature, parameters, usage_examples, returns, has_nargin_pattern, calling_pattern"
-            ).eq("name", function_name).single().execute()
-            
+            result = (
+                self.supabase_client.client.from_("api_reference_details")
+                .select(
+                    "name, signature, parameters, usage_examples, returns, has_nargin_pattern, calling_pattern"
+                )
+                .eq("name", function_name)
+                .single()
+                .execute()
+            )
+
             return result.data
-            
+
         except Exception as e:
             logger.error(f"Failed to get function details for {function_name}: {e}")
             return None
-    
-    async def search_official_sequences(self, sequence_type: str = None) -> List[Dict[str, Any]]:
+
+    async def search_official_sequences(
+        self, sequence_type: str = None
+    ) -> List[Dict[str, Any]]:
         """
         Search only official, validated sequence examples.
-        
+
         Args:
             sequence_type: Optional filter for specific sequence type (e.g., 'EPI', 'SpinEcho')
-            
+
         Returns:
             List of official sequence examples
         """
         try:
             # Query the official_sequence_examples view
             # Use ai_summary instead of content for search results
-            query = self.supabase_client.client.from_("official_sequence_examples").select(
-                "url, ai_summary, file_name, sequence_type"
-            )
-            
+            query = self.supabase_client.client.from_(
+                "official_sequence_examples"
+            ).select("url, ai_summary, file_name, sequence_type")
+
             # Apply sequence type filter if provided
             if sequence_type:
                 query = query.eq("sequence_type", sequence_type)
-            
+
             result = query.execute()
             return result.data or []
-            
+
         except Exception as e:
             logger.error(f"Failed to search official sequences: {e}")
             return []
@@ -2749,6 +2856,7 @@ def get_rag_service() -> RAGService:
         # Apply performance optimizations for faster data fetching
         try:
             from .apply_optimizations import apply_rag_optimizations
+
             apply_rag_optimizations()
         except Exception as e:
             logger.warning(f"Could not apply RAG optimizations: {e}")
