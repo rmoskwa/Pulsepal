@@ -491,11 +491,33 @@ async def run_pulsepal(query: str, session_id: str = None) -> tuple[str, str]:
             logger.warning("Agent execution timed out after 60 seconds")
             raise
         
+        # Process response for hallucinations if it contains MATLAB code
+        response_text = result.data
+        if any(indicator in response_text for indicator in ['```matlab', 'mr.', 'seq.', 'make']):
+            # Extract code blocks from response
+            import re
+            code_blocks = re.findall(r'```matlab\n(.*?)\n```', response_text, re.DOTALL)
+            
+            if code_blocks:
+                from .hallucination_prevention import PulseqGrounder
+                grounder = PulseqGrounder()
+                
+                for i, code_block in enumerate(code_blocks):
+                    grounding_result = await grounder.prevent_hallucination(code_block)
+                    
+                    if grounding_result['modified']:
+                        # Replace the code block with corrected version
+                        original_block = f"```matlab\n{code_block}\n```"
+                        corrected_block = f"```matlab\n{grounding_result['code']}\n```"
+                        response_text = response_text.replace(original_block, corrected_block)
+                        
+                        logger.info(f"Corrected {len(grounding_result['corrections'])} hallucinations in code block {i+1}")
+        
         # Add response to conversation history
-        deps.conversation_context.add_conversation("assistant", result.data)
+        deps.conversation_context.add_conversation("assistant", response_text)
         
         logger.info(f"Pulsepal responded to query in session {session_id}")
-        return session_id, result.data
+        return session_id, response_text
         
     except asyncio.TimeoutError:
         logger.warning(f"Query timed out after 10 seconds: {query[:100]}...")
