@@ -599,7 +599,7 @@ class RAGService:
 
                 if result.data:
                     return result.data
-            except:
+            except Exception:
                 pass  # RPC doesn't exist, use fallback
 
             # Fallback to direct table search
@@ -641,31 +641,37 @@ class RAGService:
             logger.error(f"Failed to get function details for {function_names}: {e}")
             return []
 
-    async def get_official_sequence(self, sequence_type: str, specific_file: str = None) -> dict:
+    async def get_official_sequence(
+        self, sequence_type: str, specific_file: str = None
+    ) -> dict:
         """
         Get official validated sequence using semantic search with embeddings.
-        
+
         Args:
             sequence_type: Type of sequence to search for
             specific_file: Optional specific filename to retrieve from search results
-            
+
         Returns:
             If specific_file is None: Returns metadata for top 5 matches
             If specific_file is provided: Returns full content for that file
         """
         try:
             logger.info(f"[GET_OFFICIAL] Starting search for: '{sequence_type}'")
-            
+
             # Import embedding function
             from .embeddings import create_embedding
-            
+
             # Create simple, effective embedding query (language-agnostic)
-            query_text = f"{sequence_type} MRI pulse sequence implementation Pulseq code example"
-            
+            query_text = (
+                f"{sequence_type} MRI pulse sequence implementation Pulseq code example"
+            )
+
             logger.debug(f"[GET_OFFICIAL] Creating embedding for: '{query_text}'")
             query_embedding = create_embedding(query_text)
-            logger.debug(f"[GET_OFFICIAL] Created embedding with dimension: {len(query_embedding)}")
-            
+            logger.debug(
+                f"[GET_OFFICIAL] Created embedding with dimension: {len(query_embedding)}"
+            )
+
             # Use RPC function for semantic search with relaxed threshold
             logger.debug("[GET_OFFICIAL] Calling RPC 'match_official_sequences'...")
             result = self.supabase_client.rpc(
@@ -673,68 +679,89 @@ class RAGService:
                 {
                     "query_embedding": query_embedding,
                     "match_count": 10,  # Get more matches for type filtering
-                    "threshold": 0.3,   # Lower threshold for better recall
+                    "threshold": 0.3,  # Lower threshold for better recall
                 },
             ).execute()
-            
-            logger.debug(f"[GET_OFFICIAL] RPC returned {len(result.data) if result.data else 0} results")
-            
+
+            logger.debug(
+                f"[GET_OFFICIAL] RPC returned {len(result.data) if result.data else 0} results"
+            )
+
             # If specific file requested, find and return it
             if specific_file and result.data:
                 for match in result.data:
-                    if match.get('file_name', '').endswith(specific_file):
-                        logger.info(f"[GET_OFFICIAL] Returning specific file: {specific_file}")
+                    if match.get("file_name", "").endswith(specific_file):
+                        logger.info(
+                            f"[GET_OFFICIAL] Returning specific file: {specific_file}"
+                        )
                         return {
-                            'file_name': match.get('file_name', 'Unknown'),
-                            'url': match.get('url', ''),
-                            'content': match.get('content', ''),
-                            'similarity': match.get('similarity', 0),
-                            'description': match.get('ai_summary', ''),
-                            'sequence_type': match.get('sequence_type', ''),
-                            'trajectory_type': match.get('trajectory_type', ''),
-                            'content_length': match.get('content_length', len(match.get('content', '')))
+                            "file_name": match.get("file_name", "Unknown"),
+                            "url": match.get("url", ""),
+                            "content": match.get("content", ""),
+                            "similarity": match.get("similarity", 0),
+                            "description": match.get("ai_summary", ""),
+                            "sequence_type": match.get("sequence_type", ""),
+                            "trajectory_type": match.get("trajectory_type", ""),
+                            "content_length": match.get(
+                                "content_length", len(match.get("content", ""))
+                            ),
                         }
-                logger.warning(f"[GET_OFFICIAL] Specific file {specific_file} not found in results")
+                logger.warning(
+                    f"[GET_OFFICIAL] Specific file {specific_file} not found in results"
+                )
                 # Fall through to return metadata
-            
+
             if result.data and len(result.data) > 0:
                 # Return metadata for top 5 matches
                 # Let Gemini decide which one to show based on user intent
                 matches_metadata = []
-                
+
                 for match in result.data[:10]:  # Process all matches for filtering
-                    file_name = match.get('file_name', 'Unknown')
-                    content = match.get('content', '')
-                    
+                    file_name = match.get("file_name", "Unknown")
+                    content = match.get("content", "")
+
                     # Extract just the filename without path
-                    short_name = file_name.split('/')[-1] if '/' in file_name else file_name
-                    
+                    short_name = (
+                        file_name.split("/")[-1] if "/" in file_name else file_name
+                    )
+
                     # Detect language
-                    is_python = '.py' in file_name or 'pypulseq' in content[:500]
-                    language = 'Python' if is_python else 'MATLAB'
-                    
+                    is_python = ".py" in file_name or "pypulseq" in content[:500]
+                    language = "Python" if is_python else "MATLAB"
+
                     # Detect complexity indicators
-                    is_complex = any([
-                        'QA' in file_name,
-                        'RS' in file_name or 'rs' in file_name.lower(),  # Ramp sampling
-                        'Diffusion' in file_name,
-                        'PMC' in file_name,
-                        len(content) > 10000  # Very long files are complex
-                    ])
-                    
-                    matches_metadata.append({
-                        'file_name': short_name,
-                        'full_path': file_name,
-                        'similarity': match.get('similarity', 0),
-                        'content_length': len(content),
-                        'language': language,
-                        'complexity': 'advanced' if is_complex else 'basic',
-                        'description': match.get('ai_summary', '')[:100] if match.get('ai_summary') else '',
-                        'sequence_type': match.get('sequence_type', '')  # Add sequence type from DB
-                    })
-                
+                    is_complex = any(
+                        [
+                            "QA" in file_name,
+                            "RS" in file_name
+                            or "rs" in file_name.lower(),  # Ramp sampling
+                            "Diffusion" in file_name,
+                            "PMC" in file_name,
+                            len(content) > 10000,  # Very long files are complex
+                        ]
+                    )
+
+                    matches_metadata.append(
+                        {
+                            "file_name": short_name,
+                            "full_path": file_name,
+                            "similarity": match.get("similarity", 0),
+                            "content_length": len(content),
+                            "language": language,
+                            "complexity": "advanced" if is_complex else "basic",
+                            "description": match.get("ai_summary", "")[:100]
+                            if match.get("ai_summary")
+                            else "",
+                            "sequence_type": match.get(
+                                "sequence_type", ""
+                            ),  # Add sequence type from DB
+                        }
+                    )
+
                 # Log what we're returning
-                logger.info(f"[GET_OFFICIAL] Returning metadata for {len(matches_metadata)} matches")
+                logger.info(
+                    f"[GET_OFFICIAL] Returning metadata for {len(matches_metadata)} matches"
+                )
                 for i, meta in enumerate(matches_metadata, 1):
                     logger.debug(
                         f"  {i}. {meta['file_name']}: "
@@ -743,20 +770,23 @@ class RAGService:
                         f"lang={meta['language']}, "
                         f"complexity={meta['complexity']}"
                     )
-                
+
                 return {
-                    'matches': matches_metadata,  # Return all matches for type filtering
-                    'query': sequence_type,
-                    'top_similarity': matches_metadata[0]['similarity'] if matches_metadata else 0
+                    "matches": matches_metadata,  # Return all matches for type filtering
+                    "query": sequence_type,
+                    "top_similarity": matches_metadata[0]["similarity"]
+                    if matches_metadata
+                    else 0,
                 }
-            
+
             logger.warning(f"[GET_OFFICIAL] No matches found for '{sequence_type}'")
             return None
-            
-        except Exception as e:
-            logger.error(f"[GET_OFFICIAL] Official sequence fetch failed: {e}", exc_info=True)
-            return None
 
+        except Exception as e:
+            logger.error(
+                f"[GET_OFFICIAL] Official sequence fetch failed: {e}", exc_info=True
+            )
+            return None
 
     async def search_api_functions_enhanced(
         self, query: str, language: str = "matlab", match_count: int = 5
@@ -2727,86 +2757,6 @@ class RAGService:
         except Exception as e:
             logger.error(f"Error getting performance stats: {e}")
             return f"Error retrieving performance statistics: {str(e)}"
-
-    async def search_functions_fast(
-        self, query: str, limit: int = 10
-    ) -> List[Dict[str, Any]]:
-        """
-        Phase 1: Lightweight search for function discovery.
-        Uses only essential fields for fast matching.
-
-        Args:
-            query: Search query for functions
-            limit: Maximum number of results to return
-
-        Returns:
-            List of function matches with minimal fields
-        """
-        context = self.performance_monitor.start_query(query, "functions_fast")
-
-        try:
-            # Create embedding for the query
-            from .embeddings import create_embedding
-
-            query_embedding = create_embedding(query)
-
-            # Query the api_reference_search view (lean fields only)
-            params = {"query_embedding": query_embedding, "match_count": limit}
-
-            # Execute search against the lean view
-            result = self.supabase_client.client.rpc(
-                "match_api_reference_search", params
-            ).execute()
-
-            if not result.data:
-                # Fallback to direct query
-                result = (
-                    self.supabase_client.client.from_("api_reference_search")
-                    .select(
-                        "name, signature, description, calling_pattern, is_class_method"
-                    )
-                    .limit(limit)
-                    .execute()
-                )
-
-            self.performance_monitor.record_query_completion(context, result.data or [])
-            return result.data or []
-
-        except Exception as e:
-            self.performance_monitor.record_query_completion(context, [], error=str(e))
-            logger.error(f"Fast function search failed: {e}")
-            return []
-
-    async def get_function_details(
-        self, function_name: str
-    ) -> Optional[Dict[str, Any]]:
-        """
-        Phase 2: Get complete details for code generation.
-        Fetches heavy fields only when needed.
-
-        Args:
-            function_name: Exact name of the function
-
-        Returns:
-            Complete function details or None if not found
-        """
-        try:
-            # Query the api_reference_details view for full details
-            result = (
-                self.supabase_client.client.from_("api_reference_details")
-                .select(
-                    "name, signature, parameters, usage_examples, returns, has_nargin_pattern, calling_pattern"
-                )
-                .eq("name", function_name)
-                .single()
-                .execute()
-            )
-
-            return result.data
-
-        except Exception as e:
-            logger.error(f"Failed to get function details for {function_name}: {e}")
-            return None
 
     async def search_official_sequences(
         self, sequence_type: str = None
