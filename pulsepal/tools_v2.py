@@ -199,43 +199,82 @@ def format_api_result(result: Dict) -> str:
 
 
 def format_example_result(result: Dict) -> str:
-    """Format code example result for display."""
+    """Format code example result for display - provides data, not presentation."""
     parts = []
+
+    def extract_code_from_content(content: str) -> str:
+        """Extract code part from content that may have summary---code format."""
+        if "---" in content:
+            # Split on --- and take the second part (the actual code)
+            code_parts = content.split("---", 1)
+            if len(code_parts) > 1:
+                return code_parts[1].strip()
+        return content
 
     if result.get("source_type") == "DOCUMENTATION_MULTI_PART":
         doc = result.get("document", {})
-        parts.append(
-            f"**{doc.get('title', 'Document')}** ({doc.get('total_parts', 1)} parts)"
-        )
-        parts.append(f"URL: {doc.get('url', 'N/A')}")
+        parts.append(f"Document: {doc.get('title', 'Document')}")
+        parts.append(f"Parts: {doc.get('total_parts', 1)}")
+        parts.append(f"Source: {doc.get('url', 'N/A')}")
 
-        # Show truncated content
+        # Extract code part if it has the summary---code format
         content = doc.get("content", "")
-        if len(content) > 500:
-            content = content[:500] + "..."
+        content = extract_code_from_content(content)
+
+        # Provide content info and raw content
+        if len(content) > 10000:
+            parts.append(
+                f"Content length: {len(content)} characters (truncated to 10000)"
+            )
+            content = content[:10000] + "\n[...truncated]"
+        else:
+            parts.append(f"Content length: {len(content)} characters")
+
+        parts.append("---CONTENT_START---")
         parts.append(content)
+        parts.append("---CONTENT_END---")
     else:
         content_info = result.get("content", {})
-        parts.append(f"**{content_info.get('title', 'Example')}**")
+        parts.append(f"Example: {content_info.get('title', 'Code Example')}")
 
         if content_info.get("url"):
-            parts.append(f"URL: {content_info['url']}")
+            parts.append(f"Source: {content_info['url']}")
 
-        # Show truncated content
+        # Extract code part if it has the summary---code format
         text = content_info.get("text", "")
-        if len(text) > 500:
-            text = text[:500] + "..."
+        text = extract_code_from_content(text)
+
+        # Check if this looks like code
+        is_code = any(
+            pattern in text for pattern in ["function", "def ", "class ", "%", "//"]
+        )
+
+        # Provide metadata about the content
+        content_type = "code" if is_code else "documentation"
+        parts.append(f"Content type: {content_type}")
+
+        # Handle truncation for very long content
+        if len(text) > 10000:
+            parts.append(f"Content length: {len(text)} characters (truncated to 10000)")
+            text = text[:10000] + "\n[...truncated]"
+        else:
+            parts.append(f"Content length: {len(text)} characters")
+
+        parts.append("---CONTENT_START---")
         parts.append(text)
+        parts.append("---CONTENT_END---")
 
     return "\n".join(parts) + "\n"
 
 
 def format_tutorial_result(result: Dict) -> str:
-    """Format tutorial/sequence result for display."""
+    """Format tutorial/sequence result for display - provides data, not presentation."""
     parts = []
     tutorial = result.get("tutorial_info", {})
+    implementation = result.get("implementation", {})
 
-    parts.append(f"**{tutorial.get('title', 'Sequence Example')}**")
+    # Provide metadata about the sequence
+    parts.append(f"Sequence: {tutorial.get('title', 'Sequence Example')}")
     parts.append(f"Type: {tutorial.get('sequence_type', 'Unknown')}")
     parts.append(f"Complexity: {tutorial.get('complexity', 'Unknown')}")
 
@@ -244,6 +283,33 @@ def format_tutorial_result(result: Dict) -> str:
 
     if tutorial.get("key_techniques"):
         parts.append(f"Techniques: {', '.join(tutorial['key_techniques'])}")
+
+    # Provide the code content without prescriptive formatting
+    if implementation.get("full_code"):
+        full_content = implementation["full_code"]
+
+        # Parse out just the code part after the --- separator
+        if "---" in full_content:
+            # Split on --- and take the second part (the actual code)
+            code_parts = full_content.split("---", 1)
+            if len(code_parts) > 1:
+                code_only = code_parts[1].strip()
+            else:
+                code_only = full_content
+        else:
+            code_only = full_content
+
+        # Count lines for context
+        line_count = len(code_only.splitlines())
+        parts.append(f"\nCode available: {line_count} lines, MATLAB")
+        parts.append("---CODE_START---")
+        parts.append(code_only)
+        parts.append("---CODE_END---")
+
+    # Include usage guide if available
+    usage_guide = result.get("usage_guide", {})
+    if usage_guide.get("when_to_use"):
+        parts.append(f"Usage context: {usage_guide['when_to_use']}")
 
     return "\n".join(parts) + "\n"
 
