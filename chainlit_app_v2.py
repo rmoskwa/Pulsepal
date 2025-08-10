@@ -22,9 +22,10 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 # Import V2 components with function validation
 from pulsepal.main_agent_v2 import pulsepal_agent, create_pulsepal_session
-from pulsepal.dependencies import get_session_manager, SUPPORTED_LANGUAGES
+from pulsepal.dependencies import get_session_manager
 from pulsepal.settings import get_settings
 from pulsepal.conversation_logger import get_conversation_logger
+from pulsepal.semantic_router import initialize_semantic_router, QueryRoute
 
 # Configure logging early so it's available for auth
 logging.basicConfig(level=logging.INFO)
@@ -119,7 +120,6 @@ settings = get_settings()
 conversation_logger = get_conversation_logger()
 
 # Initialize semantic router at startup for efficient classification
-from pulsepal.semantic_router import initialize_semantic_router, QueryRoute
 logger.info("Initializing semantic router at startup...")
 _semantic_router = initialize_semantic_router()
 logger.info("✅ Semantic router initialized successfully")
@@ -208,10 +208,7 @@ Current Focus: [What you need help with]
 
         await cl.ChatSettings(settings).send()
 
-        # Get supported languages for welcome message
-        lang_list = ", ".join(
-            [lang.upper() for lang in sorted(SUPPORTED_LANGUAGES.keys())]
-        )
+        # Get supported languages for welcome message (removed unused variable)
 
         # Get user info if authenticated
         auth_info = ""

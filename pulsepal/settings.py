@@ -29,7 +29,7 @@ class Settings(BaseSettings):
         alias="GOOGLE_API_KEY",
     )
     llm_model: str = Field(
-        default="gemini-2.0-flash-exp",
+        default="gemini-2.5-flash",
         description="Gemini model name to use",
         alias="LLM_MODEL",
     )
@@ -44,11 +44,11 @@ class Settings(BaseSettings):
         alias="SUPABASE_KEY",
     )
 
-    # BGE Embedding Model Configuration
-    bge_model_path: str = Field(
-        default="/mnt/c/Users/Robert Moskwa/huggingface_models/hub/models--BAAI--bge-large-en-v1.5/snapshots",
-        description="Path to local BGE embedding model",
-        alias="BGE_MODEL_PATH",
+    # Google Embeddings API Configuration
+    google_api_key_embedding: str = Field(
+        None,
+        description="Google API key for embeddings (optional, uses main key if not set)",
+        alias="GOOGLE_API_KEY_EMBEDDING",
     )
 
     # Session Configuration

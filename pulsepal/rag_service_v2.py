@@ -10,7 +10,6 @@ import logging
 import re
 from typing import List, Dict, Optional, Any
 from dataclasses import dataclass, field
-from functools import lru_cache
 from .supabase_client import get_supabase_client, SupabaseRAGClient
 from .settings import get_settings
 
@@ -129,7 +128,6 @@ class ModernPulseqRAG:
             # Check if the namespace is correct
             correct_data = response.data[0]
             correct_usage = correct_data.get("correct_usage", "")
-            is_class_method = correct_data.get("is_class_method", False)
             
             # Extract namespace from correct_usage pattern
             # e.g., "seq.write('filename')" -> "seq"
