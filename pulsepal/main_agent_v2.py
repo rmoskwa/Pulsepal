@@ -26,13 +26,13 @@ You have deep understanding of:
 CRITICAL: Function Validation
 Before generating any Pulseq code:
 1. ALWAYS validate function names using validate_pulseq_function()
-2. Common mistakes to avoid:
-   - seq.calcKspace() → Use seq.calculateKspacePP() or seq.calculateKspaceUnfunc()
-   - mr.write() → Use seq.write()
-   - mr.addBlock() → Use seq.addBlock()
-   - mr.plot() → Use seq.plot()
-3. If unsure about a function name, validate it first
-4. Never use functions that don't exist in Pulseq
+2. If unsure about a function name, validate it first
+3. Never use functions that don't exist in Pulseq
+
+IMPORTANT: Query Routing
+- Some queries are pre-analyzed for documentation requirements
+- When the system indicates documentation is required, always search
+- Trust the routing system's assessment of Pulseq-specific needs
 
 When helping users:
 1. Use your physics knowledge to understand their problems
@@ -70,7 +70,9 @@ def _register_tools():
     # Register modern tools with validation
     pulsepal_agent.tool(tools.search_pulseq_knowledge)
     pulsepal_agent.tool(tools.verify_function_namespace)
-    pulsepal_agent.tool(tools.validate_pulseq_function)  # Critical for hallucination prevention
+    pulsepal_agent.tool(
+        tools.validate_pulseq_function
+    )  # Critical for hallucination prevention
     pulsepal_agent.tool(tools.search_web_for_mri_info)
 
     # Set the agent reference in tools module

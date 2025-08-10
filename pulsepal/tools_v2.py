@@ -56,7 +56,10 @@ def extract_functions_from_text(text: str) -> List[str]:
 
 
 async def search_pulseq_knowledge(
-    ctx: RunContext[PulsePalDependencies], query: str, limit: int = 30
+    ctx: RunContext[PulsePalDependencies], 
+    query: str, 
+    limit: int = 30,
+    forced: bool = False  # NEW parameter for semantic routing
 ) -> str:
     """
     Search Pulseq knowledge base using modern RAG service.
@@ -65,10 +68,20 @@ async def search_pulseq_knowledge(
     Args:
         query: Search query
         limit: Maximum number of results
+        forced: If True, this search was mandated by semantic router
 
     Returns:
         Formatted search results
     """
+    # Check if this search was forced by semantic router
+    if not forced and hasattr(ctx.deps, 'force_rag'):
+        forced = ctx.deps.force_rag
+    
+    # Check if we should skip RAG (pure physics)
+    if hasattr(ctx.deps, 'skip_rag') and ctx.deps.skip_rag:
+        logger.info("Skipping RAG search for pure physics question")
+        return "[Documentation search skipped - pure physics question detected]"
+    
     # Get or create RAG service
     if not hasattr(ctx.deps, "rag_v2"):
         ctx.deps.rag_v2 = ModernPulseqRAG()
@@ -82,11 +95,16 @@ async def search_pulseq_knowledge(
         for pattern in ["```", "def ", "function ", "=", ";", "{", "}"]
     )
 
+    # Add forced search hints if available
+    search_terms = None
+    if hasattr(ctx.deps, 'forced_search_hints') and ctx.deps.forced_search_hints:
+        search_terms = ctx.deps.forced_search_hints
+    
     # Create hint for retrieval
     hint = RetrievalHint(
         functions_mentioned=functions,
         code_provided=code_provided,
-        search_terms=None,  # Let LLM provide if needed
+        search_terms=search_terms,
     )
 
     # Simple retrieval
@@ -94,10 +112,15 @@ async def search_pulseq_knowledge(
 
     # Format results for display
     if not results["documents"]:
+        if forced:
+            return """No documentation found, but this query was identified as requiring Pulseq-specific information.
+            Please provide guidance based on Pulseq best practices and validate any function names."""
         return "No relevant documentation found in the knowledge base."
 
-    # Format documents
+    # Add header if this was a forced search
     formatted = []
+    if forced:
+        formatted.append("[📚 REQUIRED DOCUMENTATION - Query identified as Pulseq-specific]\n")
     for doc in results["documents"][:10]:  # Limit display to top 10
         parts = []
 
@@ -127,12 +150,21 @@ async def search_pulseq_knowledge(
 
     # Log search event
     if ctx.deps and hasattr(ctx.deps, "conversation_context"):
+        # Include forced flag in metadata
+        metadata = {
+            "functions": functions, 
+            "code_provided": code_provided,
+            "forced": forced
+        }
+        if forced:
+            metadata["reason"] = "semantic_routing"
+            
         conversation_logger.log_search_event(
             ctx.deps.conversation_context.session_id,
-            "modern_rag",
+            "forced_rag" if forced else "modern_rag",
             query,
             len(results["documents"]),
-            {"functions": functions, "code_provided": code_provided},
+            metadata,
         )
 
     return "\n\n---\n\n".join(formatted)

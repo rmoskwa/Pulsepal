@@ -118,6 +118,12 @@ settings = get_settings()
 # Initialize conversation logger for debugging
 conversation_logger = get_conversation_logger()
 
+# Initialize semantic router at startup for efficient classification
+from pulsepal.semantic_router import initialize_semantic_router, QueryRoute
+logger.info("Initializing semantic router at startup...")
+_semantic_router = initialize_semantic_router()
+logger.info("✅ Semantic router initialized successfully")
+
 # Sequence Knowledge Template
 SEQUENCE_KNOWLEDGE_TEMPLATE = """# Sequence Knowledge Template
 
@@ -517,7 +523,45 @@ async def main(message: cl.Message):
                 # Detect language preference from query
                 deps.conversation_context.detect_language_preference(enhanced_query)
 
-                # Run agent with query including context
+                # Semantic routing before Gemini (required)
+                routing_decision = _semantic_router.classify_query(enhanced_query)
+                
+                # Log the routing decision
+                _semantic_router.log_routing_decision(
+                    pulsepal_session_id,
+                    enhanced_query,
+                    routing_decision,
+                    conversation_logger
+                )
+                
+                # Apply routing decision and inject context
+                if routing_decision.route == QueryRoute.FORCE_RAG:
+                    # Subtle user feedback for forced RAG
+                    await cl.Message(
+                        content="📚 Consulting Pulseq documentation...",
+                        author="System"
+                    ).send()
+                    
+                    # Store routing hints in deps for tools to use
+                    deps.force_rag = True
+                    deps.forced_search_hints = routing_decision.search_hints
+                    logger.info(f"Forcing RAG search: {routing_decision.reasoning}")
+                    
+                    # Store routing hints in deps instead of injecting into query
+                    # This prevents confusion where the model thinks it's part of the conversation
+                    
+                elif routing_decision.route == QueryRoute.NO_RAG:
+                    # Indicate we should skip RAG
+                    deps.skip_rag = True
+                    logger.info(f"Skipping RAG: {routing_decision.reasoning}")
+                    # Don't inject context into query - just use flags
+                    
+                else:
+                    # GEMINI_CHOICE - let the agent decide
+                    logger.info(f"Letting Gemini decide: {routing_decision.reasoning}")
+                    # Don't inject context - let the agent work normally
+
+                # Run agent with original query (not modified by routing)
                 result = await pulsepal_agent.run(query_with_context, deps=deps)
 
                 # Add response to conversation history

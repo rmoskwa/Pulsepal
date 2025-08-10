@@ -288,6 +288,11 @@ class PulsePalDependencies:
     conversation_context: Optional[ConversationContext] = None
     session_manager: Optional["SessionManager"] = None
     rag_initialized: bool = False
+    
+    # Semantic routing fields
+    force_rag: bool = False  # Force RAG search based on semantic routing
+    skip_rag: bool = False   # Skip RAG search (pure physics question)
+    forced_search_hints: Optional[List[str]] = None  # Search hints from router
 
     async def initialize_rag_services(self):
         """Initialize RAG services (embeddings and Supabase)."""

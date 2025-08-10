@@ -15,7 +15,7 @@ from pathlib import Path
 # Add pulsepal to path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from pulsepal.main_agent import run_pulsepal, create_pulsepal_session
+from pulsepal.main_agent_v2 import run_pulsepal_query, create_pulsepal_session
 from pulsepal.conversation_logger import get_conversation_logger
 
 
@@ -24,7 +24,7 @@ async def single_query(question: str):
     print("🔬 Pulsepal: Processing your question...\n")
 
     try:
-        session_id, response = await run_pulsepal(question)
+        session_id, response = await run_pulsepal_query(question)
 
         # Log conversation if enabled
         logger = get_conversation_logger()
@@ -81,7 +81,7 @@ async def interactive_mode():
                     continue
 
                 print("\n🔬 Pulsepal: Thinking...")
-                session_id, response = await run_pulsepal(question, session_id)
+                session_id, response = await run_pulsepal_query(question, session_id)
 
                 # Log conversation if enabled
                 logger.log_conversation(session_id, "user", question)
