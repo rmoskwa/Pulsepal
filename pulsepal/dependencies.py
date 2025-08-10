@@ -1,5 +1,5 @@
 """
-Dependencies and session management for Pulsepal multi-agent system.
+Dependencies and session management for Pulsepal.
 
 Provides session state management and dependency injection containers
 for both Pulsepal and MRI Expert agents with native RAG integration.

@@ -1,0 +1,209 @@
+"""
+Main Pulsepal agent with modern RAG service v2.
+
+Simplified version that lets the LLM handle all intelligence,
+while RAG just retrieves documents.
+"""
+
+import logging
+from pydantic_ai import Agent
+from .providers import get_llm_model
+from .dependencies import PulsePalDependencies, get_session_manager
+from .gemini_patch import GeminiRecitationError
+import uuid
+
+logger = logging.getLogger(__name__)
+
+# Enhanced system prompt with function validation emphasis
+PULSEPAL_SYSTEM_PROMPT = """You are PulsePal, an expert MRI physicist and Pulseq programming assistant.
+
+You have deep understanding of:
+- MRI physics and pulse sequence design
+- Pulseq framework for MRI sequence programming
+- Both MATLAB and Python (pypulseq) implementations
+- Common issues and debugging strategies
+
+CRITICAL: Function Validation
+Before generating any Pulseq code:
+1. ALWAYS validate function names using validate_pulseq_function()
+2. Common mistakes to avoid:
+   - seq.calcKspace() → Use seq.calculateKspacePP() or seq.calculateKspaceUnfunc()
+   - mr.write() → Use seq.write()
+   - mr.addBlock() → Use seq.addBlock()
+   - mr.plot() → Use seq.plot()
+3. If unsure about a function name, validate it first
+4. Never use functions that don't exist in Pulseq
+
+When helping users:
+1. Use your physics knowledge to understand their problems
+2. Search the knowledge base when you need specific documentation or examples
+3. ALWAYS validate functions before including them in code
+4. Generate code that follows Pulseq best practices
+5. Explain the physics behind your solutions
+
+You have access to:
+- validate_pulseq_function: Validate function names and get corrections
+- verify_function_namespace: Check namespace usage (mr.* vs seq.*)
+- search_pulseq_knowledge: Search documentation and examples
+- search_web_for_mri_info: Get additional MRI information from the web
+
+Remember:
+- Default to MATLAB unless the user specifies Python
+- ALWAYS verify function names before generating code
+- Use the correct namespace for each function
+- Explain the physics behind your solutions
+- Be concise but thorough"""
+
+# Create Pulsepal agent
+pulsepal_agent = Agent(
+    get_llm_model(),
+    deps_type=PulsePalDependencies,
+    system_prompt=PULSEPAL_SYSTEM_PROMPT,
+)
+
+
+# Import and register tools after agent creation
+def _register_tools():
+    """Register enhanced tools with the pulsepal agent."""
+    from . import tools_v2 as tools
+
+    # Register modern tools with validation
+    pulsepal_agent.tool(tools.search_pulseq_knowledge)
+    pulsepal_agent.tool(tools.verify_function_namespace)
+    pulsepal_agent.tool(tools.validate_pulseq_function)  # Critical for hallucination prevention
+    pulsepal_agent.tool(tools.search_web_for_mri_info)
+
+    # Set the agent reference in tools module
+    tools.pulsepal_agent = pulsepal_agent
+
+    logger.info("Modern tools registered with Pulsepal agent")
+
+
+# Register tools on module import
+_register_tools()
+
+
+async def create_pulsepal_session(
+    session_id: str = None,
+) -> tuple[str, PulsePalDependencies]:
+    """
+    Create a new Pulsepal session with dependencies.
+
+    Args:
+        session_id: Optional session ID to reuse
+
+    Returns:
+        Tuple of (session_id, dependencies)
+    """
+    # Generate or reuse session ID
+    if not session_id:
+        session_id = str(uuid.uuid4())
+
+    # Get session manager
+    session_manager = get_session_manager()
+
+    # Create or get session (get_session handles creation if needed)
+    conversation_context = session_manager.get_session(session_id)
+
+    # Create dependencies
+    deps = PulsePalDependencies(
+        conversation_context=conversation_context,
+        session_manager=session_manager,
+    )
+
+    # Initialize RAG services (now simplified)
+    await deps.initialize_rag_services()
+
+    logger.info(f"Created Pulsepal session: {session_id}")
+
+    return session_id, deps
+
+
+async def run_pulsepal_query(
+    query: str, session_id: str = None, temperature: float = 0.1
+) -> tuple[str, str]:
+    """
+    Run a query through the Pulsepal agent.
+
+    Args:
+        query: User query
+        session_id: Optional session ID for context
+        temperature: LLM temperature setting
+
+    Returns:
+        Tuple of (session_id, response)
+    """
+    try:
+        # Create or get session
+        session_id, deps = await create_pulsepal_session(session_id)
+
+        # Add query to conversation history
+        deps.conversation_context.add_conversation("user", query)
+
+        # Run the agent
+        result = await pulsepal_agent.run(
+            query, deps=deps, model_settings={"temperature": temperature}
+        )
+
+        # Extract response
+        response = result.data if hasattr(result, "data") else str(result)
+
+        # Add response to conversation history
+        deps.conversation_context.add_conversation("assistant", response)
+
+        return session_id, response
+
+    except GeminiRecitationError as e:
+        logger.warning(f"Recitation error: {e}")
+        # Fallback response for recitation errors
+        return session_id, (
+            "I encountered an issue with content generation. "
+            "Please try rephrasing your question or asking for a different example."
+        )
+    except Exception as e:
+        logger.error(f"Error running Pulsepal query: {e}")
+        return session_id, f"An error occurred: {str(e)}"
+
+
+async def run_pulsepal_stream(
+    query: str, session_id: str = None, temperature: float = 0.1
+):
+    """
+    Run a query with streaming response.
+
+    Args:
+        query: User query
+        session_id: Optional session ID
+        temperature: LLM temperature
+
+    Yields:
+        Response chunks
+    """
+    try:
+        # Create or get session
+        session_id, deps = await create_pulsepal_session(session_id)
+
+        # Add query to conversation history
+        deps.conversation_context.add_conversation("user", query)
+
+        # Run the agent with streaming
+        async with pulsepal_agent.run_stream(
+            query, deps=deps, model_settings={"temperature": temperature}
+        ) as result:
+            full_response = ""
+            async for chunk in result.stream():
+                full_response += chunk
+                yield chunk
+
+        # Add complete response to conversation history
+        deps.conversation_context.add_conversation("assistant", full_response)
+
+    except GeminiRecitationError as e:
+        logger.warning(f"Recitation error during streaming: {e}")
+        yield (
+            "\n\nI encountered an issue with content generation. "
+            "Please try rephrasing your question."
+        )
+    except Exception as e:
+        logger.error(f"Error during streaming: {e}")
+        yield f"\n\nAn error occurred: {str(e)}"

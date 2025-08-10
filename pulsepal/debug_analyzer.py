@@ -43,8 +43,12 @@ class PulseqDebugAnalyzer:
         from .code_patterns import FunctionClusterAnalyzer
 
         self.syntax_validator = SyntaxValidator()
-        self.concept_mapper = ConceptMapper()  # Optional hint provider for physics->code mapping
-        self.function_cluster_analyzer = FunctionClusterAnalyzer()  # Function clustering
+        self.concept_mapper = (
+            ConceptMapper()
+        )  # Optional hint provider for physics->code mapping
+        self.function_cluster_analyzer = (
+            FunctionClusterAnalyzer()
+        )  # Function clustering
         self.function_index = MATLAB_FUNCTIONS
 
     def analyze_code(
@@ -74,7 +78,7 @@ class PulseqDebugAnalyzer:
 
         # Extract functions used in the code
         used_functions = self._extract_functions_from_code(code)
-        
+
         # Category 1: Syntax analysis (always performed)
         syntax_results = self.debug_syntax(code)
         results["syntax_errors"] = syntax_results
@@ -86,27 +90,25 @@ class PulseqDebugAnalyzer:
             results["physics_reasoning"] = concept_results["reasoning"]
 
         # Category 3: Function cluster analysis
-        cluster_results = self.function_cluster_analyzer.analyze_functions(used_functions)
+        cluster_results = self.function_cluster_analyzer.analyze_functions(
+            used_functions
+        )
         results["function_clusters"] = cluster_results
 
         return results
-    
+
     def _extract_functions_from_code(self, code: str) -> List[str]:
         """Extract Pulseq function calls from code."""
         import re
-        
+
         functions = []
         # Pattern for MATLAB/Pulseq function calls
-        patterns = [
-            r'(mr\.\w+)\s*\(',
-            r'(seq\.\w+)\s*\(',
-            r'(opt\.\w+)\s*\('
-        ]
-        
+        patterns = [r"(mr\.\w+)\s*\(", r"(seq\.\w+)\s*\(", r"(opt\.\w+)\s*\("]
+
         for pattern in patterns:
             matches = re.findall(pattern, code)
             functions.extend(matches)
-        
+
         return functions
 
     def debug_syntax(self, code: str) -> List[SyntaxIssue]:
