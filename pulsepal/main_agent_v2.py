@@ -45,9 +45,8 @@ Let your understanding guide source selection, not keywords.
 
 CRITICAL: Function Validation
 Before generating any Pulseq code:
-1. ALWAYS validate function names using validate_pulseq_function()
-2. If unsure about a function name, validate it first
-3. Never use functions that don't exist in Pulseq
+1. ALWAYS validate function names using validate_pulseq_function() BEFORE including them in code
+2. After generating code, use validate_code_block() to check the entire code block
 
 IMPORTANT: Query Routing
 - Some queries are pre-analyzed for documentation requirements
@@ -93,6 +92,7 @@ def _register_tools():
     pulsepal_agent.tool(
         tools.validate_pulseq_function
     )  # Critical for hallucination prevention
+    pulsepal_agent.tool(tools.validate_code_block)  # Validate entire code blocks
     pulsepal_agent.tool(tools.search_web_for_mri_info)
 
     # Set the agent reference in tools module
@@ -107,12 +107,14 @@ _register_tools()
 
 async def create_pulsepal_session(
     session_id: str = None,
+    query: str = None,
 ) -> tuple[str, PulsePalDependencies]:
     """
     Create a new Pulsepal session with dependencies.
 
     Args:
         session_id: Optional session ID to reuse
+        query: Optional query for semantic routing
 
     Returns:
         Tuple of (session_id, dependencies)
@@ -136,6 +138,36 @@ async def create_pulsepal_session(
     # Initialize RAG services (now simplified)
     await deps.initialize_rag_services()
 
+    # Apply semantic routing if query provided
+    if query:
+        try:
+            from .semantic_router import SemanticRouter, QueryRoute
+
+            router = SemanticRouter()
+            routing_decision = router.classify_query(query)
+
+            # Set routing flags based on decision
+            if routing_decision.route == QueryRoute.FORCE_RAG:
+                deps.force_rag = True
+                deps.forced_search_hints = routing_decision.search_hints
+                logger.info(
+                    f"Semantic router: FORCE_RAG - {routing_decision.reasoning}"
+                )
+            elif routing_decision.route == QueryRoute.NO_RAG:
+                deps.skip_rag = True
+                logger.info(f"Semantic router: NO_RAG - {routing_decision.reasoning}")
+            else:
+                logger.info(
+                    f"Semantic router: GEMINI_CHOICE - {routing_decision.reasoning}"
+                )
+        except ImportError as e:
+            logger.warning(f"Semantic router not available: {e}")
+            # Continue without routing - let LLM decide
+        except Exception as e:
+            logger.error(f"Semantic routing failed: {e}")
+            # Continue without routing - fail gracefully
+            # This ensures the application doesn't crash if routing fails
+
     logger.info(f"Created Pulsepal session: {session_id}")
 
     return session_id, deps
@@ -156,8 +188,8 @@ async def run_pulsepal_query(
         Tuple of (session_id, response)
     """
     try:
-        # Create or get session
-        session_id, deps = await create_pulsepal_session(session_id)
+        # Create or get session with semantic routing
+        session_id, deps = await create_pulsepal_session(session_id, query)
 
         # Add query to conversation history
         deps.conversation_context.add_conversation("user", query)
@@ -187,6 +219,41 @@ async def run_pulsepal_query(
         return session_id, f"An error occurred: {str(e)}"
 
 
+def apply_semantic_routing(query: str, deps: PulsePalDependencies) -> None:
+    """
+    Apply semantic routing to a query and update dependencies.
+    This is a standalone function for use by Chainlit.
+
+    Args:
+        query: The user query to route
+        deps: Dependencies object to update with routing decisions
+    """
+    try:
+        from .semantic_router import SemanticRouter, QueryRoute
+
+        router = SemanticRouter()
+        routing_decision = router.classify_query(query)
+
+        # Set routing flags based on decision
+        if routing_decision.route == QueryRoute.FORCE_RAG:
+            deps.force_rag = True
+            deps.forced_search_hints = routing_decision.search_hints
+            logger.info(f"Semantic router: FORCE_RAG - {routing_decision.reasoning}")
+        elif routing_decision.route == QueryRoute.NO_RAG:
+            deps.skip_rag = True
+            logger.info(f"Semantic router: NO_RAG - {routing_decision.reasoning}")
+        else:
+            logger.info(
+                f"Semantic router: GEMINI_CHOICE - {routing_decision.reasoning}"
+            )
+    except ImportError as e:
+        logger.warning(f"Semantic router not available: {e}")
+        # Continue without routing - let LLM decide
+    except Exception as e:
+        logger.error(f"Semantic routing failed: {e}")
+        # Continue without routing - fail gracefully
+
+
 async def run_pulsepal_stream(
     query: str, session_id: str = None, temperature: float = 0.1
 ):
@@ -202,8 +269,8 @@ async def run_pulsepal_stream(
         Response chunks
     """
     try:
-        # Create or get session
-        session_id, deps = await create_pulsepal_session(session_id)
+        # Create or get session with semantic routing
+        session_id, deps = await create_pulsepal_session(session_id, query)
 
         # Add query to conversation history
         deps.conversation_context.add_conversation("user", query)

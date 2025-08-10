@@ -221,6 +221,10 @@ COMMON_HALLUCINATIONS = {
     "calculateKspace": "calculateKspacePP",
     "calcKSpace": "calculateKspacePP",
     "calculateKSpace": "calculateKspacePP",
+    # Adiabatic pulse hallucinations
+    "makeAdiaRF": "makeAdiabaticPulse",
+    "makeAdiabaticRF": "makeAdiabaticPulse",
+    "makeAdiabatic": "makeAdiabaticPulse",
 }
 
 FUNCTION_CLUSTERS = {

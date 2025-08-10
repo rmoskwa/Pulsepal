@@ -12,12 +12,8 @@ from typing import List, Dict, Optional, Any
 from dataclasses import dataclass, field
 from .supabase_client import get_supabase_client, SupabaseRAGClient
 from .settings import get_settings
-from .source_profiles import (
-    MULTI_CHUNK_DOCUMENTS
-)
-from .rag_formatters import (
-    format_unified_response
-)
+from .source_profiles import MULTI_CHUNK_DOCUMENTS
+from .rag_formatters import format_unified_response
 
 logger = logging.getLogger(__name__)
 
@@ -55,17 +51,17 @@ class ModernPulseqRAG:
         query: str,
         sources: Optional[List[str]] = None,
         forced: bool = False,
-        source_hints: Optional[Dict] = None
+        source_hints: Optional[Dict] = None,
     ) -> Dict:
         """
         Perform source-aware search across Supabase tables.
-        
+
         Args:
             query: User's search query
             sources: Specific sources to search (LLM-specified or None for all)
             forced: Whether this search was forced by semantic routing
             source_hints: Additional hints about which sources to prioritize
-        
+
         Returns:
             Formatted results organized by source with synthesis hints
         """
@@ -75,32 +71,33 @@ class ModernPulseqRAG:
             # The LLM can filter/prioritize results as needed
             sources = ["api_reference", "crawled_pages", "official_sequence_examples"]
             logger.info(f"No sources specified by LLM, searching all: {sources}")
-        
+
         # Search each source with appropriate methods
         source_results = {}
-        
+
         for source in sources:
             if source == "api_reference":
                 results = await self._search_api_reference(query, limit=5)
             elif source == "crawled_pages":
                 results = await self._search_crawled_pages(query, limit=10)
             elif source == "official_sequence_examples":
-                results = await self._search_official_sequences(query, limit=3)
+                # No limit for official sequences - return all relevant matches (max ~40)
+                results = await self._search_official_sequences(query, limit=50)
             else:
                 continue
-            
+
             if results:
                 source_results[source] = results
-        
+
         # Format results using rag_formatters
         query_context = {
-            'original_query': query,
-            'forced': forced,
-            'source_hints': source_hints
+            "original_query": query,
+            "forced": forced,
+            "source_hints": source_hints,
         }
-        
+
         return format_unified_response(source_results, query_context)
-    
+
     async def retrieve(
         self, query: str, hint: Optional[RetrievalHint] = None, limit: int = 30
     ) -> Dict[str, Any]:
@@ -185,16 +182,18 @@ class ModernPulseqRAG:
             # Check if the namespace is correct
             correct_data = response.data[0]
             correct_usage = correct_data.get("correct_usage", "")
-            
+
             # Extract namespace from correct_usage pattern
             # e.g., "seq.write('filename')" -> "seq"
             # or "mr.makeTrapezoid(...)" -> "mr"
             correct_namespace = None
             if correct_usage:
-                ns_match = re.match(r"(mr|seq|tra|eve|opt)(?:\.aux)?(?:\.quat)?", correct_usage)
+                ns_match = re.match(
+                    r"(mr|seq|tra|eve|opt)(?:\.aux)?(?:\.quat)?", correct_usage
+                )
                 if ns_match:
                     correct_namespace = ns_match.group(0)
-            
+
             # If we found a correct namespace and it doesn't match
             if correct_namespace and full_namespace != correct_namespace:
                 result["is_valid"] = False
@@ -210,10 +209,10 @@ class ModernPulseqRAG:
     def validate_function(self, function_name: str) -> Dict[str, Any]:
         """
         Validate a Pulseq function name and provide corrections.
-        
+
         Args:
             function_name: Function name to validate (e.g., 'seq.calcKspace')
-        
+
         Returns:
             Dictionary with:
             - is_valid: Whether the function exists
@@ -222,23 +221,23 @@ class ModernPulseqRAG:
             - explanation: Why it's wrong and how to fix it
         """
         from .function_index import COMMON_HALLUCINATIONS, MATLAB_FUNCTIONS
-        
+
         result = {
             "is_valid": True,
             "correct_form": None,
             "suggestions": [],
-            "explanation": None
+            "explanation": None,
         }
-        
+
         # Extract just the method name if it has a namespace
-        if '.' in function_name:
-            parts = function_name.split('.')
+        if "." in function_name:
+            parts = function_name.split(".")
             method = parts[-1]
-            namespace = '.'.join(parts[:-1])
+            namespace = ".".join(parts[:-1])
         else:
             method = function_name
             namespace = None
-        
+
         # Check if it's a known hallucination
         if method in COMMON_HALLUCINATIONS:
             correct = COMMON_HALLUCINATIONS[method]
@@ -248,37 +247,44 @@ class ModernPulseqRAG:
                     # Check if the namespace is correct for the corrected function
                     if correct in MATLAB_FUNCTIONS.get("direct_calls", set()):
                         result["correct_form"] = f"mr.{correct}"
-                    elif "Sequence" in MATLAB_FUNCTIONS.get("class_methods", {}) and \
-                         correct in MATLAB_FUNCTIONS["class_methods"]["Sequence"]:
+                    elif (
+                        "Sequence" in MATLAB_FUNCTIONS.get("class_methods", {})
+                        and correct in MATLAB_FUNCTIONS["class_methods"]["Sequence"]
+                    ):
                         result["correct_form"] = f"seq.{correct}"
                     else:
                         result["correct_form"] = correct
                 else:
                     result["correct_form"] = correct
-                result["explanation"] = f"'{method}' is a common mistake. Use '{correct}' instead."
+                result["explanation"] = (
+                    f"'{method}' is a common mistake. Use '{correct}' instead."
+                )
             else:
                 result["is_valid"] = False
                 result["explanation"] = f"'{method}' does not exist in Pulseq."
             return result
-        
+
         # Check if it exists in function index
         all_functions = set()
         all_functions.update(MATLAB_FUNCTIONS.get("direct_calls", set()))
         for methods in MATLAB_FUNCTIONS.get("class_methods", {}).values():
             all_functions.update(methods)
-        
+
         if method not in all_functions:
             result["is_valid"] = False
-            
+
             # Find similar functions
             import difflib
+
             similar = difflib.get_close_matches(method, all_functions, n=3, cutoff=0.6)
             if similar:
                 result["suggestions"] = similar
-                result["explanation"] = f"'{method}' not found. Did you mean: {', '.join(similar)}?"
+                result["explanation"] = (
+                    f"'{method}' not found. Did you mean: {', '.join(similar)}?"
+                )
             else:
                 result["explanation"] = f"'{method}' is not a valid Pulseq function."
-        
+
         # Validate namespace if provided and function is valid
         if result["is_valid"] and namespace:
             validated_namespace = self.check_function_namespace(function_name)
@@ -286,7 +292,7 @@ class ModernPulseqRAG:
                 result["is_valid"] = False
                 result["correct_form"] = validated_namespace.get("correct_form")
                 result["explanation"] = validated_namespace.get("explanation")
-        
+
         return result
 
     async def _vector_search(self, query: str, limit: int = 30) -> List[Dict[str, Any]]:
@@ -306,7 +312,7 @@ class ModernPulseqRAG:
                 "match_threshold": 0.3,
                 "match_count": limit // 2,  # Split between sources
             },
-        )
+        ).execute()
 
         # Search API reference
         api_response = self.supabase_client.rpc(
@@ -316,10 +322,10 @@ class ModernPulseqRAG:
                 "match_threshold": 0.3,
                 "match_count": limit // 2,
             },
-        )
+        ).execute()
 
         # Process crawled pages results
-        if hasattr(crawled_response, 'data') and crawled_response.data:
+        if hasattr(crawled_response, "data") and crawled_response.data:
             for item in crawled_response.data:
                 doc = {
                     "content": item.get("content", ""),
@@ -332,7 +338,7 @@ class ModernPulseqRAG:
                 results.append(doc)
 
         # Process API reference results
-        if hasattr(api_response, 'data') and api_response.data:
+        if hasattr(api_response, "data") and api_response.data:
             for item in api_response.data:
                 doc = {
                     "content": item.get("content", ""),
@@ -407,7 +413,9 @@ class ModernPulseqRAG:
             correct_usage = item.get("correct_usage", "")
             if correct_usage:
                 # Extract namespace from correct_usage
-                ns_match = re.match(r"(mr|seq|tra|eve|opt)(?:\.aux)?(?:\.quat)?", correct_usage)
+                ns_match = re.match(
+                    r"(mr|seq|tra|eve|opt)(?:\.aux)?(?:\.quat)?", correct_usage
+                )
                 if ns_match:
                     parts.append(f"Function: {ns_match.group(0)}.{item['name']}")
                 else:
@@ -432,11 +440,12 @@ class ModernPulseqRAG:
         Focuses on function signatures, parameters, and API specifications.
         """
         results = []
-        
+
         # Get embedding for query
         from .embeddings import create_embedding
+
         query_embedding = create_embedding(query)
-        
+
         # Search using the appropriate RPC function for API reference
         try:
             # Try the main API reference search
@@ -446,39 +455,42 @@ class ModernPulseqRAG:
                     "query_embedding": query_embedding,
                     "match_threshold": 0.75,  # Higher threshold for API docs
                     "match_count": limit,
-                }
-            )
-            
-            if hasattr(api_response, 'data') and api_response.data:
+                },
+            ).execute()
+
+            if hasattr(api_response, "data") and api_response.data:
                 for item in api_response.data:
-                    results.append({
-                        "function_name": item.get("function_name", ""),
-                        "description": item.get("description", ""),
-                        "parameters": item.get("parameters"),
-                        "returns": item.get("returns"),
-                        "signature": item.get("signature", ""),
-                        "language": item.get("language", "matlab"),
-                        "correct_usage": item.get("correct_usage", ""),
-                        "category": item.get("category", ""),
-                        "similarity": item.get("similarity", 0),
-                        "_source": "api_reference"
-                    })
+                    results.append(
+                        {
+                            "function_name": item.get("function_name", ""),
+                            "description": item.get("description", ""),
+                            "parameters": item.get("parameters"),
+                            "returns": item.get("returns"),
+                            "signature": item.get("signature", ""),
+                            "language": item.get("language", "matlab"),
+                            "correct_usage": item.get("correct_usage", ""),
+                            "category": item.get("category", ""),
+                            "similarity": item.get("similarity", 0),
+                            "_source": "api_reference",
+                        }
+                    )
         except Exception as e:
             logger.warning(f"API reference search failed: {e}")
-        
+
         return results
-    
+
     async def _search_crawled_pages(self, query: str, limit: int = 10) -> List[Dict]:
         """
         Search crawled pages with chunk coherence.
         Handles multi-chunk documents by retrieving all related chunks.
         """
         results = []
-        
+
         # Get embedding for query
         from .embeddings import create_embedding
+
         query_embedding = create_embedding(query)
-        
+
         # Search crawled pages
         crawled_response = self.supabase_client.rpc(
             "match_crawled_pages",
@@ -486,132 +498,134 @@ class ModernPulseqRAG:
                 "query_embedding": query_embedding,
                 "match_threshold": 0.7,  # Standard threshold
                 "match_count": limit,
-            }
-        )
-        
-        if hasattr(crawled_response, 'data') and crawled_response.data:
+            },
+        ).execute()
+
+        if hasattr(crawled_response, "data") and crawled_response.data:
             # Check for multi-chunk documents
             urls_to_check = set()
-            
+
             for item in crawled_response.data:
                 url = item.get("url", "")
-                
+
                 # Check if this is a known multi-chunk document
                 for doc_name in MULTI_CHUNK_DOCUMENTS:
                     if doc_name in url:
                         urls_to_check.add(url)
                         break
-                
+
                 # Add the result
-                results.append({
-                    "content": item.get("content", ""),
-                    "url": url,
-                    "title": item.get("title", ""),
-                    "chunk_number": item.get("chunk_number", 0),
-                    "similarity": item.get("similarity", 0),
-                    "metadata": item.get("metadata", {}),
-                    "_source": "crawled_pages"
-                })
-            
+                results.append(
+                    {
+                        "content": item.get("content", ""),
+                        "url": url,
+                        "title": item.get("title", ""),
+                        "chunk_number": item.get("chunk_number", 0),
+                        "similarity": item.get("similarity", 0),
+                        "metadata": item.get("metadata", {}),
+                        "_source": "crawled_pages",
+                    }
+                )
+
             # Retrieve additional chunks for multi-chunk documents
             for url in urls_to_check:
                 additional_chunks = await self._retrieve_all_chunks(url)
                 # Add chunks that aren't already in results
-                existing_chunks = {(r["url"], r.get("chunk_number", 0)) for r in results}
+                existing_chunks = {
+                    (r["url"], r.get("chunk_number", 0)) for r in results
+                }
                 for chunk in additional_chunks:
                     chunk_id = (chunk["url"], chunk.get("chunk_number", 0))
                     if chunk_id not in existing_chunks:
                         results.append(chunk)
-        
+
         return results
-    
-    async def _search_official_sequences(self, query: str, limit: int = 3) -> List[Dict]:
+
+    async def _search_official_sequences(
+        self, query: str, limit: int = 50
+    ) -> List[Dict]:
         """
         Search official sequences for tutorials.
         Returns complete educational sequences with summaries.
+        Uses vector embeddings for semantic search, consistent with other search methods.
         """
         results = []
-        
-        # Get embedding for query (removed - not used in simple relevance matching)
-        # from .embeddings import create_embedding
-        # query_embedding = create_embedding(query)
-        
-        # Search official sequence examples
+
+        # Get embedding for query
+        from .embeddings import create_embedding
+
+        query_embedding = create_embedding(query)
+
+        # Search official sequence examples using vector similarity
         try:
-            # Use a view or table for official sequences
-            sequence_response = self.supabase_client.client.table("official_sequence_examples") \
-                .select("*") \
-                .execute()
-            
-            if sequence_response.data:
-                # Simple similarity matching based on sequence type
-                query_lower = query.lower()
-                
+            # Use the RPC function for official sequences with embeddings
+            sequence_response = self.supabase_client.rpc(
+                "match_official_sequences",
+                {
+                    "query_embedding": query_embedding,
+                    "match_threshold": 0.4,  # Lower threshold for better discovery of all example types
+                    "match_count": limit,
+                },
+            ).execute()
+
+            if hasattr(sequence_response, "data") and sequence_response.data:
                 for item in sequence_response.data:
-                    # Calculate simple relevance score
-                    relevance = 0
-                    seq_type = item.get("sequence_type", "").lower()
-                    file_name = item.get("file_name", "").lower()
-                    
-                    if seq_type in query_lower:
-                        relevance += 0.5
-                    if any(word in file_name for word in query_lower.split()):
-                        relevance += 0.3
-                    
-                    if relevance > 0 or len(results) < limit:
-                        results.append({
+                    results.append(
+                        {
                             "content": item.get("content", ""),
                             "file_name": item.get("file_name", ""),
                             "sequence_type": item.get("sequence_type", ""),
                             "trajectory_type": item.get("trajectory_type", ""),
                             "acceleration": item.get("acceleration", ""),
                             "ai_summary": item.get("ai_summary", ""),
-                            "similarity": relevance,
-                            "_source": "official_sequence_examples"
-                        })
-                
-                # Sort by relevance and limit
-                results.sort(key=lambda x: x.get("similarity", 0), reverse=True)
-                results = results[:limit]
-                
+                            "similarity": item.get("similarity", 0),
+                            "url": item.get("url", ""),
+                            "_source": "official_sequence_examples",
+                        }
+                    )
+
         except Exception as e:
             logger.warning(f"Official sequence search failed: {e}")
-        
+
         return results
-    
+
     async def _retrieve_all_chunks(self, url: str) -> List[Dict]:
         """
         Retrieve all chunks for a multi-chunk document.
         Critical for documents like specification.pdf (9 chunks).
         """
         chunks = []
-        
+
         try:
             # Query all chunks with the same URL
-            response = self.supabase_client.client.table("crawled_pages") \
-                .select("*") \
-                .eq("url", url) \
+            response = (
+                self.supabase_client.client.table("crawled_pages")
+                .select("*")
+                .eq("url", url)
                 .execute()
-            
+            )
+
             if response.data:
                 for item in response.data:
-                    chunks.append({
-                        "content": item.get("content", ""),
-                        "url": item.get("url", ""),
-                        "title": item.get("title", ""),
-                        "chunk_number": item.get("chunk_number", 0),
-                        "metadata": item.get("metadata", {}),
-                        "_source": "crawled_pages"
-                    })
-                
+                    chunks.append(
+                        {
+                            "content": item.get("content", ""),
+                            "url": item.get("url", ""),
+                            "title": item.get("title", ""),
+                            "chunk_number": item.get("chunk_number", 0),
+                            "metadata": item.get("metadata", {}),
+                            "_source": "crawled_pages",
+                        }
+                    )
+
                 # Sort by chunk number
                 chunks.sort(key=lambda x: x.get("chunk_number", 0))
-                
+
         except Exception as e:
             logger.warning(f"Failed to retrieve all chunks for {url}: {e}")
-        
+
         return chunks
-    
+
     def _detect_content_type(self, url: str) -> str:
         """Detect content type from URL extension only."""
         if not url:

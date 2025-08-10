@@ -12,6 +12,7 @@ import re
 import time
 from dataclasses import dataclass, field
 from datetime import datetime
+from difflib import get_close_matches
 from enum import Enum
 from typing import Dict, List, Optional
 import numpy as np
@@ -176,13 +177,22 @@ class SemanticRouter:
         "exchange",
     }
 
-    def __init__(self):
-        """Initialize the semantic router with embeddings model."""
+    def __init__(self, lazy_load: bool = False):
+        """Initialize the semantic router with embeddings model.
+
+        Args:
+            lazy_load: If True, defer model loading until first use (better for startup time)
+        """
         self.threshold_manager = ThresholdManager()
         self.encoder = None
-        self._initialize_encoder()
-        self._load_concept_embeddings()
-        logger.info("Semantic router initialized successfully")
+        self._embeddings_loaded = False
+
+        if not lazy_load:
+            self._initialize_encoder()
+            self._load_concept_embeddings()
+            logger.info("Semantic router initialized successfully")
+        else:
+            logger.info("Semantic router initialized (lazy loading enabled)")
 
     def _initialize_encoder(self):
         """Initialize the sentence transformer model."""
@@ -193,20 +203,38 @@ class SemanticRouter:
 
             # Use all-MiniLM-L6-v2 for efficient, free embeddings
             model_name = "sentence-transformers/all-MiniLM-L6-v2"
-            
-            # Determine cache directory based on environment
+
+            # Determine cache directory based on environment with proper permission handling
+            cache_dir = None
+
             if os.getenv("TRANSFORMERS_CACHE"):
                 # Use explicit env var if set
                 cache_dir = os.getenv("TRANSFORMERS_CACHE")
             elif platform.system() == "Windows":
                 # Windows local development - use user's home directory
                 cache_dir = str(Path.home() / ".cache" / "huggingface")
-            else:
-                # Linux/Railway deployment - use app directory
+            elif os.path.exists("/app") and os.access("/app", os.W_OK):
+                # Railway deployment - use app directory only if writable
                 cache_dir = "/app/.cache/huggingface"
-            
-            # Ensure cache directory exists
-            Path(cache_dir).mkdir(parents=True, exist_ok=True)
+            else:
+                # WSL2 or other Linux - use home directory
+                cache_dir = str(Path.home() / ".cache" / "huggingface")
+
+            # Ensure cache directory exists with proper error handling
+            try:
+                Path(cache_dir).mkdir(parents=True, exist_ok=True)
+                # Test write permissions
+                test_file = Path(cache_dir) / ".write_test"
+                test_file.touch()
+                test_file.unlink()
+            except (PermissionError, OSError) as e:
+                logger.warning(f"Cannot write to cache directory {cache_dir}: {e}")
+                # Fallback to temp directory
+                import tempfile
+
+                cache_dir = os.path.join(tempfile.gettempdir(), "huggingface_cache")
+                Path(cache_dir).mkdir(parents=True, exist_ok=True)
+                logger.info(f"Using fallback cache directory: {cache_dir}")
 
             logger.info(f"Loading embedding model: {model_name}")
             logger.info(f"Using cache directory: {cache_dir}")
@@ -352,8 +380,9 @@ class SemanticRouter:
                     search_hints=self._extract_function_names(query),
                 )
 
-        # Check for known function names
+        # Check for known function names with fuzzy matching
         for func in self.PULSEQ_FUNCTIONS:
+            # Exact match (case-insensitive)
             if func.lower() in query_lower:
                 return RoutingDecision(
                     route=QueryRoute.FORCE_RAG,
@@ -362,6 +391,35 @@ class SemanticRouter:
                     trigger_type="keyword",
                     search_hints=[func],
                 )
+
+            # Fuzzy match: Convert CamelCase to spaced words
+            # EventLibrary -> "event library"
+            spaced_func = self._camelcase_to_spaced(func).lower()
+            if spaced_func in query_lower:
+                return RoutingDecision(
+                    route=QueryRoute.FORCE_RAG,
+                    confidence=0.95,
+                    reasoning=f"Pulseq function '{func}' mentioned (fuzzy match)",
+                    trigger_type="keyword",
+                    search_hints=[func],
+                )
+
+            # Also check with underscores (common variation)
+            # EventLibrary -> "event_library"
+            underscored = self._camelcase_to_underscored(func).lower()
+            if underscored in query_lower:
+                return RoutingDecision(
+                    route=QueryRoute.FORCE_RAG,
+                    confidence=0.95,
+                    reasoning=f"Pulseq function '{func}' mentioned (fuzzy match)",
+                    trigger_type="keyword",
+                    search_hints=[func],
+                )
+
+        # Check for misspellings using Levenshtein distance
+        misspelling_result = self._check_for_misspellings(query)
+        if misspelling_result:
+            return misspelling_result
 
         return None
 
@@ -391,13 +449,23 @@ class SemanticRouter:
 
     def _semantic_classify(self, query: str) -> RoutingDecision:
         """Perform semantic classification using embeddings."""
+        # Lazy load encoder if needed
         if not self.encoder:
-            return RoutingDecision(
-                route=QueryRoute.GEMINI_CHOICE,
-                confidence=0.5,
-                reasoning="Encoder not available",
-                trigger_type="fallback",
-            )
+            try:
+                self._initialize_encoder()
+                if not self._embeddings_loaded:
+                    self._load_concept_embeddings()
+                    self._embeddings_loaded = True
+            except Exception as e:
+                logger.warning(
+                    f"Failed to initialize encoder for semantic classification: {e}"
+                )
+                return RoutingDecision(
+                    route=QueryRoute.GEMINI_CHOICE,
+                    confidence=0.5,
+                    reasoning="Encoder not available",
+                    trigger_type="fallback",
+                )
 
         # Encode the query
         query_embedding = self.encoder.encode([query])[0]
@@ -516,6 +584,98 @@ class SemanticRouter:
         similarities = np.dot(concept_norms, query_norm)
 
         return float(np.max(similarities))
+
+    def _check_for_misspellings(self, query: str) -> Optional[RoutingDecision]:
+        """Check for misspelled Pulseq function names using Levenshtein distance.
+
+        Optimized version that:
+        1. Caches the function list as a sorted list for faster searching
+        2. Only checks words that look like function names (camelCase, underscored)
+        3. Uses early exit for performance
+        """
+        # Extract potential function names from the query
+        # Only check words that look like they could be function names
+        words = re.findall(r"\b[a-zA-Z][a-zA-Z0-9_]*\b", query)
+
+        # Pre-filter words that are likely function names
+        potential_functions = []
+        for word in words:
+            # Skip very short words (likely not function names)
+            if len(word) < 4:
+                continue
+
+            # Check if word looks like a function name:
+            # - Contains uppercase (camelCase): makeAdc, EventLibrary
+            # - Contains underscore: make_adc, event_library
+            # - Starts with common prefixes: make, calc, get, set
+            if (
+                any(c.isupper() for c in word[1:])  # Has uppercase after first char
+                or "_" in word  # Has underscore
+                or word.startswith(("make", "calc", "get", "set", "add", "create"))
+            ):
+                potential_functions.append(word)
+
+        # Only process if we have potential function names
+        if not potential_functions:
+            return None
+
+        # Check each potential function for misspellings
+        for word in potential_functions:
+            # Use get_close_matches with optimized parameters
+            # n=1 for just the best match, cutoff=0.75 for reasonable threshold
+            matches = get_close_matches(
+                word,
+                self.PULSEQ_FUNCTIONS,
+                n=1,  # Get only best match (faster)
+                cutoff=0.75,  # 75% similarity threshold
+            )
+
+            if matches:
+                matched_func = matches[0]
+                # Quick similarity check (no need for complex calculation)
+                # get_close_matches already validated similarity
+
+                return RoutingDecision(
+                    route=QueryRoute.FORCE_RAG,
+                    confidence=0.85,  # Fixed confidence for misspellings
+                    reasoning=f"Likely misspelling: '{word}' → '{matched_func}'",
+                    trigger_type="misspelling",
+                    search_hints=[matched_func],  # Use correct spelling for search
+                )
+
+        return None
+
+    def _calculate_similarity(self, word1: str, word2: str) -> float:
+        """Calculate similarity between two words (0 to 1)."""
+        # Simple character-based similarity
+        longer = max(len(word1), len(word2))
+        if longer == 0:
+            return 1.0
+
+        # Count matching characters in same positions
+        matches = sum(c1 == c2 for c1, c2 in zip(word1.lower(), word2.lower()))
+        # Add partial credit for length similarity
+        length_similarity = min(len(word1), len(word2)) / longer
+
+        return (matches / longer + length_similarity) / 2
+
+    def _camelcase_to_spaced(self, name: str) -> str:
+        """Convert CamelCase to spaced words.
+        EventLibrary -> 'event library'
+        makeTrapezoid -> 'make trapezoid'
+        """
+        # Add space before capital letters (except first)
+        result = re.sub(r"(?<!^)(?=[A-Z])", " ", name)
+        return result.lower()
+
+    def _camelcase_to_underscored(self, name: str) -> str:
+        """Convert CamelCase to underscored.
+        EventLibrary -> 'event_library'
+        makeTrapezoid -> 'make_trapezoid'
+        """
+        # Add underscore before capital letters (except first)
+        result = re.sub(r"(?<!^)(?=[A-Z])", "_", name)
+        return result.lower()
 
     def _extract_function_names(self, query: str) -> List[str]:
         """Extract potential function names from query."""

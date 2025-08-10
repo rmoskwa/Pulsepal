@@ -477,15 +477,25 @@ async def main(message: cl.Message):
                 f"Session {pulsepal_session_id} - Last message: {last_entry['role']}: {last_entry['content'][:50]}..."
             )
 
+        # Apply semantic routing to determine if RAG is needed
+        from pulsepal.main_agent_v2 import apply_semantic_routing
+
+        apply_semantic_routing(enhanced_query, deps)
+
         # Show typing indicator with intelligent status
-        async with cl.Step(name="🧠 Processing with Enhanced RAG v2 (Function Validation Active)...") as step:
+        async with cl.Step(
+            name="🧠 Processing with Enhanced RAG v2 (Function Validation Active)..."
+        ) as step:
             try:
                 # Add user message to conversation context (use enhanced_query if code was uploaded)
                 deps.conversation_context.add_conversation("user", enhanced_query)
 
                 # Log user message for debugging
                 conversation_logger.log_conversation(
-                    pulsepal_session_id, "user", enhanced_query, {"rag_version": "v2_enhanced"}
+                    pulsepal_session_id,
+                    "user",
+                    enhanced_query,
+                    {"rag_version": "v2_enhanced"},
                 )
 
                 # Get conversation history for context
@@ -522,37 +532,36 @@ async def main(message: cl.Message):
 
                 # Semantic routing before Gemini (required)
                 routing_decision = _semantic_router.classify_query(enhanced_query)
-                
+
                 # Log the routing decision
                 _semantic_router.log_routing_decision(
                     pulsepal_session_id,
                     enhanced_query,
                     routing_decision,
-                    conversation_logger
+                    conversation_logger,
                 )
-                
+
                 # Apply routing decision and inject context
                 if routing_decision.route == QueryRoute.FORCE_RAG:
                     # Subtle user feedback for forced RAG
                     await cl.Message(
-                        content="📚 Consulting Pulseq documentation...",
-                        author="System"
+                        content="📚 Consulting Pulseq documentation...", author="System"
                     ).send()
-                    
+
                     # Store routing hints in deps for tools to use
                     deps.force_rag = True
                     deps.forced_search_hints = routing_decision.search_hints
                     logger.info(f"Forcing RAG search: {routing_decision.reasoning}")
-                    
+
                     # Store routing hints in deps instead of injecting into query
                     # This prevents confusion where the model thinks it's part of the conversation
-                    
+
                 elif routing_decision.route == QueryRoute.NO_RAG:
                     # Indicate we should skip RAG
                     deps.skip_rag = True
                     logger.info(f"Skipping RAG: {routing_decision.reasoning}")
                     # Don't inject context into query - just use flags
-                    
+
                 else:
                     # GEMINI_CHOICE - let the agent decide
                     logger.info(f"Letting Gemini decide: {routing_decision.reasoning}")
@@ -566,7 +575,10 @@ async def main(message: cl.Message):
 
                 # Log assistant response for debugging
                 conversation_logger.log_conversation(
-                    pulsepal_session_id, "assistant", result.data, {"rag_version": "v2_enhanced"}
+                    pulsepal_session_id,
+                    "assistant",
+                    result.data,
+                    {"rag_version": "v2_enhanced"},
                 )
 
                 step.output = "✅ Response ready (Enhanced RAG v2 with validation)"
@@ -603,7 +615,9 @@ async def main(message: cl.Message):
         # Finalize the message
         await msg.update()
 
-        logger.info(f"Processed message in session {pulsepal_session_id} with enhanced RAG v2")
+        logger.info(
+            f"Processed message in session {pulsepal_session_id} with enhanced RAG v2"
+        )
 
     except asyncio.TimeoutError:
         logger.warning("Message processing timed out")
@@ -716,5 +730,7 @@ if __name__ == "__main__":
     # This won't be called when running with `chainlit run`
     # But useful for testing imports
     print("Chainlit app v2 enhanced loaded successfully.")
-    print("Features: Function validation, hallucination prevention, all UI features preserved")
+    print(
+        "Features: Function validation, hallucination prevention, all UI features preserved"
+    )
     print("Run with: chainlit run chainlit_app_v2.py")
