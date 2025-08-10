@@ -7,11 +7,11 @@ leaving all intelligence to the LLM.
 
 import logging
 import re
-from typing import List
+from typing import List, Dict, Optional
 from pydantic_ai import RunContext
 
 from .dependencies import PulsePalDependencies
-from .rag_service_v2 import ModernPulseqRAG, RetrievalHint
+from .rag_service_v2 import ModernPulseqRAG
 from .web_search import get_web_search_service
 from .conversation_logger import get_conversation_logger
 
@@ -59,19 +59,28 @@ async def search_pulseq_knowledge(
     ctx: RunContext[PulsePalDependencies], 
     query: str, 
     limit: int = 30,
-    forced: bool = False  # NEW parameter for semantic routing
+    forced: bool = False,  # NEW parameter for semantic routing
+    sources: Optional[List[str]] = None  # NEW parameter for source specification
 ) -> str:
     """
-    Search Pulseq knowledge base using modern RAG service.
-    Simple retrieval, no classification or pattern matching.
-
+    Search Pulseq knowledge with intelligent source selection.
+    
+    Available sources (choose based on query intent):
+    - "api_reference": Function signatures, parameters, return types (best for: specs, syntax)
+    - "crawled_pages": Code examples, tutorials, implementations (best for: how-to, debugging)
+    - "official_sequence_examples": Complete educational sequences (best for: learning, templates)
+    
     Args:
         query: Search query
-        limit: Maximum number of results
-        forced: If True, this search was mandated by semantic router
-
+        limit: Maximum results (default 30)
+        forced: Internal flag for semantic routing
+        sources: List of sources to search. Examples:
+                 ["api_reference"] for parameter questions
+                 ["crawled_pages", "official_sequence_examples"] for learning
+                 None to search all sources
+    
     Returns:
-        Formatted search results
+        Formatted results with source attribution and synthesis hints
     """
     # Check if this search was forced by semantic router
     if not forced and hasattr(ctx.deps, 'force_rag'):
@@ -86,88 +95,152 @@ async def search_pulseq_knowledge(
     if not hasattr(ctx.deps, "rag_v2"):
         ctx.deps.rag_v2 = ModernPulseqRAG()
 
-    # Extract any functions mentioned in the query
-    functions = extract_functions_from_text(query)
-
-    # Check if code is provided (simple heuristic)
-    code_provided = any(
-        pattern in query
-        for pattern in ["```", "def ", "function ", "=", ";", "{", "}"]
-    )
-
-    # Add forced search hints if available
-    search_terms = None
+    # Get source hints from semantic router if available
+    source_hints = None
     if hasattr(ctx.deps, 'forced_search_hints') and ctx.deps.forced_search_hints:
-        search_terms = ctx.deps.forced_search_hints
+        source_hints = {'search_terms': ctx.deps.forced_search_hints}
     
-    # Create hint for retrieval
-    hint = RetrievalHint(
-        functions_mentioned=functions,
-        code_provided=code_provided,
-        search_terms=search_terms,
+    # Use new source-aware search
+    results = await ctx.deps.rag_v2.search_with_source_awareness(
+        query=query,
+        sources=sources,
+        forced=forced,
+        source_hints=source_hints
     )
-
-    # Simple retrieval
-    results = await ctx.deps.rag_v2.retrieve(query, hint, limit)
 
     # Format results for display
-    if not results["documents"]:
+    if not results.get("results_by_source"):
         if forced:
             return """No documentation found, but this query was identified as requiring Pulseq-specific information.
             Please provide guidance based on Pulseq best practices and validate any function names."""
         return "No relevant documentation found in the knowledge base."
 
-    # Add header if this was a forced search
+    # Build formatted response
     formatted = []
+    
+    # Add header if this was a forced search
     if forced:
         formatted.append("[📚 REQUIRED DOCUMENTATION - Query identified as Pulseq-specific]\n")
-    for doc in results["documents"][:10]:  # Limit display to top 10
-        parts = []
-
-        # Add title/function name
-        if doc.get("function_name"):
-            parts.append(f"**Function: {doc['function_name']}**")
-        elif doc.get("title"):
-            parts.append(f"**{doc['title']}**")
-
-        # Add source info
-        if doc.get("url"):
-            parts.append(f"Source: {doc['url']}")
-
-        # Add content preview
-        content = doc.get("content", "")
-        if content:
-            # Limit content length for display
-            if len(content) > 500:
-                content = content[:500] + "..."
-            parts.append(content)
-
-        # Add similarity score
-        if doc.get("similarity"):
-            parts.append(f"*Relevance: {doc['similarity']:.2f}*")
-
-        formatted.append("\n".join(parts))
-
+    
+    # Add search metadata
+    formatted.append(f"**Sources searched:** {', '.join(results['search_metadata']['sources_searched'])}")
+    formatted.append(f"**Total results:** {results['search_metadata']['total_results']}\n")
+    
+    # Add synthesis hints
+    if results.get("synthesis_hints"):
+        formatted.append("**Key insights:**")
+        for hint in results["synthesis_hints"]:
+            formatted.append(f"• {hint}")
+        formatted.append("")
+    
+    # Format results by source
+    for source_type, source_results in results.get("results_by_source", {}).items():
+        formatted.append(f"\n### {source_type.replace('_', ' ').title()}\n")
+        
+        for idx, result in enumerate(source_results[:5], 1):  # Limit to 5 per source
+            if source_type == "api_documentation":
+                formatted.append(format_api_result(result))
+            elif source_type == "examples_and_docs":
+                formatted.append(format_example_result(result))
+            elif source_type == "tutorials":
+                formatted.append(format_tutorial_result(result))
+    
+    # Add synthesis recommendations
+    if results.get("synthesis_recommendations"):
+        formatted.append("\n**Recommendations:**")
+        for rec in results["synthesis_recommendations"]:
+            formatted.append(f"• {rec}")
+    
     # Log search event
     if ctx.deps and hasattr(ctx.deps, "conversation_context"):
-        # Include forced flag in metadata
         metadata = {
-            "functions": functions, 
-            "code_provided": code_provided,
-            "forced": forced
+            "forced": forced,
+            "sources_searched": results['search_metadata']['sources_searched'],
+            "total_results": results['search_metadata']['total_results']
         }
         if forced:
             metadata["reason"] = "semantic_routing"
             
         conversation_logger.log_search_event(
             ctx.deps.conversation_context.session_id,
-            "forced_rag" if forced else "modern_rag",
+            "source_aware_rag",
             query,
-            len(results["documents"]),
+            results['search_metadata']['total_results'],
             metadata,
         )
 
-    return "\n\n---\n\n".join(formatted)
+    return "\n".join(formatted)
+
+
+def format_api_result(result: Dict) -> str:
+    """Format API documentation result for display."""
+    parts = []
+    func_info = result.get("function", {})
+    tech_details = result.get("technical_details", {})
+    
+    parts.append(f"**{func_info.get('name', 'Unknown Function')}**")
+    
+    if func_info.get('purpose'):
+        parts.append(f"Purpose: {func_info['purpose']}")
+    
+    if func_info.get('usage'):
+        parts.append(f"Usage: `{func_info['usage']}`")
+    
+    if tech_details.get('parameters'):
+        parts.append(f"Parameters:\n{tech_details['parameters']}")
+    
+    if tech_details.get('returns'):
+        parts.append(f"Returns: {tech_details['returns']}")
+    
+    return "\n".join(parts) + "\n"
+
+
+def format_example_result(result: Dict) -> str:
+    """Format code example result for display."""
+    parts = []
+    
+    if result.get("source_type") == "DOCUMENTATION_MULTI_PART":
+        doc = result.get("document", {})
+        parts.append(f"**{doc.get('title', 'Document')}** ({doc.get('total_parts', 1)} parts)")
+        parts.append(f"URL: {doc.get('url', 'N/A')}")
+        
+        # Show truncated content
+        content = doc.get('content', '')
+        if len(content) > 500:
+            content = content[:500] + "..."
+        parts.append(content)
+    else:
+        content_info = result.get("content", {})
+        parts.append(f"**{content_info.get('title', 'Example')}**")
+        
+        if content_info.get('url'):
+            parts.append(f"URL: {content_info['url']}")
+        
+        # Show truncated content
+        text = content_info.get('text', '')
+        if len(text) > 500:
+            text = text[:500] + "..."
+        parts.append(text)
+    
+    return "\n".join(parts) + "\n"
+
+
+def format_tutorial_result(result: Dict) -> str:
+    """Format tutorial/sequence result for display."""
+    parts = []
+    tutorial = result.get("tutorial_info", {})
+    
+    parts.append(f"**{tutorial.get('title', 'Sequence Example')}**")
+    parts.append(f"Type: {tutorial.get('sequence_type', 'Unknown')}")
+    parts.append(f"Complexity: {tutorial.get('complexity', 'Unknown')}")
+    
+    if tutorial.get('summary'):
+        parts.append(f"Summary: {tutorial['summary']}")
+    
+    if tutorial.get('key_techniques'):
+        parts.append(f"Techniques: {', '.join(tutorial['key_techniques'])}")
+    
+    return "\n".join(parts) + "\n"
 
 
 async def verify_function_namespace(
