@@ -62,24 +62,27 @@ async def search_pulseq_knowledge(
     sources: Optional[List[str]] = None,  # NEW parameter for source specification
 ) -> str:
     """
-    Search Pulseq knowledge with intelligent source selection.
-
-    Available sources (choose based on query intent):
-    - "api_reference": Function signatures, parameters, return types (best for: specs, syntax)
-    - "crawled_pages": Code examples, tutorials, implementations (best for: how-to, debugging)
-    - "official_sequence_examples": Complete educational sequences (best for: learning, templates)
-
+    Search Pulseq knowledge base.
+    
+    By default, returns top results from all sources for comprehensive coverage.
+    You can specify sources for targeted searches when you know what you need.
+    
+    Available sources:
+    - "api_reference": Function signatures, parameters, returns (authoritative)
+    - "official_sequence_examples": Educational sequences, correct implementations
+    - "crawled_pages": Community examples, discussions, debugging
+    
+    Can be called multiple times with different strategies.
+    Results include source attribution to help assess relevance.
+    
     Args:
         query: Search query
         limit: Maximum results (default 30)
         forced: Internal flag for semantic routing
-        sources: List of sources to search. Examples:
-                 ["api_reference"] for parameter questions
-                 ["crawled_pages", "official_sequence_examples"] for learning
-                 None to search all sources
-
+        sources: Optional list of specific sources to search
+    
     Returns:
-        Formatted results with source attribution and synthesis hints
+        Formatted results with source attribution
     """
     # Check if this search was forced by semantic router
     if not forced and hasattr(ctx.deps, "force_rag"):

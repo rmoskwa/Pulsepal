@@ -83,22 +83,33 @@ class ModernPulseqRAG:
         
         # If LLM didn't specify sources, default to comprehensive search
         if not sources:
-            # Default to all sources for comprehensive results
-            # The LLM can filter/prioritize results as needed
+            # Default to all sources with balanced top-k approach
+            # This ensures comprehensive coverage without overwhelming the LLM
             sources = ["api_reference", "crawled_pages", "official_sequence_examples"]
-            logger.info(f"No sources specified by LLM, searching all: {sources}")
+            logger.info(f"No sources specified, using top-k from all sources: {sources}")
+            use_top_k = True
+            top_k_per_source = 3  # Top 3 from each source = 9 total results
+        else:
+            logger.info(f"LLM specified sources: {sources}")
+            use_top_k = False
 
         # Search each source with appropriate methods
         source_results = {}
 
         for source in sources:
             if source == "api_reference":
-                results = await self._search_api_reference(query, limit=5)
+                # For top-k mode, limit to 3; otherwise use default 5
+                limit = top_k_per_source if use_top_k else 5
+                results = await self._search_api_reference(query, limit=limit)
             elif source == "crawled_pages":
-                results = await self._search_crawled_pages(query, limit=10)
+                # For top-k mode, limit to 3; otherwise use default 10
+                limit = top_k_per_source if use_top_k else 10
+                results = await self._search_crawled_pages(query, limit=limit)
             elif source == "official_sequence_examples":
-                # Limit to prevent overwhelming Gemini (5 sequences ≈ 75KB)
-                results = await self._search_official_sequences(query, limit=5)
+                # For top-k mode, limit to 3; otherwise use default 5
+                # Note: sequence examples are large, so we keep conservative limits
+                limit = top_k_per_source if use_top_k else 5
+                results = await self._search_official_sequences(query, limit=limit)
             else:
                 continue
 
@@ -110,7 +121,14 @@ class ModernPulseqRAG:
             "original_query": query,
             "forced": forced,
             "source_hints": source_hints,
+            "search_mode": "top_k_balanced" if use_top_k else "targeted",
         }
+
+        # Log search summary
+        total_results = sum(len(results) for results in source_results.values())
+        logger.info(f"Search complete: {total_results} results from {len(source_results)} sources")
+        if use_top_k:
+            logger.info(f"Used balanced top-k approach: {top_k_per_source} results per source")
 
         return format_unified_response(source_results, query_context)
 
