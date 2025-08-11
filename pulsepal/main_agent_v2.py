@@ -135,7 +135,6 @@ def _register_tools():
         tools.validate_pulseq_function
     )  # Critical for hallucination prevention
     pulsepal_agent.tool(tools.validate_code_block)  # Validate entire code blocks
-    pulsepal_agent.tool(tools.search_web_for_mri_info)
 
     # Set the agent reference in tools module
     tools.pulsepal_agent = pulsepal_agent

@@ -12,7 +12,6 @@ from pydantic_ai import RunContext
 
 from .dependencies import PulsePalDependencies
 from .rag_service_v2 import ModernPulseqRAG
-from .web_search import get_web_search_service
 from .conversation_logger import get_conversation_logger
 
 # Agent will be set by main_agent.py after creation
@@ -435,42 +434,3 @@ async def validate_code_block(
     return "\n".join(response)
 
 
-async def search_web_for_mri_info(
-    ctx: RunContext[PulsePalDependencies], query: str
-) -> str:
-    """
-    Search the web for MRI-related information.
-    Used when information is not in the Pulseq knowledge base.
-
-    Args:
-        query: Search query
-
-    Returns:
-        Web search results
-    """
-    web_search = get_web_search_service()
-    if not web_search:
-        return "Web search is not configured. Please use the knowledge base search instead."
-
-    # Add MRI/Pulseq context to query if not present
-    query_lower = query.lower()
-    if not any(
-        term in query_lower for term in ["mri", "pulseq", "magnetic", "resonance"]
-    ):
-        query = f"MRI Pulseq {query}"
-
-    results = await web_search.search(query)
-
-    if not results:
-        return "No web results found."
-
-    # Format results
-    formatted = []
-    for result in results[:5]:  # Top 5 results
-        formatted.append(
-            f"**{result.get('title', 'Untitled')}**\n"
-            f"URL: {result.get('url', 'N/A')}\n"
-            f"{result.get('snippet', 'No description available')}"
-        )
-
-    return "\n\n---\n\n".join(formatted)
