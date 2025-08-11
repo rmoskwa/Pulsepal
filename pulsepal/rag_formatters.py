@@ -721,6 +721,20 @@ def format_unified_response(
         "synthesis_hints": [],
         "citation_map": {},
     }
+    
+    # Add detected functions as context hints (if any)
+    detected_functions = query_context.get("detected_functions", None)
+    if detected_functions:
+        # Only include a summary to avoid overwhelming context
+        func_names = [f["name"] for f in detected_functions[:10]]  # Limit to first 10
+        if len(detected_functions) > 10:
+            func_names.append(f"... and {len(detected_functions) - 10} more")
+        
+        response["search_metadata"]["function_context"] = {
+            "detected_count": len(detected_functions),
+            "sample_functions": func_names,
+            "note": "Functions detected in context - consider if documentation needed"
+        }
 
     # Process each source type
     for source_type, results in source_results.items():

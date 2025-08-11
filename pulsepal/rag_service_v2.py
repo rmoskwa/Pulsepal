@@ -68,19 +68,20 @@ class ModernPulseqRAG:
         Returns:
             Formatted results organized by source with synthesis hints
         """
-        # Check for detected functions first - direct lookup if confidence is high
+        # IMPORTANT: Function detection provides hints, not directives
+        # Detected functions are passed as metadata to help inform search,
+        # but we don't force lookups - let the LLM decide what's needed
+        
+        # Log detected functions as hints (if any)
         if detected_functions:
-            high_confidence = [f for f in detected_functions if f["confidence"] > 0.7]
-            if high_confidence:
-                logger.info(f"Performing direct lookup for {len(high_confidence)} detected function(s)")
-                direct_results = await self._direct_function_lookup(high_confidence)
-
-                if direct_results:
-                    # Format and return direct results immediately
-                    from .rag_formatters import format_direct_function_results
-                    return format_direct_function_results(direct_results, query, detected_functions)
-                logger.info("Direct lookup returned no results, falling back to vector search")
-
+            func_names = [f["name"] for f in detected_functions]
+            logger.info(f"Function hints available: {len(func_names)} functions detected as context")
+            logger.debug(f"Detected functions: {func_names[:5]}...")  # Log first 5 for debugging
+            
+            # Note: We could optionally do targeted lookups here if the query 
+            # specifically asks about one of these functions, but for now
+            # we'll let the LLM's search decision take precedence
+        
         # If LLM didn't specify sources, default to comprehensive search
         if not sources:
             # Default to all sources with balanced top-k approach
@@ -122,6 +123,7 @@ class ModernPulseqRAG:
             "forced": forced,
             "source_hints": source_hints,
             "search_mode": "top_k_balanced" if use_top_k else "targeted",
+            "detected_functions": detected_functions,  # Pass as hints, not directives
         }
 
         # Log search summary

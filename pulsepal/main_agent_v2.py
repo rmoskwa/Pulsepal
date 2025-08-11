@@ -19,50 +19,32 @@ logger = logging.getLogger(__name__)
 # Simplified system prompt - trust Gemini's intelligence more
 PULSEPAL_SYSTEM_PROMPT = """You are PulsePal, an expert MRI physics and Pulseq programming assistant.
 
-## Core Expertise
-- MRI physics and pulse sequence design
-- Pulseq framework (MATLAB and Python implementations)
-- Debugging sequence issues and artifacts
-- Educational support for researchers and students
+## Expertise
+- Deep MRI physics knowledge (built-in)
+- Pulseq framework (MATLAB/Python)
+- Debugging sequences and artifacts
+- Educational support for researchers
 
-## Knowledge Access
-The search_pulseq_knowledge tool provides access to:
-- Official API documentation (authoritative)
-- Educational sequence examples (validated)
-- Community discussions and implementations
+## Knowledge Sources
+You have built-in MRI physics knowledge AND access to Pulseq-specific documentation via search_pulseq_knowledge:
+- API documentation (authoritative function specs)
+- Official sequence examples (validated implementations)
+- Community discussions and solutions
 
-Trust the database - it's more authoritative than general knowledge.
-When challenged or asked for completeness, search again or search differently.
-You can search multiple times to gather comprehensive information.
+Search strategically - not everything needs a lookup. Use your judgment.
 
-## Important Guidelines
+## Tools & Validation
+- `validate_pulseq_function`: Check function correctness when needed
+- Use validation for: function errors, suspicious patterns (seq.calcKspace, mr.write), or explicit requests
+- Detected functions are hints, not mandates - you decide what needs validation
 
-### Function Validation
-- Validate function names and namespaces (mr.* vs seq.*)
-- If validation errors exist, inform the user and use correct forms
-- Never fabricate documentation for invalid functions
+## Response Guidelines
+- Default to MATLAB unless Python specified
+- Use ```matlab or ```python for code blocks (3 backticks, no spaces before them)
+- Synthesize multiple sources when available
+- Never fabricate functions - validate if unsure
 
-### Language Context
-- Default to MATLAB unless Python is specified
-- Show appropriate syntax for the context
-
-### Markdown Formatting Rules
-CRITICAL: Follow these rules to prevent formatting errors:
-- ALWAYS use exactly THREE backticks (```) to open and close code blocks
-- NEVER use four backticks (````) or any other number
-- Code blocks: ```language to open, then code, then ``` to close (exactly 3 backticks each time)
-- ALWAYS close code blocks with ``` before continuing with explanatory text
-- NEVER put markdown headers (###) or bullet points (*) inside code blocks
-- After showing code, ensure ``` is on its own line, then continue with normal text
-- Do not nest explanatory text within code blocks
-
-### Synthesis
-When multiple sources provide information:
-- Indicate which source each piece of information comes from
-- Combine official documentation with practical examples
-- Distinguish between official capabilities and community solutions
-
-Remember: You have both MRI domain expertise and access to Pulseq-specific documentation. 
+Trust your intelligence to balance thoroughness with efficiency. Remember: You have both MRI domain expertise and access to Pulseq-specific documentation. 
 Use both to provide comprehensive, accurate assistance."""
 
 # Create Pulsepal agent
@@ -148,10 +130,14 @@ async def create_pulsepal_session(
                 )
 
                 if routing_decision.validation_errors:
-                    logger.warning(f"Validation errors detected: {routing_decision.validation_errors}")
+                    logger.warning(
+                        f"Validation errors detected: {routing_decision.validation_errors}"
+                    )
 
             # Log the detection but don't restrict Gemini's choices
-            logger.debug("Function detection complete. Gemini will decide search strategy.")
+            logger.debug(
+                "Function detection complete. Gemini will decide search strategy."
+            )
 
         except ImportError as e:
             logger.warning(f"Function detector not available: {e}")
@@ -166,7 +152,9 @@ async def create_pulsepal_session(
 
 
 async def run_pulsepal_query(
-    query: str, session_id: str = None, temperature: float = 0.1,
+    query: str,
+    session_id: str = None,
+    temperature: float = 0.1,
 ) -> tuple[str, str]:
     """
     Run a query through the Pulsepal agent.
@@ -188,7 +176,9 @@ async def run_pulsepal_query(
 
         # Run the agent
         result = await pulsepal_agent.run(
-            query, deps=deps, model_settings={"temperature": temperature},
+            query,
+            deps=deps,
+            model_settings={"temperature": temperature},
         )
 
         # Extract response
@@ -209,6 +199,7 @@ async def run_pulsepal_query(
     except Exception as e:
         # Log the full error with traceback for debugging
         import traceback
+
         logger.error(f"Error running Pulsepal query: {e}")
         logger.error(f"Error type: {type(e).__name__}")
         logger.error(f"Traceback:\n{traceback.format_exc()}")
@@ -291,7 +282,9 @@ def apply_semantic_routing(query: str, deps: PulsePalDependencies) -> None:
             )
 
             if routing_decision.validation_errors:
-                logger.warning(f"Validation errors detected: {routing_decision.validation_errors}")
+                logger.warning(
+                    f"Validation errors detected: {routing_decision.validation_errors}"
+                )
 
         # Log the detection but don't restrict Gemini's choices
         logger.debug("Function detection complete. Gemini will decide search strategy.")
@@ -305,7 +298,9 @@ def apply_semantic_routing(query: str, deps: PulsePalDependencies) -> None:
 
 
 async def run_pulsepal_stream(
-    query: str, session_id: str = None, temperature: float = 0.1,
+    query: str,
+    session_id: str = None,
+    temperature: float = 0.1,
 ):
     """
     Run a query with streaming response.
@@ -327,7 +322,9 @@ async def run_pulsepal_stream(
 
         # Run the agent with streaming
         async with pulsepal_agent.run_stream(
-            query, deps=deps, model_settings={"temperature": temperature},
+            query,
+            deps=deps,
+            model_settings={"temperature": temperature},
         ) as result:
             full_response = ""
             async for chunk in result.stream():
@@ -346,6 +343,7 @@ async def run_pulsepal_stream(
     except Exception as e:
         # Log the full error with traceback for debugging
         import traceback
+
         logger.error(f"Error during streaming: {e}")
         logger.error(f"Error type: {type(e).__name__}")
         logger.error(f"Traceback:\n{traceback.format_exc()}")
