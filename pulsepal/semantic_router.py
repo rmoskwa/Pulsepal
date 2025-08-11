@@ -42,6 +42,7 @@ class RoutingDecision:
     semantic_scores: Dict[str, float] = field(default_factory=dict)
     trigger_type: str = "unknown"  # 'semantic', 'keyword', 'code_detection', 'fallback'
     detected_functions: List[Dict] = field(default_factory=list)  # For direct function lookup
+    validation_errors: List[str] = field(default_factory=list)  # Namespace/function validation errors
 
 
 class ThresholdManager:
@@ -362,8 +363,11 @@ class SemanticRouter:
 
     def _check_pulseq_functions(self, query: str) -> Optional[RoutingDecision]:
         """Check for explicit Pulseq function mentions with multi-level namespace support."""
+        from .function_index import validate_namespace
+        
         query_lower = query.lower()
         detected_functions = []
+        validation_errors = []
 
         # Multi-level namespace patterns (most specific first)
         namespace_patterns = [
@@ -380,16 +384,23 @@ class SemanticRouter:
                 namespace = match.group(1)
                 func_name = match.group(2)
                 
-                # Validate it's a real function
-                if func_name in self.PULSEQ_FUNCTIONS or \
-                   func_name.lower() in [f.lower() for f in self.PULSEQ_FUNCTIONS]:
+                # Validate namespace is correct
+                validation = validate_namespace(func_name, namespace)
+                
+                if validation["correct_form"]:
+                    # Function exists (may have wrong namespace)
                     detected_functions.append({
                         "name": func_name,
                         "namespace": namespace,
                         "full_match": match.group(0),
                         "confidence": 1.0,
-                        "type": "explicit_namespace"
+                        "type": "explicit_namespace",
+                        "correct_form": validation["correct_form"],
+                        "is_valid": validation["is_valid"]
                     })
+                    
+                    if not validation["is_valid"]:
+                        validation_errors.append(validation["error"])
 
         # Check for makeXxx and calcXxx patterns
         make_calc_patterns = [
@@ -412,13 +423,19 @@ class SemanticRouter:
 
         # If we found namespace/pattern matches, return early with high confidence
         if detected_functions:
+            # Include validation errors in reasoning if any
+            reasoning = f"Detected {len(detected_functions)} Pulseq function(s) with explicit patterns"
+            if validation_errors:
+                reasoning += f" (namespace issues: {'; '.join(validation_errors)})"
+            
             return RoutingDecision(
                 route=QueryRoute.FORCE_RAG,
                 confidence=1.0,
-                reasoning=f"Detected {len(detected_functions)} Pulseq function(s) with explicit patterns",
+                reasoning=reasoning,
                 trigger_type="keyword",
                 search_hints=[f["name"] for f in detected_functions],
-                detected_functions=detected_functions
+                detected_functions=detected_functions,
+                validation_errors=validation_errors  # Pass validation errors
             )
 
         # Check for known function names with fuzzy matching
@@ -426,13 +443,18 @@ class SemanticRouter:
             # Exact match (case-insensitive)
             if func.lower() in query_lower:
                 if not any(d["name"].lower() == func.lower() for d in detected_functions):
-                    detected_functions.append({
-                        "name": func,
-                        "namespace": None,
-                        "full_match": func,
-                        "confidence": 1.0,
-                        "type": "exact_match"
-                    })
+                    # Validate the function
+                    validation = validate_namespace(func, None)
+                    if validation["correct_form"]:  # Function exists
+                        detected_functions.append({
+                            "name": func,
+                            "namespace": None,
+                            "full_match": func,
+                            "confidence": 1.0,
+                            "type": "exact_match",
+                            "correct_form": validation["correct_form"],
+                            "is_valid": validation["is_valid"]
+                        })
 
             # Fuzzy match: Convert CamelCase to spaced words
             # EventLibrary -> "event library"

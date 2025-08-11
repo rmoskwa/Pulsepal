@@ -35,10 +35,8 @@ MATLAB_FUNCTIONS = {
         "addRamps",
         "pts2waveform",
         # Test and validation
-        "testSequence",
-        "testGA",
-        "testGA1",
-        "testGA2",
+        "testCalcADC",
+        "testReport",  # Useful public method
         # Shape operations
         "compressShape",
         "decompressShape",
@@ -58,57 +56,20 @@ MATLAB_FUNCTIONS = {
         "EventLibrary",
         "TransformFOV",
         "SeqPlot",
-        # Complete the remaining functions
-        "accurate_mod_pp",
-        "block2events",
+        # Remaining public functions
         "calcAdcSeg",
         "calcRamp",
-        "calcShortestParamsForArea",
-        "compressShape_mat",
-        "conjugate",
+        "compressShape_mat",  # MATLAB-compatible version
         "convert",
-        "div_check",
-        "extract_time",
-        "findFlank",
-        "fromRotMat",
-        "generate_breaks_coefs",
-        "getGradAbsMag",
-        "init",
-        "InsideLimits",
-        "is_grad_const",
-        "isOctave",
-        "joinleft0",
-        "joinleft1",
-        "joinright0",
-        "joinright1",
-        "local_frac",
-        "local_mod",
-        "localStrip",
-        "make_matlab_doc",
-        "makemosaic",
-        "max_abs",
-        "md5",
-        "melodyToPitchesAndDurations",
-        "melodyToScale",
-        "multiply",
-        "musicToSequence",
-        "normalize",
-        "parsemr",
-        "quat_conj",
-        "quat_multiply",
-        "readasc",
-        "rotate",
-        "setup",
-        "sin_mix",
-        "test_sequence",
-        "testCalcADC",
-        "testEventCombinations2",
-        "testEventCombinations3",
-        "testGradientContinuity1",
-        "testNoEvent",
-        "testSingleEvents",
-        "toRotMat",
-        "unknown",
+        # Music demo functions (useful for music sequences)
+        "init",  # mrMusic.init
+        "melodyToPitchesAndDurations",  # mrMusic function
+        "melodyToScale",  # mrMusic function
+        "musicToSequence",  # mrMusic function
+        # Utilities
+        "md5",  # Public MD5 hash function
+        "parsemr",  # Public utility for loading/displaying sequences
+        "readasc",  # Siemens ASC file reader
         "version",
     },
     "class_methods": {
@@ -124,13 +85,6 @@ MATLAB_FUNCTIONS = {
             "getDefinition",
             "getBlock",
             "setBlock",
-            "registerLabelEvent",
-            "registerRfEvent",
-            "registerGradEvent",
-            "registerAdcEvent",
-            "registerControlEvent",
-            "registerRfShimEvent",
-            "registerSoftDelayEvent",
             "evalLabels",
             "calcPNS",
             "calcRfPower",
@@ -138,48 +92,34 @@ MATLAB_FUNCTIONS = {
             "applySoftDelay",
             "flipGradAxis",
             "modGradAxis",
-            "asc_to_hw",
-            "calculateKspaceUnfunc",
-            "fillPpCoefs",
             "findBlockByTime",
-            "getBinaryCodes",
-            "getDefaultSoftDelayValues",
-            "getExtensionTypeID",
-            "getExtensionTypeString",
-            "getRawBlockContentIDs",
             "install",
-            "md5_java",
             "paperPlot",
             "readBinary",
-            "rfFromLibData",
-            "setExtensionStringAndID",
-            "sintlookup",
-            "slookup",
             "sound",
             "testReport",
             "waveforms_and_times",
             "write_v141",
             "writeBinary",
         },
-        "EventLibrary": {"find_mat"},
-        "SeqPlot": {"DataTipHandler", "guiResize", "updateGuides"},
+        "EventLibrary": {},  # No public methods users should call
+        "SeqPlot": {},  # GUI internals - users don't call these directly
         "TransformFOV": {"applyToBlock", "applyToSeq"},
     },
     # Additional prefixed functions
-    "eve_functions": {"find_mat"},  # eve.* functions (EventLibrary)
+    "eve_functions": {},  # No public EventLibrary methods
     "tra_functions": {"applyToBlock", "applyToSeq"},  # tra.* functions (TransformFOV)
     "mr_aux_functions": {
         "findFlank",
         "isOctave",
         "version",
-        "SeqPlot",
     },  # mr.aux.* functions
     "mr_aux_quat_functions": {  # mr.aux.quat.* functions
         "conjugate",
         "fromRotMat",
         "multiply",
         "normalize",
-        "rotate",
+        "rotate",  # Quaternion rotation
         "toRotMat",
     },
 }
@@ -239,3 +179,133 @@ FUNCTION_CLUSTERS = {
     "diffusion_weighting": ["makeTrapezoid", "makeDelay", "calcDuration"],
     "label_control": ["makeLabel", "registerLabelEvent", "evalLabels"],
 }
+
+# Comprehensive namespace mapping for validation
+NAMESPACE_MAP = {
+    # Functions that MUST use mr. namespace
+    "mr_only": {
+        # All make* functions
+        "makeAdc", "makeTrapezoid", "makeDelay", "makeSincPulse", "makeGaussPulse",
+        "makeBlockPulse", "makeArbitraryGrad", "makeArbitraryRf", "makeExtendedTrapezoid",
+        "makeExtendedTrapezoidArea", "makeSLRpulse", "makeAdiabaticPulse", "makeLabel",
+        "makeTrigger", "makeDigitalOutputPulse", "makeSoftDelay",
+        # Calc functions
+        "calcDuration", "calcRfCenter", "calcRfBandwidth", "calcRamp", "calcAdcSeg",
+        # Other mr functions
+        "opts", "scaleGrad", "addGradients", "splitGradient", "splitGradientAt",
+        "align", "addRamps", "pts2waveform", "compressShape",
+        "decompressShape", "rotate3D", "transform", "traj2grad", "sinc", "gauss",
+        "getSupportedRfUse", "getSupportedLabels", "simRf",
+    },
+    
+    # Functions that MUST use seq. namespace (Sequence methods)
+    "seq_only": {
+        "addBlock", "write", "plot", "calculateKspacePP", "checkTiming", "duration",
+        "read", "setDefinition", "getDefinition", "getBlock", "setBlock",
+        "evalLabels", "calcPNS", "calcRfPower", "calcMomentsBtensor", "applySoftDelay",
+        "flipGradAxis", "modGradAxis", "testReport", "sound", "paperPlot",
+        "waveforms_and_times", "writeBinary", "readBinary",
+    },
+    
+    # Constructors (can be called without namespace)
+    "constructors": {
+        "Sequence", "EventLibrary", "TransformFOV", "SeqPlot"
+    },
+    
+    # EventLibrary methods (eve. namespace)
+    "eve_only": {
+        "find_mat"
+    },
+    
+    # TransformFOV methods (tra. namespace)
+    "tra_only": {
+        "applyToBlock", "applyToSeq"
+    },
+    
+    # mr.aux functions
+    "mr_aux_only": {
+        "findFlank", "isOctave", "version"
+    },
+    
+    # mr.aux.quat functions
+    "mr_aux_quat_only": {
+        "conjugate", "fromRotMat", "multiply", "normalize", "rotate", "toRotMat"
+    }
+}
+
+def get_correct_namespace(function_name: str) -> str:
+    """
+    Get the correct namespace for a function.
+    Returns the namespace prefix (e.g., 'mr', 'seq') or empty string if no namespace needed.
+    """
+    # Check each namespace category
+    if function_name in NAMESPACE_MAP["mr_only"]:
+        return "mr"
+    elif function_name in NAMESPACE_MAP["seq_only"]:
+        return "seq"
+    elif function_name in NAMESPACE_MAP["constructors"]:
+        return ""  # No namespace needed
+    elif function_name in NAMESPACE_MAP["eve_only"]:
+        return "eve"
+    elif function_name in NAMESPACE_MAP["tra_only"]:
+        return "tra"
+    elif function_name in NAMESPACE_MAP["mr_aux_only"]:
+        return "mr.aux"
+    elif function_name in NAMESPACE_MAP["mr_aux_quat_only"]:
+        return "mr.aux.quat"
+    else:
+        return None  # Function not found
+
+def validate_namespace(function_name: str, provided_namespace: str = None) -> dict:
+    """
+    Validate if a function is being called with the correct namespace.
+    
+    Args:
+        function_name: The function name (e.g., 'makeAdc')
+        provided_namespace: The namespace provided by user (e.g., 'seq', 'mr', or None)
+    
+    Returns:
+        dict with:
+        - is_valid: Whether the namespace is correct
+        - correct_form: The correct way to call this function
+        - error: Error message if invalid
+    """
+    correct_namespace = get_correct_namespace(function_name)
+    
+    if correct_namespace is None:
+        # Function doesn't exist
+        return {
+            "is_valid": False,
+            "correct_form": None,
+            "error": f"Function '{function_name}' not found in Pulseq"
+        }
+    
+    # Build the correct form
+    if correct_namespace:
+        correct_form = f"{correct_namespace}.{function_name}"
+    else:
+        correct_form = function_name
+    
+    # If no namespace was provided, return the correct form
+    if provided_namespace is None:
+        return {
+            "is_valid": True,
+            "correct_form": correct_form,
+            "error": None
+        }
+    
+    # Check if provided namespace matches
+    if provided_namespace == correct_namespace:
+        return {
+            "is_valid": True,
+            "correct_form": correct_form,
+            "error": None
+        }
+    else:
+        # Wrong namespace
+        provided_form = f"{provided_namespace}.{function_name}" if provided_namespace else function_name
+        return {
+            "is_valid": False,
+            "correct_form": correct_form,
+            "error": f"'{provided_form}' should be '{correct_form}'"
+        }

@@ -71,8 +71,20 @@ When api_reference contains comprehensive documentation:
 
 ## Query Response Guidelines
 
-1. **Function Validation**: Validate function names before generating code
-2. **Namespace Verification**: Check correct usage (mr.* vs seq.*)
+### IMPORTANT: Check for Validation Errors
+If deps.validation_errors contains namespace issues:
+1. **Immediately inform the user** of the namespace error(s)
+2. **Suggest the correct form** (e.g., "seq.makeAdc should be mr.makeAdc")
+3. **Then search using the CORRECT form**, not the user's incorrect form
+4. **Never fabricate documentation** for incorrectly namespaced functions
+
+Example: If user asks about "seq.makeAdc" but validation says it should be "mr.makeAdc":
+- Tell user: "Note: seq.makeAdc is not valid. The correct form is mr.makeAdc"
+- Then search for and provide documentation about mr.makeAdc
+
+### Standard Guidelines
+1. **Function Validation**: MUST validate every function name mentioned
+2. **Namespace Verification**: Strictly enforce correct usage (mr.* vs seq.*)
 3. **Progressive Complexity**: Start simple, but provide complete info when asked
 4. **Session Awareness**: Use conversation history to understand user expertise level
 
@@ -181,11 +193,15 @@ async def create_pulsepal_session(
                 deps.force_rag = True
                 deps.forced_search_hints = routing_decision.search_hints
                 deps.detected_functions = routing_decision.detected_functions  # Pass detected functions
+                deps.validation_errors = routing_decision.validation_errors  # Pass validation errors
+                
                 if routing_decision.detected_functions:
                     logger.info(
                         f"Semantic router: FORCE_RAG - {routing_decision.reasoning} - "
                         f"Detected functions: {[f['name'] for f in routing_decision.detected_functions]}"
                     )
+                    if routing_decision.validation_errors:
+                        logger.warning(f"Validation errors: {routing_decision.validation_errors}")
                 else:
                     logger.info(
                         f"Semantic router: FORCE_RAG - {routing_decision.reasoning}"
