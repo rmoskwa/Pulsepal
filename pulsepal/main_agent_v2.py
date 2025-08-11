@@ -150,9 +150,16 @@ async def create_pulsepal_session(
             if routing_decision.route == QueryRoute.FORCE_RAG:
                 deps.force_rag = True
                 deps.forced_search_hints = routing_decision.search_hints
-                logger.info(
-                    f"Semantic router: FORCE_RAG - {routing_decision.reasoning}"
-                )
+                deps.detected_functions = routing_decision.detected_functions  # Pass detected functions
+                if routing_decision.detected_functions:
+                    logger.info(
+                        f"Semantic router: FORCE_RAG - {routing_decision.reasoning} - "
+                        f"Detected functions: {[f['name'] for f in routing_decision.detected_functions]}"
+                    )
+                else:
+                    logger.info(
+                        f"Semantic router: FORCE_RAG - {routing_decision.reasoning}"
+                    )
             elif routing_decision.route == QueryRoute.NO_RAG:
                 deps.skip_rag = True
                 logger.info(f"Semantic router: NO_RAG - {routing_decision.reasoning}")

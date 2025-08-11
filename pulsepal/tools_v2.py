@@ -99,10 +99,20 @@ async def search_pulseq_knowledge(
     source_hints = None
     if hasattr(ctx.deps, "forced_search_hints") and ctx.deps.forced_search_hints:
         source_hints = {"search_terms": ctx.deps.forced_search_hints}
+    
+    # Get detected functions from semantic router if available
+    detected_functions = None
+    if hasattr(ctx.deps, "detected_functions") and ctx.deps.detected_functions:
+        detected_functions = ctx.deps.detected_functions
+        logger.info(f"Using detected functions: {[f['name'] for f in detected_functions]}")
 
-    # Use new source-aware search
+    # Use new source-aware search with detected functions
     results = await ctx.deps.rag_v2.search_with_source_awareness(
-        query=query, sources=sources, forced=forced, source_hints=source_hints
+        query=query, 
+        sources=sources, 
+        forced=forced, 
+        source_hints=source_hints,
+        detected_functions=detected_functions
     )
 
     # Format results for display

@@ -52,6 +52,7 @@ class ModernPulseqRAG:
         sources: Optional[List[str]] = None,
         forced: bool = False,
         source_hints: Optional[Dict] = None,
+        detected_functions: Optional[List[Dict]] = None,
     ) -> Dict:
         """
         Perform source-aware search across Supabase tables.
@@ -61,10 +62,25 @@ class ModernPulseqRAG:
             sources: Specific sources to search (LLM-specified or None for all)
             forced: Whether this search was forced by semantic routing
             source_hints: Additional hints about which sources to prioritize
+            detected_functions: Functions detected by semantic router for direct lookup
 
         Returns:
             Formatted results organized by source with synthesis hints
         """
+        # Check for detected functions first - direct lookup if confidence is high
+        if detected_functions:
+            high_confidence = [f for f in detected_functions if f["confidence"] > 0.7]
+            if high_confidence:
+                logger.info(f"Performing direct lookup for {len(high_confidence)} detected function(s)")
+                direct_results = await self._direct_function_lookup(high_confidence)
+                
+                if direct_results:
+                    # Format and return direct results immediately
+                    from .rag_formatters import format_direct_function_results
+                    return format_direct_function_results(direct_results, query, detected_functions)
+                else:
+                    logger.info("Direct lookup returned no results, falling back to vector search")
+        
         # If LLM didn't specify sources, default to comprehensive search
         if not sources:
             # Default to all sources for comprehensive results
@@ -309,7 +325,7 @@ class ModernPulseqRAG:
             "match_crawled_pages",
             {
                 "query_embedding": query_embedding,
-                "match_threshold": 0.3,
+                "match_threshold": 0.3,  # Lower threshold for crawled pages
                 "match_count": limit // 2,  # Split between sources
             },
         ).execute()
@@ -319,7 +335,7 @@ class ModernPulseqRAG:
             "match_api_reference",
             {
                 "query_embedding": query_embedding,
-                "match_threshold": 0.3,
+                "match_threshold": 0.5,  # Balanced threshold to catch semantic matches
                 "match_count": limit // 2,
             },
         ).execute()
@@ -434,7 +450,7 @@ class ModernPulseqRAG:
 
         return "\n".join(parts)
 
-    async def _search_api_reference(self, query: str, limit: int = 5) -> List[Dict]:
+    async def _search_api_reference(self, query: str, limit: int = 10) -> List[Dict]:
         """
         Search API reference with higher precision threshold.
         Focuses on function signatures, parameters, and API specifications.
@@ -453,7 +469,7 @@ class ModernPulseqRAG:
                 "match_api_reference",
                 {
                     "query_embedding": query_embedding,
-                    "match_threshold": 0.75,  # Higher threshold for API docs
+                    "match_threshold": 0.5,  # Balanced threshold to catch semantic matches
                     "match_count": limit,
                 },
             ).execute()
@@ -462,7 +478,7 @@ class ModernPulseqRAG:
                 for item in api_response.data:
                     results.append(
                         {
-                            "function_name": item.get("function_name", ""),
+                            "function_name": item.get("name", ""),  # Fixed: DB returns 'name' not 'function_name'
                             "description": item.get("description", ""),
                             "parameters": item.get("parameters"),
                             "returns": item.get("returns"),
@@ -496,7 +512,7 @@ class ModernPulseqRAG:
             "match_crawled_pages",
             {
                 "query_embedding": query_embedding,
-                "match_threshold": 0.7,  # Standard threshold
+                "match_threshold": 0.3,  # Lower threshold for crawled pages
                 "match_count": limit,
             },
         ).execute()
@@ -587,6 +603,54 @@ class ModernPulseqRAG:
         except Exception as e:
             logger.warning(f"Official sequence search failed: {e}")
 
+        return results
+
+    async def _direct_function_lookup(self, detected_functions: List[Dict]) -> List[Dict]:
+        """
+        Direct database lookup for detected functions.
+        Returns comprehensive documentation for each function.
+        
+        Args:
+            detected_functions: List of detected function info from semantic router
+            
+        Returns:
+            List of complete function documentation from api_reference
+        """
+        results = []
+        
+        for func_info in detected_functions:
+            func_name = func_info["name"]
+            
+            try:
+                # Query specific fields (not SELECT * to avoid unnecessary data)
+                response = self.supabase_client.client.table("api_reference").select(
+                    "name, signature, description, "
+                    "parameters, returns, usage_examples, "
+                    "function_type, class_name, is_class_method, "
+                    "calling_pattern, related_functions, "
+                    "search_terms, pulseq_version"
+                ).ilike("name", func_name).eq("language", "matlab").execute()
+                
+                if response.data:
+                    for item in response.data:
+                        # Add detection metadata
+                        item["_detection"] = {
+                            "confidence": func_info["confidence"],
+                            "type": func_info["type"],
+                            "namespace": func_info.get("namespace"),
+                            "original_query": func_info.get("full_match")
+                        }
+                        item["_source"] = "direct_function_lookup"
+                        results.append(item)
+                        
+                        logger.info(f"Direct lookup found: {func_name}")
+                else:
+                    logger.warning(f"Direct lookup found no results for: {func_name}")
+                    
+            except Exception as e:
+                logger.error(f"Direct lookup failed for {func_name}: {e}")
+                # Continue with other functions even if one fails
+                
         return results
 
     async def _retrieve_all_chunks(self, url: str) -> List[Dict]:

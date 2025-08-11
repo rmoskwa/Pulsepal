@@ -41,6 +41,7 @@ class RoutingDecision:
     search_hints: List[str] = field(default_factory=list)
     semantic_scores: Dict[str, float] = field(default_factory=dict)
     trigger_type: str = "unknown"  # 'semantic', 'keyword', 'code_detection', 'fallback'
+    detected_functions: List[Dict] = field(default_factory=list)  # For direct function lookup
 
 
 class ThresholdManager:
@@ -360,66 +361,126 @@ class SemanticRouter:
             )
 
     def _check_pulseq_functions(self, query: str) -> Optional[RoutingDecision]:
-        """Check for explicit Pulseq function mentions."""
+        """Check for explicit Pulseq function mentions with multi-level namespace support."""
         query_lower = query.lower()
+        detected_functions = []
 
-        # Check for function patterns
-        patterns = [
-            r"\b(mr|seq|opt|eve|tra)\.\w+",  # Namespace patterns
+        # Multi-level namespace patterns (most specific first)
+        namespace_patterns = [
+            (r"\b(mr\.aux\.quat)\.([\w]+)", "mr.aux.quat"),  # Three-level namespace
+            (r"\b(mr\.aux)\.([\w]+)", "mr.aux"),              # Two-level namespace
+            (r"\b(eve)\.([\w]+)", "eve"),                     # EventLibrary
+            (r"\b(tra)\.([\w]+)", "tra"),                     # TransformFOV
+            (r"\b(mr|seq)\.([\w]+)", None),                   # Single-level (common)
+        ]
+
+        # Check namespace patterns
+        for pattern, namespace_type in namespace_patterns:
+            for match in re.finditer(pattern, query, re.IGNORECASE):
+                namespace = match.group(1)
+                func_name = match.group(2)
+                
+                # Validate it's a real function
+                if func_name in self.PULSEQ_FUNCTIONS or \
+                   func_name.lower() in [f.lower() for f in self.PULSEQ_FUNCTIONS]:
+                    detected_functions.append({
+                        "name": func_name,
+                        "namespace": namespace,
+                        "full_match": match.group(0),
+                        "confidence": 1.0,
+                        "type": "explicit_namespace"
+                    })
+
+        # Check for makeXxx and calcXxx patterns
+        make_calc_patterns = [
             r"\bmake[A-Z]\w+",  # makeXxx patterns
             r"\bcalc[A-Z]\w+",  # calcXxx patterns
         ]
+        
+        for pattern in make_calc_patterns:
+            for match in re.finditer(pattern, query):
+                func_name = match.group(0)
+                if func_name in self.PULSEQ_FUNCTIONS and \
+                   not any(d["name"].lower() == func_name.lower() for d in detected_functions):
+                    detected_functions.append({
+                        "name": func_name,
+                        "namespace": None,
+                        "full_match": func_name,
+                        "confidence": 1.0,
+                        "type": "pattern_match"
+                    })
 
-        for pattern in patterns:
-            if re.search(pattern, query):
-                return RoutingDecision(
-                    route=QueryRoute.FORCE_RAG,
-                    confidence=1.0,
-                    reasoning="Explicit Pulseq function pattern detected",
-                    trigger_type="keyword",
-                    search_hints=self._extract_function_names(query),
-                )
+        # If we found namespace/pattern matches, return early with high confidence
+        if detected_functions:
+            return RoutingDecision(
+                route=QueryRoute.FORCE_RAG,
+                confidence=1.0,
+                reasoning=f"Detected {len(detected_functions)} Pulseq function(s) with explicit patterns",
+                trigger_type="keyword",
+                search_hints=[f["name"] for f in detected_functions],
+                detected_functions=detected_functions
+            )
 
         # Check for known function names with fuzzy matching
         for func in self.PULSEQ_FUNCTIONS:
             # Exact match (case-insensitive)
             if func.lower() in query_lower:
-                return RoutingDecision(
-                    route=QueryRoute.FORCE_RAG,
-                    confidence=1.0,
-                    reasoning=f"Pulseq function '{func}' mentioned",
-                    trigger_type="keyword",
-                    search_hints=[func],
-                )
+                if not any(d["name"].lower() == func.lower() for d in detected_functions):
+                    detected_functions.append({
+                        "name": func,
+                        "namespace": None,
+                        "full_match": func,
+                        "confidence": 1.0,
+                        "type": "exact_match"
+                    })
 
             # Fuzzy match: Convert CamelCase to spaced words
             # EventLibrary -> "event library"
             spaced_func = self._camelcase_to_spaced(func).lower()
             if spaced_func in query_lower:
-                return RoutingDecision(
-                    route=QueryRoute.FORCE_RAG,
-                    confidence=0.95,
-                    reasoning=f"Pulseq function '{func}' mentioned (fuzzy match)",
-                    trigger_type="keyword",
-                    search_hints=[func],
-                )
+                if not any(d["name"].lower() == func.lower() for d in detected_functions):
+                    detected_functions.append({
+                        "name": func,
+                        "namespace": None,
+                        "full_match": spaced_func,
+                        "confidence": 0.95,
+                        "type": "fuzzy_camelcase"
+                    })
 
             # Also check with underscores (common variation)
             # EventLibrary -> "event_library"
             underscored = self._camelcase_to_underscored(func).lower()
             if underscored in query_lower:
-                return RoutingDecision(
-                    route=QueryRoute.FORCE_RAG,
-                    confidence=0.95,
-                    reasoning=f"Pulseq function '{func}' mentioned (fuzzy match)",
-                    trigger_type="keyword",
-                    search_hints=[func],
-                )
+                if not any(d["name"].lower() == func.lower() for d in detected_functions):
+                    detected_functions.append({
+                        "name": func,
+                        "namespace": None,
+                        "full_match": underscored,
+                        "confidence": 0.95,
+                        "type": "fuzzy_underscore"
+                    })
 
         # Check for misspellings using Levenshtein distance
         misspelling_result = self._check_for_misspellings(query)
         if misspelling_result:
+            # Merge detected functions from misspelling with others if any
+            if detected_functions:
+                # Add misspelling detection to existing detections
+                misspelling_result.detected_functions.extend(detected_functions)
             return misspelling_result
+
+        # If we detected any functions through other methods, return them
+        if detected_functions:
+            # Find the highest confidence among detections
+            max_confidence = max(f["confidence"] for f in detected_functions)
+            return RoutingDecision(
+                route=QueryRoute.FORCE_RAG,
+                confidence=max_confidence,
+                reasoning=f"Detected {len(detected_functions)} Pulseq function(s)",
+                trigger_type="keyword",
+                search_hints=[f["name"] for f in detected_functions],
+                detected_functions=detected_functions
+            )
 
         return None
 
@@ -641,6 +702,13 @@ class SemanticRouter:
                     reasoning=f"Likely misspelling: '{word}' → '{matched_func}'",
                     trigger_type="misspelling",
                     search_hints=[matched_func],  # Use correct spelling for search
+                    detected_functions=[{
+                        "name": matched_func,  # Corrected spelling
+                        "namespace": None,
+                        "full_match": word,  # Original misspelling
+                        "confidence": 0.85,
+                        "type": "misspelling_correction"
+                    }]
                 )
 
         return None
