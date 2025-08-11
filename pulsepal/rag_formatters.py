@@ -726,7 +726,7 @@ def format_unified_response(
     for source_type, results in source_results.items():
         if source_type == "api_reference":
             formatted = format_api_reference(results)
-            response["results_by_source"]["api_documentation"] = formatted
+            response["results_by_source"]["api_reference"] = formatted
             response["synthesis_hints"].append(
                 "API documentation provides authoritative function specifications"
             )

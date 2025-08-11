@@ -97,8 +97,8 @@ class ModernPulseqRAG:
             elif source == "crawled_pages":
                 results = await self._search_crawled_pages(query, limit=10)
             elif source == "official_sequence_examples":
-                # No limit for official sequences - return all relevant matches (max ~40)
-                results = await self._search_official_sequences(query, limit=50)
+                # Limit to prevent overwhelming Gemini (5 sequences ≈ 75KB)
+                results = await self._search_official_sequences(query, limit=5)
             else:
                 continue
 
@@ -558,12 +558,13 @@ class ModernPulseqRAG:
         return results
 
     async def _search_official_sequences(
-        self, query: str, limit: int = 50
+        self, query: str, limit: int = 5
     ) -> List[Dict]:
         """
         Search official sequences for tutorials.
         Returns complete educational sequences with summaries.
-        Uses vector embeddings for semantic search, consistent with other search methods.
+        Limited to 5 results to prevent overwhelming Gemini (5 sequences ≈ 75KB).
+        Even for exploration queries, 5 diverse examples are sufficient.
         """
         results = []
 
