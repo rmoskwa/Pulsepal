@@ -153,7 +153,7 @@ async def search_pulseq_knowledge(
         formatted.append(f"\n### {source_type.replace('_', ' ').title()}\n")
 
         for idx, result in enumerate(source_results[:5], 1):  # Limit to 5 per source
-            if source_type == "api_documentation":
+            if source_type == "api_reference":  # Fixed: Changed from "api_documentation"
                 formatted.append(format_api_result(result))
             elif source_type == "examples_and_docs":
                 formatted.append(format_example_result(result))
