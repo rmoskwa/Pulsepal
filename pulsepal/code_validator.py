@@ -3,11 +3,12 @@ AST-based code validator for PulsePal.
 Validates MATLAB and Python code for correct Pulseq function usage.
 """
 
-import re
 import logging
-from typing import Dict, List, Optional
+import re
 from dataclasses import dataclass
-from .function_index import MATLAB_FUNCTIONS, COMMON_HALLUCINATIONS
+from typing import Dict, List, Optional
+
+from .function_index import COMMON_HALLUCINATIONS, MATLAB_FUNCTIONS
 
 logger = logging.getLogger(__name__)
 
@@ -56,9 +57,7 @@ class PulseqCodeValidator:
             # Special cases
             if func == "Sequence":
                 namespace_map[func] = ""  # Constructor
-            elif func == "opts":
-                namespace_map[func] = "mr"
-            elif func.startswith("make"):
+            elif func == "opts" or func.startswith("make"):
                 namespace_map[func] = "mr"
             else:
                 namespace_map[func] = "mr"
@@ -91,10 +90,7 @@ class PulseqCodeValidator:
 
         for line_num, line in enumerate(lines, 1):
             # Skip comments
-            if language == "matlab" and line.strip().startswith("%"):
-                fixed_lines.append(line)
-                continue
-            elif language == "python" and line.strip().startswith("#"):
+            if (language == "matlab" and line.strip().startswith("%")) or (language == "python" and line.strip().startswith("#")):
                 fixed_lines.append(line)
                 continue
 
@@ -112,7 +108,7 @@ class PulseqCodeValidator:
                             "function": call,
                             "error": validation["error"],
                             "suggestion": validation.get("suggestion", ""),
-                        }
+                        },
                     )
 
                     # Apply fix if available
@@ -125,7 +121,7 @@ class PulseqCodeValidator:
                             "line": line_num,
                             "function": call,
                             "warning": validation["warning"],
-                        }
+                        },
                     )
 
             fixed_lines.append(fixed_line)

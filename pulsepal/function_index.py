@@ -197,7 +197,7 @@ NAMESPACE_MAP = {
         "decompressShape", "rotate3D", "transform", "traj2grad", "sinc", "gauss",
         "getSupportedRfUse", "getSupportedLabels", "simRf",
     },
-    
+
     # Functions that MUST use seq. namespace (Sequence methods)
     "seq_only": {
         "addBlock", "write", "plot", "calculateKspacePP", "checkTiming", "duration",
@@ -206,31 +206,31 @@ NAMESPACE_MAP = {
         "flipGradAxis", "modGradAxis", "testReport", "sound", "paperPlot",
         "waveforms_and_times", "writeBinary", "readBinary",
     },
-    
+
     # Constructors (can be called without namespace)
     "constructors": {
-        "Sequence", "EventLibrary", "TransformFOV", "SeqPlot"
+        "Sequence", "EventLibrary", "TransformFOV", "SeqPlot",
     },
-    
+
     # EventLibrary methods (eve. namespace)
     "eve_only": {
-        "find_mat"
+        "find_mat",
     },
-    
+
     # TransformFOV methods (tra. namespace)
     "tra_only": {
-        "applyToBlock", "applyToSeq"
+        "applyToBlock", "applyToSeq",
     },
-    
+
     # mr.aux functions
     "mr_aux_only": {
-        "findFlank", "isOctave", "version"
+        "findFlank", "isOctave", "version",
     },
-    
+
     # mr.aux.quat functions
     "mr_aux_quat_only": {
-        "conjugate", "fromRotMat", "multiply", "normalize", "rotate", "toRotMat"
-    }
+        "conjugate", "fromRotMat", "multiply", "normalize", "rotate", "toRotMat",
+    },
 }
 
 def get_correct_namespace(function_name: str) -> str:
@@ -241,20 +241,19 @@ def get_correct_namespace(function_name: str) -> str:
     # Check each namespace category
     if function_name in NAMESPACE_MAP["mr_only"]:
         return "mr"
-    elif function_name in NAMESPACE_MAP["seq_only"]:
+    if function_name in NAMESPACE_MAP["seq_only"]:
         return "seq"
-    elif function_name in NAMESPACE_MAP["constructors"]:
+    if function_name in NAMESPACE_MAP["constructors"]:
         return ""  # No namespace needed
-    elif function_name in NAMESPACE_MAP["eve_only"]:
+    if function_name in NAMESPACE_MAP["eve_only"]:
         return "eve"
-    elif function_name in NAMESPACE_MAP["tra_only"]:
+    if function_name in NAMESPACE_MAP["tra_only"]:
         return "tra"
-    elif function_name in NAMESPACE_MAP["mr_aux_only"]:
+    if function_name in NAMESPACE_MAP["mr_aux_only"]:
         return "mr.aux"
-    elif function_name in NAMESPACE_MAP["mr_aux_quat_only"]:
+    if function_name in NAMESPACE_MAP["mr_aux_quat_only"]:
         return "mr.aux.quat"
-    else:
-        return None  # Function not found
+    return None  # Function not found
 
 def validate_namespace(function_name: str, provided_namespace: str = None) -> dict:
     """
@@ -271,41 +270,40 @@ def validate_namespace(function_name: str, provided_namespace: str = None) -> di
         - error: Error message if invalid
     """
     correct_namespace = get_correct_namespace(function_name)
-    
+
     if correct_namespace is None:
         # Function doesn't exist
         return {
             "is_valid": False,
             "correct_form": None,
-            "error": f"Function '{function_name}' not found in Pulseq"
+            "error": f"Function '{function_name}' not found in Pulseq",
         }
-    
+
     # Build the correct form
     if correct_namespace:
         correct_form = f"{correct_namespace}.{function_name}"
     else:
         correct_form = function_name
-    
+
     # If no namespace was provided, return the correct form
     if provided_namespace is None:
         return {
             "is_valid": True,
             "correct_form": correct_form,
-            "error": None
+            "error": None,
         }
-    
+
     # Check if provided namespace matches
     if provided_namespace == correct_namespace:
         return {
             "is_valid": True,
             "correct_form": correct_form,
-            "error": None
+            "error": None,
         }
-    else:
-        # Wrong namespace
-        provided_form = f"{provided_namespace}.{function_name}" if provided_namespace else function_name
-        return {
-            "is_valid": False,
-            "correct_form": correct_form,
-            "error": f"'{provided_form}' should be '{correct_form}'"
-        }
+    # Wrong namespace
+    provided_form = f"{provided_namespace}.{function_name}" if provided_namespace else function_name
+    return {
+        "is_valid": False,
+        "correct_form": correct_form,
+        "error": f"'{provided_form}' should be '{correct_form}'",
+    }

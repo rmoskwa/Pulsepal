@@ -8,24 +8,24 @@ to prevent hallucinations while maintaining clean architecture.
 
 import asyncio
 import logging
-import uuid
-from typing import Optional, Dict, Any
 import os
-
-import chainlit as cl
 
 # Import existing Pulsepal components
 import sys
+import uuid
 from pathlib import Path
+from typing import Any, Dict, Optional
+
+import chainlit as cl
 
 sys.path.insert(0, str(Path(__file__).parent))
 
 # Import V2 components with function validation
-from pulsepal.main_agent_v2 import pulsepal_agent, create_pulsepal_session
-from pulsepal.dependencies import get_session_manager
-from pulsepal.settings import get_settings
 from pulsepal.conversation_logger import get_conversation_logger
-from pulsepal.semantic_router import initialize_semantic_router, QueryRoute
+from pulsepal.dependencies import get_session_manager
+from pulsepal.main_agent_v2 import create_pulsepal_session, pulsepal_agent
+from pulsepal.semantic_router import initialize_semantic_router
+from pulsepal.settings import get_settings
 
 # Configure logging early so it's available for auth
 logging.basicConfig(level=logging.INFO)
@@ -43,10 +43,10 @@ logger.info("=" * 60)
 AUTH_ENABLED = False
 try:
     logger.info("Attempting to import auth module...")
-    from pulsepal.auth import check_rate_limit, validate_api_key, API_KEYS
+    from pulsepal.auth import API_KEYS, check_rate_limit, validate_api_key
 
     logger.info(
-        f"Auth module imported successfully. API_KEYS type: {type(API_KEYS)}, length: {len(API_KEYS)}"
+        f"Auth module imported successfully. API_KEYS type: {type(API_KEYS)}, length: {len(API_KEYS)}",
     )
     logger.info(f"API key names: {list(API_KEYS.keys())}")
 
@@ -64,7 +64,7 @@ try:
 
             if user_info:
                 logger.info(
-                    f"✅ Successful login for: {username or user_info['email']}"
+                    f"✅ Successful login for: {username or user_info['email']}",
                 )
                 return cl.User(
                     identifier=username or user_info["email"],
@@ -74,15 +74,14 @@ try:
                         "limit": user_info.get("limit", 100),
                     },
                 )
-            else:
-                logger.warning(f"❌ Failed login attempt with username: {username}")
+            logger.warning(f"❌ Failed login attempt with username: {username}")
             return None
 
         logger.info("Auth callback registered successfully")
     else:
         logger.info("🔓 Authentication disabled - no valid API keys configured")
         logger.info(
-            f"Reason: len(API_KEYS)={len(API_KEYS)}, has only test-key={len(API_KEYS) == 1 and 'test-key' in API_KEYS}"
+            f"Reason: len(API_KEYS)={len(API_KEYS)}, has only test-key={len(API_KEYS) == 1 and 'test-key' in API_KEYS}",
         )
 
 except ImportError as e:
@@ -217,7 +216,7 @@ Current Focus: [What you need help with]
             logger.info(f"User session in on_chat_start: {user}")
             if user:
                 logger.info(
-                    f"User metadata: {user.metadata if hasattr(user, 'metadata') else 'No metadata'}"
+                    f"User metadata: {user.metadata if hasattr(user, 'metadata') else 'No metadata'}",
                 )
                 if hasattr(user, "metadata") and user.metadata:
                     user_name = user.metadata.get("name", "User")
@@ -287,7 +286,7 @@ What would you like to explore about MRI sequence programming today?"""
         await cl.Message(content=welcome_msg).send()
 
         logger.info(
-            f"Started Chainlit session with enhanced Pulsepal v2 session: {pulsepal_session_id}"
+            f"Started Chainlit session with enhanced Pulsepal v2 session: {pulsepal_session_id}",
         )
 
     except Exception as e:
@@ -370,11 +369,11 @@ async def main(message: cl.Message):
                             )
                         elif hasattr(element, "path"):
                             # For local file uploads, read from path
-                            with open(element.path, "r", encoding="utf-8") as f:
+                            with open(element.path, encoding="utf-8") as f:
                                 file_content = f.read()
                         else:
                             logger.warning(
-                                f"Could not extract content from file: {element.name}"
+                                f"Could not extract content from file: {element.name}",
                             )
                             continue
 
@@ -391,10 +390,10 @@ async def main(message: cl.Message):
 
                         # Send confirmation to user
                         await cl.Message(
-                            content=f"✅ Loaded file: {element.name}"
+                            content=f"✅ Loaded file: {element.name}",
                         ).send()
                         logger.info(
-                            f"Successfully loaded file: {element.name} ({len(file_content)} bytes)"
+                            f"Successfully loaded file: {element.name} ({len(file_content)} bytes)",
                         )
 
                     except Exception as e:
@@ -409,7 +408,7 @@ async def main(message: cl.Message):
         if code_context:
             enhanced_query = f"{message.content}\n\nHere is my code:{code_context}"
             logger.info(
-                f"Enhanced query with {len(code_context)} bytes of code context"
+                f"Enhanced query with {len(code_context)} bytes of code context",
             )
 
         # Special command to check user info
@@ -446,14 +445,14 @@ async def main(message: cl.Message):
 
                 if api_key and not check_rate_limit(api_key, limit):
                     logger.warning(
-                        f"Rate limit exceeded for user: {user_name} (API key: {api_key[:8]}...)"
+                        f"Rate limit exceeded for user: {user_name} (API key: {api_key[:8]}...)",
                     )
                     await cl.Message(
                         content=f"⚠️ **Rate limit exceeded**\n\nHi {user_name}, you've reached your limit of {limit} requests per hour.\n\nPlease wait a few minutes before sending more requests.",
                         author="System",
                     ).send()
                     return
-                elif api_key:
+                if api_key:
                     logger.debug(f"Rate limit check passed for user: {user_name}")
 
         # Get session info
@@ -469,12 +468,12 @@ async def main(message: cl.Message):
 
         # Debug logging for session continuity
         logger.debug(
-            f"Session {pulsepal_session_id} - History length: {len(deps.conversation_context.conversation_history)}"
+            f"Session {pulsepal_session_id} - History length: {len(deps.conversation_context.conversation_history)}",
         )
         if deps.conversation_context.conversation_history:
             last_entry = deps.conversation_context.conversation_history[-1]
             logger.debug(
-                f"Session {pulsepal_session_id} - Last message: {last_entry['role']}: {last_entry['content'][:50]}..."
+                f"Session {pulsepal_session_id} - Last message: {last_entry['role']}: {last_entry['content'][:50]}...",
             )
 
         # Apply semantic routing to determine if RAG is needed
@@ -484,7 +483,7 @@ async def main(message: cl.Message):
 
         # Show typing indicator with intelligent status
         async with cl.Step(
-            name="🧠 Processing with Enhanced RAG v2 (Function Validation Active)..."
+            name="🧠 Processing with Enhanced RAG v2 (Function Validation Active)...",
         ) as step:
             try:
                 # Add user message to conversation context (use enhanced_query if code was uploaded)
@@ -511,7 +510,7 @@ async def main(message: cl.Message):
                 if sequence_context:
                     context_parts.append(sequence_context)
                     logger.info(
-                        f"Including sequence context: {len(sequence_context)} chars"
+                        f"Including sequence context: {len(sequence_context)} chars",
                     )
 
                 # Add conversation history
@@ -542,30 +541,21 @@ async def main(message: cl.Message):
                 )
 
                 # Apply routing decision and inject context
-                if routing_decision.route == QueryRoute.FORCE_RAG:
-                    # Subtle user feedback for forced RAG
-                    await cl.Message(
-                        content="📚 Consulting Pulseq documentation...", author="System"
-                    ).send()
+                # Only use function detection, no routing restrictions
+                if routing_decision.detected_functions:
+                    deps.detected_functions = routing_decision.detected_functions
+                    deps.validation_errors = routing_decision.validation_errors
 
-                    # Store routing hints in deps for tools to use
-                    deps.force_rag = True
-                    deps.forced_search_hints = routing_decision.search_hints
-                    logger.info(f"Forcing RAG search: {routing_decision.reasoning}")
+                    logger.info(
+                        f"Function detector found {len(routing_decision.detected_functions)} function(s): "
+                        f"{[f['name'] for f in routing_decision.detected_functions]}",
+                    )
 
-                    # Store routing hints in deps instead of injecting into query
-                    # This prevents confusion where the model thinks it's part of the conversation
+                    if routing_decision.validation_errors:
+                        logger.warning(f"Validation errors detected: {routing_decision.validation_errors}")
 
-                elif routing_decision.route == QueryRoute.NO_RAG:
-                    # Indicate we should skip RAG
-                    deps.skip_rag = True
-                    logger.info(f"Skipping RAG: {routing_decision.reasoning}")
-                    # Don't inject context into query - just use flags
-
-                else:
-                    # GEMINI_CHOICE - let the agent decide
-                    logger.info(f"Letting Gemini decide: {routing_decision.reasoning}")
-                    # Don't inject context - let the agent work normally
+                # Log the detection but don't restrict Gemini's choices
+                logger.debug("Function detection complete. Gemini will decide search strategy.")
 
                 # Run agent with original query (not modified by routing)
                 result = await pulsepal_agent.run(query_with_context, deps=deps)
@@ -616,7 +606,7 @@ async def main(message: cl.Message):
         await msg.update()
 
         logger.info(
-            f"Processed message in session {pulsepal_session_id} with enhanced RAG v2"
+            f"Processed message in session {pulsepal_session_id} with enhanced RAG v2",
         )
 
     except asyncio.TimeoutError:
@@ -694,7 +684,7 @@ async def end():
             session_manager = get_session_manager()
             await session_manager.cleanup_expired_sessions()
             logger.info(
-                f"Cleaned up Chainlit session for enhanced Pulsepal v2 session: {pulsepal_session_id}"
+                f"Cleaned up Chainlit session for enhanced Pulsepal v2 session: {pulsepal_session_id}",
             )
     except Exception as e:
         logger.error(f"Error during session cleanup: {e}")
@@ -722,7 +712,7 @@ async def chat_profile():
         cl.ChatProfile(
             name="Standard",
             markdown_description="Pulsepal v2 Enhanced with function validation and sequence context",
-        )
+        ),
     ]
 
 
@@ -731,6 +721,6 @@ if __name__ == "__main__":
     # But useful for testing imports
     print("Chainlit app v2 enhanced loaded successfully.")
     print(
-        "Features: Function validation, hallucination prevention, all UI features preserved"
+        "Features: Function validation, hallucination prevention, all UI features preserved",
     )
     print("Run with: chainlit run chainlit_app_v2.py")

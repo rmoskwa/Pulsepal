@@ -5,10 +5,11 @@ Follows main_agent_reference patterns with Pydantic-settings integration
 and secure environment variable management.
 """
 
-from pydantic_settings import BaseSettings
-from pydantic import Field, ConfigDict
-from dotenv import load_dotenv
 import logging
+
+from dotenv import load_dotenv
+from pydantic import ConfigDict, Field
+from pydantic_settings import BaseSettings
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -19,7 +20,7 @@ class Settings(BaseSettings):
     """Application settings with environment variable support."""
 
     model_config = ConfigDict(
-        env_file=".env", env_file_encoding="utf-8", case_sensitive=False, extra="ignore"
+        env_file=".env", env_file_encoding="utf-8", case_sensitive=False, extra="ignore",
     )
 
     # LLM Configuration (Gemini)
@@ -36,7 +37,7 @@ class Settings(BaseSettings):
 
     # Supabase Configuration for RAG
     supabase_url: str = Field(
-        ..., description="Supabase project URL for RAG database", alias="SUPABASE_URL"
+        ..., description="Supabase project URL for RAG database", alias="SUPABASE_URL",
     )
     supabase_key: str = Field(
         ...,
@@ -53,28 +54,28 @@ class Settings(BaseSettings):
 
     # Session Configuration
     max_session_duration_hours: int = Field(
-        default=24, description="Maximum session duration in hours"
+        default=24, description="Maximum session duration in hours",
     )
     max_conversation_history: int = Field(
-        default=100, description="Maximum conversation history entries per session"
+        default=100, description="Maximum conversation history entries per session",
     )
     max_code_examples: int = Field(
-        default=50, description="Maximum code examples stored per session"
+        default=50, description="Maximum code examples stored per session",
     )
 
     # RAG Configuration
     default_match_count: int = Field(
-        default=5, description="Default number of RAG results to return"
+        default=5, description="Default number of RAG results to return",
     )
     max_match_count: int = Field(
-        default=20, description="Maximum number of RAG results allowed"
+        default=20, description="Maximum number of RAG results allowed",
     )
     use_hybrid_search: bool = Field(
         default=True,
         description="Use hybrid search (vector + keyword) for better results",
     )
     use_contextual_embeddings: bool = Field(
-        default=False, description="Use contextual embeddings for document chunks"
+        default=False, description="Use contextual embeddings for document chunks",
     )
 
     # Language Configuration

@@ -9,7 +9,8 @@ commonly work together. This is valuable because:
 
 """
 
-from typing import List, Dict, Set, Tuple
+from typing import Dict, List, Set, Tuple
+
 from .function_index import FUNCTION_CLUSTERS
 
 
@@ -134,7 +135,7 @@ class FunctionClusterAnalyzer:
         return descriptions.get(cluster_name, f"Function cluster: {cluster_name}")
 
     def find_missing_core_functions(
-        self, used_functions: List[str], clusters: List[str]
+        self, used_functions: List[str], clusters: List[str],
     ) -> List[Tuple[str, str]]:
         """
         Find core functions that are missing from specific clusters.
@@ -162,10 +163,10 @@ class FunctionClusterAnalyzer:
                 "makeTrapezoid": "Required for readout gradient",
             },
             "phase_encoding": {
-                "makeTrapezoid": "Required for phase encoding gradients"
+                "makeTrapezoid": "Required for phase encoding gradients",
             },
             "slice_selection": {
-                "makeTrapezoid": "Required for slice selection gradient"
+                "makeTrapezoid": "Required for slice selection gradient",
             },
         }
 

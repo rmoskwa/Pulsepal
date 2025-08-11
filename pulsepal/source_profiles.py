@@ -3,7 +3,7 @@ Source-aware profiles for PulsePal's RAG system.
 Defines characteristics, routing rules, and retrieval strategies for each data source.
 """
 
-from typing import Dict, Any
+from typing import Any, Dict
 
 SOURCE_PROFILES = {
     "api_reference": {

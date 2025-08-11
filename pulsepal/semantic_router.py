@@ -15,6 +15,7 @@ from datetime import datetime
 from difflib import get_close_matches
 from enum import Enum
 from typing import Dict, List, Optional
+
 import numpy as np
 
 # Import comprehensive function list from function_index
@@ -53,7 +54,7 @@ class ThresholdManager:
         self.thresholds = {
             "sequence_similarity": float(os.getenv("THRESHOLD_SEQUENCE", "0.7")),
             "implementation_similarity": float(
-                os.getenv("THRESHOLD_IMPLEMENTATION", "0.65")
+                os.getenv("THRESHOLD_IMPLEMENTATION", "0.65"),
             ),
             "function_similarity": float(os.getenv("THRESHOLD_FUNCTION", "0.75")),
             "physics_similarity": float(os.getenv("THRESHOLD_PHYSICS", "0.7")),
@@ -199,9 +200,10 @@ class SemanticRouter:
     def _initialize_encoder(self):
         """Initialize the sentence transformer model."""
         try:
-            from sentence_transformers import SentenceTransformer
             import platform
             from pathlib import Path
+
+            from sentence_transformers import SentenceTransformer
 
             # Use all-MiniLM-L6-v2 for efficient, free embeddings
             model_name = "sentence-transformers/all-MiniLM-L6-v2"
@@ -249,7 +251,7 @@ class SemanticRouter:
 
         except ImportError:
             logger.error(
-                "sentence-transformers not installed. Install with: pip install sentence-transformers"
+                "sentence-transformers not installed. Install with: pip install sentence-transformers",
             )
             raise
         except Exception as e:
@@ -310,7 +312,7 @@ class SemanticRouter:
         logger.info("Pre-computing concept embeddings...")
         self.sequence_embeddings = self.encoder.encode(self.sequence_concepts)
         self.implementation_embeddings = self.encoder.encode(
-            self.implementation_concepts
+            self.implementation_concepts,
         )
         self.physics_embeddings = self.encoder.encode(self.physics_concepts)
         logger.info("Concept embeddings ready")
@@ -364,7 +366,7 @@ class SemanticRouter:
     def _check_pulseq_functions(self, query: str) -> Optional[RoutingDecision]:
         """Check for explicit Pulseq function mentions with multi-level namespace support."""
         from .function_index import validate_namespace
-        
+
         query_lower = query.lower()
         detected_functions = []
         validation_errors = []
@@ -383,10 +385,10 @@ class SemanticRouter:
             for match in re.finditer(pattern, query, re.IGNORECASE):
                 namespace = match.group(1)
                 func_name = match.group(2)
-                
+
                 # Validate namespace is correct
                 validation = validate_namespace(func_name, namespace)
-                
+
                 if validation["correct_form"]:
                     # Function exists (may have wrong namespace)
                     detected_functions.append({
@@ -396,9 +398,9 @@ class SemanticRouter:
                         "confidence": 1.0,
                         "type": "explicit_namespace",
                         "correct_form": validation["correct_form"],
-                        "is_valid": validation["is_valid"]
+                        "is_valid": validation["is_valid"],
                     })
-                    
+
                     if not validation["is_valid"]:
                         validation_errors.append(validation["error"])
 
@@ -407,7 +409,7 @@ class SemanticRouter:
             r"\bmake[A-Z]\w+",  # makeXxx patterns
             r"\bcalc[A-Z]\w+",  # calcXxx patterns
         ]
-        
+
         for pattern in make_calc_patterns:
             for match in re.finditer(pattern, query):
                 func_name = match.group(0)
@@ -418,7 +420,7 @@ class SemanticRouter:
                         "namespace": None,
                         "full_match": func_name,
                         "confidence": 1.0,
-                        "type": "pattern_match"
+                        "type": "pattern_match",
                     })
 
         # If we found namespace/pattern matches, return early with high confidence
@@ -427,7 +429,7 @@ class SemanticRouter:
             reasoning = f"Detected {len(detected_functions)} Pulseq function(s) with explicit patterns"
             if validation_errors:
                 reasoning += f" (namespace issues: {'; '.join(validation_errors)})"
-            
+
             return RoutingDecision(
                 route=QueryRoute.FORCE_RAG,
                 confidence=1.0,
@@ -435,7 +437,7 @@ class SemanticRouter:
                 trigger_type="keyword",
                 search_hints=[f["name"] for f in detected_functions],
                 detected_functions=detected_functions,
-                validation_errors=validation_errors  # Pass validation errors
+                validation_errors=validation_errors,  # Pass validation errors
             )
 
         # Check for known function names with fuzzy matching
@@ -453,7 +455,7 @@ class SemanticRouter:
                             "confidence": 1.0,
                             "type": "exact_match",
                             "correct_form": validation["correct_form"],
-                            "is_valid": validation["is_valid"]
+                            "is_valid": validation["is_valid"],
                         })
 
             # Fuzzy match: Convert CamelCase to spaced words
@@ -466,7 +468,7 @@ class SemanticRouter:
                         "namespace": None,
                         "full_match": spaced_func,
                         "confidence": 0.95,
-                        "type": "fuzzy_camelcase"
+                        "type": "fuzzy_camelcase",
                     })
 
             # Also check with underscores (common variation)
@@ -479,7 +481,7 @@ class SemanticRouter:
                         "namespace": None,
                         "full_match": underscored,
                         "confidence": 0.95,
-                        "type": "fuzzy_underscore"
+                        "type": "fuzzy_underscore",
                     })
 
         # Check for misspellings using Levenshtein distance
@@ -501,7 +503,7 @@ class SemanticRouter:
                 reasoning=f"Detected {len(detected_functions)} Pulseq function(s)",
                 trigger_type="keyword",
                 search_hints=[f["name"] for f in detected_functions],
-                detected_functions=detected_functions
+                detected_functions=detected_functions,
             )
 
         return None
@@ -541,7 +543,7 @@ class SemanticRouter:
                     self._embeddings_loaded = True
             except Exception as e:
                 logger.warning(
-                    f"Failed to initialize encoder for semantic classification: {e}"
+                    f"Failed to initialize encoder for semantic classification: {e}",
                 )
                 return RoutingDecision(
                     route=QueryRoute.GEMINI_CHOICE,
@@ -555,13 +557,13 @@ class SemanticRouter:
 
         # Calculate similarities
         sequence_sim = self._calculate_max_similarity(
-            query_embedding, self.sequence_embeddings
+            query_embedding, self.sequence_embeddings,
         )
         implementation_sim = self._calculate_max_similarity(
-            query_embedding, self.implementation_embeddings
+            query_embedding, self.implementation_embeddings,
         )
         physics_sim = self._calculate_max_similarity(
-            query_embedding, self.physics_embeddings
+            query_embedding, self.physics_embeddings,
         )
 
         semantic_scores = {
@@ -573,7 +575,7 @@ class SemanticRouter:
         # Decision logic based on similarities
         seq_threshold = self.threshold_manager.get_threshold("sequence_similarity")
         impl_threshold = self.threshold_manager.get_threshold(
-            "implementation_similarity"
+            "implementation_similarity",
         )
         phys_threshold = self.threshold_manager.get_threshold("physics_similarity")
 
@@ -615,7 +617,7 @@ class SemanticRouter:
         for seq_type in self.SEQUENCE_TYPES:
             if seq_type in query_lower:
                 # Check if it's asking for an example/implementation
-                for impl_keyword in {"example", "show", "code", "implement", "create"}:
+                for impl_keyword in ("example", "show", "code", "implement", "create"):
                     if impl_keyword in query_lower:
                         return RoutingDecision(
                             route=QueryRoute.FORCE_RAG,
@@ -651,7 +653,7 @@ class SemanticRouter:
         return None
 
     def _calculate_max_similarity(
-        self, query_embedding: np.ndarray, concept_embeddings: np.ndarray
+        self, query_embedding: np.ndarray, concept_embeddings: np.ndarray,
     ) -> float:
         """Calculate maximum cosine similarity between query and concepts."""
         if len(concept_embeddings) == 0:
@@ -660,7 +662,7 @@ class SemanticRouter:
         # Normalize embeddings
         query_norm = query_embedding / np.linalg.norm(query_embedding)
         concept_norms = concept_embeddings / np.linalg.norm(
-            concept_embeddings, axis=1, keepdims=True
+            concept_embeddings, axis=1, keepdims=True,
         )
 
         # Calculate cosine similarities
@@ -729,8 +731,8 @@ class SemanticRouter:
                         "namespace": None,
                         "full_match": word,  # Original misspelling
                         "confidence": 0.85,
-                        "type": "misspelling_correction"
-                    }]
+                        "type": "misspelling_correction",
+                    }],
                 )
 
         return None
@@ -828,7 +830,7 @@ class SemanticRouter:
         # Log to standard logger
         logger.info(
             f"Routing decision: {decision.route.value} "
-            f"(confidence: {decision.confidence:.2f}, trigger: {decision.trigger_type})"
+            f"(confidence: {decision.confidence:.2f}, trigger: {decision.trigger_type})",
         )
 
         # Log to conversation logger if available

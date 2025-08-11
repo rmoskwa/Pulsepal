@@ -6,13 +6,13 @@ for RAG search operations, including query performance, result quality, and
 system resource usage.
 """
 
-import time
 import logging
 import statistics
-from typing import Dict, List, Any, Optional
-from dataclasses import dataclass
-from collections import defaultdict, deque
 import threading
+import time
+from collections import defaultdict, deque
+from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -76,7 +76,7 @@ class RAGPerformanceMonitor:
         self.similarity_buckets = deque(maxlen=max_history)
 
         logger.info(
-            f"RAG Performance Monitor initialized with history size: {max_history}"
+            f"RAG Performance Monitor initialized with history size: {max_history}",
         )
 
     def start_query(self, query: str, search_type: str = "documents") -> Dict[str, Any]:
@@ -156,7 +156,7 @@ class RAGPerformanceMonitor:
         else:
             logger.debug(
                 f"Query completed: {duration:.3f}s, {len(results)} results, "
-                f"avg_sim: {avg_similarity:.3f}"
+                f"avg_sim: {avg_similarity:.3f}",
             )
 
         return metrics
@@ -172,7 +172,7 @@ class RAGPerformanceMonitor:
             self.cache_stats["misses"] += 1
 
     def get_performance_stats(
-        self, window_minutes: Optional[int] = None
+        self, window_minutes: Optional[int] = None,
     ) -> PerformanceStats:
         """
         Get aggregated performance statistics.
@@ -269,7 +269,7 @@ class RAGPerformanceMonitor:
             }
 
     def get_slow_queries(
-        self, threshold_seconds: float = 1.0, limit: int = 10
+        self, threshold_seconds: float = 1.0, limit: int = 10,
     ) -> List[QueryMetrics]:
         """
         Get slowest queries above threshold.
@@ -369,11 +369,11 @@ class RAGPerformanceMonitor:
                     "slow_queries": [q.__dict__ for q in self.get_slow_queries()],
                     "failed_queries": [q.__dict__ for q in self.get_failed_queries()],
                 }
-            elif format == "json":
+            if format == "json":
                 import json
 
                 return json.dumps(self.export_metrics("dict"), indent=2, default=str)
-            elif format == "csv":
+            if format == "csv":
                 import csv
                 import io
 
@@ -392,7 +392,7 @@ class RAGPerformanceMonitor:
                         "rerank_enabled",
                         "hybrid_search",
                         "error",
-                    ]
+                    ],
                 )
 
                 # Write data
@@ -408,12 +408,11 @@ class RAGPerformanceMonitor:
                             q.rerank_enabled,
                             q.hybrid_search,
                             q.error or "",
-                        ]
+                        ],
                     )
 
                 return output.getvalue()
-            else:
-                raise ValueError(f"Unsupported format: {format}")
+            raise ValueError(f"Unsupported format: {format}")
 
 
 # Global instance

@@ -57,7 +57,7 @@ class ConceptMapper:
             "approach": "systematic_analysis",
             "physics_explanation": "Analyze using fundamental MRI physics principles",
             "responsible_elements": [
-                "Identify all sequence components that could affect this"
+                "Identify all sequence components that could affect this",
             ],
             "check_functions": ["Examine relevant Pulseq functions based on physics"],
             "common_fixes": [
@@ -148,4 +148,3 @@ class ConceptMapper:
         """
         # This could log successful novel problem solutions
         # for future inclusion in the concept map
-        pass

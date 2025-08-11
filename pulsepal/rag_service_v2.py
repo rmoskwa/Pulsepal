@@ -8,12 +8,13 @@ Includes deterministic function validation to prevent hallucinations.
 
 import logging
 import re
-from typing import List, Dict, Optional, Any
 from dataclasses import dataclass, field
-from .supabase_client import get_supabase_client, SupabaseRAGClient
+from typing import Any, Dict, List, Optional
+
+from .rag_formatters import format_unified_response
 from .settings import get_settings
 from .source_profiles import MULTI_CHUNK_DOCUMENTS
-from .rag_formatters import format_unified_response
+from .supabase_client import SupabaseRAGClient, get_supabase_client
 
 logger = logging.getLogger(__name__)
 
@@ -73,14 +74,13 @@ class ModernPulseqRAG:
             if high_confidence:
                 logger.info(f"Performing direct lookup for {len(high_confidence)} detected function(s)")
                 direct_results = await self._direct_function_lookup(high_confidence)
-                
+
                 if direct_results:
                     # Format and return direct results immediately
                     from .rag_formatters import format_direct_function_results
                     return format_direct_function_results(direct_results, query, detected_functions)
-                else:
-                    logger.info("Direct lookup returned no results, falling back to vector search")
-        
+                logger.info("Direct lookup returned no results, falling back to vector search")
+
         # If LLM didn't specify sources, default to comprehensive search
         if not sources:
             # Default to all sources with balanced top-k approach
@@ -133,7 +133,7 @@ class ModernPulseqRAG:
         return format_unified_response(source_results, query_context)
 
     async def retrieve(
-        self, query: str, hint: Optional[RetrievalHint] = None, limit: int = 30
+        self, query: str, hint: Optional[RetrievalHint] = None, limit: int = 30,
     ) -> Dict[str, Any]:
         """
         Simple retrieval based on query and optional hints.
@@ -194,7 +194,7 @@ class ModernPulseqRAG:
 
         # Parse the function call
         match = re.match(
-            r"(mr|seq|tra|eve|opt)((?:\.aux)?(?:\.quat)?)?\.(\w+)", function_call
+            r"(mr|seq|tra|eve|opt)((?:\.aux)?(?:\.quat)?)?\.(\w+)", function_call,
         )
         if not match:
             return result  # Can't parse, assume it's OK
@@ -223,7 +223,7 @@ class ModernPulseqRAG:
             correct_namespace = None
             if correct_usage:
                 ns_match = re.match(
-                    r"(mr|seq|tra|eve|opt)(?:\.aux)?(?:\.quat)?", correct_usage
+                    r"(mr|seq|tra|eve|opt)(?:\.aux)?(?:\.quat)?", correct_usage,
                 )
                 if ns_match:
                     correct_namespace = ns_match.group(0)
@@ -387,7 +387,7 @@ class ModernPulseqRAG:
         return results
 
     async def _get_function_docs(
-        self, function_names: List[str]
+        self, function_names: List[str],
     ) -> List[Dict[str, Any]]:
         """Get exact function documentation from function_calling_patterns view."""
         docs = []
@@ -396,7 +396,7 @@ class ModernPulseqRAG:
             # Handle different namespace patterns
             # Extract just the function name without namespace
             func_match = re.search(
-                r"(?:mr|seq|tra|eve|opt)(?:\.aux)?(?:\.quat)?\.(\w+)", func_name
+                r"(?:mr|seq|tra|eve|opt)(?:\.aux)?(?:\.quat)?\.(\w+)", func_name,
             )
             if func_match:
                 clean_func_name = func_match.group(1)
@@ -406,7 +406,7 @@ class ModernPulseqRAG:
             response = (
                 self.supabase_client.client.table("function_calling_patterns")
                 .select(
-                    "name, description, correct_usage, usage_instruction, class_name, is_class_method"
+                    "name, description, correct_usage, usage_instruction, class_name, is_class_method",
                 )
                 .eq("name", clean_func_name)
                 .execute()
@@ -448,7 +448,7 @@ class ModernPulseqRAG:
             if correct_usage:
                 # Extract namespace from correct_usage
                 ns_match = re.match(
-                    r"(mr|seq|tra|eve|opt)(?:\.aux)?(?:\.quat)?", correct_usage
+                    r"(mr|seq|tra|eve|opt)(?:\.aux)?(?:\.quat)?", correct_usage,
                 )
                 if ns_match:
                     parts.append(f"Function: {ns_match.group(0)}.{item['name']}")
@@ -506,7 +506,7 @@ class ModernPulseqRAG:
                             "category": item.get("category", ""),
                             "similarity": item.get("similarity", 0),
                             "_source": "api_reference",
-                        }
+                        },
                     )
         except Exception as e:
             logger.warning(f"API reference search failed: {e}")
@@ -558,7 +558,7 @@ class ModernPulseqRAG:
                         "similarity": item.get("similarity", 0),
                         "metadata": item.get("metadata", {}),
                         "_source": "crawled_pages",
-                    }
+                    },
                 )
 
             # Retrieve additional chunks for multi-chunk documents
@@ -576,7 +576,7 @@ class ModernPulseqRAG:
         return results
 
     async def _search_official_sequences(
-        self, query: str, limit: int = 5
+        self, query: str, limit: int = 5,
     ) -> List[Dict]:
         """
         Search official sequences for tutorials.
@@ -616,7 +616,7 @@ class ModernPulseqRAG:
                             "similarity": item.get("similarity", 0),
                             "url": item.get("url", ""),
                             "_source": "official_sequence_examples",
-                        }
+                        },
                     )
 
         except Exception as e:
@@ -636,10 +636,10 @@ class ModernPulseqRAG:
             List of complete function documentation from api_reference
         """
         results = []
-        
+
         for func_info in detected_functions:
             func_name = func_info["name"]
-            
+
             try:
                 # Query specific fields (not SELECT * to avoid unnecessary data)
                 response = self.supabase_client.client.table("api_reference").select(
@@ -647,9 +647,9 @@ class ModernPulseqRAG:
                     "parameters, returns, usage_examples, "
                     "function_type, class_name, is_class_method, "
                     "calling_pattern, related_functions, "
-                    "search_terms, pulseq_version"
+                    "search_terms, pulseq_version",
                 ).ilike("name", func_name).eq("language", "matlab").execute()
-                
+
                 if response.data:
                     for item in response.data:
                         # Add detection metadata
@@ -657,19 +657,19 @@ class ModernPulseqRAG:
                             "confidence": func_info["confidence"],
                             "type": func_info["type"],
                             "namespace": func_info.get("namespace"),
-                            "original_query": func_info.get("full_match")
+                            "original_query": func_info.get("full_match"),
                         }
                         item["_source"] = "direct_function_lookup"
                         results.append(item)
-                        
+
                         logger.info(f"Direct lookup found: {func_name}")
                 else:
                     logger.warning(f"Direct lookup found no results for: {func_name}")
-                    
+
             except Exception as e:
                 logger.error(f"Direct lookup failed for {func_name}: {e}")
                 # Continue with other functions even if one fails
-                
+
         return results
 
     async def _retrieve_all_chunks(self, url: str) -> List[Dict]:
@@ -698,7 +698,7 @@ class ModernPulseqRAG:
                             "chunk_number": item.get("chunk_number", 0),
                             "metadata": item.get("metadata", {}),
                             "_source": "crawled_pages",
-                        }
+                        },
                     )
 
                 # Sort by chunk number
@@ -717,16 +717,15 @@ class ModernPulseqRAG:
         # Check path patterns first
         if "/examples/" in url_lower or "/demo" in url_lower:
             return "example"
-        elif "/api/" in url_lower or "/reference/" in url_lower:
+        if "/api/" in url_lower or "/reference/" in url_lower:
             return "api_reference"
         # Then check extensions
-        elif url_lower.endswith(".m"):
+        if url_lower.endswith(".m"):
             return "matlab_code"
-        elif url_lower.endswith(".py"):
+        if url_lower.endswith(".py"):
             return "python_code"
-        elif url_lower.endswith(".md"):
+        if url_lower.endswith(".md"):
             return "markdown_doc"
-        elif url_lower.endswith(".html"):
+        if url_lower.endswith(".html"):
             return "html_doc"
-        else:
-            return "documentation"
+        return "documentation"

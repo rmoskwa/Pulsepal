@@ -4,8 +4,9 @@ Combines syntax validation with conceptual MRI physics debugging.
 Uses built-in physics knowledge as primary tool, with optional pattern hints.
 """
 
-from typing import Dict, List, Optional
 from dataclasses import dataclass
+from typing import Dict, List, Optional
+
 from .function_index import MATLAB_FUNCTIONS
 
 
@@ -38,9 +39,9 @@ class PulseqDebugAnalyzer:
     """
 
     def __init__(self):
-        from .syntax_validator import SyntaxValidator
-        from .concept_mapper import ConceptMapper
         from .code_patterns import FunctionClusterAnalyzer
+        from .concept_mapper import ConceptMapper
+        from .syntax_validator import SyntaxValidator
 
         self.syntax_validator = SyntaxValidator()
         self.concept_mapper = (
@@ -52,7 +53,7 @@ class PulseqDebugAnalyzer:
         self.function_index = MATLAB_FUNCTIONS
 
     def analyze_code(
-        self, code: str, problem_description: Optional[str] = None
+        self, code: str, problem_description: Optional[str] = None,
     ) -> Dict:
         """
         Perform comprehensive debugging analysis.
@@ -91,7 +92,7 @@ class PulseqDebugAnalyzer:
 
         # Category 3: Function cluster analysis
         cluster_results = self.function_cluster_analyzer.analyze_functions(
-            used_functions
+            used_functions,
         )
         results["function_clusters"] = cluster_results
 
@@ -129,7 +130,7 @@ class PulseqDebugAnalyzer:
                         correct_usage="seq.write(filename)",
                         explanation="write() is a method of the sequence object, not the mr namespace",
                         severity="error",
-                    )
+                    ),
                 )
 
             if "mr.addBlock" in line:
@@ -140,7 +141,7 @@ class PulseqDebugAnalyzer:
                         correct_usage="seq.addBlock(...)",
                         explanation="addBlock() belongs to the sequence object",
                         severity="error",
-                    )
+                    ),
                 )
 
             # Check for missing parameters in makeTrapezoid
@@ -152,7 +153,7 @@ class PulseqDebugAnalyzer:
                         correct_usage="mr.makeTrapezoid('x', 'amplitude', value, ...)",
                         explanation="makeTrapezoid requires channel as first parameter",
                         severity="error",
-                    )
+                    ),
                 )
 
             # Check for common typos
@@ -164,7 +165,7 @@ class PulseqDebugAnalyzer:
                         correct_usage="seq.duration()",
                         explanation="duration() is a sequence method to get total sequence time",
                         severity="error",
-                    )
+                    ),
                 )
 
         return issues
@@ -213,7 +214,7 @@ This relates to your problem because it directly controls the observed behavior.
         return reasoning
 
     def _identify_conceptual_issues(
-        self, problem: str, code: str, reasoning: str
+        self, problem: str, code: str, reasoning: str,
     ) -> List[ConceptualIssue]:
         """
         Identify specific conceptual issues based on physics analysis.
@@ -235,7 +236,7 @@ This relates to your problem because it directly controls the observed behavior.
                         code_location="Gradient definition sections",
                         issue_description="Gradient parameters may not match hardware capabilities",
                         solution="Verify amplitude and slew rate against system limits",
-                    )
+                    ),
                 )
 
         # For novel problems, provide systematic guidance
@@ -247,7 +248,7 @@ This relates to your problem because it directly controls the observed behavior.
                     code_location="Review entire sequence structure",
                     issue_description=f"Novel problem: {problem}",
                     solution="Apply systematic debugging: physics → design → code → validation",
-                )
+                ),
             )
 
         return issues

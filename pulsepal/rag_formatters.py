@@ -6,7 +6,7 @@ Formats results from different data sources for optimal LLM consumption.
 import os
 import re
 from datetime import datetime
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 from urllib.parse import urlparse
 
 
@@ -32,7 +32,7 @@ def format_api_reference(results: List[Dict]) -> List[Dict]:
                 "name": result.get("function_name", result.get("name", "")),
                 "purpose": result.get("description", ""),  # Lead with WHAT it does
                 "usage": result.get(
-                    "correct_usage", result.get("calling_pattern", "")
+                    "correct_usage", result.get("calling_pattern", ""),
                 ),  # HOW to call it correctly
             },
             # Technical Specifications
@@ -178,7 +178,7 @@ def format_examples(examples_json: Any) -> List[Dict]:
                     "code": example.get("code", ""),
                     "description": example.get("description", ""),
                     "language": example.get("language", "matlab"),
-                }
+                },
             )
         else:
             formatted_examples.append({"code": str(example), "language": "matlab"})
@@ -412,21 +412,21 @@ def get_document_type(url: str, metadata: Dict) -> str:
     # Check by extension
     if url_lower.endswith(".pdf"):
         return "pdf_specification"
-    elif url_lower.endswith(".html"):
+    if url_lower.endswith(".html"):
         return "html_documentation"
-    elif url_lower.endswith(".md"):
+    if url_lower.endswith(".md"):
         return "markdown_documentation"
-    elif url_lower.endswith(".m"):
+    if url_lower.endswith(".m"):
         return "matlab_code"
-    elif url_lower.endswith(".py"):
+    if url_lower.endswith(".py"):
         return "python_code"
 
     # Check by path patterns
     if "/examples/" in url_lower or "/demo" in url_lower:
         return "example_code"
-    elif "/api/" in url_lower or "/reference/" in url_lower:
+    if "/api/" in url_lower or "/reference/" in url_lower:
         return "api_documentation"
-    elif "github.com" in url_lower:
+    if "github.com" in url_lower:
         return "github_repository"
 
     return metadata.get("file_category", "documentation")
@@ -697,7 +697,7 @@ def extract_prerequisites(result: Dict) -> List[str]:
 
 
 def format_unified_response(
-    source_results: Dict[str, List], query_context: Dict
+    source_results: Dict[str, List], query_context: Dict,
 ) -> Dict:
     """
     Create a unified response structure that Gemini can easily process.
@@ -728,21 +728,21 @@ def format_unified_response(
             formatted = format_api_reference(results)
             response["results_by_source"]["api_reference"] = formatted
             response["synthesis_hints"].append(
-                "API documentation provides authoritative function specifications"
+                "API documentation provides authoritative function specifications",
             )
 
         elif source_type == "crawled_pages":
             formatted = format_crawled_pages(results)
             response["results_by_source"]["examples_and_docs"] = formatted
             response["synthesis_hints"].append(
-                "Examples show practical implementation patterns"
+                "Examples show practical implementation patterns",
             )
 
         elif source_type == "official_sequence_examples":
             formatted = format_official_sequence_examples(results)
             response["results_by_source"]["tutorials"] = formatted
             response["synthesis_hints"].append(
-                "Official sequences are tested and educational"
+                "Official sequences are tested and educational",
             )
 
     # Add citation guidance
@@ -750,7 +750,7 @@ def format_unified_response(
 
     # Add synthesis recommendations
     response["synthesis_recommendations"] = generate_synthesis_recommendations(
-        source_results, query_context
+        source_results, query_context,
     )
 
     return response
@@ -797,7 +797,7 @@ def generate_citation_map(results_by_source: Dict) -> Dict[str, str]:
 
 
 def generate_synthesis_recommendations(
-    source_results: Dict, query_context: Dict
+    source_results: Dict, query_context: Dict,
 ) -> List[str]:
     """
     Generate recommendations for how to synthesize the results.
@@ -852,21 +852,21 @@ def generate_synthesis_recommendations(
     # Add source-specific recommendations
     if has_api and has_examples:
         recommendations.append(
-            "Combine API specs with practical examples for complete understanding"
+            "Combine API specs with practical examples for complete understanding",
         )
 
     if has_tutorials:
         recommendations.append(
-            "Official examples provide best practices and tested implementations"
+            "Official examples provide best practices and tested implementations",
         )
 
     return recommendations
 
 
 def format_direct_function_results(
-    results: List[Dict], 
-    query: str, 
-    detected_functions: List[Dict]
+    results: List[Dict],
+    query: str,
+    detected_functions: List[Dict],
 ) -> Dict:
     """
     Format direct function lookup results comprehensively.
@@ -880,12 +880,11 @@ def format_direct_function_results(
     Returns:
         Formatted response dictionary with comprehensive function documentation
     """
-    import json
-    
+
     # Organize results by source
     formatted_results = {
         "results_by_source": {
-            "direct_function_lookup": []
+            "direct_function_lookup": [],
         },
         "search_metadata": {
             "query": query,
@@ -894,18 +893,18 @@ def format_direct_function_results(
             "detection_info": {
                 "functions_detected": [f["name"] for f in detected_functions],
                 "detection_types": list(set(f["type"] for f in detected_functions)),
-                "confidence_levels": [f["confidence"] for f in detected_functions]
-            }
+                "confidence_levels": [f["confidence"] for f in detected_functions],
+            },
         },
-        "synthesis_hints": []
+        "synthesis_hints": [],
     }
-    
+
     # Format each function's documentation
     for result in results:
         formatted_doc = {
             "source_type": "DIRECT_FUNCTION_LOOKUP",
             "relevance_score": result.get("_detection", {}).get("confidence", 1.0),
-            
+
             # Core function information
             "function": {
                 "name": result.get("name", ""),
@@ -913,16 +912,16 @@ def format_direct_function_results(
                 "description": result.get("description", ""),
                 "calling_pattern": result.get("calling_pattern", ""),
             },
-            
+
             # Parameters with full details
             "parameters": format_parameters_comprehensive(result.get("parameters", {})),
-            
+
             # Return values
             "returns": format_returns_comprehensive(result.get("returns", {})),
-            
+
             # Usage examples
             "usage_examples": format_examples_comprehensive(result.get("usage_examples", [])),
-            
+
             # Additional context
             "metadata": {
                 "function_type": result.get("function_type", "main"),
@@ -931,32 +930,32 @@ def format_direct_function_results(
                 "related_functions": result.get("related_functions", []),
                 "search_terms": result.get("search_terms", []),
                 "pulseq_version": result.get("pulseq_version", ""),
-                "detection": result.get("_detection", {})
-            }
+                "detection": result.get("_detection", {}),
+            },
         }
-        
+
         formatted_results["results_by_source"]["direct_function_lookup"].append(formatted_doc)
-    
+
     # Generate synthesis hints based on query intent
     query_lower = query.lower()
-    
+
     if "parameter" in query_lower or "argument" in query_lower:
         formatted_results["synthesis_hints"].append(
-            "Focus on parameter details including types, units, defaults, and constraints"
+            "Focus on parameter details including types, units, defaults, and constraints",
         )
     elif "how" in query_lower or "example" in query_lower:
         formatted_results["synthesis_hints"].append(
-            "Emphasize usage examples and practical implementation"
+            "Emphasize usage examples and practical implementation",
         )
     elif "what" in query_lower and "do" in query_lower:
         formatted_results["synthesis_hints"].append(
-            "Explain the function's purpose and how it fits in sequence design"
+            "Explain the function's purpose and how it fits in sequence design",
         )
-    
+
     formatted_results["synthesis_hints"].append(
-        f"Direct lookup successful - comprehensive documentation retrieved for {len(results)} function(s)"
+        f"Direct lookup successful - comprehensive documentation retrieved for {len(results)} function(s)",
     )
-    
+
     return formatted_results
 
 
@@ -972,7 +971,7 @@ def format_parameters_comprehensive(params_json: Any) -> str:
     """
     if not params_json:
         return "No parameters"
-    
+
     # Handle string parameters (might be JSON string)
     if isinstance(params_json, str):
         try:
@@ -980,37 +979,37 @@ def format_parameters_comprehensive(params_json: Any) -> str:
             params_json = json.loads(params_json)
         except (json.JSONDecodeError, ValueError):
             return params_json
-    
+
     # Format based on structure
     if isinstance(params_json, dict):
         lines = []
-        
+
         # Handle required/optional structure
         required = params_json.get("required", [])
         optional = params_json.get("optional", [])
-        
+
         if required:
             lines.append("**Required Parameters:**")
             for param in required:
                 lines.append(format_single_parameter(param, is_required=True))
-        
+
         if optional:
             if lines:
                 lines.append("")  # Add spacing
             lines.append("**Optional Parameters:**")
             for param in optional:
                 lines.append(format_single_parameter(param, is_required=False))
-        
+
         # Handle flat parameter structure
         if not required and not optional:
             for param_name, param_info in params_json.items():
                 if param_name not in ["required", "optional"]:
                     lines.append(format_single_parameter(
-                        {"name": param_name, **param_info} if isinstance(param_info, dict) else {"name": param_name, "description": str(param_info)}
+                        {"name": param_name, **param_info} if isinstance(param_info, dict) else {"name": param_name, "description": str(param_info)},
                     ))
-        
+
         return "\n".join(lines) if lines else "No parameters specified"
-    
+
     return str(params_json)
 
 
@@ -1027,7 +1026,7 @@ def format_single_parameter(param: Dict, is_required: bool = None) -> str:
     """
     if isinstance(param, str):
         return f"• {param}"
-    
+
     parts = []
     name = param.get("name", "unknown")
     param_type = param.get("type", "")
@@ -1036,34 +1035,34 @@ def format_single_parameter(param: Dict, is_required: bool = None) -> str:
     description = param.get("description", "")
     example = param.get("example", "")
     valid_values = param.get("valid_values", "")
-    
+
     # Build parameter header
     header = f"• **`{name}`**"
-    
+
     if param_type:
         header += f" ({param_type})"
-    
+
     if units and units != "none":
         header += f" [{units}]"
-    
+
     if is_required is not None:
         header += " - REQUIRED" if is_required else " - optional"
-    
+
     parts.append(header)
-    
+
     # Add details with proper indentation
     if description:
         parts.append(f"  - Description: {description}")
-    
+
     if default and default not in ["[]", "0", "none"]:
         parts.append(f"  - Default: `{default}`")
-    
+
     if example:
         parts.append(f"  - Example: `{example}`")
-    
+
     if valid_values:
         parts.append(f"  - Valid values: {valid_values}")
-    
+
     return "\n".join(parts)
 
 
@@ -1079,7 +1078,7 @@ def format_returns_comprehensive(returns_json: Any) -> str:
     """
     if not returns_json:
         return "No return value specified"
-    
+
     # Handle string returns
     if isinstance(returns_json, str):
         try:
@@ -1087,21 +1086,21 @@ def format_returns_comprehensive(returns_json: Any) -> str:
             returns_json = json.loads(returns_json)
         except (json.JSONDecodeError, ValueError):
             return returns_json
-    
+
     # Format based on structure
     if isinstance(returns_json, dict):
         lines = []
-        
+
         ret_type = returns_json.get("type", "")
         description = returns_json.get("description", "")
         fields = returns_json.get("fields", [])
-        
+
         if ret_type:
             lines.append(f"**Type:** {ret_type}")
-        
+
         if description:
             lines.append(f"**Description:** {description}")
-        
+
         if fields:
             lines.append("**Fields:**")
             for field in fields:
@@ -1111,9 +1110,9 @@ def format_returns_comprehensive(returns_json: Any) -> str:
                     lines.append(f"  - `{field_name}`: {field_desc}")
                 else:
                     lines.append(f"  - {field}")
-        
+
         return "\n".join(lines) if lines else "Return value not specified"
-    
+
     return str(returns_json)
 
 
@@ -1129,7 +1128,7 @@ def format_examples_comprehensive(examples_json: Any) -> List[str]:
     """
     if not examples_json:
         return []
-    
+
     # Handle string examples
     if isinstance(examples_json, str):
         try:
@@ -1137,23 +1136,23 @@ def format_examples_comprehensive(examples_json: Any) -> List[str]:
             examples_json = json.loads(examples_json)
         except (json.JSONDecodeError, ValueError):
             return [examples_json] if examples_json else []
-    
+
     formatted_examples = []
-    
+
     if isinstance(examples_json, list):
         for i, example in enumerate(examples_json, 1):
             if isinstance(example, dict):
                 code = example.get("code", "")
                 description = example.get("description", "")
                 language = example.get("language", "matlab")
-                
+
                 example_str = f"**Example {i}**"
                 if description:
                     example_str += f": {description}"
                 example_str += f"\n```{language}\n{code}\n```"
-                
+
                 formatted_examples.append(example_str)
             else:
                 formatted_examples.append(f"**Example {i}**\n```matlab\n{example}\n```")
-    
+
     return formatted_examples

@@ -3,12 +3,13 @@ Provider-agnostic embedding service for PulsePal.
 Supports configurable embedding providers and dimensions.
 """
 
-import os
 import logging
-import time
+import os
 import random
-from typing import List, Optional
+import time
 from abc import ABC, abstractmethod
+from typing import List, Optional
+
 import google.generativeai as genai
 
 logger = logging.getLogger(__name__)
@@ -34,7 +35,7 @@ class GoogleEmbeddingProvider(EmbeddingProvider):
     """Google Gemini embedding provider."""
 
     def __init__(
-        self, api_key: str, model: str = "models/embedding-001", dimensions: int = 768
+        self, api_key: str, model: str = "models/embedding-001", dimensions: int = 768,
     ):
         self.dimensions = dimensions
         self.model = model
@@ -61,7 +62,7 @@ class GoogleEmbeddingProvider(EmbeddingProvider):
                 if "rate" in str(e).lower() or "429" in str(e):
                     delay = base_delay * (2**attempt) + random.uniform(0, 1)
                     logger.warning(
-                        f"Rate limited, retrying in {delay:.1f}s (attempt {attempt + 1}/{max_retries})"
+                        f"Rate limited, retrying in {delay:.1f}s (attempt {attempt + 1}/{max_retries})",
                     )
                     time.sleep(delay)
                 elif attempt == max_retries - 1:
@@ -172,10 +173,9 @@ class EmbeddingService:
                 if is_migration:
                     logger.error(f"Migration embedding failed: {e}")
                     raise e  # Fail fast during migration
-                else:
-                    logger.error(f"Batch failed, using fallback: {e}")
-                    fallback = KeywordFallbackProvider(self.get_dimensions())
-                    return fallback.create_embeddings_batch(texts)
+                logger.error(f"Batch failed, using fallback: {e}")
+                fallback = KeywordFallbackProvider(self.get_dimensions())
+                return fallback.create_embeddings_batch(texts)
 
             finally:
                 del frame

@@ -4,7 +4,8 @@ Repurposed from function_similarity.py for debugging.
 This provides deterministic validation based on the function index.
 """
 
-from typing import List, Dict, Optional
+from typing import Dict, List, Optional
+
 from .function_index import MATLAB_FUNCTIONS
 
 
@@ -49,7 +50,7 @@ class SyntaxValidator:
                 if method in self.direct_calls:
                     return {"is_valid": True}
                 # Check if it's actually a sequence method
-                elif method in self.class_methods.get("seq", []):
+                if method in self.class_methods.get("seq", []):
                     return {
                         "is_valid": False,
                         "correct_form": f"seq.{method}",
@@ -61,7 +62,7 @@ class SyntaxValidator:
                 if method in self.class_methods.get("seq", []):
                     return {"is_valid": True}
                 # Check if it's actually an mr function
-                elif method in self.direct_calls:
+                if method in self.direct_calls:
                     return {
                         "is_valid": False,
                         "correct_form": f"mr.{method}",

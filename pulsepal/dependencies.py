@@ -5,11 +5,12 @@ Provides session state management and dependency injection containers
 for both Pulsepal and MRI Expert agents with native RAG integration.
 """
 
-from dataclasses import dataclass, field
-from typing import List, Dict, Optional, Any
-from datetime import datetime, timedelta
 import logging
 import os
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
+
 from .settings import get_settings
 
 logger = logging.getLogger(__name__)
@@ -74,7 +75,7 @@ class ConversationContext:
     use_sequence_context: bool = False
 
     def add_conversation(
-        self, role: str, content: str, metadata: Optional[Dict] = None
+        self, role: str, content: str, metadata: Optional[Dict] = None,
     ):
         """Add conversation entry with automatic history management."""
         settings = get_settings()
@@ -224,7 +225,7 @@ class ConversationContext:
         # - Or when no language is specified
         self.preferred_language = "matlab"
         logger.debug(
-            "Defaulting to MATLAB (no explicit Python/other language indicators)"
+            "Defaulting to MATLAB (no explicit Python/other language indicators)",
         )
         return "matlab"
 
@@ -289,11 +290,8 @@ class PulsePalDependencies:
     session_manager: Optional["SessionManager"] = None
     rag_initialized: bool = False
 
-    # Semantic routing fields
-    force_rag: bool = False  # Force RAG search based on semantic routing
-    skip_rag: bool = False  # Skip RAG search (pure physics question)
-    forced_search_hints: Optional[List[str]] = None  # Search hints from router
-    detected_functions: Optional[List[Dict]] = None  # Detected functions for direct lookup
+    # Function detection fields (no routing restrictions)
+    detected_functions: Optional[List[Dict]] = None  # Detected functions for enhanced search
     validation_errors: Optional[List[str]] = None  # Namespace/function validation errors
 
     async def initialize_rag_services(self):
@@ -345,7 +343,7 @@ class SessionManager:
         if session_id in self.sessions and not self.is_session_expired(session_id):
             self.extend_session(session_id)
             return self.sessions[session_id]
-        elif session_id in self.sessions:
+        if session_id in self.sessions:
             # Session expired, clean it up
             self.cleanup_session(session_id)
 
@@ -367,7 +365,7 @@ class SessionManager:
         """Extend session timeout on activity."""
         if session_id in self.session_timeouts:
             new_timeout = datetime.now() + timedelta(
-                hours=self.max_session_duration_hours
+                hours=self.max_session_duration_hours,
             )
             self.session_timeouts[session_id] = new_timeout
 

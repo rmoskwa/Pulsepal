@@ -5,12 +5,12 @@ This module provides conversation logging functionality for debugging purposes.
 NOTE: This is for debugging only and should be disabled in production.
 """
 
-import os
 import json
 import logging
+import os
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +33,7 @@ class ConversationLogger:
             # Create log directory if it doesn't exist
             self.log_dir.mkdir(exist_ok=True)
             logger.info(
-                f"Conversation logging enabled. Logs will be stored in: {self.log_dir}"
+                f"Conversation logging enabled. Logs will be stored in: {self.log_dir}",
             )
         else:
             logger.info("Conversation logging is disabled")
@@ -85,7 +85,7 @@ class ConversationLogger:
                     f.write("=" * 50 + "\n\n")
 
                 f.write(
-                    f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {role.upper()}:\n"
+                    f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {role.upper()}:\n",
                 )
                 f.write(f"{content}\n")
                 f.write("-" * 50 + "\n\n")
@@ -136,7 +136,7 @@ class ConversationLogger:
             readable_log = self.log_dir / f"session_{session_id[:8]}.txt"
             with open(readable_log, "a", encoding="utf-8") as f:
                 f.write(
-                    f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] SEARCH EVENT:\n"
+                    f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] SEARCH EVENT:\n",
                 )
                 f.write(f"  Type: {search_type}\n")
                 f.write(f"  Query: {query}\n")

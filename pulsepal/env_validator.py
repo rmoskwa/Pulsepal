@@ -1,9 +1,9 @@
 """Environment variable validation for PulsePal deployment."""
 
-import os
 import json
-from typing import Dict, List, Tuple
+import os
 from datetime import datetime
+from typing import Dict, List, Tuple
 
 
 class EnvValidator:

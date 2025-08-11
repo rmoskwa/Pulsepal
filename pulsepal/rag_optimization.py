@@ -8,9 +8,9 @@ This module provides optimized implementations that properly utilize:
 3. Two-tier fetching strategy for performance
 """
 
-import logging
 import asyncio
-from typing import Dict, List, Optional, Any
+import logging
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +24,7 @@ class OptimizedRAGMethods:
         self.client = supabase_client.client
 
     async def get_official_sequence_optimized(
-        self, sequence_type: str
+        self, sequence_type: str,
     ) -> Optional[Dict[str, Any]]:
         """
         Optimized version that uses ai_summary first, then fetches content.
@@ -102,7 +102,7 @@ class OptimizedRAGMethods:
             return None
 
     async def search_crawled_pages_optimized(
-        self, query: str, limit: int = 5
+        self, query: str, limit: int = 5,
     ) -> List[Dict[str, Any]]:
         """
         Optimized search that properly parses crawled_pages content.
@@ -161,12 +161,12 @@ class OptimizedRAGMethods:
                                 "summary": summary,
                                 "full_content": full_content,  # Store but don't always use
                                 "similarity": item.get("similarity", 0.0),
-                            }
+                            },
                         )
 
                 except Exception as e:
                     logger.warning(
-                        f"Error processing crawled page {item.get('id')}: {e}"
+                        f"Error processing crawled page {item.get('id')}: {e}",
                     )
                     continue
 
@@ -213,7 +213,7 @@ class OptimizedRAGMethods:
         return [0.0] * 768  # Typical embedding dimension
 
     async def get_function_details_optimized(
-        self, function_names: List[str]
+        self, function_names: List[str],
     ) -> List[Dict[str, Any]]:
         """
         Optimized function details retrieval using indexed views.
@@ -223,7 +223,7 @@ class OptimizedRAGMethods:
             result = (
                 self.client.from_("api_reference")
                 .select(
-                    "name, signature, description, parameters, returns, usage_examples"
+                    "name, signature, description, parameters, returns, usage_examples",
                 )
                 .in_("name", function_names)
                 .execute()
@@ -236,7 +236,7 @@ class OptimizedRAGMethods:
                     search_result = (
                         self.client.from_("api_reference")
                         .select(
-                            "name, signature, description, parameters, returns, usage_examples"
+                            "name, signature, description, parameters, returns, usage_examples",
                         )
                         .ilike("name", f"%{name}%")
                         .limit(1)
@@ -255,7 +255,7 @@ class OptimizedRAGMethods:
             return []
 
     async def search_functions_fast_optimized(
-        self, query: str, limit: int = 10
+        self, query: str, limit: int = 10,
     ) -> List[Dict[str, Any]]:
         """
         Phase 1: Ultra-fast function discovery using minimal fields.
@@ -320,8 +320,9 @@ def apply_optimizations_to_rag_service(rag_service):
 # Test the optimizations
 async def test_optimizations():
     """Test the optimized methods."""
-    from .rag_service import get_rag_service
     import time
+
+    from .rag_service import get_rag_service
 
     rag_service = get_rag_service()
     apply_optimizations_to_rag_service(rag_service)

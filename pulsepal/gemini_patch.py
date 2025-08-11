@@ -7,6 +7,7 @@ Instead of masking these signals, we handle them appropriately based on their me
 
 import logging
 from typing import Any, Dict
+
 from pydantic_ai.models.gemini import GeminiModel
 
 logger = logging.getLogger(__name__)
@@ -15,7 +16,6 @@ logger = logging.getLogger(__name__)
 class GeminiRecitationError(Exception):
     """Raised when Gemini detects potential training data recitation."""
 
-    pass
 
 
 class PatchedGeminiModel(GeminiModel):
@@ -42,32 +42,31 @@ class PatchedGeminiModel(GeminiModel):
                     # Handle RECITATION - this is important signal, not to be masked
                     if finish_reason == "RECITATION":
                         logger.warning(
-                            "Gemini detected potential training data recitation"
+                            "Gemini detected potential training data recitation",
                         )
 
                         # Raise a specific exception that can be caught upstream
                         raise GeminiRecitationError(
                             "Gemini blocked response due to potential training data recitation. "
-                            "Consider using verified database examples instead."
+                            "Consider using verified database examples instead.",
                         )
 
                     # Handle SAFETY - also important, should not be masked
-                    elif finish_reason == "SAFETY":
+                    if finish_reason == "SAFETY":
                         logger.warning("Gemini blocked response due to safety filters")
                         # Let this through as-is, pydantic-ai handles SAFETY
-                        pass
 
                     # Handle truly unexpected but benign reasons
                     elif finish_reason in ["OTHER", "UNEXPECTED_TOOL_CALL"]:
                         logger.warning(
-                            f"Patching benign finish reason {finish_reason} to STOP"
+                            f"Patching benign finish reason {finish_reason} to STOP",
                         )
                         candidate["finishReason"] = "STOP"
 
                         # Ensure there's minimal content if missing
                         if "content" not in candidate or not candidate["content"]:
                             candidate["content"] = {
-                                "parts": [{"text": "I'll help you with this request."}]
+                                "parts": [{"text": "I'll help you with this request."}],
                             }
 
                     # Handle any other unexpected finish reasons
@@ -76,7 +75,7 @@ class PatchedGeminiModel(GeminiModel):
                         # For truly unknown reasons, raise an error for investigation
                         raise ValueError(
                             f"Unexpected Gemini finish reason: {finish_reason}. "
-                            f"This needs to be handled in gemini_patch.py"
+                            f"This needs to be handled in gemini_patch.py",
                         )
 
         return response
@@ -99,20 +98,20 @@ class PatchedGeminiModel(GeminiModel):
             if "RECITATION" in error_str and "validation error" in error_str:
                 # Convert to our specific exception
                 raise GeminiRecitationError(
-                    "Gemini blocked response due to potential training data recitation"
+                    "Gemini blocked response due to potential training data recitation",
                 ) from e
 
             # Check for other validation errors we should handle
-            elif "validation error" in error_str and any(
+            if "validation error" in error_str and any(
                 reason in error_str for reason in ["OTHER", "UNEXPECTED_TOOL_CALL"]
             ):
                 # These are benign but we can't auto-retry
                 logger.warning(
-                    f"Unexpected finish reason that needs patching: {error_str}"
+                    f"Unexpected finish reason that needs patching: {error_str}",
                 )
                 # Convert to a more specific error
                 raise ValueError(
-                    f"Gemini returned unexpected finish reason. Original error: {error_str}"
+                    f"Gemini returned unexpected finish reason. Original error: {error_str}",
                 ) from e
 
             # Unknown error, let it propagate

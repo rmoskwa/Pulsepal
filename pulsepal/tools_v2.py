@@ -7,12 +7,13 @@ leaving all intelligence to the LLM.
 
 import logging
 import re
-from typing import List, Dict, Optional
+from typing import Dict, List, Optional
+
 from pydantic_ai import RunContext
 
+from .conversation_logger import get_conversation_logger
 from .dependencies import PulsePalDependencies
 from .rag_service_v2 import ModernPulseqRAG
-from .conversation_logger import get_conversation_logger
 
 # Agent will be set by main_agent.py after creation
 pulsepal_agent = None
@@ -58,8 +59,7 @@ async def search_pulseq_knowledge(
     ctx: RunContext[PulsePalDependencies],
     query: str,
     limit: int = 30,
-    forced: bool = False,  # NEW parameter for semantic routing
-    sources: Optional[List[str]] = None,  # NEW parameter for source specification
+    sources: Optional[List[str]] = None,  # Optional source specification
 ) -> str:
     """
     Search Pulseq knowledge base.
@@ -78,67 +78,43 @@ async def search_pulseq_knowledge(
     Args:
         query: Search query
         limit: Maximum results (default 30)
-        forced: Internal flag for semantic routing
         sources: Optional list of specific sources to search
     
     Returns:
         Formatted results with source attribution
     """
-    # Check if this search was forced by semantic router
-    if not forced and hasattr(ctx.deps, "force_rag"):
-        forced = ctx.deps.force_rag
-
-    # Check if we should skip RAG (pure physics)
-    if hasattr(ctx.deps, "skip_rag") and ctx.deps.skip_rag:
-        logger.info("Skipping RAG search for pure physics question")
-        return "[Documentation search skipped - pure physics question detected]"
-
     # Get or create RAG service
     if not hasattr(ctx.deps, "rag_v2"):
         ctx.deps.rag_v2 = ModernPulseqRAG()
 
-    # Get source hints from semantic router if available
-    source_hints = None
-    if hasattr(ctx.deps, "forced_search_hints") and ctx.deps.forced_search_hints:
-        source_hints = {"search_terms": ctx.deps.forced_search_hints}
-    
-    # Get detected functions from semantic router if available
+    # Get detected functions from function detector if available
     detected_functions = None
     if hasattr(ctx.deps, "detected_functions") and ctx.deps.detected_functions:
         detected_functions = ctx.deps.detected_functions
-        logger.info(f"Using detected functions: {[f['name'] for f in detected_functions]}")
+        logger.info(f"Using detected functions for enhanced search: {[f['name'] for f in detected_functions]}")
 
     # Use new source-aware search with detected functions
     results = await ctx.deps.rag_v2.search_with_source_awareness(
-        query=query, 
-        sources=sources, 
-        forced=forced, 
-        source_hints=source_hints,
-        detected_functions=detected_functions
+        query=query,
+        sources=sources,
+        forced=False,  # No longer forcing based on routing
+        source_hints=None,  # No longer using forced search hints
+        detected_functions=detected_functions,
     )
 
     # Format results for display
     if not results.get("results_by_source"):
-        if forced:
-            return """No documentation found, but this query was identified as requiring Pulseq-specific information.
-            Please provide guidance based on Pulseq best practices and validate any function names."""
         return "No relevant documentation found in the knowledge base."
 
     # Build formatted response
     formatted = []
 
-    # Add header if this was a forced search
-    if forced:
-        formatted.append(
-            "[📚 REQUIRED DOCUMENTATION - Query identified as Pulseq-specific]\n"
-        )
-
     # Add search metadata
     formatted.append(
-        f"**Sources searched:** {', '.join(results['search_metadata']['sources_searched'])}"
+        f"**Sources searched:** {', '.join(results['search_metadata']['sources_searched'])}",
     )
     formatted.append(
-        f"**Total results:** {results['search_metadata']['total_results']}\n"
+        f"**Total results:** {results['search_metadata']['total_results']}\n",
     )
 
     # Add synthesis hints
@@ -155,6 +131,8 @@ async def search_pulseq_knowledge(
         for idx, result in enumerate(source_results[:5], 1):  # Limit to 5 per source
             if source_type == "api_reference":  # Fixed: Changed from "api_documentation"
                 formatted.append(format_api_result(result))
+            elif source_type == "direct_function_lookup":  # Handle direct function lookups
+                formatted.append(format_direct_lookup_result(result))
             elif source_type == "examples_and_docs":
                 formatted.append(format_example_result(result))
             elif source_type == "tutorials":
@@ -169,12 +147,11 @@ async def search_pulseq_knowledge(
     # Log search event
     if ctx.deps and hasattr(ctx.deps, "conversation_context"):
         metadata = {
-            "forced": forced,
             "sources_searched": results["search_metadata"]["sources_searched"],
             "total_results": results["search_metadata"]["total_results"],
         }
-        if forced:
-            metadata["reason"] = "semantic_routing"
+        if detected_functions:
+            metadata["detected_functions"] = [f["name"] for f in detected_functions]
 
         conversation_logger.log_search_event(
             ctx.deps.conversation_context.session_id,
@@ -210,6 +187,158 @@ def format_api_result(result: Dict) -> str:
     return "\n".join(parts) + "\n"
 
 
+def format_direct_lookup_result(result: Dict) -> str:
+    """Format direct function lookup result for comprehensive display."""
+    parts = []
+
+    # Handle both direct lookup format and standard format
+    if "function" in result:
+        # Standard format from rag_formatters
+        func_info = result.get("function", {})
+        parts.append(f"**{func_info.get('name', 'Unknown Function')}**")
+
+        if func_info.get("signature"):
+            parts.append(f"Signature: `{func_info['signature']}`")
+
+        if func_info.get("description"):
+            parts.append(f"Description: {func_info['description']}")
+
+        if func_info.get("calling_pattern"):
+            parts.append(f"Usage: `{func_info['calling_pattern']}`")
+
+        # Parameters section
+        if result.get("parameters"):
+            parts.append(f"\nParameters:\n{result['parameters']}")
+
+        # Returns section
+        if result.get("returns"):
+            parts.append(f"\nReturns:\n{result['returns']}")
+
+        # Usage examples
+        if result.get("usage_examples"):
+            parts.append("\n**Usage Examples:**")
+            for example in result["usage_examples"]:
+                if isinstance(example, str):
+                    parts.append(example)
+                elif isinstance(example, dict):
+                    if example.get("description"):
+                        parts.append(f"- {example['description']}")
+                    if example.get("code"):
+                        parts.append(f"```{example.get('language', 'matlab')}\n{example['code']}\n```")
+    else:
+        # Direct database format
+        name = result.get("name", result.get("function_name", "Unknown Function"))
+        parts.append(f"**{name}**")
+
+        if result.get("signature"):
+            parts.append(f"Signature: `{result['signature']}`")
+
+        if result.get("description"):
+            parts.append(f"Description: {result['description']}")
+
+        if result.get("calling_pattern"):
+            parts.append(f"Usage: `{result['calling_pattern']}`")
+
+        # Handle parameters - could be JSON string or dict
+        params = result.get("parameters", {})
+        if params:
+            if isinstance(params, str):
+                try:
+                    import json
+                    params = json.loads(params)
+                except:
+                    pass
+
+            if isinstance(params, dict):
+                parts.append("\n**Parameters:**")
+                # Check for required/optional structure
+                if "required" in params or "optional" in params:
+                    if params.get("required"):
+                        parts.append("Required:")
+                        for p in params["required"]:
+                            if isinstance(p, dict):
+                                parts.append(f"• {p.get('name', 'unknown')} ({p.get('type', '')}) - {p.get('description', '')}")
+                            else:
+                                parts.append(f"• {p}")
+                    if params.get("optional"):
+                        parts.append("Optional:")
+                        for p in params["optional"]:
+                            if isinstance(p, dict):
+                                parts.append(f"• {p.get('name', 'unknown')} ({p.get('type', '')}) - {p.get('description', '')}")
+                            else:
+                                parts.append(f"• {p}")
+                else:
+                    # Direct parameter listing
+                    for param_name, param_info in params.items():
+                        if isinstance(param_info, dict):
+                            param_str = f"• {param_name}"
+                            if param_info.get("type"):
+                                param_str += f" ({param_info['type']})"
+                            if param_info.get("description"):
+                                param_str += f" - {param_info['description']}"
+                            parts.append(param_str)
+                        else:
+                            parts.append(f"• {param_name}: {param_info}")
+            elif isinstance(params, str):
+                parts.append(f"\nParameters:\n{params}")
+
+        # Handle returns
+        returns = result.get("returns", {})
+        if returns:
+            if isinstance(returns, str):
+                try:
+                    import json
+                    returns = json.loads(returns)
+                except:
+                    pass
+
+            parts.append("\n**Returns:**")
+            if isinstance(returns, dict):
+                if returns.get("type"):
+                    parts.append(f"Type: {returns['type']}")
+                if returns.get("description"):
+                    parts.append(f"Description: {returns['description']}")
+                if returns.get("fields"):
+                    parts.append("Fields:")
+                    for field in returns["fields"]:
+                        if isinstance(field, dict):
+                            parts.append(f"• {field.get('name', '')} - {field.get('description', '')}")
+                        else:
+                            parts.append(f"• {field}")
+            else:
+                parts.append(str(returns))
+
+        # Handle examples
+        examples = result.get("usage_examples", [])
+        if examples:
+            if isinstance(examples, str):
+                try:
+                    import json
+                    examples = json.loads(examples)
+                except:
+                    examples = [examples]
+
+            if examples and isinstance(examples, list):
+                parts.append("\n**Usage Examples:**")
+                for i, example in enumerate(examples, 1):
+                    if isinstance(example, dict):
+                        if example.get("description"):
+                            parts.append(f"Example {i}: {example['description']}")
+                        if example.get("code"):
+                            parts.append(f"```{example.get('language', 'matlab')}\n{example['code']}\n```")
+                    else:
+                        parts.append(f"```matlab\n{example}\n```")
+
+    # Add metadata if available
+    metadata = result.get("metadata", {})
+    if metadata:
+        related = metadata.get("related_functions", [])
+        if related:
+            parts.append(f"\n**Related Functions:** {', '.join(related)}")
+
+    return "\n".join(parts) + "\n"
+
+
 def format_example_result(result: Dict) -> str:
     """Format code example result for display - provides data, not presentation."""
     parts = []
@@ -236,7 +365,7 @@ def format_example_result(result: Dict) -> str:
         # Provide content info and raw content
         if len(content) > 10000:
             parts.append(
-                f"Content length: {len(content)} characters (truncated to 10000)"
+                f"Content length: {len(content)} characters (truncated to 10000)",
             )
             content = content[:10000] + "\n[...truncated]"
         else:
@@ -327,7 +456,7 @@ def format_tutorial_result(result: Dict) -> str:
 
 
 async def verify_function_namespace(
-    ctx: RunContext[PulsePalDependencies], function_call: str
+    ctx: RunContext[PulsePalDependencies], function_call: str,
 ) -> str:
     """
     Check if a function call uses the correct namespace.
@@ -353,12 +482,11 @@ async def verify_function_namespace(
             f"Correct: `{result['correct_form']}`\n"
             f"Explanation: {result['explanation']}"
         )
-    else:
-        return f"✅ `{function_call}` uses the correct namespace."
+    return f"✅ `{function_call}` uses the correct namespace."
 
 
 async def validate_pulseq_function(
-    ctx: RunContext[PulsePalDependencies], function_name: str
+    ctx: RunContext[PulsePalDependencies], function_name: str,
 ) -> str:
     """
     Validate a Pulseq function name and get corrections if needed.
@@ -379,23 +507,22 @@ async def validate_pulseq_function(
     # Format response
     if result["is_valid"]:
         return f"✅ {function_name} is valid"
-    else:
-        response = [f"❌ {function_name} is not valid"]
+    response = [f"❌ {function_name} is not valid"]
 
-        if result.get("correct_form"):
-            response.append(f"✅ Use: {result['correct_form']}")
+    if result.get("correct_form"):
+        response.append(f"✅ Use: {result['correct_form']}")
 
-        if result.get("explanation"):
-            response.append(f"ℹ️ {result['explanation']}")
+    if result.get("explanation"):
+        response.append(f"ℹ️ {result['explanation']}")
 
-        if result.get("suggestions"):
-            response.append(f"💡 Suggestions: {', '.join(result['suggestions'])}")
+    if result.get("suggestions"):
+        response.append(f"💡 Suggestions: {', '.join(result['suggestions'])}")
 
-        return "\n".join(response)
+    return "\n".join(response)
 
 
 async def validate_code_block(
-    ctx: RunContext[PulsePalDependencies], code: str, language: str = "matlab"
+    ctx: RunContext[PulsePalDependencies], code: str, language: str = "matlab",
 ) -> str:
     """
     Validate a code block for correct Pulseq function usage.

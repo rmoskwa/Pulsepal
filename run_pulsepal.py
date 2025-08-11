@@ -7,16 +7,16 @@ Usage:
     python run_pulsepal.py --interactive  # For interactive mode
 """
 
+import argparse
 import asyncio
 import sys
-import argparse
 from pathlib import Path
 
 # Add pulsepal to path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from pulsepal.main_agent_v2 import run_pulsepal_query, create_pulsepal_session
 from pulsepal.conversation_logger import get_conversation_logger
+from pulsepal.main_agent_v2 import create_pulsepal_session, run_pulsepal_query
 
 
 async def single_query(question: str):
@@ -39,7 +39,7 @@ async def single_query(question: str):
 
         if logger.enabled:
             print(
-                f"📝 Conversation logged to: {logger.log_dir / f'session_{session_id[:8]}.txt'}"
+                f"📝 Conversation logged to: {logger.log_dir / f'session_{session_id[:8]}.txt'}",
             )
 
     except Exception as e:
@@ -72,7 +72,7 @@ async def interactive_mode():
 
                 if question.lower() in ["quit", "exit", "bye"]:
                     logger.log_conversation(
-                        session_id, "system", "Interactive session ended"
+                        session_id, "system", "Interactive session ended",
                     )
                     print("\n👋 Goodbye! Thanks for using Pulsepal!")
                     break
@@ -94,7 +94,7 @@ async def interactive_mode():
 
             except KeyboardInterrupt:
                 logger.log_conversation(
-                    session_id, "system", "Session interrupted by user"
+                    session_id, "system", "Session interrupted by user",
                 )
                 print("\n\n👋 Goodbye! Thanks for using Pulsepal!")
                 break
@@ -109,13 +109,13 @@ async def interactive_mode():
 async def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(
-        description="Pulsepal: Multi-Agent MRI Sequence Programming Assistant"
+        description="Pulsepal: Multi-Agent MRI Sequence Programming Assistant",
     )
     parser.add_argument(
-        "question", nargs="?", help="Your question about Pulseq programming"
+        "question", nargs="?", help="Your question about Pulseq programming",
     )
     parser.add_argument(
-        "-i", "--interactive", action="store_true", help="Run in interactive mode"
+        "-i", "--interactive", action="store_true", help="Run in interactive mode",
     )
     parser.add_argument("--version", action="version", version="Pulsepal v1.0.0")
 

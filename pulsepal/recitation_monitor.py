@@ -5,11 +5,11 @@ RECITATION errors indicate the agent is attempting to generate code from memory
 instead of using database examples. This should NEVER happen with proper prompts.
 """
 
-import logging
-from typing import Optional
-from datetime import datetime
 import json
+import logging
 import os
+from datetime import datetime
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -69,14 +69,14 @@ class RecitationMonitor:
         logger.critical(
             f"RECITATION ERROR #{self.recitation_count}: "
             f"Agent attempted to generate from memory instead of using tools. "
-            f"Query: '{query[:100]}...' | Session: {session_id}"
+            f"Query: '{query[:100]}...' | Session: {session_id}",
         )
 
         # If this happens even once, it's a problem
         if self.recitation_count >= self.alert_threshold:
             logger.critical(
                 f"🚨 RECITATION THRESHOLD EXCEEDED: {self.recitation_count} errors. "
-                "System prompt or tool usage is broken!"
+                "System prompt or tool usage is broken!",
             )
 
             # Could trigger additional alerts here:
@@ -111,7 +111,7 @@ Please try:
 Error code: RECITATION_ERROR"""
 
     def log_prevented_recitation(
-        self, query: str, sequence_type: str, session_id: Optional[str] = None
+        self, query: str, sequence_type: str, session_id: Optional[str] = None,
     ):
         """
         Log when RECITATION was successfully prevented.
@@ -144,7 +144,7 @@ Error code: RECITATION_ERROR"""
         logger.info(
             f"RECITATION PREVENTED #{self.prevented_count}: "
             f"Successfully avoided RECITATION for {sequence_type}. "
-            f"Query: '{query[:100]}...' | Session: {session_id}"
+            f"Query: '{query[:100]}...' | Session: {session_id}",
         )
 
     def analyze_patterns(self) -> dict:
@@ -159,7 +159,7 @@ Error code: RECITATION_ERROR"""
 
         errors = []
         preventions = []
-        with open(self.recitation_log_file, "r") as f:
+        with open(self.recitation_log_file) as f:
             for line in f:
                 try:
                     record = json.loads(line)
@@ -196,7 +196,7 @@ Error code: RECITATION_ERROR"""
             "common_patterns": query_keywords,
             "prevented_sequences": prevented_sequences,
             "unique_sessions": len(
-                set(e.get("session_id") for e in errors + preventions)
+                set(e.get("session_id") for e in errors + preventions),
             ),
         }
 

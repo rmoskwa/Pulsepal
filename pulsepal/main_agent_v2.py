@@ -6,11 +6,13 @@ while RAG just retrieves documents.
 """
 
 import logging
+import uuid
+
 from pydantic_ai import Agent
-from .providers import get_llm_model
+
 from .dependencies import PulsePalDependencies, get_session_manager
 from .gemini_patch import GeminiRecitationError
-import uuid
+from .providers import get_llm_model
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +46,16 @@ You can search multiple times to gather comprehensive information.
 - Default to MATLAB unless Python is specified
 - Show appropriate syntax for the context
 
+### Markdown Formatting Rules
+CRITICAL: Follow these rules to prevent formatting errors:
+- ALWAYS use exactly THREE backticks (```) to open and close code blocks
+- NEVER use four backticks (````) or any other number
+- Code blocks: ```language to open, then code, then ``` to close (exactly 3 backticks each time)
+- ALWAYS close code blocks with ``` before continuing with explanatory text
+- NEVER put markdown headers (###) or bullet points (*) inside code blocks
+- After showing code, ensure ``` is on its own line, then continue with normal text
+- Do not nest explanatory text within code blocks
+
 ### Synthesis
 When multiple sources provide information:
 - Indicate which source each piece of information comes from
@@ -70,7 +82,7 @@ def _register_tools():
     pulsepal_agent.tool(tools.search_pulseq_knowledge)
     pulsepal_agent.tool(tools.verify_function_namespace)
     pulsepal_agent.tool(
-        tools.validate_pulseq_function
+        tools.validate_pulseq_function,
     )  # Critical for hallucination prevention
     pulsepal_agent.tool(tools.validate_code_block)  # Validate entire code blocks
 
@@ -117,46 +129,36 @@ async def create_pulsepal_session(
     # Initialize RAG services (now simplified)
     await deps.initialize_rag_services()
 
-    # Apply semantic routing if query provided
+    # Apply function detection if query provided (no routing restrictions)
     if query:
         try:
-            from .semantic_router import SemanticRouter, QueryRoute
+            from .semantic_router import SemanticRouter
 
             router = SemanticRouter()
             routing_decision = router.classify_query(query)
 
-            # Set routing flags based on decision
-            if routing_decision.route == QueryRoute.FORCE_RAG:
-                deps.force_rag = True
-                deps.forced_search_hints = routing_decision.search_hints
-                deps.detected_functions = routing_decision.detected_functions  # Pass detected functions
-                deps.validation_errors = routing_decision.validation_errors  # Pass validation errors
-                
-                if routing_decision.detected_functions:
-                    logger.info(
-                        f"Semantic router: FORCE_RAG - {routing_decision.reasoning} - "
-                        f"Detected functions: {[f['name'] for f in routing_decision.detected_functions]}"
-                    )
-                    if routing_decision.validation_errors:
-                        logger.warning(f"Validation errors: {routing_decision.validation_errors}")
-                else:
-                    logger.info(
-                        f"Semantic router: FORCE_RAG - {routing_decision.reasoning}"
-                    )
-            elif routing_decision.route == QueryRoute.NO_RAG:
-                deps.skip_rag = True
-                logger.info(f"Semantic router: NO_RAG - {routing_decision.reasoning}")
-            else:
+            # Only use detected functions as hints, not for routing decisions
+            if routing_decision.detected_functions:
+                deps.detected_functions = routing_decision.detected_functions
+                deps.validation_errors = routing_decision.validation_errors
+
                 logger.info(
-                    f"Semantic router: GEMINI_CHOICE - {routing_decision.reasoning}"
+                    f"Function detector found {len(routing_decision.detected_functions)} function(s): "
+                    f"{[f['name'] for f in routing_decision.detected_functions]}",
                 )
+
+                if routing_decision.validation_errors:
+                    logger.warning(f"Validation errors detected: {routing_decision.validation_errors}")
+
+            # Log the detection but don't restrict Gemini's choices
+            logger.debug("Function detection complete. Gemini will decide search strategy.")
+
         except ImportError as e:
-            logger.warning(f"Semantic router not available: {e}")
-            # Continue without routing - let LLM decide
+            logger.warning(f"Function detector not available: {e}")
+            # Continue without function detection
         except Exception as e:
-            logger.error(f"Semantic routing failed: {e}")
-            # Continue without routing - fail gracefully
-            # This ensures the application doesn't crash if routing fails
+            logger.error(f"Function detection failed: {e}")
+            # Continue without function detection - fail gracefully
 
     logger.info(f"Created Pulsepal session: {session_id}")
 
@@ -164,7 +166,7 @@ async def create_pulsepal_session(
 
 
 async def run_pulsepal_query(
-    query: str, session_id: str = None, temperature: float = 0.1
+    query: str, session_id: str = None, temperature: float = 0.1,
 ) -> tuple[str, str]:
     """
     Run a query through the Pulsepal agent.
@@ -186,7 +188,7 @@ async def run_pulsepal_query(
 
         # Run the agent
         result = await pulsepal_agent.run(
-            query, deps=deps, model_settings={"temperature": temperature}
+            query, deps=deps, model_settings={"temperature": temperature},
         )
 
         # Extract response
@@ -205,47 +207,105 @@ async def run_pulsepal_query(
             "Please try rephrasing your question or asking for a different example."
         )
     except Exception as e:
+        # Log the full error with traceback for debugging
+        import traceback
         logger.error(f"Error running Pulsepal query: {e}")
-        return session_id, f"An error occurred: {str(e)}"
+        logger.error(f"Error type: {type(e).__name__}")
+        logger.error(f"Traceback:\n{traceback.format_exc()}")
+
+        # Check for specific error types and provide helpful feedback
+        error_msg = str(e).lower()
+
+        if "503" in error_msg or "service unavailable" in error_msg:
+            logger.error("Gemini API returned 503 Service Unavailable")
+            return session_id, (
+                "⚠️ **Gemini API Service Unavailable (503)**\n\n"
+                "The AI service is temporarily unavailable. This usually means:\n"
+                "- The service is experiencing high load\n"
+                "- Temporary maintenance is occurring\n\n"
+                "Please try again in a few moments. If the issue persists, "
+                "check the Gemini API status page.\n\n"
+                f"Error details: {e!s}"
+            )
+        if "rate limit" in error_msg or "429" in error_msg:
+            logger.error("Rate limit exceeded for Gemini API")
+            return session_id, (
+                "⚠️ **Rate Limit Exceeded**\n\n"
+                "The API rate limit has been reached. Please wait a moment before trying again.\n\n"
+                f"Error details: {e!s}"
+            )
+        if "timeout" in error_msg:
+            logger.error("Request timeout")
+            return session_id, (
+                "⚠️ **Request Timeout**\n\n"
+                "The request took too long to process. Try:\n"
+                "- Breaking your query into smaller parts\n"
+                "- Being more specific in your question\n\n"
+                f"Error details: {e!s}"
+            )
+        if "connection" in error_msg or "network" in error_msg:
+            logger.error("Network/connection error")
+            return session_id, (
+                "⚠️ **Connection Error**\n\n"
+                "Unable to connect to the AI service. Please check:\n"
+                "- Your internet connection\n"
+                "- Firewall/proxy settings\n"
+                "- API endpoint availability\n\n"
+                f"Error details: {e!s}"
+            )
+        # For unexpected errors, provide the actual error message
+        # This ensures we don't hide important debugging information
+        logger.error(f"Unexpected error type: {type(e).__name__}")
+        return session_id, (
+            f"❌ **Error: {type(e).__name__}**\n\n"
+            f"An unexpected error occurred:\n{e!s}\n\n"
+            "This error has been logged for debugging. "
+            "Please try rephrasing your query or contact support if the issue persists."
+        )
 
 
 def apply_semantic_routing(query: str, deps: PulsePalDependencies) -> None:
     """
-    Apply semantic routing to a query and update dependencies.
+    Apply function detection to a query and update dependencies.
     This is a standalone function for use by Chainlit.
+    No longer restricts search decisions - only provides function hints.
 
     Args:
-        query: The user query to route
-        deps: Dependencies object to update with routing decisions
+        query: The user query to analyze for functions
+        deps: Dependencies object to update with detected functions
     """
     try:
-        from .semantic_router import SemanticRouter, QueryRoute
+        from .semantic_router import SemanticRouter
 
         router = SemanticRouter()
         routing_decision = router.classify_query(query)
 
-        # Set routing flags based on decision
-        if routing_decision.route == QueryRoute.FORCE_RAG:
-            deps.force_rag = True
-            deps.forced_search_hints = routing_decision.search_hints
-            logger.info(f"Semantic router: FORCE_RAG - {routing_decision.reasoning}")
-        elif routing_decision.route == QueryRoute.NO_RAG:
-            deps.skip_rag = True
-            logger.info(f"Semantic router: NO_RAG - {routing_decision.reasoning}")
-        else:
+        # Only use detected functions as hints, not for routing decisions
+        if routing_decision.detected_functions:
+            deps.detected_functions = routing_decision.detected_functions
+            deps.validation_errors = routing_decision.validation_errors
+
             logger.info(
-                f"Semantic router: GEMINI_CHOICE - {routing_decision.reasoning}"
+                f"Function detector found {len(routing_decision.detected_functions)} function(s): "
+                f"{[f['name'] for f in routing_decision.detected_functions]}",
             )
+
+            if routing_decision.validation_errors:
+                logger.warning(f"Validation errors detected: {routing_decision.validation_errors}")
+
+        # Log the detection but don't restrict Gemini's choices
+        logger.debug("Function detection complete. Gemini will decide search strategy.")
+
     except ImportError as e:
-        logger.warning(f"Semantic router not available: {e}")
-        # Continue without routing - let LLM decide
+        logger.warning(f"Function detector not available: {e}")
+        # Continue without function detection
     except Exception as e:
-        logger.error(f"Semantic routing failed: {e}")
-        # Continue without routing - fail gracefully
+        logger.error(f"Function detection failed: {e}")
+        # Continue without function detection - fail gracefully
 
 
 async def run_pulsepal_stream(
-    query: str, session_id: str = None, temperature: float = 0.1
+    query: str, session_id: str = None, temperature: float = 0.1,
 ):
     """
     Run a query with streaming response.
@@ -267,7 +327,7 @@ async def run_pulsepal_stream(
 
         # Run the agent with streaming
         async with pulsepal_agent.run_stream(
-            query, deps=deps, model_settings={"temperature": temperature}
+            query, deps=deps, model_settings={"temperature": temperature},
         ) as result:
             full_response = ""
             async for chunk in result.stream():
@@ -284,5 +344,41 @@ async def run_pulsepal_stream(
             "Please try rephrasing your question."
         )
     except Exception as e:
+        # Log the full error with traceback for debugging
+        import traceback
         logger.error(f"Error during streaming: {e}")
-        yield f"\n\nAn error occurred: {str(e)}"
+        logger.error(f"Error type: {type(e).__name__}")
+        logger.error(f"Traceback:\n{traceback.format_exc()}")
+
+        # Check for specific error types
+        error_msg = str(e).lower()
+
+        if "503" in error_msg or "service unavailable" in error_msg:
+            logger.error("Gemini API returned 503 during streaming")
+            yield (
+                "\n\n⚠️ **Gemini API Service Unavailable (503)**\n"
+                "The AI service is temporarily unavailable. Please try again in a few moments.\n"
+                f"Error: {e!s}"
+            )
+        elif "rate limit" in error_msg or "429" in error_msg:
+            logger.error("Rate limit exceeded during streaming")
+            yield (
+                "\n\n⚠️ **Rate Limit Exceeded**\n"
+                "Please wait a moment before trying again.\n"
+                f"Error: {e!s}"
+            )
+        elif "timeout" in error_msg:
+            logger.error("Timeout during streaming")
+            yield (
+                "\n\n⚠️ **Request Timeout**\n"
+                "The request took too long. Try a simpler query.\n"
+                f"Error: {e!s}"
+            )
+        else:
+            # For unexpected errors, provide the actual error
+            logger.error(f"Unexpected streaming error: {type(e).__name__}")
+            yield (
+                f"\n\n❌ **Error: {type(e).__name__}**\n"
+                f"An unexpected error occurred: {e!s}\n"
+                "This error has been logged for debugging."
+            )

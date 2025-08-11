@@ -5,10 +5,12 @@ Provides Gemini model configuration with proper error handling
 following main_agent_reference patterns.
 """
 
-from pydantic_ai.models.gemini import GeminiModel
-from .settings import get_settings
 import logging
 import os
+
+from pydantic_ai.models.gemini import GeminiModel
+
+from .settings import get_settings
 
 logger = logging.getLogger(__name__)
 

@@ -5,10 +5,11 @@ This module provides direct integration with Supabase for vector similarity sear
 managing documentation and code examples stored in the vector database.
 """
 
-import os
 import logging
-from typing import List, Dict, Any, Optional
-from supabase import create_client, Client
+import os
+from typing import Any, Dict, List, Optional
+
+from supabase import Client, create_client
 
 # Lazy imports to avoid slow startup
 create_embedding = None
@@ -59,7 +60,7 @@ class SupabaseRAGClient:
         if not self.url or not self.key:
             raise ValueError(
                 "Supabase URL and service key must be provided or set in environment variables "
-                "(SUPABASE_URL and SUPABASE_KEY)"
+                "(SUPABASE_URL and SUPABASE_KEY)",
             )
 
         self.client: Client = create_client(self.url, self.key)
@@ -97,7 +98,7 @@ class SupabaseRAGClient:
         return self._reranker
 
     def rerank_results(
-        self, query: str, results: List[Dict], top_k: Optional[int] = None
+        self, query: str, results: List[Dict], top_k: Optional[int] = None,
     ) -> List[Dict]:
         """
         Rerank search results using cross-encoder for improved relevance.
@@ -132,7 +133,7 @@ class SupabaseRAGClient:
 
             # Sort by rerank score
             reranked = sorted(
-                results, key=lambda x: x.get("rerank_score", 0), reverse=True
+                results, key=lambda x: x.get("rerank_score", 0), reverse=True,
             )
 
             logger.debug(f"Reranked {len(results)} results using cross-encoder")
@@ -277,7 +278,7 @@ class SupabaseRAGClient:
             except Exception as rpc_error:
                 # Fallback to direct table query if RPC doesn't exist
                 logger.debug(
-                    f"RPC match_api_reference not available, using direct query: {rpc_error}"
+                    f"RPC match_api_reference not available, using direct query: {rpc_error}",
                 )
 
                 # Direct query to api_reference table
@@ -287,7 +288,7 @@ class SupabaseRAGClient:
                 query_builder = query_builder.or_(
                     f"name.ilike.%{query}%,"
                     f"description.ilike.%{query}%,"
-                    f"signature.ilike.%{query}%"
+                    f"signature.ilike.%{query}%",
                 )
 
                 # Add language filter if specified
@@ -395,7 +396,7 @@ class SupabaseRAGClient:
                             or source.get("total_word_count"),
                             "created_at": source.get("created_at"),
                             "updated_at": source.get("updated_at"),
-                        }
+                        },
                     )
 
             logger.info(f"Retrieved {len(sources)} sources from database")
@@ -457,12 +458,12 @@ class SupabaseRAGClient:
         rrf_scores = {}
         for doc_id in all_docs:
             rrf_scores[doc_id] = vector_scores.get(doc_id, 0) + keyword_scores.get(
-                doc_id, 0
+                doc_id, 0,
             )
 
         # Sort by RRF score and return top results
         sorted_docs = sorted(
-            all_docs.values(), key=lambda x: rrf_scores.get(x["id"], 0), reverse=True
+            all_docs.values(), key=lambda x: rrf_scores.get(x["id"], 0), reverse=True,
         )
 
         # Add RRF scores to results
@@ -510,10 +511,10 @@ class SupabaseRAGClient:
                 ute_query = (
                     self.client.from_(table_name)
                     .select(
-                        "id, url, chunk_number, content, summary, metadata, source_id"
+                        "id, url, chunk_number, content, summary, metadata, source_id",
                     )
                     .or_(
-                        "url.ilike.%writeUTE%,summary.ilike.%UTE%,summary.ilike.%ultra-short echo%,summary.ilike.%ultrashort echo%"
+                        "url.ilike.%writeUTE%,summary.ilike.%UTE%,summary.ilike.%ultra-short echo%,summary.ilike.%ultrashort echo%",
                     )
                 )
                 if source:
@@ -545,10 +546,10 @@ class SupabaseRAGClient:
                     exact_query = (
                         self.client.from_(table_name)
                         .select(
-                            "id, url, chunk_number, content, summary, metadata, source_id"
+                            "id, url, chunk_number, content, summary, metadata, source_id",
                         )
                         .or_(
-                            f"url.ilike.%{seq_name}%,summary.ilike.%{seq_name.replace('write', '')}%"
+                            f"url.ilike.%{seq_name}%,summary.ilike.%{seq_name.replace('write', '')}%",
                         )
                     )
                 else:
@@ -564,7 +565,7 @@ class SupabaseRAGClient:
                 exact_response = exact_query.limit(match_count).execute()
                 if exact_response.data:
                     logger.debug(
-                        f"Found {len(exact_response.data)} exact matches for {seq_name}"
+                        f"Found {len(exact_response.data)} exact matches for {seq_name}",
                     )
                     results.extend(exact_response.data)
                     sequence_found = True
@@ -594,7 +595,7 @@ class SupabaseRAGClient:
                 self.client.from_(table_name)
                 .select(select_fields)
                 .or_(
-                    f"name.ilike.%{query}%,description.ilike.%{query}%,signature.ilike.%{query}%"
+                    f"name.ilike.%{query}%,description.ilike.%{query}%,signature.ilike.%{query}%",
                 )
             )
         else:
@@ -660,7 +661,7 @@ class SupabaseRAGClient:
                     word_query = word_query.eq("source_id", source)
 
                 word_response = word_query.limit(
-                    match_count // len(meaningful_words)
+                    match_count // len(meaningful_words),
                 ).execute()
                 if word_response.data:
                     results.extend(word_response.data)
@@ -735,30 +736,30 @@ class SupabaseRAGClient:
             # Use override query if provided, otherwise use original query
             keyword_query = keyword_query_override if keyword_query_override else query
             keyword_results = self._multi_strategy_keyword_search(
-                keyword_query, match_count * 2, table_name, source
+                keyword_query, match_count * 2, table_name, source,
             )
 
             # Combine results using RRF or simple fusion
             if use_rrf:
                 combined_results = self._reciprocal_rank_fusion(
-                    vector_results, keyword_results, match_count * 2
+                    vector_results, keyword_results, match_count * 2,
                 )
             else:
                 # Fallback to original fusion method
                 combined_results = self._simple_fusion(
-                    vector_results, keyword_results, match_count * 2
+                    vector_results, keyword_results, match_count * 2,
                 )
 
             # Apply final reranking if enabled
             if use_reranking and combined_results:
                 combined_results = self.rerank_results(
-                    query, combined_results, match_count
+                    query, combined_results, match_count,
                 )
             else:
                 combined_results = combined_results[:match_count]
 
             logger.info(
-                f"Advanced hybrid search returned {len(combined_results)} results"
+                f"Advanced hybrid search returned {len(combined_results)} results",
             )
             return combined_results
 
@@ -767,7 +768,7 @@ class SupabaseRAGClient:
             return []
 
     def _simple_fusion(
-        self, vector_results: List[Dict], keyword_results: List[Dict], match_count: int
+        self, vector_results: List[Dict], keyword_results: List[Dict], match_count: int,
     ) -> List[Dict]:
         """Simple fusion method (fallback for original behavior)."""
         seen_ids = set()
@@ -809,7 +810,7 @@ class SupabaseRAGClient:
                         "metadata": kr.get("metadata", {}),
                         "source_id": kr["source_id"],
                         "similarity": 0.5,  # Default similarity for keyword-only matches
-                    }
+                    },
                 )
                 seen_ids.add(kr["id"])
 
