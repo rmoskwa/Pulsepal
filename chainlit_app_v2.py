@@ -41,7 +41,7 @@ logger.info("Using enhanced RAG service v2 with hallucination prevention")
 logger.info("=" * 60)
 
 # Optional authentication for deployment
-AUTH_ENABLED = False
+AUTH_ENABLED = True
 try:
     logger.info("Attempting to import auth module...")
     from pulsepal.auth import API_KEYS, check_rate_limit, validate_api_key
@@ -556,17 +556,23 @@ async def main(message: cl.Message):
                     )
 
                     if routing_decision.validation_errors:
-                        logger.warning(f"Validation errors detected: {routing_decision.validation_errors}")
+                        logger.warning(
+                            f"Validation errors detected: {routing_decision.validation_errors}"
+                        )
 
                 # Log the detection but don't restrict Gemini's choices
-                logger.debug("Function detection complete. Gemini will decide search strategy.")
+                logger.debug(
+                    "Function detection complete. Gemini will decide search strategy."
+                )
 
                 # Run agent with original query (not modified by routing)
                 result = await pulsepal_agent.run(query_with_context, deps=deps)
 
                 # Add response to conversation history
                 # Use result.output for modern pydantic-ai
-                response_text = result.output if hasattr(result, 'output') else str(result)
+                response_text = (
+                    result.output if hasattr(result, "output") else str(result)
+                )
                 deps.conversation_context.add_conversation("assistant", response_text)
 
                 # Log assistant response for debugging
