@@ -26,6 +26,7 @@ from pulsepal.dependencies import get_session_manager
 from pulsepal.main_agent_v2 import create_pulsepal_session, pulsepal_agent
 from pulsepal.semantic_router import initialize_semantic_router
 from pulsepal.settings import get_settings
+from pulsepal.startup import initialize_all_services
 
 # Configure logging early so it's available for auth
 logging.basicConfig(level=logging.INFO)
@@ -111,6 +112,9 @@ logger.info("=" * 60)
 logger.info(f"🔒 FINAL AUTH STATUS: AUTH_ENABLED = {AUTH_ENABLED}")
 logger.info("🚀 USING ENHANCED RAG SERVICE V2 - With Function Validation")
 logger.info("=" * 60)
+
+# Initialize all services at startup
+initialize_all_services()
 
 # Global settings
 settings = get_settings()

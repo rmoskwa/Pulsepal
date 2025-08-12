@@ -817,18 +817,33 @@ class SupabaseRAGClient:
         return combined_results[:match_count]
 
 
-# Global instance
+# Global instance - will be managed by startup module
 _supabase_client: Optional[SupabaseRAGClient] = None
 
 
 def get_supabase_client() -> SupabaseRAGClient:
     """
     Get the global Supabase client instance.
+    
+    This now checks if the client was pre-initialized at startup,
+    otherwise falls back to lazy loading for backward compatibility.
 
     Returns:
         SupabaseRAGClient instance
     """
     global _supabase_client
+    
+    # First check if startup module has initialized it
     if _supabase_client is None:
+        try:
+            from .startup import get_initialized_supabase_client
+            _supabase_client = get_initialized_supabase_client()
+        except ImportError:
+            pass  # Startup module not available
+    
+    # Fall back to lazy loading if not initialized at startup
+    if _supabase_client is None:
+        logger.info("Supabase client not pre-initialized, using lazy loading...")
         _supabase_client = SupabaseRAGClient()
+    
     return _supabase_client

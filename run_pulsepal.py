@@ -17,6 +17,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from pulsepal.conversation_logger import get_conversation_logger
 from pulsepal.main_agent_v2 import create_pulsepal_session, run_pulsepal_query
+from pulsepal.startup import initialize_all_services
 
 
 async def single_query(question: str):
@@ -108,6 +109,9 @@ async def interactive_mode():
 
 async def main():
     """Main entry point."""
+    # Initialize all services at startup
+    initialize_all_services()
+    
     parser = argparse.ArgumentParser(
         description="Pulsepal: Multi-Agent MRI Sequence Programming Assistant",
     )
