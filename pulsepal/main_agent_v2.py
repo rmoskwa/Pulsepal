@@ -181,8 +181,8 @@ async def run_pulsepal_query(
             model_settings={"temperature": temperature},
         )
 
-        # Extract response
-        response = result.data if hasattr(result, "data") else str(result)
+        # Extract response - use result.output for pydantic-ai
+        response = result.output if hasattr(result, 'output') else str(result)
 
         # Add response to conversation history
         deps.conversation_context.add_conversation("assistant", response)

@@ -146,6 +146,52 @@ class ConversationLogger:
         except Exception as e:
             logger.error(f"Failed to log search event: {e}")
 
+    def log_routing_event(
+        self,
+        session_id: str,
+        routing_info: Dict[str, Any],
+    ):
+        """
+        Log a routing decision event.
+        
+        Args:
+            session_id: Session identifier
+            routing_info: Dictionary containing routing decision details
+        """
+        if not self.enabled:
+            return
+            
+        try:
+            # Create log entry
+            log_entry = {
+                "timestamp": datetime.now().isoformat(),
+                "session_id": session_id,
+                "type": "routing_event",
+                "routing_info": routing_info,
+            }
+            
+            # Append to session log file
+            log_file = self.log_dir / f"session_{session_id[:8]}.jsonl"
+            with open(log_file, "a", encoding="utf-8") as f:
+                json.dump(log_entry, f, ensure_ascii=False)
+                f.write("\n")
+                
+            # Also add to human-readable log
+            readable_log = self.log_dir / f"session_{session_id[:8]}.txt"
+            with open(readable_log, "a", encoding="utf-8") as f:
+                f.write(
+                    f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] ROUTING EVENT:\n"
+                )
+                f.write(f"  Route: {routing_info.get('route', 'unknown')}\n")
+                f.write(f"  Confidence: {routing_info.get('confidence', 0):.2f}\n")
+                f.write(f"  Trigger: {routing_info.get('trigger_type', 'unknown')}\n")
+                if routing_info.get('detected_functions'):
+                    f.write(f"  Detected Functions: {', '.join([f['name'] for f in routing_info['detected_functions']])}\n")
+                f.write("-" * 50 + "\n\n")
+                
+        except Exception as e:
+            logger.error(f"Failed to log routing event: {e}")
+
     def get_session_log(self, session_id: str) -> Optional[str]:
         """
         Read the conversation log for a session.
