@@ -6,11 +6,8 @@ to avoid lazy loading delays during runtime.
 """
 
 import logging
-import os
-import sys
 from typing import Optional
 
-from .embeddings import create_embedding
 from .settings import get_settings
 from .supabase_client import SupabaseRAGClient
 
@@ -72,7 +69,7 @@ def initialize_embeddings():
         from .embeddings import get_embedding_service, get_embedding_dimensions
         
         # Initialize the service (this creates the provider)
-        service = get_embedding_service()
+        _ = get_embedding_service()
         dimensions = get_embedding_dimensions()
         
         logger.info(f"✅ Embeddings service initialized (dimension: {dimensions})")
@@ -106,7 +103,7 @@ def initialize_all_services():
         logger.info("✅ Configuration loaded")
         
         # Initialize Supabase client
-        supabase_client = initialize_supabase()
+        _ = initialize_supabase()
         
         # Initialize embeddings
         initialize_embeddings()

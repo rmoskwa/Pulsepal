@@ -246,7 +246,7 @@ def format_direct_lookup_result(result: Dict) -> str:
                 try:
                     import json
                     params = json.loads(params)
-                except:
+                except (json.JSONDecodeError, ValueError):
                     pass
 
             if isinstance(params, dict):
@@ -289,7 +289,7 @@ def format_direct_lookup_result(result: Dict) -> str:
                 try:
                     import json
                     returns = json.loads(returns)
-                except:
+                except (json.JSONDecodeError, ValueError):
                     pass
 
             parts.append("\n**Returns:**")
@@ -315,7 +315,7 @@ def format_direct_lookup_result(result: Dict) -> str:
                 try:
                     import json
                     examples = json.loads(examples)
-                except:
+                except (json.JSONDecodeError, ValueError):
                     examples = [examples]
 
             if examples and isinstance(examples, list):

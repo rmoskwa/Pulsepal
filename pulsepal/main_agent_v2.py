@@ -77,6 +77,29 @@ def _register_tools():
 # Register tools on module import
 _register_tools()
 
+# Cached semantic router instance (singleton pattern)
+_semantic_router_instance = None
+
+def get_semantic_router():
+    """Get or create a singleton SemanticRouter instance.
+    
+    This ensures the 80MB model is only loaded once, not on every request.
+    """
+    global _semantic_router_instance
+    
+    if _semantic_router_instance is None:
+        try:
+            from .semantic_router import SemanticRouter
+            logger.info("Initializing semantic router (one-time load)...")
+            _semantic_router_instance = SemanticRouter(lazy_load=False)
+            logger.info("Semantic router initialized and cached")
+        except Exception as e:
+            logger.warning(f"Failed to initialize semantic router: {e}")
+            # Return None to indicate router is not available
+            return None
+    
+    return _semantic_router_instance
+
 
 async def create_pulsepal_session(
     session_id: str = None,
@@ -114,30 +137,31 @@ async def create_pulsepal_session(
     # Apply function detection if query provided (no routing restrictions)
     if query:
         try:
-            from .semantic_router import SemanticRouter
+            router = get_semantic_router()
+            if router is None:
+                logger.warning("Semantic router not available, skipping function detection")
+            else:
+                routing_decision = router.classify_query(query)
 
-            router = SemanticRouter()
-            routing_decision = router.classify_query(query)
+                # Only use detected functions as hints, not for routing decisions
+                if routing_decision.detected_functions:
+                    deps.detected_functions = routing_decision.detected_functions
+                    deps.validation_errors = routing_decision.validation_errors
 
-            # Only use detected functions as hints, not for routing decisions
-            if routing_decision.detected_functions:
-                deps.detected_functions = routing_decision.detected_functions
-                deps.validation_errors = routing_decision.validation_errors
-
-                logger.info(
-                    f"Function detector found {len(routing_decision.detected_functions)} function(s): "
-                    f"{[f['name'] for f in routing_decision.detected_functions]}",
-                )
-
-                if routing_decision.validation_errors:
-                    logger.warning(
-                        f"Validation errors detected: {routing_decision.validation_errors}"
+                    logger.info(
+                        f"Function detector found {len(routing_decision.detected_functions)} function(s): "
+                        f"{[f['name'] for f in routing_decision.detected_functions]}",
                     )
 
-            # Log the detection but don't restrict Gemini's choices
-            logger.debug(
-                "Function detection complete. Gemini will decide search strategy."
-            )
+                    if routing_decision.validation_errors:
+                        logger.warning(
+                            f"Validation errors detected: {routing_decision.validation_errors}"
+                        )
+
+                # Log the detection but don't restrict Gemini's choices
+                logger.debug(
+                    "Function detection complete. Gemini will decide search strategy."
+                )
 
         except ImportError as e:
             logger.warning(f"Function detector not available: {e}")
@@ -266,9 +290,11 @@ def apply_semantic_routing(query: str, deps: PulsePalDependencies) -> None:
         deps: Dependencies object to update with detected functions
     """
     try:
-        from .semantic_router import SemanticRouter
-
-        router = SemanticRouter()
+        router = get_semantic_router()
+        if router is None:
+            logger.warning("Semantic router not available, skipping function detection")
+            return
+            
         routing_decision = router.classify_query(query)
 
         # Only use detected functions as hints, not for routing decisions

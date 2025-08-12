@@ -565,13 +565,15 @@ async def main(message: cl.Message):
                 result = await pulsepal_agent.run(query_with_context, deps=deps)
 
                 # Add response to conversation history
-                deps.conversation_context.add_conversation("assistant", result.data)
+                # Use result.output for modern pydantic-ai
+                response_text = result.output if hasattr(result, 'output') else str(result)
+                deps.conversation_context.add_conversation("assistant", response_text)
 
                 # Log assistant response for debugging
                 conversation_logger.log_conversation(
                     pulsepal_session_id,
                     "assistant",
-                    result.data,
+                    response_text,
                     {"rag_version": "v2_enhanced"},
                 )
 
@@ -582,7 +584,7 @@ async def main(message: cl.Message):
                 step.output = f"❌ Error: {e}"
                 result_output = f"I apologize, but I encountered an error: {e}\n\nPlease try rephrasing your question or check that all services are running properly."
             else:
-                result_output = result.data
+                result_output = response_text
 
         # Add sequence context indicator if active
         context_prefix = ""

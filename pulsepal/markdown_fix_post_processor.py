@@ -111,7 +111,7 @@ def validate_markdown_structure(text: str) -> list[str]:
     
     # Count code block delimiters
     code_blocks = text.count('```')
-    if code_blocks % 2 \!= 0:
+    if code_blocks % 2 != 0:
         issues.append(f"Unmatched code block delimiters (found {code_blocks})")
     
     # Check for nested code blocks (simplified check)
@@ -166,4 +166,3 @@ def apply_markdown_fixes(response: str) -> tuple[str, bool]:
         logger.info("All markdown issues resolved")
     
     return fixed, True
-EOF < /dev/null
