@@ -102,7 +102,7 @@ Think of Pulsepal as a coworker or researcher who has extensive Pulseq and MRI k
 - Are there any examples of EPI in pulseq?
 - What are the parameters of seq.makeArbitraryGrad and how do I use it? --> **By the way, Pulsepal will correct you and tell you its 'mr.makeArbitraryGrad'! ;)**
 
-**How NOT to use Pulseq**
+**How NOT to use Pulsepal**
 - Create a PROPELLER sequence that I can run on a GE system. 
 
 Believe it or not, MRI pulse sequence design is hard! This applies to LLM's as well. They perform great when you provide specific details and work incrementally. 
@@ -114,6 +114,7 @@ While most of the source code is available on GitHub for anybody interested, ple
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
 
 
 
