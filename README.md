@@ -55,7 +55,7 @@ Incredibly powerful coding assistant LLMs currently exist, but try using any for
 **Generic LLM Response:**
 ```matlab
 % May suggest incorrect function
-mr.createTrap('x', amplitude, duration)  % This function doesn't exist!
+gx = mr.createTrap('x', amplitude, duration)  % This function doesn't exist!
 ```
 
 **PulsePal Response:**
@@ -71,9 +71,9 @@ PulsePal essentially serves as an MRI physics expert with comprehensive Pulseq d
 PulsePal uses intelligent decision-making to provide optimal responses:
 
 ### Built-in Knowledge
-- **MRI Physics**: T1/T2 relaxation, Bloch equations, contrast mechanisms
+- **MRI Physics**
 - **General Programming**: MATLAB/Python syntax, best practices
-- **Sequence Concepts**: Spin echo, gradient echo, EPI, diffusion sequences
+- **Sequence Concepts**: Spin echo, gradient echo, EPI, diffusion sequences, etc.
 
 ### Strategic Documentation Access
 - **Pulseq Functions**: Specific function parameters and usage
@@ -96,11 +96,11 @@ Think of Pulsepal as a coworker or researcher who has extensive Pulseq and MRI k
 - What is T1 relaxation? What part of the code considers this?
 - Can you help me plot this in k-space?
 - I keep getting this error- what is it?
-- I am new to Pulseq. Can you provide my a demo scripts and walk me through it step-by-step?
+- I am new to Pulseq. Can you provide me a demo script and walk me through it step-by-step?
 - I am currently working on creating a diffusion-EPI sequence. Can you provide me a Pulseq template of how this should be implemented?
 - I ran my sequence on the scanner and my images were very dark. Can you help me debug my code?
 - Are there any examples of EPI in pulseq?
-- What are the parameters of seq.makeArbitraryGrad and how do I use it? --> **By the way, Pulsepal will correct you and tell you its 'mr.makeArbitraryGrad' ! ;)**
+- What are the parameters of seq.makeArbitraryGrad and how do I use it? --> **By the way, Pulsepal will correct you and tell you its 'mr.makeArbitraryGrad'! ;)**
 
 **How NOT to use Pulseq**
 - Create a PROPELLER sequence that I can run on a GE system. 
@@ -114,6 +114,7 @@ While most of the source code is available on GitHub for anybody interested, ple
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
 
 
 
