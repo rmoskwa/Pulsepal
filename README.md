@@ -1,5 +1,4 @@
 # ![Pulsepal Logo](pulsepal.png) 
-Intelligent AI Assistant for MRI Sequence Programming
 
 **An advanced PydanticAI system with intelligent decision-making for Pulseq MRI sequence development**
 
@@ -115,6 +114,7 @@ While most of the source code is available on GitHub for anybody interested, ple
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
 
 
 
