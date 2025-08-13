@@ -8,7 +8,7 @@
 [![Gemini 2.5 Flash](https://img.shields.io/badge/Gemini-2.5--flash-purple.svg)](https://ai.google.dev/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**NOTE:** Pulsepal is in alpha testing. If you are interested in using Pulsepal and providing feedback, please reach out to 'rmoskwa@wisc.edu'. Pulsepal will be tailored to researcher's needs!
+**NOTE:** Pulsepal is in alpha testing. If you are interested in using Pulsepal and providing feedback, please reach out to `rmoskwa@wisc.edu`. Pulsepal will be tailored to researcher's needs!
 
 ## 🚀 What is PulsePal?
 
@@ -114,6 +114,7 @@ While most of the source code is available on GitHub for anybody interested, ple
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
 
 
 
