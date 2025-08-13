@@ -16,7 +16,7 @@ PulsePal is an intelligent AI assistant specifically designed for MRI sequence p
 
 ### Why use Pulsepal?
 
-Incredibly powerful coding assistant LLMs currently exist, but try using any for Pulseq and you might find yourself frustrated. Pulseq has unique function signatures and sequence design pipeline that is applied to the ever-changing and specialized MRI pulse sequence design field. Additionally, Pulseq is a two-sided coin, with programming on one side and MRI knowledge on the other, requiring knowledge of subtle but vital connections between MRI principles and sequence design. For this reason, LLM's will often be over-confident with their written Pulseq code and hallucinate. 
+Incredibly powerful coding assistant LLMs currently exist, but try using any for Pulseq and you might find yourself frustrated. Pulseq has unique function signatures and sequence design pipeline that is applied to the ever-changing and specialized MRI pulse sequence design field. Additionally, Pulseq is a two-sided coin, with programming on one side and MRI knowledge on the other, requiring knowledge of subtle but vital connections between MRI principles and sequence design. For this reason, LLMs will often be over-confident with their written Pulseq code and hallucinate. 
 
 ## 1. **Specialized Pulseq Knowledge Base**
 - **Comprehensive Documentation Access**: PulsePal has access to a curated Supabase database with:
@@ -114,6 +114,7 @@ While most of the source code is available on GitHub for anybody interested, ple
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
 
 
 
