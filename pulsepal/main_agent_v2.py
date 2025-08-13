@@ -40,9 +40,8 @@ Search strategically - not everything needs a lookup. Use your judgment.
 
 ## Response Guidelines
 - Default to MATLAB unless Python specified
-- Use ```matlab or ```python for code blocks (3 backticks, no spaces before them)
 - Synthesize multiple sources when available
-- Never fabricate functions - validate if unsure
+- Never fabricate functions when coding - validate if unsure
 
 Trust your intelligence to balance thoroughness with efficiency. Remember: You have both MRI domain expertise and access to Pulseq-specific documentation. 
 Use both to provide comprehensive, accurate assistance."""
@@ -80,16 +79,18 @@ _register_tools()
 # Cached semantic router instance (singleton pattern)
 _semantic_router_instance = None
 
+
 def get_semantic_router():
     """Get or create a singleton SemanticRouter instance.
-    
+
     This ensures the 80MB model is only loaded once, not on every request.
     """
     global _semantic_router_instance
-    
+
     if _semantic_router_instance is None:
         try:
             from .semantic_router import SemanticRouter
+
             logger.info("Initializing semantic router (one-time load)...")
             _semantic_router_instance = SemanticRouter(lazy_load=False)
             logger.info("Semantic router initialized and cached")
@@ -97,7 +98,7 @@ def get_semantic_router():
             logger.warning(f"Failed to initialize semantic router: {e}")
             # Return None to indicate router is not available
             return None
-    
+
     return _semantic_router_instance
 
 
@@ -139,7 +140,9 @@ async def create_pulsepal_session(
         try:
             router = get_semantic_router()
             if router is None:
-                logger.warning("Semantic router not available, skipping function detection")
+                logger.warning(
+                    "Semantic router not available, skipping function detection"
+                )
             else:
                 routing_decision = router.classify_query(query)
 
@@ -206,7 +209,7 @@ async def run_pulsepal_query(
         )
 
         # Extract response - use result.output for pydantic-ai
-        response = result.output if hasattr(result, 'output') else str(result)
+        response = result.output if hasattr(result, "output") else str(result)
 
         # Add response to conversation history
         deps.conversation_context.add_conversation("assistant", response)
@@ -294,7 +297,7 @@ def apply_semantic_routing(query: str, deps: PulsePalDependencies) -> None:
         if router is None:
             logger.warning("Semantic router not available, skipping function detection")
             return
-            
+
         routing_decision = router.classify_query(query)
 
         # Only use detected functions as hints, not for routing decisions
