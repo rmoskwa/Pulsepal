@@ -241,48 +241,20 @@ Current Focus: [What you need help with]
             context_status = "\n\n🎯 **[Sequence Context Active]** - Your sequence-specific knowledge is being used."
 
         # Send welcome message with v2 enhanced features highlighted
-        welcome_msg = f"""🧠 **Welcome to Pulsepal v2 Enhanced - Intelligent MRI Assistant with Function Validation!**{auth_info}{context_status}
+        welcome_msg = f"""🧠 **Welcome to Pulsepal - Intelligent MRI Assistant with Pulseq Expert!**{auth_info}{context_status}
 
-**✨ What's New in v2 Enhanced:**
-- **✅ Function Validation**: Prevents hallucinated functions like `seq.calcKspace()` 
-- **✅ Namespace Checking**: Corrects common errors (mr.write → seq.write)
-- **🚀 90% Faster Responses**: Simplified architecture with modern RAG service
-- **🧪 Smarter Intelligence**: Gemini 2.5 Flash handles reasoning with validation safety
-- **📚 Clean Retrieval**: Document retrieval with deterministic function checking
-- **🔍 Better Search**: LLM decides what to search, validation ensures correctness
 
-I'm an advanced AI with comprehensive MRI physics knowledge, enhanced by selective access to Pulseq documentation and **deterministic function validation** to prevent hallucinations.
+
+I'm an advanced AI with comprehensive MRI physics and Pulseq knowledge,
 
 **💡 My Capabilities:**
-🧪 **Validated Code Generation**: Create sequences with guaranteed correct functions
-🐛 **Smart Debugging**: Analyze code with validation (upload your .m or .py files!)
-🔄 **Language Conversion**: Transform code between different languages
-⚛️ **MRI Physics**: Deep understanding of concepts, formulas, and principles
-✅ **Function Validation**: I verify all Pulseq functions before using them
-📎 **File Upload**: Attach .m or .py files for debugging assistance
+- Answer questions about MRI physics and Pulseq sequences
+- Provide details about Pulseq functions and parameters
+- Assist with sequence design and optimization
+- Troubleshoot common pulse sequence design and MRI issues
+- And more! Just ask me anything related to MRI sequences or Pulseq.
 
-**🎯 Sequence Knowledge**: Add your sequence context via Settings (gear icon) for targeted assistance
-  - Open Settings and add your sequence details
-  - Enable "Sequence Context" toggle to activate
-  - Your context will be considered in all responses!
-
-**📝 Example Queries:**
-
-*General MRI Knowledge:*
-- "Explain T1 vs T2 relaxation mechanisms"
-- "How does parallel imaging work?"
-- "What causes ghosting artifacts in EPI?"
-- "Debug my infinite loop in this code"
-
-*Pulseq-Specific (with validation):*
-- "How to plot k-space?" (I'll use seq.calculateKspacePP, not hallucinated functions)
-- "How to save a sequence?" (I'll correctly use seq.write, not mr.write)
-- "Show me mr.makeSincPulse parameters"
-- "Convert this MATLAB code to Python pypulseq"
-
-💡 **Pro Tip**: All function names are validated against the Pulseq function index to ensure correctness!
-
-📋 **Commands**: Type `/info` to see your account information and rate limits.
+**NOTE**: Pulsepal is currently not designed to be a coder! But it does ok. Double check all code that Pulsepal independently produces!! Or just tell Pulsepal to correct it :)
 
 What would you like to explore about MRI sequence programming today?"""
 

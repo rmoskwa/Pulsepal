@@ -36,6 +36,7 @@ ENV/
 .env.development
 .env.test
 .env.production
+alpha_keys.json
 
 # IDEs and editors
 .vscode/
@@ -92,6 +93,7 @@ generate_api_keys.py
 alpha_keys_backup.json
 docs/
 recrawlDatabase/
+matlab/
 
 # Testing scripts
 test_*.py
