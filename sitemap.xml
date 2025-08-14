@@ -1,375 +1,375 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-         <loc>https://yourusername.github.io/pulsePal/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/EventLibrary/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/EventLibrary/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/SeqPlot/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/SeqPlot/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/Sequence/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/Sequence/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/TransformFOV/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/TransformFOV/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/addBlock/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/addBlock/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/addGradients/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/addGradients/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/addRamps/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/addRamps/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/align/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/align/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/applySoftDelay/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/applySoftDelay/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/applyToBlock/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/applyToBlock/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/applyToSeq/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/applyToSeq/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/calcAdcSeg/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/calcAdcSeg/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/calcDuration/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/calcDuration/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/calcMomentsBtensor/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/calcMomentsBtensor/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/calcPNS/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/calcPNS/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/calcRamp/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/calcRamp/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/calcRfBandwidth/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/calcRfBandwidth/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/calcRfCenter/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/calcRfCenter/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/calcRfPower/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/calcRfPower/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/calculateKspacePP/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/calculateKspacePP/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/checkTiming/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/checkTiming/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/compressShape/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/compressShape/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/compressShape_mat/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/compressShape_mat/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/conjugate/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/conjugate/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/convert/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/convert/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/decompressShape/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/decompressShape/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/duration/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/duration/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/evalLabels/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/evalLabels/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/findBlockByTime/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/findBlockByTime/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/findFlank/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/findFlank/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/flipGradAxis/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/flipGradAxis/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/fromRotMat/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/fromRotMat/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/gauss/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/gauss/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/getBlock/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/getBlock/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/getDefinition/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/getDefinition/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/getSupportedLabels/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/getSupportedLabels/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/getSupportedRfUse/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/getSupportedRfUse/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/init/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/init/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/install/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/install/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/isOctave/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/isOctave/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/makeAdc/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/makeAdc/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/makeAdiabaticPulse/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/makeAdiabaticPulse/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/makeArbitraryGrad/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/makeArbitraryGrad/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/makeArbitraryRf/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/makeArbitraryRf/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/makeBlockPulse/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/makeBlockPulse/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/makeDelay/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/makeDelay/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/makeDigitalOutputPulse/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/makeDigitalOutputPulse/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/makeExtendedTrapezoid/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/makeExtendedTrapezoid/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/makeExtendedTrapezoidArea/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/makeExtendedTrapezoidArea/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/makeGaussPulse/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/makeGaussPulse/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/makeLabel/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/makeLabel/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/makeSLRpulse/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/makeSLRpulse/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/makeSincPulse/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/makeSincPulse/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/makeSoftDelay/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/makeSoftDelay/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/makeTrapezoid/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/makeTrapezoid/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/makeTrigger/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/makeTrigger/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/md5/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/md5/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/melodyToPitchesAndDurations/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/melodyToPitchesAndDurations/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/melodyToScale/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/melodyToScale/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/modGradAxis/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/modGradAxis/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/multiply/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/multiply/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/musicToSequence/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/musicToSequence/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/normalize/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/normalize/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/opts/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/opts/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/paperPlot/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/paperPlot/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/parsemr/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/parsemr/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/plot/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/plot/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/pts2waveform/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/pts2waveform/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/read/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/read/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/readBinary/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/readBinary/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/readasc/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/readasc/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/restoreAdditionalShapeSamples/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/restoreAdditionalShapeSamples/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/rotate/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/rotate/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/rotate3D/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/rotate3D/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/scaleGrad/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/scaleGrad/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/setBlock/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/setBlock/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/setDefinition/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/setDefinition/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/simRf/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/simRf/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/sinc/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/sinc/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/sound/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/sound/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/splitGradient/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/splitGradient/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/splitGradientAt/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/splitGradientAt/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/testReport/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/testReport/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/toRotMat/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/toRotMat/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/traj2grad/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/traj2grad/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/transform/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/transform/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/version/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/version/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/waveforms_and_times/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/waveforms_and_times/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/write/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/write/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/writeBinary/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/writeBinary/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
     <url>
-         <loc>https://yourusername.github.io/pulsePal/matlab_api/write_v141/</loc>
+         <loc>https://rmoskwa.github.io/Pulsepal/matlab_api/write_v141/</loc>
          <lastmod>2025-08-14</lastmod>
     </url>
 </urlset>
