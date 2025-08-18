@@ -94,6 +94,12 @@ alpha_keys_backup.json
 docs/
 recrawlDatabase/
 matlab/
+deploy_api_docs.sh
+generate_matlab_docs.py
+mkdocs.yml
+requirements-docs.txt
+site/
+api-docs-deploy/
 
 # Testing scripts
 test_*.py

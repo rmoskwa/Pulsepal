@@ -656,20 +656,35 @@ async def end():
     try:
         pulsepal_session_id = cl.user_session.get("pulsepal_session_id")
         if pulsepal_session_id:
-            # Log session end for debugging
-            conversation_logger.log_conversation(
-                pulsepal_session_id,
-                "system",
-                "Session ended",
-                {"event": "session_end", "rag_version": "v2_enhanced"},
-            )
-
-            # Optional: Clean up expired sessions
+            # Check if session actually exists before trying to clean it up
             session_manager = get_session_manager()
-            await session_manager.cleanup_expired_sessions()
-            logger.info(
-                f"Cleaned up Chainlit session for enhanced Pulsepal v2 session: {pulsepal_session_id}",
-            )
+            
+            # Only log and clean if session exists
+            if pulsepal_session_id in session_manager.sessions:
+                # Log session end for debugging
+                conversation_logger.log_conversation(
+                    pulsepal_session_id,
+                    "system",
+                    "Session ended",
+                    {"event": "session_end", "rag_version": "v2_enhanced"},
+                )
+                
+                # Clean up this specific session
+                session_manager.cleanup_session(pulsepal_session_id)
+                logger.info(
+                    f"Cleaned up Chainlit session for enhanced Pulsepal v2 session: {pulsepal_session_id}",
+                )
+            else:
+                # Session already cleaned up, skip logging to avoid spam
+                logger.debug(
+                    f"Session {pulsepal_session_id} already cleaned up, skipping"
+                )
+            
+            # Clean up other expired sessions (but not too frequently)
+            # Only do this occasionally to avoid excessive cleanup attempts
+            import random
+            if random.random() < 0.1:  # 10% chance to run cleanup
+                await session_manager.cleanup_expired_sessions()
     except Exception as e:
         logger.error(f"Error during session cleanup: {e}")
 
