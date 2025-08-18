@@ -16,7 +16,7 @@ PulsePal is an intelligent AI assistant specifically designed for MRI sequence p
 
 ### Why use Pulsepal?
 
-Incredibly powerful coding assistant LLM's currently exist, but try using any for Pulseq and you might find yourself frustrated. Pulseq has unique function signatures and sequence design pipeline that is applied to the ever-changing and specialized MRI pulse sequence design field. Additionally, Pulseq is a two-sided coin, with programming on one side and MRI knowledge on the other, requiring knowledge of subtle but vital connections between MRI principles and sequence design. For this reason, LLM's will often be over-confident with their written Pulseq code and hallucinate. 
+Incredibly powerful coding assistant LLMs currently exist, but try using any for Pulseq and you might find yourself frustrated. Pulseq has unique function signatures and sequence design pipeline that is applied to the ever-changing and specialized MRI pulse sequence design field. Additionally, Pulseq is a two-sided coin, with programming on one side and MRI knowledge on the other, requiring knowledge of subtle but vital connections between MRI principles and sequence design. For this reason, LLMs will often be over-confident with their written Pulseq code and hallucinate. 
 
 ## 1. **Specialized Pulseq Knowledge Base**
 - **Comprehensive Documentation Access**: PulsePal has access to a curated Supabase database with:
@@ -55,7 +55,7 @@ Incredibly powerful coding assistant LLM's currently exist, but try using any fo
 **Generic LLM Response:**
 ```matlab
 % May suggest incorrect function
-mr.createTrap('x', amplitude, duration)  % This function doesn't exist!
+gx = mr.createTrap('x', amplitude, duration)  % This function doesn't exist!
 ```
 
 **PulsePal Response:**
@@ -71,9 +71,9 @@ PulsePal essentially serves as an MRI physics expert with comprehensive Pulseq d
 PulsePal uses intelligent decision-making to provide optimal responses:
 
 ### Built-in Knowledge
-- **MRI Physics**: T1/T2 relaxation, Bloch equations, contrast mechanisms
+- **MRI Physics**
 - **General Programming**: MATLAB/Python syntax, best practices
-- **Sequence Concepts**: Spin echo, gradient echo, EPI, diffusion sequences
+- **Sequence Concepts**: Spin echo, gradient echo, EPI, diffusion sequences, etc.
 
 ### Strategic Documentation Access
 - **Pulseq Functions**: Specific function parameters and usage
@@ -96,13 +96,13 @@ Think of Pulsepal as a coworker or researcher who has extensive Pulseq and MRI k
 - What is T1 relaxation? What part of the code considers this?
 - Can you help me plot this in k-space?
 - I keep getting this error- what is it?
-- I am new to Pulseq. Can you provide my a demo scripts and walk me through it step-by-step?
+- I am new to Pulseq. Can you provide me a demo script and walk me through it step-by-step?
 - I am currently working on creating a diffusion-EPI sequence. Can you provide me a Pulseq template of how this should be implemented?
 - I ran my sequence on the scanner and my images were very dark. Can you help me debug my code?
 - Are there any examples of EPI in pulseq?
-- What are the parameters of seq.makeArbitraryGrad and how do I use it? --> **By the way, Pulsepal will correct you and tell you its 'mr.makeArbitraryGrad' ! ;)**
+- What are the parameters of seq.makeArbitraryGrad and how do I use it? --> **By the way, Pulsepal will correct you and tell you its 'mr.makeArbitraryGrad'! ;)**
 
-**How NOT to use Pulseq**
+**How NOT to use Pulsepal**
 - Create a PROPELLER sequence that I can run on a GE system. 
 
 Believe it or not, MRI pulse sequence design is hard! This applies to LLM's as well. They perform great when you provide specific details and work incrementally. 
@@ -114,6 +114,10 @@ While most of the source code is available on GitHub for anybody interested, ple
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+
+
+
 
 
 
