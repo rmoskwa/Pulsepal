@@ -6,7 +6,7 @@ Provides health checks, metrics tracking, and alerting capabilities.
 
 import json
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
 
