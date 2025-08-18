@@ -1,4 +1,4 @@
-# ![Pulsepal Logo](pulsepal.png) 
+# ![Pulsepal Logo](pulsepal.png)
 
 **An advanced PydanticAI system with intelligent decision-making for Pulseq MRI sequence development**
 
@@ -16,7 +16,7 @@ PulsePal is an intelligent AI assistant specifically designed for MRI sequence p
 
 ### Why use Pulsepal?
 
-Incredibly powerful coding assistant LLMs currently exist, but try using any for Pulseq and you might find yourself frustrated. Pulseq has unique function signatures and sequence design pipeline that is applied to the ever-changing and specialized MRI pulse sequence design field. Additionally, Pulseq is a two-sided coin, with programming on one side and MRI knowledge on the other, requiring knowledge of subtle but vital connections between MRI principles and sequence design. For this reason, LLMs will often be over-confident with their written Pulseq code and hallucinate. 
+Incredibly powerful coding assistant LLMs currently exist, but try using any for Pulseq and you might find yourself frustrated. Pulseq has unique function signatures and sequence design pipeline that is applied to the ever-changing and specialized MRI pulse sequence design field. Additionally, Pulseq is a two-sided coin, with programming on one side and MRI knowledge on the other, requiring knowledge of subtle but vital connections between MRI principles and sequence design. For this reason, LLMs will often be over-confident with their written Pulseq code and hallucinate.
 
 ## 1. **Specialized Pulseq Knowledge Base**
 - **Comprehensive Documentation Access**: PulsePal has access to a curated Supabase database with:
@@ -48,7 +48,7 @@ Incredibly powerful coding assistant LLMs currently exist, but try using any for
 - **Physics Context**: Freely provides MRI physics explanations alongside code - great for beginners to pulse sequence design!
 - **Learning-Oriented**: Designed to teach users, not just solve problems
 - **Progressive Complexity**: Can adapt explanations from beginner to expert level
-- General LLMs may provide code without educational context 
+- General LLMs may provide code without educational context
 
 ## Example Comparison:
 
@@ -103,9 +103,9 @@ Think of Pulsepal as a coworker or researcher who has extensive Pulseq and MRI k
 - What are the parameters of seq.makeArbitraryGrad and how do I use it? --> **By the way, Pulsepal will correct you and tell you its 'mr.makeArbitraryGrad'! ;)**
 
 **How NOT to use Pulsepal**
-- Create a PROPELLER sequence that I can run on a GE system. 
+- Create a PROPELLER sequence that I can run on a GE system.
 
-Believe it or not, MRI pulse sequence design is hard! This applies to LLM's as well. They perform great when you provide specific details and work incrementally. 
+Believe it or not, MRI pulse sequence design is hard! This applies to LLM's as well. They perform great when you provide specific details and work incrementally.
 
 ## 🚀 Getting Started
 
@@ -190,3 +190,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 
 
+# Testing pre-commit hooks
