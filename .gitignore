@@ -57,6 +57,7 @@ coverage.xml
 *.cover
 .hypothesis/
 TEST_RESULTS.md
+tests/
 
 # Jupyter Notebook
 .ipynb_checkpoints
@@ -92,14 +93,25 @@ CURRENT-STATE-DOCUMENTATION.md
 generate_api_keys.py
 alpha_keys_backup.json
 docs/
+docs-old/
 recrawlDatabase/
 matlab/
 deploy_api_docs.sh
+
+# Cleanup and backup artifacts
+cleanup_archive_*.tar.gz
+alpha_keys_backup_*.json
+alpha_users_mapping.json
+backups/
+.backup/
+*.rollback
+.rollback_history.json
 generate_matlab_docs.py
 mkdocs.yml
 requirements-docs.txt
 site/
 api-docs-deploy/
+.bmad-core/
 
 # Testing scripts
 test_*.py
@@ -118,6 +130,9 @@ models/
 temp/
 tmp/
 READMEarchive.md
+
+# Backup directories
+backups/
 
 # OS generated files
 .DS_Store?
@@ -141,3 +156,7 @@ railway.toml
 DEPLOYMENT_CHECKLIST.md
 alpha_*.md
 railway_*.txt
+
+# Alpha keys backup
+alpha_keys_backup_20250818_024633.json
+alpha_users_mapping.json

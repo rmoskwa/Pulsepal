@@ -20,10 +20,10 @@ import chainlit as cl
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-# Import V2 components with function validation
+# Import components with function validation
 from pulsepal.conversation_logger import get_conversation_logger
 from pulsepal.dependencies import get_session_manager
-from pulsepal.main_agent_v2 import create_pulsepal_session, pulsepal_agent
+from pulsepal.main_agent import create_pulsepal_session, pulsepal_agent
 from pulsepal.semantic_router import initialize_semantic_router
 from pulsepal.settings import get_settings
 from pulsepal.startup import initialize_all_services
@@ -453,7 +453,7 @@ async def main(message: cl.Message):
             )
 
         # Apply semantic routing to determine if RAG is needed
-        from pulsepal.main_agent_v2 import apply_semantic_routing
+        from pulsepal.main_agent import apply_semantic_routing
 
         apply_semantic_routing(enhanced_query, deps)
 

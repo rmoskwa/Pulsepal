@@ -84,6 +84,50 @@ class Settings(BaseSettings):
         description="Default programming language for code examples (matlab/python)",
         alias="DEFAULT_LANGUAGE",
     )
+    
+    # Alpha Testing Configuration (migrated from alpha_keys.json)
+    alpha_api_keys: str = Field(
+        default="",
+        description="Comma-separated list of alpha testing API keys",
+        alias="ALPHA_API_KEYS",
+    )
+    enable_alpha_auth: bool = Field(
+        default=False,
+        description="Enable alpha testing authentication",
+        alias="ENABLE_ALPHA_AUTH",
+    )
+    alpha_user_daily_limit: int = Field(
+        default=100,
+        description="Maximum requests per alpha user per day",
+        alias="ALPHA_USER_DAILY_LIMIT",
+    )
+    
+    # Log Rotation Configuration
+    log_retention_days: int = Field(
+        default=30,
+        description="Number of days to retain session logs",
+        alias="LOG_RETENTION_DAYS",
+    )
+    max_log_size_gb: float = Field(
+        default=1.0,
+        description="Maximum total size of log directory in GB",
+        alias="MAX_LOG_SIZE_GB",
+    )
+    archive_important_sessions: bool = Field(
+        default=True,
+        description="Archive important sessions before deletion",
+        alias="ARCHIVE_IMPORTANT",
+    )
+    importance_threshold: float = Field(
+        default=0.7,
+        description="Score threshold for considering a session important",
+        alias="IMPORTANCE_THRESHOLD",
+    )
+    rotation_check_interval: int = Field(
+        default=3600,
+        description="Interval in seconds between rotation checks",
+        alias="ROTATION_INTERVAL",
+    )
 
 
 def load_settings() -> Settings:

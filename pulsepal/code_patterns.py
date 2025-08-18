@@ -11,7 +11,7 @@ commonly work together. This is valuable because:
 
 from typing import Dict, List, Set, Tuple
 
-from .function_index import FUNCTION_CLUSTERS
+from pulsepal.function_index import FUNCTION_CLUSTERS
 
 
 class FunctionClusterAnalyzer:

@@ -16,7 +16,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from pulsepal.conversation_logger import get_conversation_logger
-from pulsepal.main_agent_v2 import create_pulsepal_session, run_pulsepal_query
+from pulsepal.main_agent import create_pulsepal_session, run_pulsepal_query
 from pulsepal.startup import initialize_all_services
 
 

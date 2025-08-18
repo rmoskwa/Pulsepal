@@ -7,7 +7,7 @@ Uses built-in physics knowledge as primary tool, with optional pattern hints.
 from dataclasses import dataclass
 from typing import Dict, List, Optional
 
-from .function_index import MATLAB_FUNCTIONS
+from pulsepal.function_index import MATLAB_FUNCTIONS
 
 
 @dataclass
@@ -39,11 +39,9 @@ class PulseqDebugAnalyzer:
     """
 
     def __init__(self):
-        from .code_patterns import FunctionClusterAnalyzer
-        from .concept_mapper import ConceptMapper
-        from .syntax_validator import SyntaxValidator
+        from pulsepal.code_patterns import FunctionClusterAnalyzer
+        from pulsepal.concept_mapper import ConceptMapper
 
-        self.syntax_validator = SyntaxValidator()
         self.concept_mapper = (
             ConceptMapper()
         )  # Optional hint provider for physics->code mapping

@@ -1,0 +1,65 @@
+# Pre-commit hooks configuration for PulsePal
+# Install: pip install pre-commit
+# Setup: pre-commit install
+# Run manually: pre-commit run --all-files
+
+repos:
+  # Python code formatting and linting
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.9
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+  
+  # Check for trailing whitespace, end of file, etc.
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-toml
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-case-conflict
+      - id: check-merge-conflict
+      - id: detect-private-key
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+  
+  # Security checks
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+        exclude: .*(\.lock|\.example)$
+  
+  # Local hooks
+  # NOTE: Import validation hooks removed after refactoring completion
+  # The scripts they referenced have been removed as they were only needed for v1->v2 migration
+  - repo: local
+    hooks:
+      - id: check-alpha-keys
+        name: Check for alpha_keys.json
+        entry: bash -c 'if [ -f alpha_keys.json ]; then echo "ERROR: alpha_keys.json should not exist"; exit 1; fi'
+        language: system
+        pass_filenames: false
+        always_run: true
+
+# Global excludes
+exclude: |
+  (?x)^(
+    backups/.*|
+    conversationLogs/.*|
+    __pycache__/.*|
+    \.pytest_cache/.*|
+    \.git/.*|
+    dist/.*|
+    build/.*|
+    .*\.egg-info/.*|
+    docs/.*\.md|
+    alpha_keys_backup.*\.json
+  )$

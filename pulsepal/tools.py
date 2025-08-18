@@ -13,7 +13,7 @@ from pydantic_ai import RunContext
 
 from .conversation_logger import get_conversation_logger
 from .dependencies import PulsePalDependencies
-from .rag_service_v2 import ModernPulseqRAG
+from .rag_service import ModernPulseqRAG
 
 # Agent will be set by main_agent.py after creation
 pulsepal_agent = None

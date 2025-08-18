@@ -57,7 +57,7 @@ pulsepal_agent = Agent(
 # Import and register tools after agent creation
 def _register_tools():
     """Register enhanced tools with the pulsepal agent."""
-    from . import tools_v2 as tools
+    from . import tools
 
     # Register modern tools with validation
     pulsepal_agent.tool(tools.search_pulseq_knowledge)
