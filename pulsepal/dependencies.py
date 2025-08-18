@@ -75,7 +75,10 @@ class ConversationContext:
     use_sequence_context: bool = False
 
     def add_conversation(
-        self, role: str, content: str, metadata: Optional[Dict] = None,
+        self,
+        role: str,
+        content: str,
+        metadata: Optional[Dict] = None,
     ):
         """Add conversation entry with automatic history management."""
         settings = get_settings()
@@ -291,8 +294,12 @@ class PulsePalDependencies:
     rag_initialized: bool = False
 
     # Function detection fields (no routing restrictions)
-    detected_functions: Optional[List[Dict]] = None  # Detected functions for enhanced search
-    validation_errors: Optional[List[str]] = None  # Namespace/function validation errors
+    detected_functions: Optional[List[Dict]] = (
+        None  # Detected functions for enhanced search
+    )
+    validation_errors: Optional[List[str]] = (
+        None  # Namespace/function validation errors
+    )
 
     async def initialize_rag_services(self):
         """Initialize RAG services (embeddings and Supabase)."""

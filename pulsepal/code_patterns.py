@@ -135,7 +135,9 @@ class FunctionClusterAnalyzer:
         return descriptions.get(cluster_name, f"Function cluster: {cluster_name}")
 
     def find_missing_core_functions(
-        self, used_functions: List[str], clusters: List[str],
+        self,
+        used_functions: List[str],
+        clusters: List[str],
     ) -> List[Tuple[str, str]]:
         """
         Find core functions that are missing from specific clusters.

@@ -90,7 +90,9 @@ class PulseqCodeValidator:
 
         for line_num, line in enumerate(lines, 1):
             # Skip comments
-            if (language == "matlab" and line.strip().startswith("%")) or (language == "python" and line.strip().startswith("#")):
+            if (language == "matlab" and line.strip().startswith("%")) or (
+                language == "python" and line.strip().startswith("#")
+            ):
                 fixed_lines.append(line)
                 continue
 

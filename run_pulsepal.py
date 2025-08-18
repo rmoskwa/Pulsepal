@@ -73,7 +73,9 @@ async def interactive_mode():
 
                 if question.lower() in ["quit", "exit", "bye"]:
                     logger.log_conversation(
-                        session_id, "system", "Interactive session ended",
+                        session_id,
+                        "system",
+                        "Interactive session ended",
                     )
                     print("\n👋 Goodbye! Thanks for using Pulsepal!")
                     break
@@ -95,7 +97,9 @@ async def interactive_mode():
 
             except KeyboardInterrupt:
                 logger.log_conversation(
-                    session_id, "system", "Session interrupted by user",
+                    session_id,
+                    "system",
+                    "Session interrupted by user",
                 )
                 print("\n\n👋 Goodbye! Thanks for using Pulsepal!")
                 break
@@ -111,15 +115,20 @@ async def main():
     """Main entry point."""
     # Initialize all services at startup
     initialize_all_services()
-    
+
     parser = argparse.ArgumentParser(
         description="Pulsepal: Multi-Agent MRI Sequence Programming Assistant",
     )
     parser.add_argument(
-        "question", nargs="?", help="Your question about Pulseq programming",
+        "question",
+        nargs="?",
+        help="Your question about Pulseq programming",
     )
     parser.add_argument(
-        "-i", "--interactive", action="store_true", help="Run in interactive mode",
+        "-i",
+        "--interactive",
+        action="store_true",
+        help="Run in interactive mode",
     )
     parser.add_argument("--version", action="version", version="Pulsepal v1.0.0")
 

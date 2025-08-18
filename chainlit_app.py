@@ -658,7 +658,7 @@ async def end():
         if pulsepal_session_id:
             # Check if session actually exists before trying to clean it up
             session_manager = get_session_manager()
-            
+
             # Only log and clean if session exists
             if pulsepal_session_id in session_manager.sessions:
                 # Log session end for debugging
@@ -668,7 +668,7 @@ async def end():
                     "Session ended",
                     {"event": "session_end", "rag_version": "v2_enhanced"},
                 )
-                
+
                 # Clean up this specific session
                 session_manager.cleanup_session(pulsepal_session_id)
                 logger.info(
@@ -679,10 +679,11 @@ async def end():
                 logger.debug(
                     f"Session {pulsepal_session_id} already cleaned up, skipping"
                 )
-            
+
             # Clean up other expired sessions (but not too frequently)
             # Only do this occasionally to avoid excessive cleanup attempts
             import random
+
             if random.random() < 0.1:  # 10% chance to run cleanup
                 await session_manager.cleanup_expired_sessions()
     except Exception as e:

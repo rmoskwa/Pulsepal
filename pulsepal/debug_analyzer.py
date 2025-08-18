@@ -51,7 +51,9 @@ class PulseqDebugAnalyzer:
         self.function_index = MATLAB_FUNCTIONS
 
     def analyze_code(
-        self, code: str, problem_description: Optional[str] = None,
+        self,
+        code: str,
+        problem_description: Optional[str] = None,
     ) -> Dict:
         """
         Perform comprehensive debugging analysis.
@@ -212,7 +214,10 @@ This relates to your problem because it directly controls the observed behavior.
         return reasoning
 
     def _identify_conceptual_issues(
-        self, problem: str, code: str, reasoning: str,
+        self,
+        problem: str,
+        code: str,
+        reasoning: str,
     ) -> List[ConceptualIssue]:
         """
         Identify specific conceptual issues based on physics analysis.

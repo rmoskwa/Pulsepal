@@ -17,7 +17,6 @@ class GeminiRecitationError(Exception):
     """Raised when Gemini detects potential training data recitation."""
 
 
-
 class PatchedGeminiModel(GeminiModel):
     """
     Patched Gemini model that properly handles unexpected finish reasons.

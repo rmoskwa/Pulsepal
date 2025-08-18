@@ -63,23 +63,23 @@ async def search_pulseq_knowledge(
 ) -> str:
     """
     Search Pulseq knowledge base.
-    
+
     By default, returns top results from all sources for comprehensive coverage.
     You can specify sources for targeted searches when you know what you need.
-    
+
     Available sources:
     - "api_reference": Function signatures, parameters, returns (authoritative)
     - "official_sequence_examples": Educational sequences, correct implementations
     - "crawled_pages": Community examples, discussions, debugging
-    
+
     Can be called multiple times with different strategies.
     Results include source attribution to help assess relevance.
-    
+
     Args:
         query: Search query
         limit: Maximum results (default 30)
         sources: Optional list of specific sources to search
-    
+
     Returns:
         Formatted results with source attribution
     """
@@ -91,7 +91,9 @@ async def search_pulseq_knowledge(
     detected_functions = None
     if hasattr(ctx.deps, "detected_functions") and ctx.deps.detected_functions:
         detected_functions = ctx.deps.detected_functions
-        logger.info(f"Using detected functions for enhanced search: {[f['name'] for f in detected_functions]}")
+        logger.info(
+            f"Using detected functions for enhanced search: {[f['name'] for f in detected_functions]}"
+        )
 
     # Use new source-aware search with detected functions
     results = await ctx.deps.rag_v2.search_with_source_awareness(
@@ -129,9 +131,13 @@ async def search_pulseq_knowledge(
         formatted.append(f"\n### {source_type.replace('_', ' ').title()}\n")
 
         for idx, result in enumerate(source_results[:5], 1):  # Limit to 5 per source
-            if source_type == "api_reference":  # Fixed: Changed from "api_documentation"
+            if (
+                source_type == "api_reference"
+            ):  # Fixed: Changed from "api_documentation"
                 formatted.append(format_api_result(result))
-            elif source_type == "direct_function_lookup":  # Handle direct function lookups
+            elif (
+                source_type == "direct_function_lookup"
+            ):  # Handle direct function lookups
                 formatted.append(format_direct_lookup_result(result))
             elif source_type == "examples_and_docs":
                 formatted.append(format_example_result(result))
@@ -224,7 +230,9 @@ def format_direct_lookup_result(result: Dict) -> str:
                     if example.get("description"):
                         parts.append(f"- {example['description']}")
                     if example.get("code"):
-                        parts.append(f"```{example.get('language', 'matlab')}\n{example['code']}\n```")
+                        parts.append(
+                            f"```{example.get('language', 'matlab')}\n{example['code']}\n```"
+                        )
     else:
         # Direct database format
         name = result.get("name", result.get("function_name", "Unknown Function"))
@@ -245,6 +253,7 @@ def format_direct_lookup_result(result: Dict) -> str:
             if isinstance(params, str):
                 try:
                     import json
+
                     params = json.loads(params)
                 except (json.JSONDecodeError, ValueError):
                     pass
@@ -257,14 +266,18 @@ def format_direct_lookup_result(result: Dict) -> str:
                         parts.append("Required:")
                         for p in params["required"]:
                             if isinstance(p, dict):
-                                parts.append(f"• {p.get('name', 'unknown')} ({p.get('type', '')}) - {p.get('description', '')}")
+                                parts.append(
+                                    f"• {p.get('name', 'unknown')} ({p.get('type', '')}) - {p.get('description', '')}"
+                                )
                             else:
                                 parts.append(f"• {p}")
                     if params.get("optional"):
                         parts.append("Optional:")
                         for p in params["optional"]:
                             if isinstance(p, dict):
-                                parts.append(f"• {p.get('name', 'unknown')} ({p.get('type', '')}) - {p.get('description', '')}")
+                                parts.append(
+                                    f"• {p.get('name', 'unknown')} ({p.get('type', '')}) - {p.get('description', '')}"
+                                )
                             else:
                                 parts.append(f"• {p}")
                 else:
@@ -288,6 +301,7 @@ def format_direct_lookup_result(result: Dict) -> str:
             if isinstance(returns, str):
                 try:
                     import json
+
                     returns = json.loads(returns)
                 except (json.JSONDecodeError, ValueError):
                     pass
@@ -302,7 +316,9 @@ def format_direct_lookup_result(result: Dict) -> str:
                     parts.append("Fields:")
                     for field in returns["fields"]:
                         if isinstance(field, dict):
-                            parts.append(f"• {field.get('name', '')} - {field.get('description', '')}")
+                            parts.append(
+                                f"• {field.get('name', '')} - {field.get('description', '')}"
+                            )
                         else:
                             parts.append(f"• {field}")
             else:
@@ -314,6 +330,7 @@ def format_direct_lookup_result(result: Dict) -> str:
             if isinstance(examples, str):
                 try:
                     import json
+
                     examples = json.loads(examples)
                 except (json.JSONDecodeError, ValueError):
                     examples = [examples]
@@ -325,7 +342,9 @@ def format_direct_lookup_result(result: Dict) -> str:
                         if example.get("description"):
                             parts.append(f"Example {i}: {example['description']}")
                         if example.get("code"):
-                            parts.append(f"```{example.get('language', 'matlab')}\n{example['code']}\n```")
+                            parts.append(
+                                f"```{example.get('language', 'matlab')}\n{example['code']}\n```"
+                            )
                     else:
                         parts.append(f"```matlab\n{example}\n```")
 
@@ -456,7 +475,8 @@ def format_tutorial_result(result: Dict) -> str:
 
 
 async def verify_function_namespace(
-    ctx: RunContext[PulsePalDependencies], function_call: str,
+    ctx: RunContext[PulsePalDependencies],
+    function_call: str,
 ) -> str:
     """
     Check if a function call uses the correct namespace.
@@ -486,7 +506,8 @@ async def verify_function_namespace(
 
 
 async def validate_pulseq_function(
-    ctx: RunContext[PulsePalDependencies], function_name: str,
+    ctx: RunContext[PulsePalDependencies],
+    function_name: str,
 ) -> str:
     """
     Validate a Pulseq function name and get corrections if needed.
@@ -522,7 +543,9 @@ async def validate_pulseq_function(
 
 
 async def validate_code_block(
-    ctx: RunContext[PulsePalDependencies], code: str, language: str = "matlab",
+    ctx: RunContext[PulsePalDependencies],
+    code: str,
+    language: str = "matlab",
 ) -> str:
     """
     Validate a code block for correct Pulseq function usage.
@@ -562,5 +585,3 @@ async def validate_code_block(
         response.append("```")
 
     return "\n".join(response)
-
-

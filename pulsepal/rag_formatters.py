@@ -32,7 +32,8 @@ def format_api_reference(results: List[Dict]) -> List[Dict]:
                 "name": result.get("function_name", result.get("name", "")),
                 "purpose": result.get("description", ""),  # Lead with WHAT it does
                 "usage": result.get(
-                    "correct_usage", result.get("calling_pattern", ""),
+                    "correct_usage",
+                    result.get("calling_pattern", ""),
                 ),  # HOW to call it correctly
             },
             # Technical Specifications
@@ -697,7 +698,8 @@ def extract_prerequisites(result: Dict) -> List[str]:
 
 
 def format_unified_response(
-    source_results: Dict[str, List], query_context: Dict,
+    source_results: Dict[str, List],
+    query_context: Dict,
 ) -> Dict:
     """
     Create a unified response structure that Gemini can easily process.
@@ -721,7 +723,7 @@ def format_unified_response(
         "synthesis_hints": [],
         "citation_map": {},
     }
-    
+
     # Add detected functions as context hints (if any)
     detected_functions = query_context.get("detected_functions", None)
     if detected_functions:
@@ -729,11 +731,11 @@ def format_unified_response(
         func_names = [f["name"] for f in detected_functions[:10]]  # Limit to first 10
         if len(detected_functions) > 10:
             func_names.append(f"... and {len(detected_functions) - 10} more")
-        
+
         response["search_metadata"]["function_context"] = {
             "detected_count": len(detected_functions),
             "sample_functions": func_names,
-            "note": "Functions detected in context - consider if documentation needed"
+            "note": "Functions detected in context - consider if documentation needed",
         }
 
     # Process each source type
@@ -764,7 +766,8 @@ def format_unified_response(
 
     # Add synthesis recommendations
     response["synthesis_recommendations"] = generate_synthesis_recommendations(
-        source_results, query_context,
+        source_results,
+        query_context,
     )
 
     return response
@@ -811,7 +814,8 @@ def generate_citation_map(results_by_source: Dict) -> Dict[str, str]:
 
 
 def generate_synthesis_recommendations(
-    source_results: Dict, query_context: Dict,
+    source_results: Dict,
+    query_context: Dict,
 ) -> List[str]:
     """
     Generate recommendations for how to synthesize the results.
@@ -885,12 +889,12 @@ def format_direct_function_results(
     """
     Format direct function lookup results comprehensively.
     Ensures all important fields are presented clearly for the LLM.
-    
+
     Args:
         results: Direct lookup results from api_reference
         query: Original user query
         detected_functions: Function detection info from semantic router
-        
+
     Returns:
         Formatted response dictionary with comprehensive function documentation
     """
@@ -918,7 +922,6 @@ def format_direct_function_results(
         formatted_doc = {
             "source_type": "DIRECT_FUNCTION_LOOKUP",
             "relevance_score": result.get("_detection", {}).get("confidence", 1.0),
-
             # Core function information
             "function": {
                 "name": result.get("name", ""),
@@ -926,16 +929,14 @@ def format_direct_function_results(
                 "description": result.get("description", ""),
                 "calling_pattern": result.get("calling_pattern", ""),
             },
-
             # Parameters with full details
             "parameters": format_parameters_comprehensive(result.get("parameters", {})),
-
             # Return values
             "returns": format_returns_comprehensive(result.get("returns", {})),
-
             # Usage examples
-            "usage_examples": format_examples_comprehensive(result.get("usage_examples", [])),
-
+            "usage_examples": format_examples_comprehensive(
+                result.get("usage_examples", [])
+            ),
             # Additional context
             "metadata": {
                 "function_type": result.get("function_type", "main"),
@@ -948,7 +949,9 @@ def format_direct_function_results(
             },
         }
 
-        formatted_results["results_by_source"]["direct_function_lookup"].append(formatted_doc)
+        formatted_results["results_by_source"]["direct_function_lookup"].append(
+            formatted_doc
+        )
 
     # Generate synthesis hints based on query intent
     query_lower = query.lower()
@@ -976,10 +979,10 @@ def format_direct_function_results(
 def format_parameters_comprehensive(params_json: Any) -> str:
     """
     Format parameters with complete details for direct lookup results.
-    
+
     Args:
         params_json: Parameters in JSON format from database
-        
+
     Returns:
         Comprehensively formatted parameter string
     """
@@ -990,6 +993,7 @@ def format_parameters_comprehensive(params_json: Any) -> str:
     if isinstance(params_json, str):
         try:
             import json
+
             params_json = json.loads(params_json)
         except (json.JSONDecodeError, ValueError):
             return params_json
@@ -1018,9 +1022,13 @@ def format_parameters_comprehensive(params_json: Any) -> str:
         if not required and not optional:
             for param_name, param_info in params_json.items():
                 if param_name not in ["required", "optional"]:
-                    lines.append(format_single_parameter(
-                        {"name": param_name, **param_info} if isinstance(param_info, dict) else {"name": param_name, "description": str(param_info)},
-                    ))
+                    lines.append(
+                        format_single_parameter(
+                            {"name": param_name, **param_info}
+                            if isinstance(param_info, dict)
+                            else {"name": param_name, "description": str(param_info)},
+                        )
+                    )
 
         return "\n".join(lines) if lines else "No parameters specified"
 
@@ -1030,11 +1038,11 @@ def format_parameters_comprehensive(params_json: Any) -> str:
 def format_single_parameter(param: Dict, is_required: bool = None) -> str:
     """
     Format a single parameter with all available details.
-    
+
     Args:
         param: Parameter dictionary
         is_required: Whether parameter is required
-        
+
     Returns:
         Formatted parameter string
     """
@@ -1083,10 +1091,10 @@ def format_single_parameter(param: Dict, is_required: bool = None) -> str:
 def format_returns_comprehensive(returns_json: Any) -> str:
     """
     Format return values comprehensively.
-    
+
     Args:
         returns_json: Returns in JSON format
-        
+
     Returns:
         Formatted returns string
     """
@@ -1097,6 +1105,7 @@ def format_returns_comprehensive(returns_json: Any) -> str:
     if isinstance(returns_json, str):
         try:
             import json
+
             returns_json = json.loads(returns_json)
         except (json.JSONDecodeError, ValueError):
             return returns_json
@@ -1133,10 +1142,10 @@ def format_returns_comprehensive(returns_json: Any) -> str:
 def format_examples_comprehensive(examples_json: Any) -> List[str]:
     """
     Format usage examples comprehensively.
-    
+
     Args:
         examples_json: Examples in JSON format
-        
+
     Returns:
         List of formatted example strings
     """
@@ -1147,6 +1156,7 @@ def format_examples_comprehensive(examples_json: Any) -> List[str]:
     if isinstance(examples_json, str):
         try:
             import json
+
             examples_json = json.loads(examples_json)
         except (json.JSONDecodeError, ValueError):
             return [examples_json] if examples_json else []

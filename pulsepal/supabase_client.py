@@ -98,7 +98,10 @@ class SupabaseRAGClient:
         return self._reranker
 
     def rerank_results(
-        self, query: str, results: List[Dict], top_k: Optional[int] = None,
+        self,
+        query: str,
+        results: List[Dict],
+        top_k: Optional[int] = None,
     ) -> List[Dict]:
         """
         Rerank search results using cross-encoder for improved relevance.
@@ -133,7 +136,9 @@ class SupabaseRAGClient:
 
             # Sort by rerank score
             reranked = sorted(
-                results, key=lambda x: x.get("rerank_score", 0), reverse=True,
+                results,
+                key=lambda x: x.get("rerank_score", 0),
+                reverse=True,
             )
 
             logger.debug(f"Reranked {len(results)} results using cross-encoder")
@@ -458,12 +463,15 @@ class SupabaseRAGClient:
         rrf_scores = {}
         for doc_id in all_docs:
             rrf_scores[doc_id] = vector_scores.get(doc_id, 0) + keyword_scores.get(
-                doc_id, 0,
+                doc_id,
+                0,
             )
 
         # Sort by RRF score and return top results
         sorted_docs = sorted(
-            all_docs.values(), key=lambda x: rrf_scores.get(x["id"], 0), reverse=True,
+            all_docs.values(),
+            key=lambda x: rrf_scores.get(x["id"], 0),
+            reverse=True,
         )
 
         # Add RRF scores to results
@@ -736,24 +744,33 @@ class SupabaseRAGClient:
             # Use override query if provided, otherwise use original query
             keyword_query = keyword_query_override if keyword_query_override else query
             keyword_results = self._multi_strategy_keyword_search(
-                keyword_query, match_count * 2, table_name, source,
+                keyword_query,
+                match_count * 2,
+                table_name,
+                source,
             )
 
             # Combine results using RRF or simple fusion
             if use_rrf:
                 combined_results = self._reciprocal_rank_fusion(
-                    vector_results, keyword_results, match_count * 2,
+                    vector_results,
+                    keyword_results,
+                    match_count * 2,
                 )
             else:
                 # Fallback to original fusion method
                 combined_results = self._simple_fusion(
-                    vector_results, keyword_results, match_count * 2,
+                    vector_results,
+                    keyword_results,
+                    match_count * 2,
                 )
 
             # Apply final reranking if enabled
             if use_reranking and combined_results:
                 combined_results = self.rerank_results(
-                    query, combined_results, match_count,
+                    query,
+                    combined_results,
+                    match_count,
                 )
             else:
                 combined_results = combined_results[:match_count]
@@ -768,7 +785,10 @@ class SupabaseRAGClient:
             return []
 
     def _simple_fusion(
-        self, vector_results: List[Dict], keyword_results: List[Dict], match_count: int,
+        self,
+        vector_results: List[Dict],
+        keyword_results: List[Dict],
+        match_count: int,
     ) -> List[Dict]:
         """Simple fusion method (fallback for original behavior)."""
         seen_ids = set()
@@ -824,7 +844,7 @@ _supabase_client: Optional[SupabaseRAGClient] = None
 def get_supabase_client() -> SupabaseRAGClient:
     """
     Get the global Supabase client instance.
-    
+
     This now checks if the client was pre-initialized at startup,
     otherwise falls back to lazy loading for backward compatibility.
 
@@ -832,18 +852,19 @@ def get_supabase_client() -> SupabaseRAGClient:
         SupabaseRAGClient instance
     """
     global _supabase_client
-    
+
     # First check if startup module has initialized it
     if _supabase_client is None:
         try:
             from .startup import get_initialized_supabase_client
+
             _supabase_client = get_initialized_supabase_client()
         except ImportError:
             pass  # Startup module not available
-    
+
     # Fall back to lazy loading if not initialized at startup
     if _supabase_client is None:
         logger.info("Supabase client not pre-initialized, using lazy loading...")
         _supabase_client = SupabaseRAGClient()
-    
+
     return _supabase_client

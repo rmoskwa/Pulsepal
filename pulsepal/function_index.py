@@ -185,53 +185,108 @@ NAMESPACE_MAP = {
     # Functions that MUST use mr. namespace
     "mr_only": {
         # All make* functions
-        "makeAdc", "makeTrapezoid", "makeDelay", "makeSincPulse", "makeGaussPulse",
-        "makeBlockPulse", "makeArbitraryGrad", "makeArbitraryRf", "makeExtendedTrapezoid",
-        "makeExtendedTrapezoidArea", "makeSLRpulse", "makeAdiabaticPulse", "makeLabel",
-        "makeTrigger", "makeDigitalOutputPulse", "makeSoftDelay",
+        "makeAdc",
+        "makeTrapezoid",
+        "makeDelay",
+        "makeSincPulse",
+        "makeGaussPulse",
+        "makeBlockPulse",
+        "makeArbitraryGrad",
+        "makeArbitraryRf",
+        "makeExtendedTrapezoid",
+        "makeExtendedTrapezoidArea",
+        "makeSLRpulse",
+        "makeAdiabaticPulse",
+        "makeLabel",
+        "makeTrigger",
+        "makeDigitalOutputPulse",
+        "makeSoftDelay",
         # Calc functions
-        "calcDuration", "calcRfCenter", "calcRfBandwidth", "calcRamp", "calcAdcSeg",
+        "calcDuration",
+        "calcRfCenter",
+        "calcRfBandwidth",
+        "calcRamp",
+        "calcAdcSeg",
         # Other mr functions
-        "opts", "scaleGrad", "addGradients", "splitGradient", "splitGradientAt",
-        "align", "addRamps", "pts2waveform", "compressShape",
-        "decompressShape", "rotate3D", "transform", "traj2grad", "sinc", "gauss",
-        "getSupportedRfUse", "getSupportedLabels", "simRf",
+        "opts",
+        "scaleGrad",
+        "addGradients",
+        "splitGradient",
+        "splitGradientAt",
+        "align",
+        "addRamps",
+        "pts2waveform",
+        "compressShape",
+        "decompressShape",
+        "rotate3D",
+        "transform",
+        "traj2grad",
+        "sinc",
+        "gauss",
+        "getSupportedRfUse",
+        "getSupportedLabels",
+        "simRf",
     },
-
     # Functions that MUST use seq. namespace (Sequence methods)
     "seq_only": {
-        "addBlock", "write", "plot", "calculateKspacePP", "checkTiming", "duration",
-        "read", "setDefinition", "getDefinition", "getBlock", "setBlock",
-        "evalLabels", "calcPNS", "calcRfPower", "calcMomentsBtensor", "applySoftDelay",
-        "flipGradAxis", "modGradAxis", "testReport", "sound", "paperPlot",
-        "waveforms_and_times", "writeBinary", "readBinary",
+        "addBlock",
+        "write",
+        "plot",
+        "calculateKspacePP",
+        "checkTiming",
+        "duration",
+        "read",
+        "setDefinition",
+        "getDefinition",
+        "getBlock",
+        "setBlock",
+        "evalLabels",
+        "calcPNS",
+        "calcRfPower",
+        "calcMomentsBtensor",
+        "applySoftDelay",
+        "flipGradAxis",
+        "modGradAxis",
+        "testReport",
+        "sound",
+        "paperPlot",
+        "waveforms_and_times",
+        "writeBinary",
+        "readBinary",
     },
-
     # Constructors (can be called without namespace)
     "constructors": {
-        "Sequence", "EventLibrary", "TransformFOV", "SeqPlot",
+        "Sequence",
+        "EventLibrary",
+        "TransformFOV",
+        "SeqPlot",
     },
-
     # EventLibrary methods (eve. namespace)
     "eve_only": {
         "find_mat",
     },
-
     # TransformFOV methods (tra. namespace)
     "tra_only": {
-        "applyToBlock", "applyToSeq",
+        "applyToBlock",
+        "applyToSeq",
     },
-
     # mr.aux functions
     "mr_aux_only": {
-        "findFlank", "isOctave", "version",
+        "findFlank",
+        "isOctave",
+        "version",
     },
-
     # mr.aux.quat functions
     "mr_aux_quat_only": {
-        "conjugate", "fromRotMat", "multiply", "normalize", "rotate", "toRotMat",
+        "conjugate",
+        "fromRotMat",
+        "multiply",
+        "normalize",
+        "rotate",
+        "toRotMat",
     },
 }
+
 
 def get_correct_namespace(function_name: str) -> str:
     """
@@ -255,14 +310,15 @@ def get_correct_namespace(function_name: str) -> str:
         return "mr.aux.quat"
     return None  # Function not found
 
+
 def validate_namespace(function_name: str, provided_namespace: str = None) -> dict:
     """
     Validate if a function is being called with the correct namespace.
-    
+
     Args:
         function_name: The function name (e.g., 'makeAdc')
         provided_namespace: The namespace provided by user (e.g., 'seq', 'mr', or None)
-    
+
     Returns:
         dict with:
         - is_valid: Whether the namespace is correct
@@ -301,7 +357,9 @@ def validate_namespace(function_name: str, provided_namespace: str = None) -> di
             "error": None,
         }
     # Wrong namespace
-    provided_form = f"{provided_namespace}.{function_name}" if provided_namespace else function_name
+    provided_form = (
+        f"{provided_namespace}.{function_name}" if provided_namespace else function_name
+    )
     return {
         "is_valid": False,
         "correct_form": correct_form,

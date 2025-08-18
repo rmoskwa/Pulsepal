@@ -153,14 +153,14 @@ class ConversationLogger:
     ):
         """
         Log a routing decision event.
-        
+
         Args:
             session_id: Session identifier
             routing_info: Dictionary containing routing decision details
         """
         if not self.enabled:
             return
-            
+
         try:
             # Create log entry
             log_entry = {
@@ -169,13 +169,13 @@ class ConversationLogger:
                 "type": "routing_event",
                 "routing_info": routing_info,
             }
-            
+
             # Append to session log file
             log_file = self.log_dir / f"session_{session_id[:8]}.jsonl"
             with open(log_file, "a", encoding="utf-8") as f:
                 json.dump(log_entry, f, ensure_ascii=False)
                 f.write("\n")
-                
+
             # Also add to human-readable log
             readable_log = self.log_dir / f"session_{session_id[:8]}.txt"
             with open(readable_log, "a", encoding="utf-8") as f:
@@ -185,10 +185,12 @@ class ConversationLogger:
                 f.write(f"  Route: {routing_info.get('route', 'unknown')}\n")
                 f.write(f"  Confidence: {routing_info.get('confidence', 0):.2f}\n")
                 f.write(f"  Trigger: {routing_info.get('trigger_type', 'unknown')}\n")
-                if routing_info.get('detected_functions'):
-                    f.write(f"  Detected Functions: {', '.join([f['name'] for f in routing_info['detected_functions']])}\n")
+                if routing_info.get("detected_functions"):
+                    f.write(
+                        f"  Detected Functions: {', '.join([f['name'] for f in routing_info['detected_functions']])}\n"
+                    )
                 f.write("-" * 50 + "\n\n")
-                
+
         except Exception as e:
             logger.error(f"Failed to log routing event: {e}")
 

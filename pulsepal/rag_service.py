@@ -71,23 +71,29 @@ class ModernPulseqRAG:
         # IMPORTANT: Function detection provides hints, not directives
         # Detected functions are passed as metadata to help inform search,
         # but we don't force lookups - let the LLM decide what's needed
-        
+
         # Log detected functions as hints (if any)
         if detected_functions:
             func_names = [f["name"] for f in detected_functions]
-            logger.info(f"Function hints available: {len(func_names)} functions detected as context")
-            logger.debug(f"Detected functions: {func_names[:5]}...")  # Log first 5 for debugging
-            
-            # Note: We could optionally do targeted lookups here if the query 
+            logger.info(
+                f"Function hints available: {len(func_names)} functions detected as context"
+            )
+            logger.debug(
+                f"Detected functions: {func_names[:5]}..."
+            )  # Log first 5 for debugging
+
+            # Note: We could optionally do targeted lookups here if the query
             # specifically asks about one of these functions, but for now
             # we'll let the LLM's search decision take precedence
-        
+
         # If LLM didn't specify sources, default to comprehensive search
         if not sources:
             # Default to all sources with balanced top-k approach
             # This ensures comprehensive coverage without overwhelming the LLM
             sources = ["api_reference", "crawled_pages", "official_sequence_examples"]
-            logger.info(f"No sources specified, using top-k from all sources: {sources}")
+            logger.info(
+                f"No sources specified, using top-k from all sources: {sources}"
+            )
             use_top_k = True
             top_k_per_source = 3  # Top 3 from each source = 9 total results
         else:
@@ -128,14 +134,21 @@ class ModernPulseqRAG:
 
         # Log search summary
         total_results = sum(len(results) for results in source_results.values())
-        logger.info(f"Search complete: {total_results} results from {len(source_results)} sources")
+        logger.info(
+            f"Search complete: {total_results} results from {len(source_results)} sources"
+        )
         if use_top_k:
-            logger.info(f"Used balanced top-k approach: {top_k_per_source} results per source")
+            logger.info(
+                f"Used balanced top-k approach: {top_k_per_source} results per source"
+            )
 
         return format_unified_response(source_results, query_context)
 
     async def retrieve(
-        self, query: str, hint: Optional[RetrievalHint] = None, limit: int = 30,
+        self,
+        query: str,
+        hint: Optional[RetrievalHint] = None,
+        limit: int = 30,
     ) -> Dict[str, Any]:
         """
         Simple retrieval based on query and optional hints.
@@ -196,7 +209,8 @@ class ModernPulseqRAG:
 
         # Parse the function call
         match = re.match(
-            r"(mr|seq|tra|eve|opt)((?:\.aux)?(?:\.quat)?)?\.(\w+)", function_call,
+            r"(mr|seq|tra|eve|opt)((?:\.aux)?(?:\.quat)?)?\.(\w+)",
+            function_call,
         )
         if not match:
             return result  # Can't parse, assume it's OK
@@ -225,7 +239,8 @@ class ModernPulseqRAG:
             correct_namespace = None
             if correct_usage:
                 ns_match = re.match(
-                    r"(mr|seq|tra|eve|opt)(?:\.aux)?(?:\.quat)?", correct_usage,
+                    r"(mr|seq|tra|eve|opt)(?:\.aux)?(?:\.quat)?",
+                    correct_usage,
                 )
                 if ns_match:
                     correct_namespace = ns_match.group(0)
@@ -389,7 +404,8 @@ class ModernPulseqRAG:
         return results
 
     async def _get_function_docs(
-        self, function_names: List[str],
+        self,
+        function_names: List[str],
     ) -> List[Dict[str, Any]]:
         """Get exact function documentation from function_calling_patterns view."""
         docs = []
@@ -398,7 +414,8 @@ class ModernPulseqRAG:
             # Handle different namespace patterns
             # Extract just the function name without namespace
             func_match = re.search(
-                r"(?:mr|seq|tra|eve|opt)(?:\.aux)?(?:\.quat)?\.(\w+)", func_name,
+                r"(?:mr|seq|tra|eve|opt)(?:\.aux)?(?:\.quat)?\.(\w+)",
+                func_name,
             )
             if func_match:
                 clean_func_name = func_match.group(1)
@@ -450,7 +467,8 @@ class ModernPulseqRAG:
             if correct_usage:
                 # Extract namespace from correct_usage
                 ns_match = re.match(
-                    r"(mr|seq|tra|eve|opt)(?:\.aux)?(?:\.quat)?", correct_usage,
+                    r"(mr|seq|tra|eve|opt)(?:\.aux)?(?:\.quat)?",
+                    correct_usage,
                 )
                 if ns_match:
                     parts.append(f"Function: {ns_match.group(0)}.{item['name']}")
@@ -498,7 +516,9 @@ class ModernPulseqRAG:
                 for item in api_response.data:
                     results.append(
                         {
-                            "function_name": item.get("name", ""),  # Fixed: DB returns 'name' not 'function_name'
+                            "function_name": item.get(
+                                "name", ""
+                            ),  # Fixed: DB returns 'name' not 'function_name'
                             "description": item.get("description", ""),
                             "parameters": item.get("parameters"),
                             "returns": item.get("returns"),
@@ -578,7 +598,9 @@ class ModernPulseqRAG:
         return results
 
     async def _search_official_sequences(
-        self, query: str, limit: int = 5,
+        self,
+        query: str,
+        limit: int = 5,
     ) -> List[Dict]:
         """
         Search official sequences for tutorials.
@@ -626,14 +648,16 @@ class ModernPulseqRAG:
 
         return results
 
-    async def _direct_function_lookup(self, detected_functions: List[Dict]) -> List[Dict]:
+    async def _direct_function_lookup(
+        self, detected_functions: List[Dict]
+    ) -> List[Dict]:
         """
         Direct database lookup for detected functions.
         Returns comprehensive documentation for each function.
-        
+
         Args:
             detected_functions: List of detected function info from semantic router
-            
+
         Returns:
             List of complete function documentation from api_reference
         """
@@ -644,13 +668,19 @@ class ModernPulseqRAG:
 
             try:
                 # Query specific fields (not SELECT * to avoid unnecessary data)
-                response = self.supabase_client.client.table("api_reference").select(
-                    "name, signature, description, "
-                    "parameters, returns, usage_examples, "
-                    "function_type, class_name, is_class_method, "
-                    "calling_pattern, related_functions, "
-                    "search_terms, pulseq_version",
-                ).ilike("name", func_name).eq("language", "matlab").execute()
+                response = (
+                    self.supabase_client.client.table("api_reference")
+                    .select(
+                        "name, signature, description, "
+                        "parameters, returns, usage_examples, "
+                        "function_type, class_name, is_class_method, "
+                        "calling_pattern, related_functions, "
+                        "search_terms, pulseq_version",
+                    )
+                    .ilike("name", func_name)
+                    .eq("language", "matlab")
+                    .execute()
+                )
 
                 if response.data:
                     for item in response.data:

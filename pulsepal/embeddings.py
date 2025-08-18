@@ -35,7 +35,10 @@ class GoogleEmbeddingProvider(EmbeddingProvider):
     """Google Gemini embedding provider."""
 
     def __init__(
-        self, api_key: str, model: str = "models/embedding-001", dimensions: int = 768,
+        self,
+        api_key: str,
+        model: str = "models/embedding-001",
+        dimensions: int = 768,
     ):
         self.dimensions = dimensions
         self.model = model

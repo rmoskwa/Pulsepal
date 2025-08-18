@@ -42,8 +42,12 @@ class RoutingDecision:
     search_hints: List[str] = field(default_factory=list)
     semantic_scores: Dict[str, float] = field(default_factory=dict)
     trigger_type: str = "unknown"  # 'semantic', 'keyword', 'code_detection', 'fallback'
-    detected_functions: List[Dict] = field(default_factory=list)  # For direct function lookup
-    validation_errors: List[str] = field(default_factory=list)  # Namespace/function validation errors
+    detected_functions: List[Dict] = field(
+        default_factory=list
+    )  # For direct function lookup
+    validation_errors: List[str] = field(
+        default_factory=list
+    )  # Namespace/function validation errors
 
 
 class ThresholdManager:
@@ -374,10 +378,10 @@ class SemanticRouter:
         # Multi-level namespace patterns (most specific first)
         namespace_patterns = [
             (r"\b(mr\.aux\.quat)\.([\w]+)", "mr.aux.quat"),  # Three-level namespace
-            (r"\b(mr\.aux)\.([\w]+)", "mr.aux"),              # Two-level namespace
-            (r"\b(eve)\.([\w]+)", "eve"),                     # EventLibrary
-            (r"\b(tra)\.([\w]+)", "tra"),                     # TransformFOV
-            (r"\b(mr|seq)\.([\w]+)", None),                   # Single-level (common)
+            (r"\b(mr\.aux)\.([\w]+)", "mr.aux"),  # Two-level namespace
+            (r"\b(eve)\.([\w]+)", "eve"),  # EventLibrary
+            (r"\b(tra)\.([\w]+)", "tra"),  # TransformFOV
+            (r"\b(mr|seq)\.([\w]+)", None),  # Single-level (common)
         ]
 
         # Check namespace patterns
@@ -391,15 +395,17 @@ class SemanticRouter:
 
                 if validation["correct_form"]:
                     # Function exists (may have wrong namespace)
-                    detected_functions.append({
-                        "name": func_name,
-                        "namespace": namespace,
-                        "full_match": match.group(0),
-                        "confidence": 1.0,
-                        "type": "explicit_namespace",
-                        "correct_form": validation["correct_form"],
-                        "is_valid": validation["is_valid"],
-                    })
+                    detected_functions.append(
+                        {
+                            "name": func_name,
+                            "namespace": namespace,
+                            "full_match": match.group(0),
+                            "confidence": 1.0,
+                            "type": "explicit_namespace",
+                            "correct_form": validation["correct_form"],
+                            "is_valid": validation["is_valid"],
+                        }
+                    )
 
                     if not validation["is_valid"]:
                         validation_errors.append(validation["error"])
@@ -413,15 +419,18 @@ class SemanticRouter:
         for pattern in make_calc_patterns:
             for match in re.finditer(pattern, query):
                 func_name = match.group(0)
-                if func_name in self.PULSEQ_FUNCTIONS and \
-                   not any(d["name"].lower() == func_name.lower() for d in detected_functions):
-                    detected_functions.append({
-                        "name": func_name,
-                        "namespace": None,
-                        "full_match": func_name,
-                        "confidence": 1.0,
-                        "type": "pattern_match",
-                    })
+                if func_name in self.PULSEQ_FUNCTIONS and not any(
+                    d["name"].lower() == func_name.lower() for d in detected_functions
+                ):
+                    detected_functions.append(
+                        {
+                            "name": func_name,
+                            "namespace": None,
+                            "full_match": func_name,
+                            "confidence": 1.0,
+                            "type": "pattern_match",
+                        }
+                    )
 
         # If we found namespace/pattern matches, return early with high confidence
         if detected_functions:
@@ -444,45 +453,57 @@ class SemanticRouter:
         for func in self.PULSEQ_FUNCTIONS:
             # Exact match (case-insensitive)
             if func.lower() in query_lower:
-                if not any(d["name"].lower() == func.lower() for d in detected_functions):
+                if not any(
+                    d["name"].lower() == func.lower() for d in detected_functions
+                ):
                     # Validate the function
                     validation = validate_namespace(func, None)
                     if validation["correct_form"]:  # Function exists
-                        detected_functions.append({
-                            "name": func,
-                            "namespace": None,
-                            "full_match": func,
-                            "confidence": 1.0,
-                            "type": "exact_match",
-                            "correct_form": validation["correct_form"],
-                            "is_valid": validation["is_valid"],
-                        })
+                        detected_functions.append(
+                            {
+                                "name": func,
+                                "namespace": None,
+                                "full_match": func,
+                                "confidence": 1.0,
+                                "type": "exact_match",
+                                "correct_form": validation["correct_form"],
+                                "is_valid": validation["is_valid"],
+                            }
+                        )
 
             # Fuzzy match: Convert CamelCase to spaced words
             # EventLibrary -> "event library"
             spaced_func = self._camelcase_to_spaced(func).lower()
             if spaced_func in query_lower:
-                if not any(d["name"].lower() == func.lower() for d in detected_functions):
-                    detected_functions.append({
-                        "name": func,
-                        "namespace": None,
-                        "full_match": spaced_func,
-                        "confidence": 0.95,
-                        "type": "fuzzy_camelcase",
-                    })
+                if not any(
+                    d["name"].lower() == func.lower() for d in detected_functions
+                ):
+                    detected_functions.append(
+                        {
+                            "name": func,
+                            "namespace": None,
+                            "full_match": spaced_func,
+                            "confidence": 0.95,
+                            "type": "fuzzy_camelcase",
+                        }
+                    )
 
             # Also check with underscores (common variation)
             # EventLibrary -> "event_library"
             underscored = self._camelcase_to_underscored(func).lower()
             if underscored in query_lower:
-                if not any(d["name"].lower() == func.lower() for d in detected_functions):
-                    detected_functions.append({
-                        "name": func,
-                        "namespace": None,
-                        "full_match": underscored,
-                        "confidence": 0.95,
-                        "type": "fuzzy_underscore",
-                    })
+                if not any(
+                    d["name"].lower() == func.lower() for d in detected_functions
+                ):
+                    detected_functions.append(
+                        {
+                            "name": func,
+                            "namespace": None,
+                            "full_match": underscored,
+                            "confidence": 0.95,
+                            "type": "fuzzy_underscore",
+                        }
+                    )
 
         # Check for misspellings using Levenshtein distance
         misspelling_result = self._check_for_misspellings(query)
@@ -557,13 +578,16 @@ class SemanticRouter:
 
         # Calculate similarities
         sequence_sim = self._calculate_max_similarity(
-            query_embedding, self.sequence_embeddings,
+            query_embedding,
+            self.sequence_embeddings,
         )
         implementation_sim = self._calculate_max_similarity(
-            query_embedding, self.implementation_embeddings,
+            query_embedding,
+            self.implementation_embeddings,
         )
         physics_sim = self._calculate_max_similarity(
-            query_embedding, self.physics_embeddings,
+            query_embedding,
+            self.physics_embeddings,
         )
 
         semantic_scores = {
@@ -653,7 +677,9 @@ class SemanticRouter:
         return None
 
     def _calculate_max_similarity(
-        self, query_embedding: np.ndarray, concept_embeddings: np.ndarray,
+        self,
+        query_embedding: np.ndarray,
+        concept_embeddings: np.ndarray,
     ) -> float:
         """Calculate maximum cosine similarity between query and concepts."""
         if len(concept_embeddings) == 0:
@@ -662,7 +688,9 @@ class SemanticRouter:
         # Normalize embeddings
         query_norm = query_embedding / np.linalg.norm(query_embedding)
         concept_norms = concept_embeddings / np.linalg.norm(
-            concept_embeddings, axis=1, keepdims=True,
+            concept_embeddings,
+            axis=1,
+            keepdims=True,
         )
 
         # Calculate cosine similarities
@@ -726,13 +754,15 @@ class SemanticRouter:
                     reasoning=f"Likely misspelling: '{word}' → '{matched_func}'",
                     trigger_type="misspelling",
                     search_hints=[matched_func],  # Use correct spelling for search
-                    detected_functions=[{
-                        "name": matched_func,  # Corrected spelling
-                        "namespace": None,
-                        "full_match": word,  # Original misspelling
-                        "confidence": 0.85,
-                        "type": "misspelling_correction",
-                    }],
+                    detected_functions=[
+                        {
+                            "name": matched_func,  # Corrected spelling
+                            "namespace": None,
+                            "full_match": word,  # Original misspelling
+                            "confidence": 0.85,
+                            "type": "misspelling_correction",
+                        }
+                    ],
                 )
 
         return None
