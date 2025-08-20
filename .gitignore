@@ -60,6 +60,7 @@ alpha_*.md
 alpha_*.csv
 alpha_*.html
 alpha_*.txt
+generate_api_keys.py
 
 # ====================================
 # IDEs & Editors
