@@ -199,6 +199,9 @@ $RECYCLE.BIN/
 .chainlit/
 chainlit.md
 
+# Database recrawl utilities (private Supabase access)
+recrawlDatabase/
+
 # Supabase migrations (if local only)
 # migrations/  # Keep if needed for database setup
 
