@@ -1,0 +1,7 @@
+# Documentation generation requirements
+mkdocs>=1.5.0
+mkdocs-material>=9.0.0
+pymdown-extensions>=10.0
+pyyaml>=6.0
+supabase>=2.0.0
+python-dotenv>=1.0.0

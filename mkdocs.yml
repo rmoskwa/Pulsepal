@@ -1,0 +1,135 @@
+site_name: Pulseq MATLAB API Documentation
+site_description: Complete API reference for Pulseq MATLAB functions
+site_url: https://rmoskwa.github.io/Pulsepal/
+theme:
+  name: material
+  palette:
+    primary: blue
+    accent: light blue
+  features:
+  - navigation.tabs
+  - navigation.sections
+  - navigation.expand
+  - navigation.top
+  - search.suggest
+  - search.highlight
+  - content.code.copy
+  - content.code.annotate
+  font:
+    text: Roboto
+    code: Roboto Mono
+plugins:
+- search:
+    lang: en
+    separator: '[\s\-\.]+'
+markdown_extensions:
+- pymdownx.highlight
+- pymdownx.superfences
+- pymdownx.tabbed
+- pymdownx.details
+- pymdownx.snippets
+- admonition
+- tables
+- toc
+- toc:
+    permalink: true
+nav:
+- Home: index.md
+- API Reference:
+  - Overview: matlab_api/index.md
+  - Functions:
+    - addBlock: matlab_api/addBlock.md
+    - addGradients: matlab_api/addGradients.md
+    - addRamps: matlab_api/addRamps.md
+    - align: matlab_api/align.md
+    - applySoftDelay: matlab_api/applySoftDelay.md
+    - applyToBlock: matlab_api/applyToBlock.md
+    - applyToSeq: matlab_api/applyToSeq.md
+    - calcAdcSeg: matlab_api/calcAdcSeg.md
+    - calcDuration: matlab_api/calcDuration.md
+    - calcMomentsBtensor: matlab_api/calcMomentsBtensor.md
+    - calcPNS: matlab_api/calcPNS.md
+    - calcRamp: matlab_api/calcRamp.md
+    - calcRfBandwidth: matlab_api/calcRfBandwidth.md
+    - calcRfCenter: matlab_api/calcRfCenter.md
+    - calcRfPower: matlab_api/calcRfPower.md
+    - calculateKspacePP: matlab_api/calculateKspacePP.md
+    - checkTiming: matlab_api/checkTiming.md
+    - compressShape: matlab_api/compressShape.md
+    - compressShape_mat: matlab_api/compressShape_mat.md
+    - conjugate: matlab_api/conjugate.md
+    - convert: matlab_api/convert.md
+    - decompressShape: matlab_api/decompressShape.md
+    - duration: matlab_api/duration.md
+    - evalLabels: matlab_api/evalLabels.md
+    - EventLibrary: matlab_api/EventLibrary.md
+    - findBlockByTime: matlab_api/findBlockByTime.md
+    - findFlank: matlab_api/findFlank.md
+    - flipGradAxis: matlab_api/flipGradAxis.md
+    - fromRotMat: matlab_api/fromRotMat.md
+    - gauss: matlab_api/gauss.md
+    - getBlock: matlab_api/getBlock.md
+    - getDefinition: matlab_api/getDefinition.md
+    - getSupportedLabels: matlab_api/getSupportedLabels.md
+    - getSupportedRfUse: matlab_api/getSupportedRfUse.md
+    - init: matlab_api/init.md
+    - install: matlab_api/install.md
+    - isOctave: matlab_api/isOctave.md
+    - makeAdc: matlab_api/makeAdc.md
+    - makeAdiabaticPulse: matlab_api/makeAdiabaticPulse.md
+    - makeArbitraryGrad: matlab_api/makeArbitraryGrad.md
+    - makeArbitraryRf: matlab_api/makeArbitraryRf.md
+    - makeBlockPulse: matlab_api/makeBlockPulse.md
+    - makeDelay: matlab_api/makeDelay.md
+    - makeDigitalOutputPulse: matlab_api/makeDigitalOutputPulse.md
+    - makeExtendedTrapezoid: matlab_api/makeExtendedTrapezoid.md
+    - makeExtendedTrapezoidArea: matlab_api/makeExtendedTrapezoidArea.md
+    - makeGaussPulse: matlab_api/makeGaussPulse.md
+    - makeLabel: matlab_api/makeLabel.md
+    - makeSincPulse: matlab_api/makeSincPulse.md
+    - makeSLRpulse: matlab_api/makeSLRpulse.md
+    - makeSoftDelay: matlab_api/makeSoftDelay.md
+    - makeTrapezoid: matlab_api/makeTrapezoid.md
+    - makeTrigger: matlab_api/makeTrigger.md
+    - md5: matlab_api/md5.md
+    - melodyToPitchesAndDurations: matlab_api/melodyToPitchesAndDurations.md
+    - melodyToScale: matlab_api/melodyToScale.md
+    - modGradAxis: matlab_api/modGradAxis.md
+    - multiply: matlab_api/multiply.md
+    - musicToSequence: matlab_api/musicToSequence.md
+    - normalize: matlab_api/normalize.md
+    - opts: matlab_api/opts.md
+    - paperPlot: matlab_api/paperPlot.md
+    - parsemr: matlab_api/parsemr.md
+    - plot: matlab_api/plot.md
+    - pts2waveform: matlab_api/pts2waveform.md
+    - read: matlab_api/read.md
+    - readasc: matlab_api/readasc.md
+    - readBinary: matlab_api/readBinary.md
+    - restoreAdditionalShapeSamples: matlab_api/restoreAdditionalShapeSamples.md
+    - rotate: matlab_api/rotate.md
+    - rotate3D: matlab_api/rotate3D.md
+    - scaleGrad: matlab_api/scaleGrad.md
+    - SeqPlot: matlab_api/SeqPlot.md
+    - Sequence: matlab_api/Sequence.md
+    - setBlock: matlab_api/setBlock.md
+    - setDefinition: matlab_api/setDefinition.md
+    - simRf: matlab_api/simRf.md
+    - sinc: matlab_api/sinc.md
+    - sound: matlab_api/sound.md
+    - splitGradient: matlab_api/splitGradient.md
+    - splitGradientAt: matlab_api/splitGradientAt.md
+    - testReport: matlab_api/testReport.md
+    - toRotMat: matlab_api/toRotMat.md
+    - traj2grad: matlab_api/traj2grad.md
+    - transform: matlab_api/transform.md
+    - TransformFOV: matlab_api/TransformFOV.md
+    - version: matlab_api/version.md
+    - waveforms_and_times: matlab_api/waveforms_and_times.md
+    - write: matlab_api/write.md
+    - write_v141: matlab_api/write_v141.md
+    - writeBinary: matlab_api/writeBinary.md
+extra:
+  social:
+  - icon: fontawesome/brands/github
+    link: https://github.com/pulseq/pulseq

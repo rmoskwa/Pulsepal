@@ -1,8 +1,14 @@
-# Python
+# ====================================
+# Python & Development
+# ====================================
+
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
+
+# Distribution / packaging
 .Python
 build/
 develop-eggs/
@@ -16,147 +22,244 @@ parts/
 sdist/
 var/
 wheels/
+pip-wheel-metadata/
+share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
 MANIFEST
-examples/
-.chainlit
 
 # Virtual environments
+venv/
 .venv/
 .venv-wsl/
-venv/
 env/
 ENV/
+env.bak/
+venv.bak/
 
-# Environment variables (keep .env.example for reference)
+# ====================================
+# Configuration & Secrets
+# ====================================
+
+# Environment variables
 .env
 .env.local
 .env.development
 .env.test
 .env.production
-alpha_keys.json
+*.env
 
-# IDEs and editors
+# API keys and secrets
+*_keys.json
+*_keys_backup*.json
+*_users.json
+*_users_mapping.json
+alpha_*.json
+alpha_*.md
+alpha_*.csv
+alpha_*.html
+alpha_*.txt
+
+# ====================================
+# IDEs & Editors
+# ====================================
+
+# VSCode
 .vscode/
+*.code-workspace
+
+# PyCharm
 .idea/
+*.iml
+
+# Vim
 *.swp
 *.swo
 *~
-.DS_Store
-Thumbs.db
+.*.swp
 
-# Testing
-.coverage
+# Emacs
+*~
+\#*\#
+.\#*
+
+# ====================================
+# Testing & Quality
+# ====================================
+
+# Unit test / coverage
 htmlcov/
-.pytest_cache/
 .tox/
 .nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
 coverage.xml
 *.cover
+*.py,cover
 .hypothesis/
+.pytest_cache/
 TEST_RESULTS.md
-tests/
 
-# Jupyter Notebook
-.ipynb_checkpoints
+# Type checking
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Linting
+.ruff_cache/
+.pylint.d/
+
+# ====================================
+# Logs & Temporary Files
+# ====================================
 
 # Logs
 *.log
 logs/
 conversationLogs/
-
-# Database
-*.db
-*.sqlite3
-
-# Cache directories
-.cache/
-.mypy_cache/
-.ruff_cache/
-
-# Development and internal files
-.claude/
-CLAUDE.md
-CLAUDE.local.md
-README_TEMPLATE.md
-PRPs/
-RAG_IMPROVEMENTS_SUMMARY.md
-CHAINLIT_INTEGRATION_FIXES.md
-CHAINLIT_TESTS_SUMMARY.md
-chainlit.md
-PULSEPAL-DOCUMENTATION.md
-prpPrompt.md
-CHANGELOG.md
-CURRENT-STATE-DOCUMENTATION.md
-generate_api_keys.py
-alpha_keys_backup.json
-docs/
-docs-old/
-recrawlDatabase/
-matlab/
-deploy_api_docs.sh
-
-# Cleanup and backup artifacts
-cleanup_archive_*.tar.gz
-alpha_keys_backup_*.json
-alpha_users_mapping.json
-backups/
-.backup/
-*.rollback
-.rollback_history.json
-generate_matlab_docs.py
-mkdocs.yml
-requirements-docs.txt
-site/
-api-docs-deploy/
-.bmad-core/
-
-# Testing scripts
-test_*.py
-pulsepal/tests/
-pytest.ini
-
-# Local model files (too large for GitHub)
-huggingface_models/
-*.bin
-*.safetensors
-models/
+*.log.*
+log/
 
 # Temporary files
 *.tmp
 *.temp
+*.bak
 temp/
 tmp/
+.temp/
+.tmp/
+
+# ====================================
+# Database & Data
+# ====================================
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.db-wal
+
+# Data directories
+data/
+huggingface_models/
+models/
+*.bin
+*.safetensors
+*.pkl
+*.pickle
+*.h5
+*.hdf5
+
+# ====================================
+# Documentation & Generated Files
+# ====================================
+
+# MkDocs / Sphinx
+site/
+_build/
+docs/_build/
+api-docs-deploy/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# ====================================
+# OS Files
+# ====================================
+
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+.directory
+.Trash-*
+
+# ====================================
+# Project Specific
+# ====================================
+
+# Chainlit
+.chainlit/
+chainlit.md
+
+# Supabase migrations (if local only)
+# migrations/  # Keep if needed for database setup
+
+# Example and template directories
+examples/
+
+# Backup and archive files
+backups/
+.backup/
+*.rollback
+.rollback_history.json
+cleanup_archive_*.tar.gz
+*_backup_*.json
+
+# Deployment specific
+railway.toml
+railway_*.txt
+railway_*.sh
+start_production.py
+DEPLOYMENT_CHECKLIST.md
+deploy_*.sh
+
+# Development tools and scripts
+.bmad-core/
+.claude/
+CLAUDE.md
+CLAUDE.local.md
+
+# Internal documentation
+PRPs/
+*_SUMMARY.md
+*_DOCUMENTATION.md
+*_TEMPLATE.md
+CHANGELOG.md
+CURRENT-STATE-DOCUMENTATION.md
+prpPrompt.md
+README_TEMPLATE.md
 READMEarchive.md
 
-# Backup directories
-backups/
+# Generated test files
+test_precommit.py
+# pytest.ini  # Keep if you have test configuration
 
-# OS generated files
-.DS_Store?
-ehthumbs.db
-Icon?
+# Utility scripts (keep in repo but ignore local runs)
+# generate_api_keys.py  # Keep this in repo
+# generate_matlab_docs.py  # Keep this in repo
 
-# Production/deployment files
-railway_env.txt
-railway_commands.sh
-alpha_api_keys.md
-alpha_users.json
+# Public assets (consider if needed)
+# public/  # Uncomment if not needed
+
+# Welcome and onboarding files
 welcome_*.txt
-alpha_users.csv
-alpha_dashboard.html
 
-# Deployment files
-auth.py
-health_check.py
-start_production.py
-railway.toml
-DEPLOYMENT_CHECKLIST.md
-alpha_*.md
-railway_*.txt
+# Health check
+# health_check.py  # Keep if needed for deployment
 
-# Alpha keys backup
-alpha_keys_backup_20250818_024633.json
-alpha_users_mapping.json
+# Authentication module (if deployment specific)
+# pulsepal/auth.py  # Uncomment if should be deployment-specific
+
+# ====================================
+# Pre-commit
+# ====================================
+.pre-commit-config.yaml
+.secrets.baseline
