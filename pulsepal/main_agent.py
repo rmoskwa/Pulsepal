@@ -86,6 +86,12 @@ def get_semantic_router():
     This ensures the 80MB model is only loaded once, not on every request.
     """
     global _semantic_router_instance
+    
+    # Skip semantic router in CLI mode or when disabled
+    import os
+    if os.getenv("DISABLE_SEMANTIC_ROUTER", "false").lower() == "true":
+        logger.info("Semantic router disabled via environment variable")
+        return None
 
     if _semantic_router_instance is None:
         try:

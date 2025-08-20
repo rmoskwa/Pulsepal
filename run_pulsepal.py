@@ -9,8 +9,13 @@ Usage:
 
 import argparse
 import asyncio
+import os
 import sys
 from pathlib import Path
+
+# Disable semantic router and embedding init for CLI to avoid loading delays on WSL2
+os.environ["DISABLE_SEMANTIC_ROUTER"] = "true"
+os.environ["INIT_EMBEDDINGS"] = "false"
 
 # Add pulsepal to path
 sys.path.insert(0, str(Path(__file__).parent))
