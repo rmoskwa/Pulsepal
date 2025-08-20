@@ -12,7 +12,7 @@
   --pulsepal-text-primary: #1f2937;
   --pulsepal-text-secondary: #6b7280;
   --pulsepal-border: #e1e8ed;      /* Slight blue tint */
-  
+
   /* Language-specific colors */
   --lang-matlab: #ff6b35;          /* Orange for MATLAB */
   --lang-python: #3776ab;          /* Python blue */
@@ -346,15 +346,15 @@ code {
   .message.assistant {
     max-width: 95%;
   }
-  
+
   .header {
     padding: 0.75rem 1rem;
   }
-  
+
   .header h1 {
     font-size: 1.25rem;
   }
-  
+
   pre {
     font-size: 0.75rem;
     padding: 0.75rem;
@@ -556,11 +556,11 @@ pre:hover .copy-button {
 }
 
 @keyframes pulse-beat {
-  0%, 100% { 
+  0%, 100% {
     transform: scale(1);
     opacity: 1;
   }
-  50% { 
+  50% {
     transform: scale(1.2);
     opacity: 0.7;
   }

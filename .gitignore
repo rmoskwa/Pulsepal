@@ -265,5 +265,5 @@ welcome_*.txt
 # ====================================
 # Pre-commit
 # ====================================
-.pre-commit-config.yaml
+# Note: .pre-commit-config.yaml should be tracked in git
 .secrets.baseline

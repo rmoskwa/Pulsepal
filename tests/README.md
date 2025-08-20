@@ -134,20 +134,20 @@ from pulsepal.main_agent import pulsepal_agent
 
 class TestMainAgent:
     """Group related tests in classes."""
-    
+
     @pytest.mark.asyncio
     async def test_agent_initialization(self):
         """Test agent initializes correctly."""
         # Arrange
         query = "test query"
-        
+
         # Act
         result = await pulsepal_agent.run(query)
-        
+
         # Assert
         assert result is not None
         assert isinstance(result.data, str)
-    
+
     @pytest.mark.parametrize("query,expected", [
         ("gradient echo", True),
         ("spin echo", True),

@@ -439,7 +439,7 @@ async def main():
         "What is a gradient echo sequence?"
     )
     print(response)
-    
+
     # Follow-up with session
     _, response2 = await run_pulsepal(
         "Can you show me the code?",
@@ -457,19 +457,19 @@ from pulsepal.rag_service import ModernPulseqRAG
 
 async def search_examples():
     rag = ModernPulseqRAG()
-    
+
     # Search for code examples
     examples = await rag.search_pulseq_knowledge(
         "EPI sequence implementation",
         search_type="examples"
     )
-    
+
     # Search for function documentation
     functions = await rag.search_pulseq_knowledge(
         "makeArbitraryGrad parameters",
         search_type="functions"
     )
-    
+
     return examples, functions
 ```
 

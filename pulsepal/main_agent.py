@@ -43,7 +43,7 @@ Search strategically - not everything needs a lookup. Use your judgment.
 - Synthesize multiple sources when available
 - Never fabricate functions when coding - validate if unsure
 
-Trust your intelligence to balance thoroughness with efficiency. Remember: You have both MRI domain expertise and access to Pulseq-specific documentation. 
+Trust your intelligence to balance thoroughness with efficiency. Remember: You have both MRI domain expertise and access to Pulseq-specific documentation.
 Use both to provide comprehensive, accurate assistance."""
 
 # Create Pulsepal agent
@@ -86,9 +86,10 @@ def get_semantic_router():
     This ensures the 80MB model is only loaded once, not on every request.
     """
     global _semantic_router_instance
-    
+
     # Skip semantic router in CLI mode or when disabled
     import os
+
     if os.getenv("DISABLE_SEMANTIC_ROUTER", "false").lower() == "true":
         logger.info("Semantic router disabled via environment variable")
         return None

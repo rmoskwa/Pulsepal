@@ -13,7 +13,7 @@ PulsePal implements sophisticated session management to maintain conversation co
    - Handles session rotation and cleanup
    - Maintains session persistence
 
-2. **ConversationContext** 
+2. **ConversationContext**
    - Stores conversation history
    - Tracks language preferences (MATLAB/Python)
    - Maintains code examples within session

@@ -197,7 +197,7 @@ class PulseqDebugAnalyzer:
         if hints.get("approach") == "systematic_analysis":
             # Novel problem - use pure physics reasoning
             reasoning = f"""Analyzing novel problem: "{problem}"
-            
+
 This issue isn't in my common patterns database, but I can analyze it using MRI physics:
 
 1. Physics Analysis: Breaking down the problem into fundamental MRI principles
@@ -207,7 +207,7 @@ This issue isn't in my common patterns database, but I can analyze it using MRI 
         else:
             # We have hints - use them to speed up analysis
             reasoning = f"""Analyzing problem using physics knowledge with pattern hints:
-            
+
 Physics Principle: {hints.get("physics", "Analyzing physics...")}
 This relates to your problem because it directly controls the observed behavior."""
 

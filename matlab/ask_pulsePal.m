@@ -15,19 +15,19 @@ function ask_pulsePal(query)
     %   2. Format it with your query
     %   3. Copy to clipboard
     %   4. Guide you to paste in your existing PulsePal session
-    
+
     % Check input
     if nargin < 1 || isempty(query)
         error('Please provide a query. Example: ask_pulsePal(''Why is my RF pulse not working?'')');
     end
-    
+
     if ~ischar(query) && ~isstring(query)
         error('Query must be a string');
     end
-    
+
     % Convert to char if needed
     query = char(query);
-    
+
     % Load configuration
     try
         config = pulsePal_config();
@@ -41,7 +41,7 @@ function ask_pulsePal(query)
         config.show_session_instructions = true;
         config.verbose = true;
     end
-    
+
     % Check if PulsePal is accessible (for local mode)
     if config.use_local && config.verbose
         try
@@ -59,17 +59,17 @@ function ask_pulsePal(query)
             end
         end
     end
-    
+
     % Get active editor content
     try
         editor = matlab.desktop.editor.getActive;
         if isempty(editor)
             warning('No active MATLAB editor found.');
             warning('To include your code, open a .m file in the MATLAB editor first.');
-            
+
             % Just copy the query
             clipboard('copy', query);
-            
+
             % Provide session-aware instructions
             print_session_instructions(config, false);
             return;
@@ -77,26 +77,26 @@ function ask_pulsePal(query)
     catch ME
         % Editor API might not be available in some MATLAB versions
         warning('Could not access MATLAB editor: %s', ME.message);
-        
+
         % Just copy the query
         clipboard('copy', query);
-        
+
         % Provide session-aware instructions
         print_session_instructions(config, false);
         return;
     end
-    
+
     % Get code and filename
     code = editor.Text;
     filename = editor.Filename;
-    
+
     if isempty(filename)
         % Untitled file
         [~, name, ext] = fileparts('untitled.m');
     else
         [~, name, ext] = fileparts(filename);
     end
-    
+
     % Check if code is too large (>1MB)
     if length(code) > 1024*1024
         warning('Code is too large (>1MB). Consider selecting specific portions.');
@@ -106,24 +106,24 @@ function ask_pulsePal(query)
             return;
         end
     end
-    
+
     % Format the message
     formatted_message = sprintf(['%s\n\n' ...
         '--- Code from %s%s ---\n' ...
         '%s\n' ...
         '--- End of %s%s ---'], ...
         query, name, ext, code, name, ext);
-    
+
     % Copy to clipboard
     clipboard('copy', formatted_message);
-    
+
     % Provide session-aware instructions
     print_session_instructions(config, true, query, name, ext, code);
 end
 
 function print_session_instructions(config, has_code, query, name, ext, code)
     % Helper function to print session-aware instructions
-    
+
     fprintf('\n=====================================\n');
     if has_code
         fprintf('✅ Your code and query have been copied to clipboard!\n');
@@ -131,7 +131,7 @@ function print_session_instructions(config, has_code, query, name, ext, code)
         fprintf('✅ Your query has been copied to clipboard!\n');
     end
     fprintf('=====================================\n\n');
-    
+
     if strcmp(config.session_mode, 'existing')
         % User should use existing browser session
         fprintf('📌 SESSION MANAGEMENT:\n');
@@ -144,7 +144,7 @@ function print_session_instructions(config, has_code, query, name, ext, code)
         fprintf('   3. Paste your %s in the chat (Ctrl+V or Cmd+V)\n', ...
             ternary(has_code, 'code and query', 'query'));
         fprintf('   4. Your existing conversation context will be preserved\n\n');
-        
+
         if config.auto_open_browser
             fprintf('🌐 Opening browser (if needed)...\n');
             web(config.url, '-browser');
@@ -157,14 +157,14 @@ function print_session_instructions(config, has_code, query, name, ext, code)
         web(config.url, '-browser');
         fprintf('📋 Just paste (Ctrl+V or Cmd+V) in the PulsePal chat window.\n');
     end
-    
+
     if has_code && nargin >= 6
         fprintf('\n📝 Query: "%s"\n', query);
         fprintf('📄 Code from: %s%s (%d lines)\n', name, ext, length(strfind(code, newline)) + 1);
     elseif ~has_code && nargin >= 3
         fprintf('\n📝 Query: "%s"\n', query);
     end
-    
+
     fprintf('\n💡 TIPS:\n');
     if has_code
         fprintf('   - Your code will be automatically formatted\n');

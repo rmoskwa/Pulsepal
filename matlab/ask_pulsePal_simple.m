@@ -12,19 +12,19 @@ function ask_pulsePal_simple(query)
     %
     % This is the simple version that doesn't include any code,
     % just your question. Use ask_pulsePal() to include code.
-    
+
     % Check input
     if nargin < 1 || isempty(query)
         error('Please provide a query. Example: ask_pulsePal_simple(''What is T1 relaxation?'')');
     end
-    
+
     if ~ischar(query) && ~isstring(query)
         error('Query must be a string');
     end
-    
+
     % Convert to char if needed
     query = char(query);
-    
+
     % Load configuration
     try
         config = pulsePal_config();
@@ -38,7 +38,7 @@ function ask_pulsePal_simple(query)
         config.show_session_instructions = true;
         config.verbose = true;
     end
-    
+
     % Check if PulsePal is accessible (for local mode)
     if config.use_local && config.verbose
         try
@@ -56,15 +56,15 @@ function ask_pulsePal_simple(query)
             end
         end
     end
-    
+
     % Copy query to clipboard
     clipboard('copy', query);
-    
+
     % Instructions
     fprintf('\n=====================================\n');
     fprintf('✅ Query copied to clipboard!\n');
     fprintf('=====================================\n\n');
-    
+
     if strcmp(config.session_mode, 'existing')
         % User should use existing browser session
         fprintf('📌 SESSION MANAGEMENT:\n');
@@ -76,7 +76,7 @@ function ask_pulsePal_simple(query)
         fprintf('   2. If using production, log in with your API key\n');
         fprintf('   3. Paste your query in the chat (Ctrl+V or Cmd+V)\n');
         fprintf('   4. Your existing conversation context will be preserved\n\n');
-        
+
         if config.auto_open_browser
             fprintf('🌐 Opening browser (if needed)...\n');
             web(config.url, '-browser');
@@ -89,9 +89,9 @@ function ask_pulsePal_simple(query)
         web(config.url, '-browser');
         fprintf('📋 Paste (Ctrl+V or Cmd+V) in PulsePal chat window.\n');
     end
-    
+
     fprintf('\n📝 Query: "%s"\n', query);
-    
+
     % Tips
     fprintf('\n💡 TIPS:\n');
     fprintf('   - Use ask_pulsePal() to include your code for debugging\n');

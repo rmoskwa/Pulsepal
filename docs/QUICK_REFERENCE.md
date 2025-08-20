@@ -149,11 +149,11 @@ settings.max_conversation_history = 50
 async def batch_process(queries):
     session_id = None
     results = []
-    
+
     for query in queries:
         session_id, response = await run_pulsepal(query, session_id)
         results.append(response)
-    
+
     return results
 ```
 

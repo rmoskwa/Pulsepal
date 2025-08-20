@@ -397,7 +397,7 @@ async def main(message: cl.Message):
                 api_key = user.metadata.get("api_key", "Unknown")
 
                 info_msg = f"""📋 **Your Account Information**
-                
+
 👤 **Name**: {user_name}
 📧 **Email**: {user_email}
 🔑 **API Key**: {api_key[:8]}...
