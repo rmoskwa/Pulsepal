@@ -477,15 +477,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#required-parameters" class="md-nav__link">
-    <span class="md-ellipsis">
-      Required Parameters
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#optional-parameters" class="md-nav__link">
     <span class="md-ellipsis">
       Optional Parameters
@@ -2675,15 +2666,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#required-parameters" class="md-nav__link">
-    <span class="md-ellipsis">
-      Required Parameters
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#optional-parameters" class="md-nav__link">
     <span class="md-ellipsis">
       Optional Parameters
@@ -2749,27 +2731,6 @@
 <div class="highlight"><pre><span></span><code><span class="n">seq</span><span class="p">.</span><span class="n">addBlock</span><span class="p">(</span><span class="k">...</span><span class="c">)</span>
 </code></pre></div>
 <h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
-<h3 id="required-parameters">Required Parameters<a class="headerlink" href="#required-parameters" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Type</th>
-<th>Description</th>
-<th>Example</th>
-<th>Units</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>obj</code></td>
-<td>object</td>
-<td>The Pulseq sequence object to which the block will be added.</td>
-<td><code>mySequence</code></td>
-<td></td>
-</tr>
-</tbody>
-</table>
 <h3 id="optional-parameters">Optional Parameters<a class="headerlink" href="#optional-parameters" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -2783,10 +2744,31 @@
 </thead>
 <tbody>
 <tr>
+<td><code>blockStruct</code></td>
+<td>struct</td>
+<td></td>
+<td>A pre-defined block structure</td>
+<td><code>struct('type', 'adc', 'duration', 0.001)</code></td>
+</tr>
+<tr>
+<td><code>duration</code></td>
+<td>double</td>
+<td></td>
+<td>Optional duration for the block. If provided as first argument, all subsequent events will be added to a block with this duration (Units: seconds)</td>
+<td><code>0.01</code></td>
+</tr>
+<tr>
+<td><code>events</code></td>
+<td>varargs</td>
+<td></td>
+<td>One or more events (RF, gradient, ADC) to add to the block</td>
+<td><code>makeTrapezoid('x', 100, 0.001), makeAdc(0.005)</code></td>
+</tr>
+<tr>
 <td><code>trajectory_delay</code></td>
 <td>double</td>
 <td><code>0</code></td>
-<td>Delay before starting the trajectory.  Only applicable if the input block events include a gradient event (Units: seconds)</td>
+<td>Delay before starting the trajectory. Only applicable if the input block events include a gradient event (Units: seconds)</td>
 <td><code>0.001</code></td>
 </tr>
 </tbody>
