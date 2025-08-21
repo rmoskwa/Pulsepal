@@ -2726,18 +2726,25 @@
 </thead>
 <tbody>
 <tr>
-<td><code>sameSeq</code></td>
-<td>logical</td>
-<td><code>false</code></td>
-<td>A boolean flag indicating whether to assume the input events belong to the same sequence as the object. This parameter is likely used for internal optimization and may influence how the function processes the events. Valid values: true, false</td>
-<td><code>true</code></td>
+<td><code>rf</code></td>
+<td>struct</td>
+<td></td>
+<td>RF pulse event structure to transform</td>
+<td><code>rf_event</code></td>
 </tr>
 <tr>
-<td><code>blockRange</code></td>
-<td>numeric</td>
-<td><code>[1 inf]</code></td>
-<td>A two-element vector specifying the range of events to process.  Defaults to processing all events. It can be used to select a subset of events from a longer sequence. Valid values: A 1x2 vector with positive integers [start_index end_index]</td>
-<td><code>[10 20]</code></td>
+<td><code>grad</code></td>
+<td>struct</td>
+<td></td>
+<td>Gradient event structure to transform</td>
+<td><code>grad_event</code></td>
+</tr>
+<tr>
+<td><code>adc</code></td>
+<td>struct</td>
+<td></td>
+<td>ADC event structure to transform</td>
+<td><code>adc_event</code></td>
 </tr>
 </tbody>
 </table>
