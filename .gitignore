@@ -244,20 +244,13 @@ READMEarchive.md
 
 # Generated test files
 test_precommit.py
-# pytest.ini  # Keep if you have test configuration
-
-# Utility scripts (keep in repo but ignore local runs)
-# generate_api_keys.py  # Keep this in repo
-# generate_matlab_docs.py  # Keep this in repo
-
-# Public assets (consider if needed)
-# public/  # Uncomment if not needed
+# pytest.ini
 
 # Welcome and onboarding files
 welcome_*.txt
 
 # Health check
-# health_check.py  # Keep if needed for deployment
+# health_check.py
 
 # Authentication module (if deployment specific)
 # pulsepal/auth.py  # Uncomment if should be deployment-specific
@@ -265,5 +258,5 @@ welcome_*.txt
 # ====================================
 # Pre-commit
 # ====================================
-# Note: .pre-commit-config.yaml should be tracked in git
+.pre-commit-config.yaml
 .secrets.baseline
