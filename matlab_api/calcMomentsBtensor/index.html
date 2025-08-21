@@ -2707,7 +2707,7 @@
 <h1 id="calcmomentsbtensor">calcMomentsBtensor<a class="headerlink" href="#calcmomentsbtensor" title="Permanent link">&para;</a></h1>
 <p>Calculates the magnetic field (B) and its first three moments (m1, m2, m3) from a Pulseq sequence object.  The function processes gradient waveforms to compute these values, which are useful for characterizing the magnetic field variations in MRI experiments. It handles multiple repetitions (readouts) and allows for skipping initial dummy scans.</p>
 <h2 id="syntax">Syntax<a class="headerlink" href="#syntax" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="k">function</span><span class="w"> </span><span class="nf">[B, m1, m2, m3] = calcMomentsBtensor</span><span class="p">(</span>obj, varargin<span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="k">function</span><span class="w"> </span><span class="nf">[B, m1, m2, m3] = calcMomentsBtensor</span><span class="p">(</span>varargin<span class="p">)</span>
 </code></pre></div>
 <h2 id="calling-pattern">Calling Pattern<a class="headerlink" href="#calling-pattern" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="n">seq</span><span class="p">.</span><span class="n">calcMomentsBtensor</span><span class="p">(</span><span class="k">...</span><span class="c">)</span>

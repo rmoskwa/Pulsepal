@@ -2725,7 +2725,7 @@
 <h1 id="checktiming">checkTiming<a class="headerlink" href="#checktiming" title="Permanent link">&para;</a></h1>
 <p>This function checks the timing and other parameters of all blocks and objects within a Pulseq sequence.  It verifies consistency between stored block durations and calculated durations, ensures alignment with the blockDurationRaster, and checks for dead times in RF and ADC events. The function modifies the sequence object by adding a 'TotalDuration' field and returns a boolean indicating whether all checks passed, along with a detailed error report if any checks failed.</p>
 <h2 id="syntax">Syntax<a class="headerlink" href="#syntax" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="k">function</span><span class="w"> </span><span class="nf">[is_ok, errorReport]=checkTiming</span><span class="p">(</span>obj<span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="k">function</span><span class="w"> </span><span class="nf">[is_ok, errorReport]=checkTiming</span><span class="p">()</span>
 </code></pre></div>
 <h2 id="calling-pattern">Calling Pattern<a class="headerlink" href="#calling-pattern" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="n">seq</span><span class="p">.</span><span class="n">checkTiming</span><span class="p">(</span><span class="k">...</span><span class="c">)</span>

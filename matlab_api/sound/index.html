@@ -2725,7 +2725,7 @@
 <h1 id="sound">sound<a class="headerlink" href="#sound" title="Permanent link">&para;</a></h1>
 <p>Plays the sequence waveforms through the system speaker.  It processes the waveforms from the Pulseq sequence object, applies channel weighting, performs interpolation to match the desired sample rate, applies a Gaussian filter to suppress ringing artifacts, normalizes the amplitude, and then plays the resulting audio.  The function allows specifying a range of blocks to play and provides an option to only generate the sound data without playing it.</p>
 <h2 id="syntax">Syntax<a class="headerlink" href="#syntax" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="k">function</span><span class="w"> </span>soundData<span class="p">=</span><span class="nf">sound</span><span class="p">(</span>obj, varargin<span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="k">function</span><span class="w"> </span>soundData<span class="p">=</span><span class="nf">sound</span><span class="p">(</span>varargin<span class="p">)</span>
 </code></pre></div>
 <h2 id="calling-pattern">Calling Pattern<a class="headerlink" href="#calling-pattern" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="n">seq</span><span class="p">.</span><span class="n">sound</span><span class="p">(</span><span class="k">...</span><span class="c">)</span>

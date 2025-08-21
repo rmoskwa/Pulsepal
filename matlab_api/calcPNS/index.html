@@ -2743,7 +2743,7 @@
 <h1 id="calcpns">calcPNS<a class="headerlink" href="#calcpns" title="Permanent link">&para;</a></h1>
 <p>Calculates peripheral nerve stimulation (PNS) levels using the safe model implementation by Szczepankiewicz and Witzel.  The function takes hardware specifications and gradient waveforms as input and returns normalized PNS levels for each axis.  It optionally plots the gradient waveforms and can calculate cardiac nerve stimulation (CNS) levels if the hardware data supports it.</p>
 <h2 id="syntax">Syntax<a class="headerlink" href="#syntax" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="k">function</span><span class="w"> </span><span class="nf">[ok, pns_norm, pns_comp, t_axis]=calcPNS</span><span class="p">(</span>obj,hardware,doPlots,calcCNS<span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="k">function</span><span class="w"> </span><span class="nf">[ok, pns_norm, pns_comp, t_axis]=calcPNS</span><span class="p">(</span>hardware,doPlots,calcCNS<span class="p">)</span>
 </code></pre></div>
 <h2 id="calling-pattern">Calling Pattern<a class="headerlink" href="#calling-pattern" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="n">seq</span><span class="p">.</span><span class="n">calcPNS</span><span class="p">(</span><span class="k">...</span><span class="c">)</span>

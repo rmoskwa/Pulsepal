@@ -2707,7 +2707,7 @@
 <h1 id="readbinary">readBinary<a class="headerlink" href="#readbinary" title="Permanent link">&para;</a></h1>
 <p>Loads a Pulseq sequence from a binary file.  This function reads a binary file containing a Pulseq sequence and populates a Pulseq sequence object with the data.  The binary file format is described in the Pulseq specification at http://pulseq.github.io.  The function reads various sections of the binary file, including definitions, blocks, RF pulses, gradients, ADC events, delays, and shapes, and stores them in the appropriate fields of the sequence object.</p>
 <h2 id="syntax">Syntax<a class="headerlink" href="#syntax" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="k">function</span><span class="w"> </span><span class="nf">readBinary</span><span class="p">(</span>obj,filename<span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="k">function</span><span class="w"> </span><span class="nf">readBinary</span><span class="p">(</span>filename<span class="p">)</span>
 </code></pre></div>
 <h2 id="calling-pattern">Calling Pattern<a class="headerlink" href="#calling-pattern" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="n">seq</span><span class="p">.</span><span class="n">readBinary</span><span class="p">(</span><span class="k">...</span><span class="c">)</span>

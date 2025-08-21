@@ -2725,7 +2725,7 @@
 <h1 id="calcrfpower">calcRfPower<a class="headerlink" href="#calcrfpower" title="Permanent link">&para;</a></h1>
 <p>Calculates the relative power of an RF pulse.  It returns the relative energy of the pulse in units of Hz^2<em>s (which simplifies to Hz), where the units represent RF amplitude squared multiplied by time.  The <code>mean_pwr</code> output is closely related to relative SAR.  The function also returns the peak power (in Hz^2) and the RMS B1 amplitude (in Hz).  The power and amplitude values are relative; to convert the RF amplitude to Tesla (T), divide by the gyromagnetic ratio (γ).  Similarly, to convert the power to mT^2</em>s, divide by γ^2. Note that absolute SAR calculation requires additional coil and subject-dependent scaling factors.</p>
 <h2 id="syntax">Syntax<a class="headerlink" href="#syntax" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="k">function</span><span class="w"> </span><span class="nf">[mean_pwr, peak_pwr, rf_rms, total_energy]=calcRfPower</span><span class="p">(</span>obj, varargin<span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="k">function</span><span class="w"> </span><span class="nf">[mean_pwr, peak_pwr, rf_rms, total_energy]=calcRfPower</span><span class="p">(</span>varargin<span class="p">)</span>
 </code></pre></div>
 <h2 id="calling-pattern">Calling Pattern<a class="headerlink" href="#calling-pattern" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="n">seq</span><span class="p">.</span><span class="n">calcRfPower</span><span class="p">(</span><span class="k">...</span><span class="c">)</span>

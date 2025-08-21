@@ -2743,7 +2743,7 @@
 <h1 id="applytoseq">applyToSeq<a class="headerlink" href="#applytoseq" title="Permanent link">&para;</a></h1>
 <p>This helper function applies a transformation defined by an object <code>obj</code> to a Pulseq sequence <code>seq</code>. It iterates through blocks of the sequence within a specified range and applies the transformation defined in <code>obj.applyToBlock</code> to each block.  It offers the option to modify the input sequence (<code>sameSeq = false</code>) or to perform the transformation in-place (<code>sameSeq = true</code>).</p>
 <h2 id="syntax">Syntax<a class="headerlink" href="#syntax" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="k">function</span><span class="w"> </span>seq2<span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nf">applyToSeq</span><span class="p">(</span>obj, seq, varargin<span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="k">function</span><span class="w"> </span>seq2<span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nf">applyToSeq</span><span class="p">(</span>varargin<span class="p">)</span>
 </code></pre></div>
 <h2 id="calling-pattern">Calling Pattern<a class="headerlink" href="#calling-pattern" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="n">tra</span><span class="p">.</span><span class="n">applyToSeq</span><span class="p">(</span><span class="k">...</span><span class="c">)</span>

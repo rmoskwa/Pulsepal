@@ -2743,7 +2743,7 @@
 <h1 id="findblockbytime">findBlockByTime<a class="headerlink" href="#findblockbytime" title="Permanent link">&para;</a></h1>
 <p>This helper function finds the index of the block in a Pulseq sequence that contains a given time point.  It takes a sequence object and a time value as input and returns the index of the block that encompasses that time. The function iterates through the cumulative sum of block durations until it finds the block containing the specified time.  It handles cases where the time is beyond the sequence duration by returning an empty array.</p>
 <h2 id="syntax">Syntax<a class="headerlink" href="#syntax" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="k">function</span><span class="w"> </span>iB<span class="p">=</span><span class="nf">findBlockByTime</span><span class="p">(</span>obj,t<span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="k">function</span><span class="w"> </span>iB<span class="p">=</span><span class="nf">findBlockByTime</span><span class="p">(</span>t<span class="p">)</span>
 </code></pre></div>
 <h2 id="calling-pattern">Calling Pattern<a class="headerlink" href="#calling-pattern" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="n">seq</span><span class="p">.</span><span class="n">findBlockByTime</span><span class="p">(</span><span class="k">...</span><span class="c">)</span>

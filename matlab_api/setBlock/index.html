@@ -2743,7 +2743,7 @@
 <h1 id="setblock">setBlock<a class="headerlink" href="#setblock" title="Permanent link">&para;</a></h1>
 <p>This function adds or replaces a block of events within a Pulseq sequence. It accepts events in uncompressed form and stores them in the sequence's internal, compressed, non-redundant libraries.  It handles different input formats: a pre-defined block structure, individual events, or a duration with subsequent events.  Error checking ensures that event durations do not exceed a specified duration when provided.</p>
 <h2 id="syntax">Syntax<a class="headerlink" href="#syntax" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="k">function</span><span class="w"> </span><span class="nf">setBlock</span><span class="p">(</span>obj, index, varargin<span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="k">function</span><span class="w"> </span><span class="nf">setBlock</span><span class="p">(</span>index, varargin<span class="p">)</span>
 </code></pre></div>
 <h2 id="calling-pattern">Calling Pattern<a class="headerlink" href="#calling-pattern" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="n">seq</span><span class="p">.</span><span class="n">setBlock</span><span class="p">(</span><span class="k">...</span><span class="c">)</span>

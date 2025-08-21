@@ -2743,7 +2743,7 @@
 <h1 id="getblock">getBlock<a class="headerlink" href="#getblock" title="Permanent link">&para;</a></h1>
 <p>Retrieves a specific block from a Pulseq sequence object.  The function decompresses all events and shapes within the requested block and returns it as a structure. It also handles the extraction and unpacking of optional extensions like triggers and labels associated with the block.</p>
 <h2 id="syntax">Syntax<a class="headerlink" href="#syntax" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="k">function</span><span class="w"> </span>block<span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nf">getBlock</span><span class="p">(</span>obj, index, addIDs<span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="k">function</span><span class="w"> </span>block<span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nf">getBlock</span><span class="p">(</span>index, addIDs<span class="p">)</span>
 </code></pre></div>
 <h2 id="calling-pattern">Calling Pattern<a class="headerlink" href="#calling-pattern" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="n">seq</span><span class="p">.</span><span class="n">getBlock</span><span class="p">(</span><span class="k">...</span><span class="c">)</span>
@@ -2764,15 +2764,8 @@
 <tr>
 <td><code>index</code></td>
 <td>double</td>
-<td>The index (integer) of the block to retrieve (1-based indexing).</td>
+<td>The index (integer) of the block to retrieve (1-based indexing)</td>
 <td><code>1</code></td>
-<td></td>
-</tr>
-<tr>
-<td><code>addIDs</code></td>
-<td>logical</td>
-<td>A boolean flag indicating whether to include IDs for triggers and labels in the returned block structure. If true, the 'id' field will be added to trigger and label data.</td>
-<td><code>true</code></td>
 <td></td>
 </tr>
 </tbody>
@@ -2790,11 +2783,11 @@
 </thead>
 <tbody>
 <tr>
-<td><code>trajectory_delay</code></td>
-<td>double</td>
-<td><code>0</code></td>
-<td>This parameter is not explicitly used in the provided code excerpt, and its purpose is unclear from this context. It might be related to a feature not shown in the provided code snippet. Valid values: Non-negative scalar (Units: seconds)</td>
-<td><code>0.001</code></td>
+<td><code>addIDs</code></td>
+<td>logical</td>
+<td><code>false</code></td>
+<td>A boolean flag indicating whether to include IDs for triggers and labels in the returned block structure</td>
+<td><code>true</code></td>
 </tr>
 </tbody>
 </table>

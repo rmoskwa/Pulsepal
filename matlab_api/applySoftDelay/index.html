@@ -2689,7 +2689,7 @@
 <h1 id="applysoftdelay">applySoftDelay<a class="headerlink" href="#applysoftdelay" title="Permanent link">&para;</a></h1>
 <p>This function adjusts the durations of blocks within a Pulseq sequence based on user-specified soft delays.  It takes key-value pairs as input, where the keys are string identifiers (hints) for soft delays (e.g., 'TE', 'TR') and the values are the desired durations in seconds.  The function iterates through the sequence's blocks, identifying those with matching soft delay hints. It then updates the block durations accordingly, ensuring consistency between the numeric and string IDs associated with each soft delay.  Soft delays not specified in the input are left unchanged.</p>
 <h2 id="syntax">Syntax<a class="headerlink" href="#syntax" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="k">function</span><span class="w"> </span><span class="nf">applySoftDelay</span><span class="p">(</span>obj, varargin<span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="k">function</span><span class="w"> </span><span class="nf">applySoftDelay</span><span class="p">(</span>varargin<span class="p">)</span>
 </code></pre></div>
 <h2 id="calling-pattern">Calling Pattern<a class="headerlink" href="#calling-pattern" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="n">seq</span><span class="p">.</span><span class="n">applySoftDelay</span><span class="p">(</span><span class="k">...</span><span class="c">)</span>

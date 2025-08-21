@@ -2743,7 +2743,7 @@
 <h1 id="waveforms_and_times">waveforms_and_times<a class="headerlink" href="#waveforms_and_times" title="Permanent link">&para;</a></h1>
 <p>This function extracts and organizes waveform data from a Pulseq sequence object. It decompresses the gradient waveforms, returning them as a cell array where each cell contains time points and corresponding gradient amplitude values for each gradient axis (typically x, y, and z).  It also returns timing information for excitation and refocusing RF pulses, and ADC sampling points, including frequency and phase offsets.  If the <code>appendRF</code> flag is true, RF waveforms are included in the output.</p>
 <h2 id="syntax">Syntax<a class="headerlink" href="#syntax" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="k">function</span><span class="w"> </span><span class="nf">[wave_data, tfp_excitation, tfp_refocusing, t_adc, fp_adc, pm_adc]=waveforms_and_times</span><span class="p">(</span>obj, appendRF, blockRange<span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="k">function</span><span class="w"> </span><span class="nf">[wave_data, tfp_excitation, tfp_refocusing, t_adc, fp_adc, pm_adc]=waveforms_and_times</span><span class="p">(</span>appendRF, blockRange<span class="p">)</span>
 </code></pre></div>
 <h2 id="calling-pattern">Calling Pattern<a class="headerlink" href="#calling-pattern" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="n">seq</span><span class="p">.</span><span class="n">waveforms_and_times</span><span class="p">(</span><span class="k">...</span><span class="c">)</span>

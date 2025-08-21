@@ -2707,7 +2707,7 @@
 <h1 id="applytoblock">applyToBlock<a class="headerlink" href="#applytoblock" title="Permanent link">&para;</a></h1>
 <p>This helper function processes a sequence of Pulseq events (potentially within a block) and converts it into a standardized cell array.  It separates the events into different categories: RF pulses, ADC events, gradient events (x, y, z), and other miscellaneous events. It also handles the case where the input is a single structure representing a block of events or a cell array containing such structures.  The function updates the object's label settings based on 'NOPOS', 'NOROT', and 'NOSCL' labels present in the input events.</p>
 <h2 id="syntax">Syntax<a class="headerlink" href="#syntax" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="k">function</span><span class="w"> </span>out<span class="p">=</span><span class="nf">applyToBlock</span><span class="p">(</span>obj, varargin<span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="k">function</span><span class="w"> </span>out<span class="p">=</span><span class="nf">applyToBlock</span><span class="p">(</span>varargin<span class="p">)</span>
 </code></pre></div>
 <h2 id="calling-pattern">Calling Pattern<a class="headerlink" href="#calling-pattern" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="n">tra</span><span class="p">.</span><span class="n">applyToBlock</span><span class="p">(</span><span class="k">...</span><span class="c">)</span>
