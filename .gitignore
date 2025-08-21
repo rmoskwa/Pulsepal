@@ -216,6 +216,7 @@ backups/
 .rollback_history.json
 cleanup_archive_*.tar.gz
 *_backup_*.json
+conversationLogs/archive/
 
 # Deployment specific
 railway.toml
