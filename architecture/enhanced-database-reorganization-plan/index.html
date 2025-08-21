@@ -1,0 +1,4166 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Complete API reference for Pulseq MATLAB functions">
+      
+      
+      
+        <link rel="canonical" href="https://rmoskwa.github.io/Pulsepal/architecture/enhanced-database-reorganization-plan/">
+      
+      
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.16">
+    
+    
+      
+        <title>Enhanced PulsePal Database Reorganization Plan - Pulseq MATLAB API Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.7e37652d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="light-blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#enhanced-pulsepal-database-reorganization-plan" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Pulseq MATLAB API Documentation" class="md-header__button md-logo" aria-label="Pulseq MATLAB API Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Pulseq MATLAB API Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Enhanced PulsePal Database Reorganization Plan
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../matlab_api/" class="md-tabs__link">
+          
+  
+  
+  API Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Pulseq MATLAB API Documentation" class="md-nav__button md-logo" aria-label="Pulseq MATLAB API Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Pulseq MATLAB API Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    API Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            API Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Functions
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            Functions
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/addBlock/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    addBlock
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/addGradients/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    addGradients
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/addRamps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    addRamps
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/align/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    align
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/applySoftDelay/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    applySoftDelay
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/applyToBlock/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    applyToBlock
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/applyToSeq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    applyToSeq
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/calcAdcSeg/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    calcAdcSeg
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/calcDuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    calcDuration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/calcMomentsBtensor/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    calcMomentsBtensor
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/calcPNS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    calcPNS
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/calcRamp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    calcRamp
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/calcRfBandwidth/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    calcRfBandwidth
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/calcRfCenter/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    calcRfCenter
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/calcRfPower/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    calcRfPower
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/calculateKspacePP/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    calculateKspacePP
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/checkTiming/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    checkTiming
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/compressShape/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    compressShape
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/compressShape_mat/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    compressShape_mat
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/conjugate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    conjugate
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/convert/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    convert
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/decompressShape/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    decompressShape
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/duration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    duration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/evalLabels/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    evalLabels
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/EventLibrary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    EventLibrary
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/findBlockByTime/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    findBlockByTime
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/findFlank/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    findFlank
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/flipGradAxis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    flipGradAxis
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/fromRotMat/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    fromRotMat
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/gauss/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    gauss
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/getBlock/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    getBlock
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/getDefinition/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    getDefinition
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/getSupportedLabels/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    getSupportedLabels
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/getSupportedRfUse/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    getSupportedRfUse
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/init/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    init
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/install/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    install
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/isOctave/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    isOctave
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/makeAdc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeAdc
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/makeAdiabaticPulse/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeAdiabaticPulse
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/makeArbitraryGrad/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeArbitraryGrad
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/makeArbitraryRf/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeArbitraryRf
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/makeBlockPulse/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeBlockPulse
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/makeDelay/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeDelay
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/makeDigitalOutputPulse/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeDigitalOutputPulse
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/makeExtendedTrapezoid/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeExtendedTrapezoid
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/makeExtendedTrapezoidArea/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeExtendedTrapezoidArea
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/makeGaussPulse/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeGaussPulse
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/makeLabel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeLabel
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/makeSincPulse/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeSincPulse
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/makeSLRpulse/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeSLRpulse
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/makeSoftDelay/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeSoftDelay
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/makeTrapezoid/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeTrapezoid
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/makeTrigger/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeTrigger
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/md5/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    md5
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/melodyToPitchesAndDurations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    melodyToPitchesAndDurations
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/melodyToScale/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    melodyToScale
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/modGradAxis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    modGradAxis
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/multiply/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    multiply
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/musicToSequence/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    musicToSequence
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/normalize/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    normalize
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/opts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    opts
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/paperPlot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    paperPlot
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/parsemr/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    parsemr
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/plot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    plot
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/pts2waveform/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    pts2waveform
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/read/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    read
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/readasc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    readasc
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/readBinary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    readBinary
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/restoreAdditionalShapeSamples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    restoreAdditionalShapeSamples
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/rotate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    rotate
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/rotate3D/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    rotate3D
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/scaleGrad/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    scaleGrad
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/SeqPlot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    SeqPlot
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/Sequence/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Sequence
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/setBlock/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    setBlock
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/setDefinition/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    setDefinition
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/simRf/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    simRf
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/sinc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    sinc
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/sound/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    sound
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/splitGradient/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    splitGradient
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/splitGradientAt/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    splitGradientAt
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/testReport/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    testReport
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/toRotMat/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    toRotMat
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/traj2grad/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    traj2grad
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/transform/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    transform
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/TransformFOV/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    TransformFOV
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/version/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    version
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/waveforms_and_times/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    waveforms_and_times
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/write/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    write
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/write_v141/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    write_v141
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/writeBinary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    writeBinary
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#executive-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      Executive Summary
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Executive Summary">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cleanup-progress-as-of-january-21-2025" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cleanup Progress (as of January 21, 2025):
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#current-state" class="md-nav__link">
+    <span class="md-ellipsis">
+      Current State:
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-findings-from-repository-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Findings from Repository Analysis
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Key Findings from Repository Analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#repository-quality-tiers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Repository Quality Tiers
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Repository Quality Tiers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tier-1-core-pulseq-keep-100" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tier 1: Core Pulseq (Keep 100%)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tier-2-high-value-examples-keep-selectively" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tier 2: High-Value Examples (Keep Selectively)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tier-3-utility-heavy-keep-20" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tier 3: Utility-Heavy (Keep &lt;20%)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tier-4-low-value-remove" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tier 4: Low Value (Remove)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#content-type-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Content Type Analysis
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Content Type Analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#current-distribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Current Distribution
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#critical-utility-function-analysis-end-to-end-expertise-approach" class="md-nav__link">
+    <span class="md-ellipsis">
+      Critical Utility Function Analysis - End-to-End Expertise Approach
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Critical Utility Function Analysis - End-to-End Expertise Approach">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-complete-pulseq-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      The Complete Pulseq Pipeline
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#utility-function-categories-and-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Utility Function Categories and Decisions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-keep-reconstruction-knowledge" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why Keep Reconstruction Knowledge?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#revised-utility-categorization-three-tier-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      Revised Utility Categorization - Three-Tier System
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smart-retrieval-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Smart Retrieval Strategy
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#proposed-database-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      Proposed Database Schema
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Proposed Database Schema">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#simplified-3-table-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      Simplified 3-Table Architecture
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smart-views-for-efficient-access" class="md-nav__link">
+    <span class="md-ellipsis">
+      Smart Views for Efficient Access
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation-roadmap" class="md-nav__link">
+    <span class="md-ellipsis">
+      Implementation Roadmap
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementation Roadmap">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phase-1-targeted-cleanup-week-1-completed" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 1: Targeted Cleanup (Week 1) - ✅ COMPLETED
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Phase 1: Targeted Cleanup (Week 1) - ✅ COMPLETED">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#removed-276-files-total-preserving-pipeline-knowledge" class="md-nav__link">
+    <span class="md-ellipsis">
+      Removed 276 Files Total (Preserving Pipeline Knowledge)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-2-content-migration-enrichment-week-1-2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 2: Content Migration &amp; Enrichment (Week 1-2)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-3-validate-critical-patterns-week-2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 3: Validate Critical Patterns (Week 2)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-4-performance-optimization-week-3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 4: Performance Optimization (Week 3)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#expected-outcomes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Expected Outcomes
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Expected Outcomes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#quantitative-improvements-achieved" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quantitative Improvements ✅ ACHIEVED
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#qualitative-improvements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Qualitative Improvements
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quality-metrics-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quality Metrics Dashboard
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#maintenance-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Maintenance Strategy
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Maintenance Strategy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#weekly-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Weekly Tasks
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#monthly-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Monthly Tasks
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#quarterly-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quarterly Tasks
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#critical-decision-matlab-only-focus" class="md-nav__link">
+    <span class="md-ellipsis">
+      Critical Decision: MATLAB-Only Focus
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Critical Decision: MATLAB-Only Focus">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-remove-all-python-content" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why Remove All Python Content?
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Why Remove All Python Content?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-version-mismatch-problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      The Version Mismatch Problem
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#current-python-content-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Current Python Content Analysis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api-confusion-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      API Confusion Example
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#benefits-of-matlab-only-approach" class="md-nav__link">
+    <span class="md-ellipsis">
+      Benefits of MATLAB-Only Approach
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#future-python-integration-plan" class="md-nav__link">
+    <span class="md-ellipsis">
+      Future Python Integration Plan
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#critical-decision-utility-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      Critical Decision: Utility Files
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Critical Decision: Utility Files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#revised-understanding-the-sequence-reconstruction-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      Revised Understanding: The Sequence-Reconstruction Interface
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Revised Understanding: The Sequence-Reconstruction Interface">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-actual-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      The Actual Workflow
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#evidence-from-official-pulseq" class="md-nav__link">
+    <span class="md-ellipsis">
+      Evidence from Official Pulseq
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#critical-sequence-reconstruction-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Critical Sequence-Reconstruction Dependencies
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#revised-what-we-keep-vs-remove-end-to-end-expertise" class="md-nav__link">
+    <span class="md-ellipsis">
+      Revised: What We Keep vs Remove (End-to-End Expertise)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#impact-on-pulsepal-users" class="md-nav__link">
+    <span class="md-ellipsis">
+      Impact on PulsePal Users
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Impact on PulsePal Users">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-how-do-i-write-a-spiral-sequence" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example: "How do I write a spiral sequence?"
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-how-do-i-implement-2x-grappa-acceleration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example: "How do I implement 2x GRAPPA acceleration?"
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-why-are-my-images-shifteddistorted" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example: "Why are my images shifted/distorted?"
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vendor-conversion-tools-why-theyre-critical" class="md-nav__link">
+    <span class="md-ellipsis">
+      Vendor Conversion Tools: Why They're Critical
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Vendor Conversion Tools: Why They&#39;re Critical">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-pulseq-execution-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      The Pulseq Execution Pipeline
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-vendor-conversion-tools-do" class="md-nav__link">
+    <span class="md-ellipsis">
+      What Vendor Conversion Tools Do
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-ge-conversion-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example: GE Conversion Process
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-keep-these-in-the-knowledge-base" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why Keep These in the Knowledge Base
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-happens-without-conversion-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      What Happens Without Conversion Tools?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pulsepals-role" class="md-nav__link">
+    <span class="md-ellipsis">
+      PulsePal's Role
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-discovery-end-to-end-pipeline-knowledge-is-essential" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Discovery: End-to-End Pipeline Knowledge is Essential
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Key Discovery: End-to-End Pipeline Knowledge is Essential">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-complete-picture" class="md-nav__link">
+    <span class="md-ellipsis">
+      The Complete Picture
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-this-means-for-pulsepal" class="md-nav__link">
+    <span class="md-ellipsis">
+      What This Means for PulsePal
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#conclusion" class="md-nav__link">
+    <span class="md-ellipsis">
+      Conclusion
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Conclusion">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#next-steps-after-cleanup" class="md-nav__link">
+    <span class="md-ellipsis">
+      Next Steps After Cleanup
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="enhanced-pulsepal-database-reorganization-plan">Enhanced PulsePal Database Reorganization Plan<a class="headerlink" href="#enhanced-pulsepal-database-reorganization-plan" title="Permanent link">&para;</a></h1>
+<h2 id="executive-summary">Executive Summary<a class="headerlink" href="#executive-summary" title="Permanent link">&para;</a></h2>
+<p>After comprehensive analysis of the 27 GitHub repositories (1,703 documents) in the PulsePal knowledge base, we've identified clear patterns for optimizing RAG search effectiveness. </p>
+<h3 id="cleanup-progress-as-of-january-21-2025">Cleanup Progress (as of January 21, 2025):<a class="headerlink" href="#cleanup-progress-as-of-january-21-2025" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Original</strong>: 1,703 documents</li>
+<li><strong>After Python removal</strong>: 1,514 documents (-189)</li>
+<li><strong>After Phase 2 cleanup</strong>: 1,427 documents (-87 more)</li>
+<li><strong>Total removed</strong>: 276 documents (16% reduction)</li>
+</ul>
+<h3 id="current-state">Current State:<a class="headerlink" href="#current-state" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>1,178 MATLAB files</strong> (83% of content)</li>
+<li><strong>135 sequence implementation files</strong> (with seq.addBlock)</li>
+<li><strong>0 Python files</strong> - ✅ REMOVED</li>
+<li><strong>0 archived files</strong> - ✅ REMOVED  </li>
+<li><strong>Minimal generic utilities</strong> - ✅ CLEANED</li>
+</ul>
+<p><strong>Strategic Decision</strong>: Focus exclusively on MATLAB (v1.5.0) with end-to-end pipeline knowledge preserved.</p>
+<h2 id="key-findings-from-repository-analysis">Key Findings from Repository Analysis<a class="headerlink" href="#key-findings-from-repository-analysis" title="Permanent link">&para;</a></h2>
+<h3 id="repository-quality-tiers">Repository Quality Tiers<a class="headerlink" href="#repository-quality-tiers" title="Permanent link">&para;</a></h3>
+<h4 id="tier-1-core-pulseq-keep-100">Tier 1: Core Pulseq (Keep 100%)<a class="headerlink" href="#tier-1-core-pulseq-keep-100" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>pulseq/pulseq</strong>: 240 Pulseq score, 192 files - Official implementation</li>
+<li><strong>pulseq/tutorials</strong>: 110 Pulseq score, 47 files - Educational gold</li>
+<li><strong>imr-framework/pypulseq</strong>: Python port, essential for multi-language support</li>
+</ul>
+<h4 id="tier-2-high-value-examples-keep-selectively">Tier 2: High-Value Examples (Keep Selectively)<a class="headerlink" href="#tier-2-high-value-examples-keep-selectively" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>HarmonizedMRI/SequenceExamples-GE</strong>: 60 Pulseq score, vendor adaptations (TRID, seq2ceq)</li>
+<li><strong>pulseq/MR-Physics-with-Pulseq</strong>: Educational notebooks with solutions</li>
+<li><strong>HarmonizedMRI/Pulseq-diffusion</strong>: Specialized diffusion sequences</li>
+</ul>
+<h4 id="tier-3-utility-heavy-keep-20">Tier 3: Utility-Heavy (Keep &lt;20%)<a class="headerlink" href="#tier-3-utility-heavy-keep-20" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>MIMOSA</strong>: 283 files, only 20 Pulseq score - Mostly generic utilities</li>
+<li><strong>PRIME</strong>: 194 files, 49 Pulseq score - Some value but lots of noise</li>
+<li><strong>wave-haste</strong>: 134 files, 24 Pulseq score - 96% utilities</li>
+</ul>
+<h4 id="tier-4-low-value-remove">Tier 4: Low Value (Remove)<a class="headerlink" href="#tier-4-low-value-remove" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>HarmonizedMRI/3DEPI</strong>: 0 Pulseq score - Pure reconstruction, no sequences</li>
+<li><strong>HarmonizedMRI/SOSP3d</strong>: 0 Pulseq score - PyTorch reconstruction only</li>
+<li><strong>Fast-fMRI</strong>: 1 file, no Pulseq content</li>
+</ul>
+<h2 id="content-type-analysis">Content Type Analysis<a class="headerlink" href="#content-type-analysis" title="Permanent link">&para;</a></h2>
+<h3 id="current-distribution">Current Distribution<a class="headerlink" href="#current-distribution" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>Content Type         | Files | Avg Size | Total Size | Action
+--------------------|-------|----------|------------|--------
+MATLAB Code (.m)    | 785   | 7.4KB    | 5.8MB      | Filter &amp; Keep
+Utilities (/utils/) | 434   | 6.6KB    | 2.9MB      | Remove 95%
+Python Code (.py)   | 106   | 27KB     | 2.9MB      | REMOVE ALL
+Documentation (.md) | 84    | 4.2KB    | 352KB      | Keep all
+Archived (/attic/) | 30    | 5.3KB    | 158KB      | Remove all
+Config files       | 15    | 4.6KB    | 69KB       | Remove all
+</code></pre></div>
+<h3 id="critical-utility-function-analysis-end-to-end-expertise-approach">Critical Utility Function Analysis - End-to-End Expertise Approach<a class="headerlink" href="#critical-utility-function-analysis-end-to-end-expertise-approach" title="Permanent link">&para;</a></h3>
+<p><strong>IMPORTANT REVISION</strong>: PulsePal must be an <strong>end-to-end Pulseq expert</strong> that understands the complete pipeline from sequence generation through reconstruction. This enables comprehensive support for debugging, research, and cutting-edge implementations.</p>
+<h4 id="the-complete-pulseq-pipeline">The Complete Pulseq Pipeline<a class="headerlink" href="#the-complete-pulseq-pipeline" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code>1. Sequence Design → 2. Data Acquisition → 3. Reconstruction → 4. Image Analysis
+    (Pulseq Code)      (Scanner Execution)    (May need custom)    (Research/Clinical)
+</code></pre></div>
+<h4 id="utility-function-categories-and-decisions">Utility Function Categories and Decisions<a class="headerlink" href="#utility-function-categories-and-decisions" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code>Utility Category        | Files | Keep? | Rationale
+------------------------|-------|-------|------------------------------------------
+trajectory_calculation  | 64    | ✅ YES | Core for non-Cartesian, debugging timing
+vendor_conversion       | 10    | ✅ YES | Critical for scanner deployment
+sampling_patterns       | 11    | ✅ YES | Acceleration strategies (CAIPI, etc.)
+novel_reconstruction    | 30    | ✅ YES | Wave-CAIPI, SMS - scanners can&#39;t handle
+field_mapping          | 6     | ✅ YES | B0/B1 calibration sequences
+non_cartesian          | 3     | ✅ YES | Spiral/radial specific handling
+gridding_nufft         | 14    | ✅ YES | Understanding non-Cartesian recon
+kernel_calculation     | 12    | ✅ YES | How GRAPPA works - debugging value
+standard_recon         | ~50   | ✅ YES | Educational, benchmarking, validation
+generic_fft            | 11    | ❌ NO  | fft2c, ifft3c - truly generic
+generic_array_ops      | 14    | ❌ NO  | crop, reshape - standard MATLAB
+setup_scripts          | ~20   | ❌ NO  | setup.m, path configs
+test_files             | ~30   | ❌ NO  | Unit tests, not educational
+</code></pre></div>
+<h4 id="why-keep-reconstruction-knowledge">Why Keep Reconstruction Knowledge?<a class="headerlink" href="#why-keep-reconstruction-knowledge" title="Permanent link">&para;</a></h4>
+<ol>
+<li><strong>Debugging Support</strong></li>
+<li>User: "Why are my images distorted?"</li>
+<li>
+<p>PulsePal: "Check trajectory delays in reconstruction, here's how..."</p>
+</li>
+<li>
+<p><strong>Research Enablement</strong></p>
+</li>
+<li>Novel sequences often need custom reconstruction</li>
+<li>
+<p>Understanding the full pipeline prevents failed experiments</p>
+</li>
+<li>
+<p><strong>Educational Value</strong></p>
+</li>
+<li>Researchers need to understand HOW their sampling affects images</li>
+<li>
+<p>GRAPPA/SENSE implementations show WHY certain patterns work</p>
+</li>
+<li>
+<p><strong>Offline Development</strong></p>
+</li>
+<li>Many researchers develop without scanner access</li>
+<li>Need reconstruction to validate sequences</li>
+</ol>
+<h3 id="revised-utility-categorization-three-tier-system">Revised Utility Categorization - Three-Tier System<a class="headerlink" href="#revised-utility-categorization-three-tier-system" title="Permanent link">&para;</a></h3>
+<p><strong>Tier 1 - Core Sequence (Highest Priority)</strong>
+- Pulseq sequence files (<code>seq.addBlock</code>, <code>mr.make*</code>)
+- Direct sequence generation code
+- ~240 files</p>
+<p><strong>Tier 2 - Pipeline Support (Medium Priority)</strong>
+- Trajectory calculation utilities
+- Vendor conversion tools
+- Sampling pattern generators
+- Field mapping sequences
+- ~100 files</p>
+<p><strong>Tier 3 - Reference Implementation (Lower Priority, but KEPT)</strong>
+- GRAPPA/SENSE implementations
+- Reconstruction algorithms
+- Gridding/NUFFT code
+- Educational examples
+- ~150 files</p>
+<h3 id="smart-retrieval-strategy">Smart Retrieval Strategy<a class="headerlink" href="#smart-retrieval-strategy" title="Permanent link">&para;</a></h3>
+<p>PulsePal will use metadata tagging to provide context-appropriate responses:
+- <strong>Basic query</strong>: Focus on Tier 1 (sequence code)
+- <strong>Debugging</strong>: Include Tier 2 &amp; 3 (full pipeline understanding)
+- <strong>Research</strong>: Access all tiers (complete knowledge)</p>
+<h2 id="proposed-database-schema">Proposed Database Schema<a class="headerlink" href="#proposed-database-schema" title="Permanent link">&para;</a></h2>
+<h3 id="simplified-3-table-architecture">Simplified 3-Table Architecture<a class="headerlink" href="#simplified-3-table-architecture" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1">-- 1. knowledge_base: Core content with rich metadata</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">knowledge_base</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="n">id</span><span class="w"> </span><span class="n">BIGSERIAL</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="p">,</span>
+<span class="w">    </span><span class="n">content</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">    </span><span class="n">source_url</span><span class="w"> </span><span class="nb">TEXT</span><span class="p">,</span>
+
+<span class="w">    </span><span class="c1">-- Content classification</span>
+<span class="w">    </span><span class="n">content_type</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span><span class="w"> </span><span class="k">CHECK</span><span class="w"> </span><span class="p">(</span><span class="n">content_type</span><span class="w"> </span><span class="k">IN</span><span class="w"> </span><span class="p">(</span>
+<span class="w">        </span><span class="s1">&#39;sequence_implementation&#39;</span><span class="p">,</span><span class="w">  </span><span class="c1">-- Complete sequence examples</span>
+<span class="w">        </span><span class="s1">&#39;pulseq_function&#39;</span><span class="p">,</span><span class="w">         </span><span class="c1">-- Core Pulseq functions (mr.*)</span>
+<span class="w">        </span><span class="s1">&#39;vendor_adaptation&#39;</span><span class="p">,</span><span class="w">       </span><span class="c1">-- GE/Siemens specific</span>
+<span class="w">        </span><span class="s1">&#39;educational&#39;</span><span class="p">,</span><span class="w">            </span><span class="c1">-- Tutorials, workshops</span>
+<span class="w">        </span><span class="s1">&#39;mri_utility&#39;</span><span class="p">,</span><span class="w">           </span><span class="c1">-- MRI-specific helpers</span>
+<span class="w">        </span><span class="s1">&#39;concept_explanation&#39;</span><span class="w">    </span><span class="c1">-- Theory, physics</span>
+<span class="w">    </span><span class="p">)),</span>
+
+<span class="w">    </span><span class="c1">-- Quality and relevance scoring</span>
+<span class="w">    </span><span class="n">quality_score</span><span class="w"> </span><span class="nb">INTEGER</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="mi">50</span><span class="p">,</span><span class="w">  </span><span class="c1">-- 0-100 scale</span>
+<span class="w">    </span><span class="n">pulseq_version</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">20</span><span class="p">),</span><span class="w">       </span><span class="c1">-- &#39;1.4.0&#39;, &#39;2.0.0&#39;, etc.</span>
+<span class="w">    </span><span class="k">language</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span><span class="w">              </span><span class="c1">-- &#39;matlab&#39;, &#39;python&#39;</span>
+
+<span class="w">    </span><span class="c1">-- Rich metadata for better search</span>
+<span class="w">    </span><span class="n">metadata</span><span class="w"> </span><span class="n">JSONB</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="s1">&#39;{}&#39;</span><span class="p">,</span>
+<span class="w">    </span><span class="cm">/*</span>
+<span class="cm">    Example metadata structure:</span>
+<span class="cm">    {</span>
+<span class="cm">        &quot;sequence_type&quot;: &quot;EPI&quot;,           -- GRE, EPI, MPRAGE, etc.</span>
+<span class="cm">        &quot;difficulty&quot;: &quot;intermediate&quot;,     -- beginner, intermediate, advanced</span>
+<span class="cm">        &quot;has_reconstruction&quot;: true,</span>
+<span class="cm">        &quot;vendor_specific&quot;: [&quot;GE&quot;, &quot;Siemens&quot;],</span>
+<span class="cm">        &quot;pulseq_functions&quot;: [&quot;mr.makeSincPulse&quot;, &quot;seq.addBlock&quot;],</span>
+<span class="cm">        &quot;file_path&quot;: &quot;original/path/to/file.m&quot;,</span>
+<span class="cm">        &quot;github_stars&quot;: 245,              -- Repository popularity</span>
+<span class="cm">        &quot;last_updated&quot;: &quot;2024-06-15&quot;,</span>
+<span class="cm">        &quot;dependencies&quot;: [&quot;Signal Processing Toolbox&quot;],</span>
+<span class="cm">        &quot;tested_scanners&quot;: [&quot;GE Premier&quot;, &quot;Siemens Prisma&quot;]</span>
+<span class="cm">    }</span>
+<span class="cm">    */</span>
+
+<span class="w">    </span><span class="c1">-- Vector embedding for semantic search</span>
+<span class="w">    </span><span class="n">embedding</span><span class="w"> </span><span class="n">vector</span><span class="p">(</span><span class="mi">768</span><span class="p">),</span>
+
+<span class="w">    </span><span class="c1">-- Timestamps</span>
+<span class="w">    </span><span class="n">created_at</span><span class="w"> </span><span class="n">TIMESTAMPTZ</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="n">NOW</span><span class="p">(),</span>
+<span class="w">    </span><span class="n">updated_at</span><span class="w"> </span><span class="n">TIMESTAMPTZ</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="n">NOW</span><span class="p">(),</span>
+
+<span class="w">    </span><span class="c1">-- Indexes</span>
+<span class="w">    </span><span class="k">INDEX</span><span class="w"> </span><span class="n">idx_content_type</span><span class="w"> </span><span class="p">(</span><span class="n">content_type</span><span class="p">),</span>
+<span class="w">    </span><span class="k">INDEX</span><span class="w"> </span><span class="n">idx_quality_score</span><span class="w"> </span><span class="p">(</span><span class="n">quality_score</span><span class="p">),</span>
+<span class="w">    </span><span class="k">INDEX</span><span class="w"> </span><span class="n">idx_language</span><span class="w"> </span><span class="p">(</span><span class="k">language</span><span class="p">),</span>
+<span class="w">    </span><span class="k">INDEX</span><span class="w"> </span><span class="n">idx_embedding_vector</span><span class="w"> </span><span class="p">(</span><span class="n">embedding</span><span class="p">)</span><span class="w"> </span><span class="k">USING</span><span class="w"> </span><span class="n">ivfflat</span>
+<span class="p">);</span>
+
+<span class="c1">-- 2. validated_patterns: Curated, verified code patterns</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">validated_patterns</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="n">id</span><span class="w"> </span><span class="n">BIGSERIAL</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="p">,</span>
+<span class="w">    </span><span class="n">pattern_name</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span><span class="w"> </span><span class="k">UNIQUE</span><span class="p">,</span>
+<span class="w">    </span><span class="n">pattern_category</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">50</span><span class="p">),</span><span class="w">  </span><span class="c1">-- &#39;vendor_fix&#39;, &#39;common_bug&#39;, &#39;optimization&#39;</span>
+
+<span class="w">    </span><span class="n">problem_description</span><span class="w"> </span><span class="nb">TEXT</span><span class="p">,</span>
+<span class="w">    </span><span class="n">solution_code</span><span class="w"> </span><span class="nb">TEXT</span><span class="p">,</span>
+
+<span class="w">    </span><span class="c1">-- Validation metadata</span>
+<span class="w">    </span><span class="n">verified_by</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span><span class="w">      </span><span class="c1">-- Who validated this</span>
+<span class="w">    </span><span class="n">verification_date</span><span class="w"> </span><span class="nb">DATE</span><span class="p">,</span>
+<span class="w">    </span><span class="n">works_on_scanners</span><span class="w"> </span><span class="nb">TEXT</span><span class="p">[],</span><span class="w">      </span><span class="c1">-- Array of tested scanners</span>
+
+<span class="w">    </span><span class="c1">-- Usage tracking</span>
+<span class="w">    </span><span class="n">usage_count</span><span class="w"> </span><span class="nb">INTEGER</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">    </span><span class="n">last_used</span><span class="w"> </span><span class="n">TIMESTAMPTZ</span><span class="p">,</span>
+
+<span class="w">    </span><span class="n">metadata</span><span class="w"> </span><span class="n">JSONB</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="s1">&#39;{}&#39;</span>
+<span class="p">);</span>
+
+<span class="c1">-- 3. api_reference: Keep existing, already well-structured</span>
+<span class="c1">-- (413 functions with signatures, parameters, examples)</span>
+</code></pre></div>
+<h3 id="smart-views-for-efficient-access">Smart Views for Efficient Access<a class="headerlink" href="#smart-views-for-efficient-access" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1">-- High-quality sequences only</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">VIEW</span><span class="w"> </span><span class="n">premium_sequences</span><span class="w"> </span><span class="k">AS</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">knowledge_base</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">content_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;sequence_implementation&#39;</span>
+<span class="w">  </span><span class="k">AND</span><span class="w"> </span><span class="n">quality_score</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">80</span>
+<span class="w">  </span><span class="k">AND</span><span class="w"> </span><span class="n">metadata</span><span class="o">-&gt;&gt;</span><span class="s1">&#39;has_reconstruction&#39;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;true&#39;</span><span class="p">;</span>
+
+<span class="c1">-- Vendor-specific adaptations</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">VIEW</span><span class="w"> </span><span class="n">vendor_adaptations</span><span class="w"> </span><span class="k">AS</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">knowledge_base</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">content_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;vendor_adaptation&#39;</span>
+<span class="w">   </span><span class="k">OR</span><span class="w"> </span><span class="n">metadata</span><span class="o">-&gt;&gt;</span><span class="s1">&#39;vendor_specific&#39;</span><span class="w"> </span><span class="k">IS</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">;</span>
+
+<span class="c1">-- Learning progression</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">VIEW</span><span class="w"> </span><span class="n">educational_path</span><span class="w"> </span><span class="k">AS</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">knowledge_base</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">content_type</span><span class="w"> </span><span class="k">IN</span><span class="w"> </span><span class="p">(</span><span class="s1">&#39;educational&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;concept_explanation&#39;</span><span class="p">)</span>
+<span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span>
+<span class="w">    </span><span class="k">CASE</span><span class="w"> </span><span class="n">metadata</span><span class="o">-&gt;&gt;</span><span class="s1">&#39;difficulty&#39;</span>
+<span class="w">        </span><span class="k">WHEN</span><span class="w"> </span><span class="s1">&#39;beginner&#39;</span><span class="w"> </span><span class="k">THEN</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">        </span><span class="k">WHEN</span><span class="w"> </span><span class="s1">&#39;intermediate&#39;</span><span class="w"> </span><span class="k">THEN</span><span class="w"> </span><span class="mi">2</span>
+<span class="w">        </span><span class="k">WHEN</span><span class="w"> </span><span class="s1">&#39;advanced&#39;</span><span class="w"> </span><span class="k">THEN</span><span class="w"> </span><span class="mi">3</span>
+<span class="w">    </span><span class="k">END</span><span class="p">,</span>
+<span class="w">    </span><span class="n">quality_score</span><span class="w"> </span><span class="k">DESC</span><span class="p">;</span>
+
+<span class="c1">-- Function usage examples</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">VIEW</span><span class="w"> </span><span class="n">function_examples</span><span class="w"> </span><span class="k">AS</span>
+<span class="k">SELECT</span><span class="w"> </span>
+<span class="w">    </span><span class="n">k</span><span class="p">.</span><span class="n">content</span><span class="p">,</span>
+<span class="w">    </span><span class="n">k</span><span class="p">.</span><span class="n">metadata</span><span class="o">-&gt;&gt;</span><span class="s1">&#39;pulseq_functions&#39;</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">functions_used</span><span class="p">,</span>
+<span class="w">    </span><span class="n">a</span><span class="p">.</span><span class="n">name</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">function_name</span><span class="p">,</span>
+<span class="w">    </span><span class="n">a</span><span class="p">.</span><span class="n">signature</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">knowledge_base</span><span class="w"> </span><span class="n">k</span>
+<span class="k">CROSS</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="k">LATERAL</span><span class="w"> </span><span class="n">jsonb_array_elements_text</span><span class="p">(</span><span class="n">k</span><span class="p">.</span><span class="n">metadata</span><span class="o">-&gt;</span><span class="s1">&#39;pulseq_functions&#39;</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">func_name</span>
+<span class="k">JOIN</span><span class="w"> </span><span class="n">api_reference</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">func_name</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">k</span><span class="p">.</span><span class="n">content_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;sequence_implementation&#39;</span><span class="p">;</span>
+</code></pre></div>
+<h2 id="implementation-roadmap">Implementation Roadmap<a class="headerlink" href="#implementation-roadmap" title="Permanent link">&para;</a></h2>
+<h3 id="phase-1-targeted-cleanup-week-1-completed">Phase 1: Targeted Cleanup (Week 1) - ✅ COMPLETED<a class="headerlink" href="#phase-1-targeted-cleanup-week-1-completed" title="Permanent link">&para;</a></h3>
+<h4 id="removed-276-files-total-preserving-pipeline-knowledge">Removed 276 Files Total (Preserving Pipeline Knowledge)<a class="headerlink" href="#removed-276-files-total-preserving-pipeline-knowledge" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="c1">-- 1. ✅ REMOVED ALL PYTHON CONTENT (189 files) - COMPLETED Jan 21</span>
+<span class="k">DELETE</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">crawled_pages</span><span class="w"> </span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">metadata</span><span class="o">-&gt;&gt;</span><span class="s1">&#39;file_path&#39;</span><span class="w"> </span><span class="k">LIKE</span><span class="w"> </span><span class="s1">&#39;%.py&#39;</span>
+<span class="w">   </span><span class="k">OR</span><span class="w"> </span><span class="n">metadata</span><span class="o">-&gt;&gt;</span><span class="s1">&#39;file_path&#39;</span><span class="w"> </span><span class="k">LIKE</span><span class="w"> </span><span class="s1">&#39;%.ipynb&#39;</span>
+<span class="w">   </span><span class="k">OR</span><span class="w"> </span><span class="n">source_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;github.com/imr-framework/pypulseq&#39;</span><span class="p">;</span>
+
+<span class="c1">-- 2. ✅ Removed all archived content (30 files) - COMPLETED Jan 21</span>
+<span class="k">DELETE</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">crawled_pages</span><span class="w"> </span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">metadata</span><span class="o">-&gt;&gt;</span><span class="s1">&#39;file_path&#39;</span><span class="w"> </span><span class="k">LIKE</span><span class="w"> </span><span class="s1">&#39;%/attic/%&#39;</span>
+<span class="w">   </span><span class="k">OR</span><span class="w"> </span><span class="n">metadata</span><span class="o">-&gt;&gt;</span><span class="s1">&#39;file_path&#39;</span><span class="w"> </span><span class="k">LIKE</span><span class="w"> </span><span class="s1">&#39;%/old/%&#39;</span>
+<span class="w">   </span><span class="k">OR</span><span class="w"> </span><span class="n">metadata</span><span class="o">-&gt;&gt;</span><span class="s1">&#39;file_path&#39;</span><span class="w"> </span><span class="k">LIKE</span><span class="w"> </span><span class="s1">&#39;%/deprecated/%&#39;</span><span class="p">;</span>
+
+<span class="c1">-- 3. ✅ MINIMAL removal - ONLY truly generic utilities (32 files) - COMPLETED Jan 21</span>
+<span class="k">DELETE</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">crawled_pages</span><span class="w"> </span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">metadata</span><span class="o">-&gt;&gt;</span><span class="s1">&#39;file_path&#39;</span><span class="w"> </span><span class="k">SIMILAR</span><span class="w"> </span><span class="k">TO</span><span class="w"> </span><span class="s1">&#39;%(fft2c|ifft2c|fft3c|ifft3c|fftc|ifftc)\.m$&#39;</span>
+<span class="w">   </span><span class="k">OR</span><span class="w"> </span><span class="n">metadata</span><span class="o">-&gt;&gt;</span><span class="s1">&#39;file_path&#39;</span><span class="w"> </span><span class="k">SIMILAR</span><span class="w"> </span><span class="k">TO</span><span class="w"> </span><span class="s1">&#39;%(crop|reshape|dot_mult|safe_plot)\.m$&#39;</span>
+<span class="w">   </span><span class="k">OR</span><span class="w"> </span><span class="n">metadata</span><span class="o">-&gt;&gt;</span><span class="s1">&#39;file_path&#39;</span><span class="w"> </span><span class="k">SIMILAR</span><span class="w"> </span><span class="k">TO</span><span class="w"> </span><span class="s1">&#39;%setup\.m$&#39;</span><span class="p">;</span>
+
+<span class="c1">-- 4. ✅ Removed config and test files (25 files) - COMPLETED Jan 21</span>
+<span class="k">DELETE</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">crawled_pages</span><span class="w"> </span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">metadata</span><span class="o">-&gt;&gt;</span><span class="s1">&#39;file_path&#39;</span><span class="w"> </span><span class="k">SIMILAR</span><span class="w"> </span><span class="k">TO</span><span class="w"> </span><span class="s1">&#39;%\.(toml|yml|yaml|json|ini)$&#39;</span>
+<span class="w">   </span><span class="k">OR</span><span class="w"> </span><span class="n">metadata</span><span class="o">-&gt;&gt;</span><span class="s1">&#39;file_path&#39;</span><span class="w"> </span><span class="k">LIKE</span><span class="w"> </span><span class="s1">&#39;%/test/%&#39;</span>
+<span class="w">   </span><span class="k">OR</span><span class="w"> </span><span class="n">metadata</span><span class="o">-&gt;&gt;</span><span class="s1">&#39;file_path&#39;</span><span class="w"> </span><span class="k">LIKE</span><span class="w"> </span><span class="s1">&#39;%/tests/%&#39;</span><span class="p">;</span>
+
+<span class="c1">-- 5. Tag and categorize remaining utilities for smart retrieval</span>
+<span class="c1">-- Tier 1: Core Pulseq sequences</span>
+<span class="k">UPDATE</span><span class="w"> </span><span class="n">crawled_pages</span><span class="w"> </span>
+<span class="k">SET</span><span class="w"> </span><span class="n">metadata</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">jsonb_set</span><span class="p">(</span>
+<span class="w">    </span><span class="n">jsonb_set</span><span class="p">(</span><span class="n">metadata</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;{tier}&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;1&#39;</span><span class="p">),</span>
+<span class="w">    </span><span class="s1">&#39;{category}&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;&quot;core_sequence&quot;&#39;</span>
+<span class="p">)</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">content</span><span class="w"> </span><span class="k">LIKE</span><span class="w"> </span><span class="s1">&#39;%seq.addBlock%&#39;</span><span class="w"> </span>
+<span class="w">  </span><span class="k">AND</span><span class="w"> </span><span class="n">content</span><span class="w"> </span><span class="k">LIKE</span><span class="w"> </span><span class="s1">&#39;%mr.make%&#39;</span><span class="p">;</span>
+
+<span class="c1">-- Tier 2: Pipeline support utilities</span>
+<span class="k">UPDATE</span><span class="w"> </span><span class="n">crawled_pages</span><span class="w"> </span>
+<span class="k">SET</span><span class="w"> </span><span class="n">metadata</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">jsonb_set</span><span class="p">(</span>
+<span class="w">    </span><span class="n">jsonb_set</span><span class="p">(</span><span class="n">metadata</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;{tier}&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;2&#39;</span><span class="p">),</span>
+<span class="w">    </span><span class="s1">&#39;{category}&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;&quot;pipeline_support&quot;&#39;</span>
+<span class="p">)</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="n">content</span><span class="w"> </span><span class="k">SIMILAR</span><span class="w"> </span><span class="k">TO</span><span class="w"> </span><span class="s1">&#39;%(trajectory|traj2grad|calculateKspace)%&#39;</span>
+<span class="w">    </span><span class="k">OR</span><span class="w"> </span><span class="n">content</span><span class="w"> </span><span class="k">SIMILAR</span><span class="w"> </span><span class="k">TO</span><span class="w"> </span><span class="s1">&#39;%(TOPPE|seq2ge|seq2ceq|TRID)%&#39;</span>
+<span class="w">    </span><span class="k">OR</span><span class="w"> </span><span class="n">content</span><span class="w"> </span><span class="k">SIMILAR</span><span class="w"> </span><span class="k">TO</span><span class="w"> </span><span class="s1">&#39;%(sampling.?pattern|CAIPI|acceleration)%&#39;</span>
+<span class="w">    </span><span class="k">OR</span><span class="w"> </span><span class="n">content</span><span class="w"> </span><span class="k">SIMILAR</span><span class="w"> </span><span class="k">TO</span><span class="w"> </span><span class="s1">&#39;%(B0.?map|B1.?map|field.?map)%&#39;</span>
+<span class="p">)</span>
+<span class="k">AND</span><span class="w"> </span><span class="n">metadata</span><span class="o">-&gt;&gt;</span><span class="s1">&#39;tier&#39;</span><span class="w"> </span><span class="k">IS</span><span class="w"> </span><span class="k">NULL</span><span class="p">;</span>
+
+<span class="c1">-- Tier 3: Reference implementations (kept for completeness)</span>
+<span class="k">UPDATE</span><span class="w"> </span><span class="n">crawled_pages</span><span class="w"> </span>
+<span class="k">SET</span><span class="w"> </span><span class="n">metadata</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">jsonb_set</span><span class="p">(</span>
+<span class="w">    </span><span class="n">jsonb_set</span><span class="p">(</span><span class="n">metadata</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;{tier}&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;3&#39;</span><span class="p">),</span>
+<span class="w">    </span><span class="s1">&#39;{category}&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;&quot;reference_implementation&quot;&#39;</span>
+<span class="p">)</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="n">content</span><span class="w"> </span><span class="k">SIMILAR</span><span class="w"> </span><span class="k">TO</span><span class="w"> </span><span class="s1">&#39;%(GRAPPA|SENSE|kernel|coil)%&#39;</span>
+<span class="w">    </span><span class="k">OR</span><span class="w"> </span><span class="n">content</span><span class="w"> </span><span class="k">SIMILAR</span><span class="w"> </span><span class="k">TO</span><span class="w"> </span><span class="s1">&#39;%(gridding|NUFFT|recon)%&#39;</span>
+<span class="w">    </span><span class="k">OR</span><span class="w"> </span><span class="n">content</span><span class="w"> </span><span class="k">SIMILAR</span><span class="w"> </span><span class="k">TO</span><span class="w"> </span><span class="s1">&#39;%(wave|SMS|multiband)%&#39;</span>
+<span class="p">)</span>
+<span class="k">AND</span><span class="w"> </span><span class="n">metadata</span><span class="o">-&gt;&gt;</span><span class="s1">&#39;tier&#39;</span><span class="w"> </span><span class="k">IS</span><span class="w"> </span><span class="k">NULL</span><span class="p">;</span>
+
+<span class="c1">-- 6. Mark educational and debugging utilities</span>
+<span class="k">UPDATE</span><span class="w"> </span><span class="n">crawled_pages</span><span class="w"> </span>
+<span class="k">SET</span><span class="w"> </span><span class="n">metadata</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">jsonb_set</span><span class="p">(</span><span class="n">metadata</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;{educational_value}&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;true&#39;</span><span class="p">)</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">source_id</span><span class="w"> </span><span class="k">IN</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="s1">&#39;github.com/pulseq/pulseq&#39;</span><span class="p">,</span>
+<span class="w">    </span><span class="s1">&#39;github.com/pulseq/tutorials&#39;</span><span class="p">,</span>
+<span class="w">    </span><span class="s1">&#39;github.com/pulseq/MR-Physics-with-Pulseq&#39;</span>
+<span class="p">)</span>
+<span class="k">AND</span><span class="w"> </span><span class="n">metadata</span><span class="o">-&gt;&gt;</span><span class="s1">&#39;file_path&#39;</span><span class="w"> </span><span class="k">LIKE</span><span class="w"> </span><span class="s1">&#39;%demo%&#39;</span><span class="p">;</span>
+</code></pre></div>
+<h3 id="phase-2-content-migration-enrichment-week-1-2">Phase 2: Content Migration &amp; Enrichment (Week 1-2)<a class="headerlink" href="#phase-2-content-migration-enrichment-week-1-2" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Python script for intelligent content migration</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">analyze_content</span><span class="p">(</span><span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Analyze content and generate rich metadata.&quot;&quot;&quot;</span>
+
+    <span class="n">enriched_metadata</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;original_metadata&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="p">,</span>
+        <span class="s2">&quot;pulseq_functions&quot;</span><span class="p">:</span> <span class="n">extract_pulseq_functions</span><span class="p">(</span><span class="n">content</span><span class="p">),</span>
+        <span class="s2">&quot;sequence_type&quot;</span><span class="p">:</span> <span class="n">detect_sequence_type</span><span class="p">(</span><span class="n">content</span><span class="p">),</span>
+        <span class="s2">&quot;has_vendor_code&quot;</span><span class="p">:</span> <span class="n">detect_vendor_specific</span><span class="p">(</span><span class="n">content</span><span class="p">),</span>
+        <span class="s2">&quot;complexity_score&quot;</span><span class="p">:</span> <span class="n">calculate_complexity</span><span class="p">(</span><span class="n">content</span><span class="p">),</span>
+        <span class="s2">&quot;has_reconstruction&quot;</span><span class="p">:</span> <span class="s2">&quot;recon&quot;</span> <span class="ow">in</span> <span class="n">content</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span>
+        <span class="s2">&quot;line_count&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">content</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)),</span>
+        <span class="s2">&quot;has_comments&quot;</span><span class="p">:</span> <span class="n">detect_documentation_quality</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="c1"># Determine content type</span>
+    <span class="k">if</span> <span class="s2">&quot;seq.addBlock&quot;</span> <span class="ow">in</span> <span class="n">content</span> <span class="ow">and</span> <span class="s2">&quot;seq.write&quot;</span> <span class="ow">in</span> <span class="n">content</span><span class="p">:</span>
+        <span class="n">content_type</span> <span class="o">=</span> <span class="s2">&quot;sequence_implementation&quot;</span>
+    <span class="k">elif</span> <span class="s2">&quot;function&quot;</span> <span class="ow">in</span> <span class="n">content</span> <span class="ow">and</span> <span class="s2">&quot;mr.&quot;</span> <span class="ow">in</span> <span class="n">content</span><span class="p">:</span>
+        <span class="n">content_type</span> <span class="o">=</span> <span class="s2">&quot;pulseq_function&quot;</span>
+    <span class="k">elif</span> <span class="s2">&quot;TRID&quot;</span> <span class="ow">in</span> <span class="n">content</span> <span class="ow">or</span> <span class="s2">&quot;seq2ceq&quot;</span> <span class="ow">in</span> <span class="n">content</span><span class="p">:</span>
+        <span class="n">content_type</span> <span class="o">=</span> <span class="s2">&quot;vendor_adaptation&quot;</span>
+    <span class="k">elif</span> <span class="s2">&quot;tutorial&quot;</span> <span class="ow">in</span> <span class="n">content</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="s2">&quot;example&quot;</span> <span class="ow">in</span> <span class="n">content</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+        <span class="n">content_type</span> <span class="o">=</span> <span class="s2">&quot;educational&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">content_type</span> <span class="o">=</span> <span class="s2">&quot;mri_utility&quot;</span>
+
+    <span class="c1"># Calculate quality score</span>
+    <span class="n">quality_score</span> <span class="o">=</span> <span class="n">calculate_quality_score</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">enriched_metadata</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;content_type&quot;</span><span class="p">:</span> <span class="n">content_type</span><span class="p">,</span>
+        <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="n">enriched_metadata</span><span class="p">,</span>
+        <span class="s2">&quot;quality_score&quot;</span><span class="p">:</span> <span class="n">quality_score</span>
+    <span class="p">}</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">extract_pulseq_functions</span><span class="p">(</span><span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract all Pulseq function calls.&quot;&quot;&quot;</span>
+    <span class="n">patterns</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="sa">r</span><span class="s1">&#39;mr\.\w+&#39;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s1">&#39;seq\.\w+&#39;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s1">&#39;opts\.\w+&#39;</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">functions</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">pattern</span> <span class="ow">in</span> <span class="n">patterns</span><span class="p">:</span>
+        <span class="n">functions</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">content</span><span class="p">))</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">functions</span><span class="p">))</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">detect_sequence_type</span><span class="p">(</span><span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Detect the MRI sequence type.&quot;&quot;&quot;</span>
+    <span class="n">sequence_markers</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;EPI&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;epi&#39;</span><span class="p">,</span> <span class="s1">&#39;echo.planar&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;GRE&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;gradient.echo&#39;</span><span class="p">,</span> <span class="s1">&#39;gre&#39;</span><span class="p">,</span> <span class="s1">&#39;flash&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;TSE&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;turbo.spin&#39;</span><span class="p">,</span> <span class="s1">&#39;tse&#39;</span><span class="p">,</span> <span class="s1">&#39;fse&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;MPRAGE&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;mprage&#39;</span><span class="p">,</span> <span class="s1">&#39;mp.rage&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;DWI&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;diffusion&#39;</span><span class="p">,</span> <span class="s1">&#39;dwi&#39;</span><span class="p">,</span> <span class="s1">&#39;dti&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;CEST&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;cest&#39;</span><span class="p">,</span> <span class="s1">&#39;chemical.exchange&#39;</span><span class="p">],</span>
+    <span class="p">}</span>
+
+    <span class="n">content_lower</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">seq_type</span><span class="p">,</span> <span class="n">markers</span> <span class="ow">in</span> <span class="n">sequence_markers</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">marker</span> <span class="ow">in</span> <span class="n">content_lower</span> <span class="k">for</span> <span class="n">marker</span> <span class="ow">in</span> <span class="n">markers</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">seq_type</span>
+    <span class="k">return</span> <span class="s2">&quot;unknown&quot;</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">calculate_quality_score</span><span class="p">(</span><span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate content quality score (0-100).&quot;&quot;&quot;</span>
+    <span class="n">score</span> <span class="o">=</span> <span class="mi">50</span>  <span class="c1"># Base score</span>
+
+    <span class="c1"># Positive factors</span>
+    <span class="k">if</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;has_comments&quot;</span><span class="p">):</span>
+        <span class="n">score</span> <span class="o">+=</span> <span class="mi">10</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;pulseq_functions&quot;</span><span class="p">,</span> <span class="p">[]))</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">:</span>
+        <span class="n">score</span> <span class="o">+=</span> <span class="mi">15</span>
+    <span class="k">if</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sequence_type&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;unknown&quot;</span><span class="p">:</span>
+        <span class="n">score</span> <span class="o">+=</span> <span class="mi">10</span>
+    <span class="k">if</span> <span class="s2">&quot;seq.checkTiming&quot;</span> <span class="ow">in</span> <span class="n">content</span><span class="p">:</span>
+        <span class="n">score</span> <span class="o">+=</span> <span class="mi">10</span>  <span class="c1"># Proper validation</span>
+    <span class="k">if</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;has_vendor_code&quot;</span><span class="p">):</span>
+        <span class="n">score</span> <span class="o">+=</span> <span class="mi">5</span>  <span class="c1"># Real-world applicability</span>
+
+    <span class="c1"># Negative factors</span>
+    <span class="k">if</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;line_count&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">50</span><span class="p">:</span>
+        <span class="n">score</span> <span class="o">-=</span> <span class="mi">10</span>  <span class="c1"># Too simple</span>
+    <span class="k">if</span> <span class="s2">&quot;TODO&quot;</span> <span class="ow">in</span> <span class="n">content</span> <span class="ow">or</span> <span class="s2">&quot;FIXME&quot;</span> <span class="ow">in</span> <span class="n">content</span><span class="p">:</span>
+        <span class="n">score</span> <span class="o">-=</span> <span class="mi">15</span>  <span class="c1"># Incomplete</span>
+    <span class="k">if</span> <span class="s2">&quot;deprecated&quot;</span> <span class="ow">in</span> <span class="n">content</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+        <span class="n">score</span> <span class="o">-=</span> <span class="mi">20</span>
+
+    <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="n">score</span><span class="p">))</span>
+</code></pre></div>
+<h3 id="phase-3-validate-critical-patterns-week-2">Phase 3: Validate Critical Patterns (Week 2)<a class="headerlink" href="#phase-3-validate-critical-patterns-week-2" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1">-- Insert validated vendor patterns</span>
+<span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="n">validated_patterns</span><span class="w"> </span><span class="p">(</span><span class="n">pattern_name</span><span class="p">,</span><span class="w"> </span><span class="n">pattern_category</span><span class="p">,</span><span class="w"> </span><span class="n">problem_description</span><span class="p">,</span><span class="w"> </span><span class="n">solution_code</span><span class="p">,</span><span class="w"> </span><span class="n">verified_by</span><span class="p">,</span><span class="w"> </span><span class="n">works_on_scanners</span><span class="p">)</span>
+<span class="k">VALUES</span><span class="w"> </span>
+<span class="p">(</span><span class="s1">&#39;GE_TRID_Labels&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;vendor_fix&#39;</span><span class="p">,</span><span class="w"> </span>
+<span class="w"> </span><span class="s1">&#39;GE scanners require TRID labels to mark segment boundaries&#39;</span><span class="p">,</span>
+<span class="w"> </span><span class="s1">&#39;seq.setDefinition(&#39;&#39;SegmentID&#39;&#39;, trid_value);&#39;</span><span class="p">,</span>
+<span class="w"> </span><span class="s1">&#39;HarmonizedMRI Team&#39;</span><span class="p">,</span>
+<span class="w"> </span><span class="nb">ARRAY</span><span class="p">[</span><span class="s1">&#39;GE Premier&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;GE SIGNA&#39;</span><span class="p">]),</span>
+
+<span class="p">(</span><span class="s1">&#39;GE_Gradient_Raster&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;vendor_fix&#39;</span><span class="p">,</span>
+<span class="w"> </span><span class="s1">&#39;GE requires gradient raster time of 4us, RF raster of 2us&#39;</span><span class="p">,</span>
+<span class="w"> </span><span class="s1">&#39;sys = mr.opts(&#39;&#39;gradRasterTime&#39;&#39;, 4e-6, &#39;&#39;rfRasterTime&#39;&#39;, 2e-6);&#39;</span><span class="p">,</span>
+<span class="w"> </span><span class="s1">&#39;PulsePal Analysis&#39;</span><span class="p">,</span>
+<span class="w"> </span><span class="nb">ARRAY</span><span class="p">[</span><span class="s1">&#39;GE Premier&#39;</span><span class="p">]),</span>
+
+<span class="p">(</span><span class="s1">&#39;Gradient_Boundary_Check&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;common_bug&#39;</span><span class="p">,</span>
+<span class="w"> </span><span class="s1">&#39;Gradients must ramp to zero at segment boundaries&#39;</span><span class="p">,</span>
+<span class="w"> </span><span class="s1">&#39;gx_end = mr.makeTrapezoid(&#39;&#39;x&#39;&#39;, &#39;&#39;Area&#39;&#39;, -gx.area, &#39;&#39;system&#39;&#39;, sys);&#39;</span><span class="p">,</span>
+<span class="w"> </span><span class="s1">&#39;Pulseq Core Team&#39;</span><span class="p">,</span>
+<span class="w"> </span><span class="nb">ARRAY</span><span class="p">[</span><span class="s1">&#39;All&#39;</span><span class="p">]);</span>
+</code></pre></div>
+<h3 id="phase-4-performance-optimization-week-3">Phase 4: Performance Optimization (Week 3)<a class="headerlink" href="#phase-4-performance-optimization-week-3" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1">-- Create optimized indexes</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="n">idx_pulseq_functions</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">knowledge_base</span><span class="w"> </span><span class="k">USING</span><span class="w"> </span><span class="n">GIN</span><span class="w"> </span><span class="p">((</span><span class="n">metadata</span><span class="o">-&gt;</span><span class="s1">&#39;pulseq_functions&#39;</span><span class="p">));</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="n">idx_sequence_type</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">knowledge_base</span><span class="w"> </span><span class="p">((</span><span class="n">metadata</span><span class="o">-&gt;&gt;</span><span class="s1">&#39;sequence_type&#39;</span><span class="p">));</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="n">idx_vendor</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">knowledge_base</span><span class="w"> </span><span class="k">USING</span><span class="w"> </span><span class="n">GIN</span><span class="w"> </span><span class="p">((</span><span class="n">metadata</span><span class="o">-&gt;</span><span class="s1">&#39;vendor_specific&#39;</span><span class="p">));</span>
+
+<span class="c1">-- Create materialized view for common queries</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="n">MATERIALIZED</span><span class="w"> </span><span class="k">VIEW</span><span class="w"> </span><span class="n">sequence_catalog</span><span class="w"> </span><span class="k">AS</span>
+<span class="k">SELECT</span><span class="w"> </span>
+<span class="w">    </span><span class="n">content_type</span><span class="p">,</span>
+<span class="w">    </span><span class="n">metadata</span><span class="o">-&gt;&gt;</span><span class="s1">&#39;sequence_type&#39;</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">sequence_type</span><span class="p">,</span>
+<span class="w">    </span><span class="k">language</span><span class="p">,</span>
+<span class="w">    </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">example_count</span><span class="p">,</span>
+<span class="w">    </span><span class="k">AVG</span><span class="p">(</span><span class="n">quality_score</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">avg_quality</span><span class="p">,</span>
+<span class="w">    </span><span class="n">array_agg</span><span class="p">(</span><span class="k">DISTINCT</span><span class="w"> </span><span class="n">metadata</span><span class="o">-&gt;&gt;</span><span class="s1">&#39;vendor_specific&#39;</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">vendors</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">knowledge_base</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">content_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;sequence_implementation&#39;</span>
+<span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">content_type</span><span class="p">,</span><span class="w"> </span><span class="n">metadata</span><span class="o">-&gt;&gt;</span><span class="s1">&#39;sequence_type&#39;</span><span class="p">,</span><span class="w"> </span><span class="k">language</span><span class="p">;</span>
+
+<span class="c1">-- Refresh periodically</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">OR</span><span class="w"> </span><span class="k">REPLACE</span><span class="w"> </span><span class="k">FUNCTION</span><span class="w"> </span><span class="n">refresh_sequence_catalog</span><span class="p">()</span>
+<span class="k">RETURNS</span><span class="w"> </span><span class="n">void</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="err">$$</span>
+<span class="k">BEGIN</span>
+<span class="w">    </span><span class="n">REFRESH</span><span class="w"> </span><span class="n">MATERIALIZED</span><span class="w"> </span><span class="k">VIEW</span><span class="w"> </span><span class="n">CONCURRENTLY</span><span class="w"> </span><span class="n">sequence_catalog</span><span class="p">;</span>
+<span class="k">END</span><span class="p">;</span>
+<span class="err">$$</span><span class="w"> </span><span class="k">LANGUAGE</span><span class="w"> </span><span class="n">plpgsql</span><span class="p">;</span>
+</code></pre></div>
+<h2 id="expected-outcomes">Expected Outcomes<a class="headerlink" href="#expected-outcomes" title="Permanent link">&para;</a></h2>
+<h3 id="quantitative-improvements-achieved">Quantitative Improvements ✅ ACHIEVED<a class="headerlink" href="#quantitative-improvements-achieved" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Document reduction</strong>: 1,703 → 1,427 documents (16% reduction) ✅</li>
+<li>Removed 189 Python files (all pypulseq content) ✅</li>
+<li>Removed 30 archived files ✅</li>
+<li>Removed 32 generic utilities (kept pipeline-relevant ones) ✅</li>
+<li>Removed 25 config/test files ✅</li>
+<li><strong>Language consistency</strong>: 100% MATLAB (v1.5.0) ✅</li>
+<li><strong>Content focus</strong>: 135 files with actual sequence implementations</li>
+<li><strong>MATLAB dominance</strong>: 1,178 MATLAB files (83% of all content)</li>
+<li><strong>Search relevance</strong>: Improved through removal of noise</li>
+<li><strong>Next step</strong>: Metadata enrichment and categorization</li>
+</ul>
+<h3 id="qualitative-improvements">Qualitative Improvements<a class="headerlink" href="#qualitative-improvements" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Better organization</strong>: Clear content types and quality scoring</li>
+<li><strong>Vendor knowledge</strong>: Properly tagged and searchable adaptations</li>
+<li><strong>Educational path</strong>: Progressive learning from beginner to advanced</li>
+<li><strong>Validated patterns</strong>: Curated solutions to common problems</li>
+<li><strong>Multi-language</strong>: Separate tracking of MATLAB vs Python examples</li>
+</ul>
+<h2 id="quality-metrics-dashboard">Quality Metrics Dashboard<a class="headerlink" href="#quality-metrics-dashboard" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="c1">-- Create a view to monitor knowledge base health</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">VIEW</span><span class="w"> </span><span class="n">knowledge_base_metrics</span><span class="w"> </span><span class="k">AS</span>
+<span class="k">SELECT</span><span class="w"> </span>
+<span class="w">    </span><span class="n">content_type</span><span class="p">,</span>
+<span class="w">    </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">document_count</span><span class="p">,</span>
+<span class="w">    </span><span class="k">AVG</span><span class="p">(</span><span class="n">quality_score</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">avg_quality</span><span class="p">,</span>
+<span class="w">    </span><span class="k">COUNT</span><span class="p">(</span><span class="k">DISTINCT</span><span class="w"> </span><span class="k">language</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">languages</span><span class="p">,</span>
+<span class="w">    </span><span class="k">COUNT</span><span class="p">(</span><span class="k">DISTINCT</span><span class="w"> </span><span class="n">metadata</span><span class="o">-&gt;&gt;</span><span class="s1">&#39;sequence_type&#39;</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">sequence_types</span><span class="p">,</span>
+<span class="w">    </span><span class="k">AVG</span><span class="p">(</span><span class="k">LENGTH</span><span class="p">(</span><span class="n">content</span><span class="p">))</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">avg_content_length</span><span class="p">,</span>
+<span class="w">    </span><span class="k">MAX</span><span class="p">(</span><span class="n">updated_at</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">last_update</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">knowledge_base</span>
+<span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">content_type</span>
+
+<span class="k">UNION</span><span class="w"> </span><span class="k">ALL</span>
+
+<span class="k">SELECT</span><span class="w"> </span>
+<span class="w">    </span><span class="s1">&#39;TOTAL&#39;</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">content_type</span><span class="p">,</span>
+<span class="w">    </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">document_count</span><span class="p">,</span>
+<span class="w">    </span><span class="k">AVG</span><span class="p">(</span><span class="n">quality_score</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">avg_quality</span><span class="p">,</span>
+<span class="w">    </span><span class="k">COUNT</span><span class="p">(</span><span class="k">DISTINCT</span><span class="w"> </span><span class="k">language</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">languages</span><span class="p">,</span>
+<span class="w">    </span><span class="k">COUNT</span><span class="p">(</span><span class="k">DISTINCT</span><span class="w"> </span><span class="n">metadata</span><span class="o">-&gt;&gt;</span><span class="s1">&#39;sequence_type&#39;</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">sequence_types</span><span class="p">,</span>
+<span class="w">    </span><span class="k">AVG</span><span class="p">(</span><span class="k">LENGTH</span><span class="p">(</span><span class="n">content</span><span class="p">))</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">avg_content_length</span><span class="p">,</span>
+<span class="w">    </span><span class="k">MAX</span><span class="p">(</span><span class="n">updated_at</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">last_update</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">knowledge_base</span><span class="p">;</span>
+</code></pre></div>
+<h2 id="maintenance-strategy">Maintenance Strategy<a class="headerlink" href="#maintenance-strategy" title="Permanent link">&para;</a></h2>
+<h3 id="weekly-tasks">Weekly Tasks<a class="headerlink" href="#weekly-tasks" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Review and validate new patterns from user queries</li>
+<li>Update quality scores based on usage analytics</li>
+<li>Identify gaps in sequence coverage</li>
+</ul>
+<h3 id="monthly-tasks">Monthly Tasks<a class="headerlink" href="#monthly-tasks" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Re-crawl high-value repositories for updates</li>
+<li>Review and remove outdated content</li>
+<li>Generate embeddings for new content</li>
+</ul>
+<h3 id="quarterly-tasks">Quarterly Tasks<a class="headerlink" href="#quarterly-tasks" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Full quality audit of knowledge base</li>
+<li>Update vendor adaptation patterns</li>
+<li>Benchmark search performance</li>
+</ul>
+<h2 id="critical-decision-matlab-only-focus">Critical Decision: MATLAB-Only Focus<a class="headerlink" href="#critical-decision-matlab-only-focus" title="Permanent link">&para;</a></h2>
+<h3 id="why-remove-all-python-content">Why Remove All Python Content?<a class="headerlink" href="#why-remove-all-python-content" title="Permanent link">&para;</a></h3>
+<p><strong>Strategic Decision</strong>: Focus exclusively on MATLAB Pulseq v1.5.0, removing all Python/pypulseq content.</p>
+<h4 id="the-version-mismatch-problem">The Version Mismatch Problem<a class="headerlink" href="#the-version-mismatch-problem" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>MATLAB Pulseq</strong>: v1.5.0 (current, actively maintained)</li>
+<li><strong>Python pypulseq</strong>: v1.4.0 (lagging behind)</li>
+<li><strong>Impact</strong>: Mixing versions creates confusion about feature availability and API differences</li>
+</ul>
+<h4 id="current-python-content-analysis">Current Python Content Analysis<a class="headerlink" href="#current-python-content-analysis" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code>Source                          | Files | Type           | Quality Issue
+--------------------------------|-------|----------------|----------------
+imr-framework/pypulseq          | 82    | Core library   | v1.4.0 outdated
+yutingchen11/MIMOSA            | 16    | Reconstruction | Not sequence writing
+HarmonizedMRI/SOSP3d            | 6     | Reconstruction | Pure PyTorch, no Pulseq
+Other sources                   | 10    | Tests/Utils    | Minimal value
+</code></pre></div>
+<h4 id="api-confusion-example">API Confusion Example<a class="headerlink" href="#api-confusion-example" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="c">% MATLAB (v1.5.0) - Current standard</span>
+<span class="n">seq</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">mr</span><span class="p">.</span><span class="n">Sequence</span><span class="p">();</span>
+<span class="n">rf</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">mr</span><span class="p">.</span><span class="n">makeSincPulse</span><span class="p">(</span><span class="nb">flip</span><span class="p">,</span><span class="w"> </span><span class="s">&#39;Duration&#39;</span><span class="p">,</span><span class="w"> </span><span class="mf">3e-3</span><span class="p">);</span>
+<span class="n">seq</span><span class="p">.</span><span class="n">addBlock</span><span class="p">(</span><span class="n">rf</span><span class="p">,</span><span class="w"> </span><span class="n">gz</span><span class="p">);</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="c1"># Python (v1.4.0) - Different API, outdated</span>
+<span class="n">seq</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">Sequence</span><span class="p">()</span>
+<span class="n">rf</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">make_sinc_pulse</span><span class="p">(</span><span class="n">flip_angle</span><span class="o">=</span><span class="n">flip</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="mf">3e-3</span><span class="p">)</span>
+<span class="n">seq</span><span class="o">.</span><span class="n">add_block</span><span class="p">(</span><span class="n">rf</span><span class="p">,</span> <span class="n">gz</span><span class="p">)</span>
+</code></pre></div>
+<p>Mixing these in the knowledge base causes:
+- ❌ Incorrect API suggestions
+- ❌ Version-specific feature confusion
+- ❌ Inconsistent naming conventions (camelCase vs snake_case)</p>
+<h4 id="benefits-of-matlab-only-approach">Benefits of MATLAB-Only Approach<a class="headerlink" href="#benefits-of-matlab-only-approach" title="Permanent link">&para;</a></h4>
+<ol>
+<li><strong>Consistency</strong>: Single API, single version, single naming convention</li>
+<li><strong>Quality</strong>: Focus resources on one excellent knowledge base vs two mediocre ones</li>
+<li><strong>Clarity</strong>: No need to specify language in every response</li>
+<li><strong>Maintenance</strong>: Easier updates and quality control</li>
+<li><strong>User Experience</strong>: Clear, unambiguous answers</li>
+</ol>
+<h3 id="future-python-integration-plan">Future Python Integration Plan<a class="headerlink" href="#future-python-integration-plan" title="Permanent link">&para;</a></h3>
+<p><strong>When pypulseq reaches v1.5.0:</strong></p>
+<ol>
+<li><strong>Dedicated Crawl</strong>: Fresh extraction with lessons learned from MATLAB</li>
+<li><strong>Separate Storage</strong>: Language-specific tables or clear metadata separation</li>
+<li><strong>Smart Routing</strong>: User specifies language preference</li>
+<li><strong>Version Parity</strong>: Ensure both languages offer same features</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="c1">-- Future schema for multi-language support</span>
+<span class="k">ALTER</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">knowledge_base</span><span class="w"> </span>
+<span class="k">ADD</span><span class="w"> </span><span class="k">COLUMN</span><span class="w"> </span><span class="k">language</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="s1">&#39;matlab&#39;</span><span class="p">,</span>
+<span class="k">ADD</span><span class="w"> </span><span class="k">COLUMN</span><span class="w"> </span><span class="n">pulseq_version</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span>
+<span class="k">ADD</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="n">idx_language_version</span><span class="w"> </span><span class="p">(</span><span class="k">language</span><span class="p">,</span><span class="w"> </span><span class="n">pulseq_version</span><span class="p">);</span>
+</code></pre></div>
+<h2 id="critical-decision-utility-files">Critical Decision: Utility Files<a class="headerlink" href="#critical-decision-utility-files" title="Permanent link">&para;</a></h2>
+<h3 id="revised-understanding-the-sequence-reconstruction-interface">Revised Understanding: The Sequence-Reconstruction Interface<a class="headerlink" href="#revised-understanding-the-sequence-reconstruction-interface" title="Permanent link">&para;</a></h3>
+<p><strong>Important Discovery</strong>: The official Pulseq repository includes reconstruction examples (<code>demoRecon/</code> folder), and sequences ARE written with reconstruction considerations in mind. The boundary is more nuanced than initially thought.</p>
+<h4 id="the-actual-workflow">The Actual Workflow<a class="headerlink" href="#the-actual-workflow" title="Permanent link">&para;</a></h4>
+<ol>
+<li><strong>Sequence Generation Phase</strong> (Primary PulsePal focus)</li>
+<li>User writes: <code>seq = mr.Sequence()</code>, <code>seq.addBlock(rf, gz)</code>, <code>seq.write('my_sequence.seq')</code></li>
+<li><strong>ALSO calculates k-space trajectories</strong> for reconstruction</li>
+<li><strong>Defines sampling patterns</strong> that determine reconstruction approach</li>
+<li>
+<p><strong>Compensates for hardware delays</strong> that affect image quality</p>
+</li>
+<li>
+<p><strong>Data Reconstruction Phase</strong> (Still relevant for sequence design)</p>
+</li>
+<li>Uses k-space trajectory FROM the sequence</li>
+<li>Relies on sampling pattern DEFINED BY the sequence</li>
+<li>Applies trajectory delays CALCULATED IN the sequence</li>
+</ol>
+<h4 id="evidence-from-official-pulseq">Evidence from Official Pulseq<a class="headerlink" href="#evidence-from-official-pulseq" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>67 files</strong> mention k-space considerations</li>
+<li><strong>50 files</strong> use <code>calculateKspace()</code> methods</li>
+<li><strong>51 files</strong> discuss trajectory planning</li>
+<li><strong>29 files</strong> reference reconstruction needs</li>
+<li><strong>6 official reconstruction demos</strong> in <code>demoRecon/</code> folder</li>
+</ul>
+<h4 id="critical-sequence-reconstruction-dependencies">Critical Sequence-Reconstruction Dependencies<a class="headerlink" href="#critical-sequence-reconstruction-dependencies" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Why It Matters for Sequence Design</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>K-space trajectory</strong></td>
+<td>Sequence must calculate and provide trajectory for non-Cartesian imaging</td>
+</tr>
+<tr>
+<td><strong>Trajectory delays</strong></td>
+<td>Must compensate in sequence design (e.g., <code>traj_recon_delay = 3.9e-6</code>)</td>
+</tr>
+<tr>
+<td><strong>Sampling patterns</strong></td>
+<td>Acceleration/undersampling must be planned in sequence</td>
+</tr>
+<tr>
+<td><strong>Phase encode ordering</strong></td>
+<td>Determines how data maps to k-space</td>
+</tr>
+<tr>
+<td><strong>ADC timing</strong></td>
+<td>Critical for proper data-gradient alignment</td>
+</tr>
+</tbody>
+</table>
+<h3 id="revised-what-we-keep-vs-remove-end-to-end-expertise">Revised: What We Keep vs Remove (End-to-End Expertise)<a class="headerlink" href="#revised-what-we-keep-vs-remove-end-to-end-expertise" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Utility Type</th>
+<th>Keep?</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Generic FFT</strong> (<code>fft2c</code>, <code>ifft3c</code>)</td>
+<td>❌ Remove</td>
+<td>Generic operations, available in MATLAB</td>
+</tr>
+<tr>
+<td><strong>Generic array ops</strong> (<code>crop</code>, <code>reshape</code>)</td>
+<td>❌ Remove</td>
+<td>Standard MATLAB, not MRI-specific</td>
+</tr>
+<tr>
+<td><strong>Setup/config scripts</strong></td>
+<td>❌ Remove</td>
+<td>Path configurations, not MRI-specific</td>
+</tr>
+<tr>
+<td><strong>GRAPPA/SENSE implementations</strong></td>
+<td>✅ KEEP</td>
+<td>Educational value, debugging support</td>
+</tr>
+<tr>
+<td><strong>Coil sensitivity estimation</strong></td>
+<td>✅ KEEP</td>
+<td>Understanding parallel imaging</td>
+</tr>
+<tr>
+<td><strong>Kernel calculation</strong> (<code>dat2Kernel</code>)</td>
+<td>✅ KEEP</td>
+<td>Shows how acceleration works</td>
+</tr>
+<tr>
+<td><strong>Vendor conversion</strong> (<code>seq2ge</code>, <code>seq2ceq</code>)</td>
+<td>✅ KEEP</td>
+<td>Critical for deployment</td>
+</tr>
+<tr>
+<td><strong>TOPPE utilities</strong></td>
+<td>✅ KEEP</td>
+<td>GE scanner interface</td>
+</tr>
+<tr>
+<td><strong>Trajectory calculation</strong></td>
+<td>✅ KEEP</td>
+<td>Needed for spiral/radial sequences</td>
+</tr>
+<tr>
+<td><strong>K-space ordering examples</strong></td>
+<td>✅ KEEP</td>
+<td>Shows data organization for recon</td>
+</tr>
+<tr>
+<td><strong>Trajectory delay compensation</strong></td>
+<td>✅ KEEP</td>
+<td>Required for image quality</td>
+</tr>
+<tr>
+<td><strong>Official Pulseq recon demos</strong></td>
+<td>✅ KEEP</td>
+<td>Part of core distribution</td>
+</tr>
+<tr>
+<td><strong>Sampling pattern generators</strong></td>
+<td>✅ KEEP</td>
+<td>For acceleration strategies</td>
+</tr>
+<tr>
+<td><strong>calculateKspace methods</strong></td>
+<td>✅ KEEP</td>
+<td>Core Pulseq functionality</td>
+</tr>
+<tr>
+<td><strong>Gridding/NUFFT</strong></td>
+<td>✅ KEEP</td>
+<td>Non-Cartesian reconstruction</td>
+</tr>
+<tr>
+<td><strong>Novel reconstruction</strong> (Wave, SMS)</td>
+<td>✅ KEEP</td>
+<td>Cutting-edge techniques</td>
+</tr>
+</tbody>
+</table>
+<h3 id="impact-on-pulsepal-users">Impact on PulsePal Users<a class="headerlink" href="#impact-on-pulsepal-users" title="Permanent link">&para;</a></h3>
+<h4 id="example-how-do-i-write-a-spiral-sequence">Example: "How do I write a spiral sequence?"<a class="headerlink" href="#example-how-do-i-write-a-spiral-sequence" title="Permanent link">&para;</a></h4>
+<p>PulsePal should provide:
+- ✅ Spiral trajectory calculation (<code>mr.traj2grad()</code>)
+- ✅ Gradient waveform generation from trajectory
+- ✅ Trajectory delay compensation strategies
+- ✅ K-space trajectory visualization
+- ✅ Spiral gridding/NUFFT concepts (for complete understanding)</p>
+<h4 id="example-how-do-i-implement-2x-grappa-acceleration">Example: "How do I implement 2x GRAPPA acceleration?"<a class="headerlink" href="#example-how-do-i-implement-2x-grappa-acceleration" title="Permanent link">&para;</a></h4>
+<p>PulsePal should provide:
+- ✅ How to set undersampling patterns in sequence
+- ✅ How to include calibration regions (ACS lines)
+- ✅ Phase encode ordering for optimal reconstruction
+- ✅ GRAPPA kernel calculation (for understanding/debugging)
+- ✅ Coil sensitivity concepts (educational value)</p>
+<h4 id="example-why-are-my-images-shifteddistorted">Example: "Why are my images shifted/distorted?"<a class="headerlink" href="#example-why-are-my-images-shifteddistorted" title="Permanent link">&para;</a></h4>
+<p>PulsePal should explain:
+- ✅ Trajectory delay compensation (<code>traj_recon_delay</code>)
+- ✅ How to use <code>calculateKspacePP()</code> with delays
+- ✅ Hardware-specific timing considerations
+- ✅ Example code showing proper compensation</p>
+<p>This nuanced approach provides sequence writers with reconstruction-aware knowledge while avoiding full reconstruction implementations.</p>
+<h2 id="vendor-conversion-tools-why-theyre-critical">Vendor Conversion Tools: Why They're Critical<a class="headerlink" href="#vendor-conversion-tools-why-theyre-critical" title="Permanent link">&para;</a></h2>
+<h3 id="the-pulseq-execution-pipeline">The Pulseq Execution Pipeline<a class="headerlink" href="#the-pulseq-execution-pipeline" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>1. User writes Pulseq code in MATLAB/Python
+   ↓
+2. Generate .seq file (vendor-neutral format)
+   ↓
+3. VENDOR CONVERSION (Critical step!)
+   ↓
+4. Scanner executes vendor-specific format
+</code></pre></div>
+<h3 id="what-vendor-conversion-tools-do">What Vendor Conversion Tools Do<a class="headerlink" href="#what-vendor-conversion-tools-do" title="Permanent link">&para;</a></h3>
+<p><strong>These tools translate the universal Pulseq <code>.seq</code> format into vendor-specific languages that MRI scanners can execute.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Vendor</th>
+<th>Conversion Tool</th>
+<th>Output Format</th>
+<th>Key Adaptations</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>GE</strong></td>
+<td><code>seq2ge</code>, <code>seq2ceq</code>, PulCeq</td>
+<td><code>.pge</code>, <code>.tar</code></td>
+<td>TRID labels, 4μs gradient raster, segment boundaries</td>
+</tr>
+<tr>
+<td><strong>Siemens</strong></td>
+<td>Direct interpreter</td>
+<td><code>.seq</code> (direct)</td>
+<td>Minimal conversion needed</td>
+</tr>
+<tr>
+<td><strong>Bruker</strong></td>
+<td>Bruker interpreter</td>
+<td>Proprietary</td>
+<td>Vendor-specific timing</td>
+</tr>
+<tr>
+<td><strong>Philips</strong></td>
+<td>Philips interpreter</td>
+<td>Proprietary</td>
+<td>Vendor-specific format</td>
+</tr>
+</tbody>
+</table>
+<h3 id="example-ge-conversion-process">Example: GE Conversion Process<a class="headerlink" href="#example-ge-conversion-process" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c">% Step 1: User writes Pulseq sequence</span>
+<span class="n">seq</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">mr</span><span class="p">.</span><span class="n">Sequence</span><span class="p">(</span><span class="n">sys</span><span class="p">);</span>
+<span class="n">seq</span><span class="p">.</span><span class="n">addBlock</span><span class="p">(</span><span class="n">rf</span><span class="p">,</span><span class="w"> </span><span class="n">gz</span><span class="p">);</span>
+<span class="n">seq</span><span class="p">.</span><span class="n">addBlock</span><span class="p">(</span><span class="n">gx</span><span class="p">,</span><span class="w"> </span><span class="n">adc</span><span class="p">);</span>
+<span class="n">seq</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;mysequence.seq&#39;</span><span class="p">);</span><span class="w">  </span><span class="c">% Universal format</span>
+
+<span class="c">% Step 2: Convert for GE scanner (REQUIRED!)</span>
+<span class="n">ceq</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">seq2ceq</span><span class="p">(</span><span class="s">&#39;mysequence.seq&#39;</span><span class="p">);</span><span class="w">  </span><span class="c">% Conversion tool</span>
+<span class="n">ceq</span><span class="p">.</span><span class="n">trid</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">];</span><span class="w">  </span><span class="c">% Add GE-specific segment markers</span>
+<span class="n">writeceq</span><span class="p">(</span><span class="n">ceq</span><span class="p">,</span><span class="w"> </span><span class="s">&#39;mysequence.pge&#39;</span><span class="p">);</span><span class="w">  </span><span class="c">% GE can execute this</span>
+
+<span class="c">% Without conversion, the scanner cannot run the sequence!</span>
+</code></pre></div>
+<h3 id="why-keep-these-in-the-knowledge-base">Why Keep These in the Knowledge Base<a class="headerlink" href="#why-keep-these-in-the-knowledge-base" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Deployment Critical</strong>: Users can't run sequences without these converters</li>
+<li><strong>Vendor-Specific Knowledge</strong>: Each scanner has unique requirements:</li>
+<li>GE: TRID labels, timing constraints</li>
+<li>Siemens: Label extensions, reconstruction markers</li>
+<li>Hardware limitations differ by vendor</li>
+<li><strong>Real-World Usage</strong>: The gap between "sequence works in simulation" and "sequence runs on scanner"</li>
+</ol>
+<h3 id="what-happens-without-conversion-tools">What Happens Without Conversion Tools?<a class="headerlink" href="#what-happens-without-conversion-tools" title="Permanent link">&para;</a></h3>
+<ul>
+<li>❌ User writes perfect Pulseq code</li>
+<li>❌ Generates valid <code>.seq</code> file</li>
+<li>❌ <strong>Cannot execute on scanner</strong> - Scanner doesn't understand <code>.seq</code> format</li>
+<li>❌ Frustrated user: "Why won't my sequence run?"</li>
+</ul>
+<h3 id="pulsepals-role">PulsePal's Role<a class="headerlink" href="#pulsepals-role" title="Permanent link">&para;</a></h3>
+<p>When users ask "How do I run my sequence on a GE/Siemens/Bruker scanner?", PulsePal must:
+- ✅ Provide the appropriate conversion workflow
+- ✅ Explain vendor-specific requirements
+- ✅ Show examples of the conversion process
+- ✅ Warn about timing constraints and hardware limitations</p>
+<h2 id="key-discovery-end-to-end-pipeline-knowledge-is-essential">Key Discovery: End-to-End Pipeline Knowledge is Essential<a class="headerlink" href="#key-discovery-end-to-end-pipeline-knowledge-is-essential" title="Permanent link">&para;</a></h2>
+<h3 id="the-complete-picture">The Complete Picture<a class="headerlink" href="#the-complete-picture" title="Permanent link">&para;</a></h3>
+<p>Our investigation revealed that effective Pulseq programming requires understanding the ENTIRE pipeline, not just sequence generation. The evidence:
+- Official Pulseq includes 6 reconstruction demos in <code>demoRecon/</code>
+- 67 files discuss k-space considerations
+- 50 files use trajectory calculation methods
+- Researchers often need custom reconstruction for novel techniques
+- Debugging requires understanding how sequences affect final images</p>
+<h3 id="what-this-means-for-pulsepal">What This Means for PulsePal<a class="headerlink" href="#what-this-means-for-pulsepal" title="Permanent link">&para;</a></h3>
+<p>PulsePal must be an <strong>end-to-end expert</strong> to properly assist users:
+- <strong>Sequence Design</strong>: Core Pulseq programming (<code>mr.*</code>, <code>seq.*</code>)
+- <strong>Data Acquisition</strong>: Understanding scanner execution and limitations
+- <strong>Reconstruction Pipeline</strong>: How data becomes images (GRAPPA, SENSE, gridding)
+- <strong>Debugging Support</strong>: Why images fail and how to fix them
+- <strong>Research Innovation</strong>: Supporting novel techniques with custom reconstruction</p>
+<p>This comprehensive knowledge enables PulsePal to be a true partner in MRI sequence development, not just a code generator.</p>
+<h2 id="conclusion">Conclusion<a class="headerlink" href="#conclusion" title="Permanent link">&para;</a></h2>
+<p>This enhanced reorganization plan implements an <strong>"end-to-end expertise"</strong> strategy:</p>
+<ol>
+<li><strong>MATLAB-only focus</strong> - Single language (v1.5.0) for consistency</li>
+<li><strong>Minimal cleanup</strong> - Remove only 18% (truly generic content)</li>
+<li><strong>Complete pipeline knowledge</strong> - Preserve sequence-to-image understanding</li>
+<li><strong>Three-tier categorization</strong> - Smart retrieval based on query context</li>
+<li><strong>Rich metadata</strong> - Enable intelligent filtering and search</li>
+<li><strong>Debugging capability</strong> - Full pipeline knowledge for troubleshooting</li>
+</ol>
+<p>The result will be a comprehensive MATLAB-centric knowledge base that enables PulsePal to be a true end-to-end Pulseq expert, capable of:
+- Writing sequences
+- Understanding data acquisition
+- Explaining reconstruction requirements
+- Debugging image quality issues
+- Supporting cutting-edge research</p>
+<p>This positions PulsePal not just as a "sequence writer" but as a complete MRI sequence development partner.</p>
+<h3 id="next-steps-after-cleanup">Next Steps After Cleanup<a class="headerlink" href="#next-steps-after-cleanup" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Immediate</strong>: Execute Phase 1 SQL cleanup queries</li>
+<li><strong>Week 1</strong>: Enrich remaining MATLAB content with metadata</li>
+<li><strong>Week 2</strong>: Validate vendor patterns and critical sequences</li>
+<li><strong>Future</strong>: Monitor pypulseq for v1.5.0 release, then execute dedicated Python crawl</li>
+</ol>
+<p>This strategic focus on MATLAB ensures PulsePal delivers accurate, version-consistent assistance rather than confusing users with mixed-language, mixed-version responses.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/pulseq/pulseq" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.50899def.min.js"></script>
+      
+    
+  </body>
+</html>

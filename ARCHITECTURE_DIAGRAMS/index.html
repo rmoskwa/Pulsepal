@@ -10,28 +10,24 @@
       
       
       
-        <link rel="canonical" href="https://rmoskwa.github.io/Pulsepal/matlab_api/calculateKspacePP/">
+        <link rel="canonical" href="https://rmoskwa.github.io/Pulsepal/ARCHITECTURE_DIAGRAMS/">
       
       
-        <link rel="prev" href="../calcRfPower/">
       
       
-        <link rel="next" href="../checkTiming/">
-      
-      
-      <link rel="icon" href="../../assets/images/favicon.png">
+      <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.16">
     
     
       
-        <title>calculateKspacePP - Pulseq MATLAB API Documentation</title>
+        <title>PulsePal Architecture Diagrams - Pulseq MATLAB API Documentation</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.7e37652d.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.7e37652d.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
       
       
 
@@ -50,7 +46,7 @@
       
     
     
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -74,7 +70,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#calculatekspacepp" class="md-skip">
+        <a href="#pulsepal-architecture-diagrams" class="md-skip">
           Skip to content
         </a>
       
@@ -88,7 +84,7 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="Pulseq MATLAB API Documentation" class="md-header__button md-logo" aria-label="Pulseq MATLAB API Documentation" data-md-component="logo">
+    <a href=".." title="Pulseq MATLAB API Documentation" class="md-header__button md-logo" aria-label="Pulseq MATLAB API Documentation" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -108,7 +104,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              calculateKspacePP
+              PulsePal Architecture Diagrams
             
           </span>
         </div>
@@ -183,7 +179,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../.." class="md-tabs__link">
+      <a href=".." class="md-tabs__link">
         
   
   
@@ -200,13 +196,11 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="../" class="md-tabs__link">
+      <li class="md-tabs__item">
+        <a href="../matlab_api/" class="md-tabs__link">
           
   
   
@@ -240,7 +234,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="Pulseq MATLAB API Documentation" class="md-nav__button md-logo" aria-label="Pulseq MATLAB API Documentation" data-md-component="logo">
+    <a href=".." title="Pulseq MATLAB API Documentation" class="md-nav__button md-logo" aria-label="Pulseq MATLAB API Documentation" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -258,7 +252,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
+      <a href=".." class="md-nav__link">
         
   
   
@@ -277,31 +271,28 @@
       
   
   
-    
   
   
-  
     
     
     
     
-      
-        
-        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
         
           
-          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
             
   
   
@@ -314,7 +305,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
             API Reference
@@ -328,7 +319,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../" class="md-nav__link">
+      <a href="../matlab_api/" class="md-nav__link">
         
   
   
@@ -348,31 +339,28 @@
                 
   
   
-    
   
   
-  
     
     
     
     
       
       
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
         
           
-          
         
-      
-    
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" checked>
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_2" >
         
           
-          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="">
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
             
   
   
@@ -385,7 +373,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_2_2">
             <span class="md-nav__icon md-icon"></span>
             Functions
@@ -399,7 +387,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../addBlock/" class="md-nav__link">
+      <a href="../matlab_api/addBlock/" class="md-nav__link">
         
   
   
@@ -422,7 +410,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../addGradients/" class="md-nav__link">
+      <a href="../matlab_api/addGradients/" class="md-nav__link">
         
   
   
@@ -445,7 +433,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../addRamps/" class="md-nav__link">
+      <a href="../matlab_api/addRamps/" class="md-nav__link">
         
   
   
@@ -468,7 +456,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../align/" class="md-nav__link">
+      <a href="../matlab_api/align/" class="md-nav__link">
         
   
   
@@ -491,7 +479,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../applySoftDelay/" class="md-nav__link">
+      <a href="../matlab_api/applySoftDelay/" class="md-nav__link">
         
   
   
@@ -514,7 +502,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../applyToBlock/" class="md-nav__link">
+      <a href="../matlab_api/applyToBlock/" class="md-nav__link">
         
   
   
@@ -537,7 +525,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../applyToSeq/" class="md-nav__link">
+      <a href="../matlab_api/applyToSeq/" class="md-nav__link">
         
   
   
@@ -560,7 +548,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../calcAdcSeg/" class="md-nav__link">
+      <a href="../matlab_api/calcAdcSeg/" class="md-nav__link">
         
   
   
@@ -583,7 +571,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../calcDuration/" class="md-nav__link">
+      <a href="../matlab_api/calcDuration/" class="md-nav__link">
         
   
   
@@ -606,7 +594,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../calcMomentsBtensor/" class="md-nav__link">
+      <a href="../matlab_api/calcMomentsBtensor/" class="md-nav__link">
         
   
   
@@ -629,7 +617,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../calcPNS/" class="md-nav__link">
+      <a href="../matlab_api/calcPNS/" class="md-nav__link">
         
   
   
@@ -652,7 +640,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../calcRamp/" class="md-nav__link">
+      <a href="../matlab_api/calcRamp/" class="md-nav__link">
         
   
   
@@ -675,7 +663,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../calcRfBandwidth/" class="md-nav__link">
+      <a href="../matlab_api/calcRfBandwidth/" class="md-nav__link">
         
   
   
@@ -698,7 +686,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../calcRfCenter/" class="md-nav__link">
+      <a href="../matlab_api/calcRfCenter/" class="md-nav__link">
         
   
   
@@ -721,7 +709,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../calcRfPower/" class="md-nav__link">
+      <a href="../matlab_api/calcRfPower/" class="md-nav__link">
         
   
   
@@ -741,32 +729,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    calculateKspacePP
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../matlab_api/calculateKspacePP/" class="md-nav__link">
         
   
   
@@ -777,104 +743,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#syntax" class="md-nav__link">
-    <span class="md-ellipsis">
-      Syntax
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#calling-pattern" class="md-nav__link">
-    <span class="md-ellipsis">
-      Calling Pattern
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#parameters" class="md-nav__link">
-    <span class="md-ellipsis">
-      Parameters
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Parameters">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#required-parameters" class="md-nav__link">
-    <span class="md-ellipsis">
-      Required Parameters
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#optional-parameters" class="md-nav__link">
-    <span class="md-ellipsis">
-      Optional Parameters
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#returns" class="md-nav__link">
-    <span class="md-ellipsis">
-      Returns
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#examples" class="md-nav__link">
-    <span class="md-ellipsis">
-      Examples
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#see-also" class="md-nav__link">
-    <span class="md-ellipsis">
-      See Also
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -887,7 +755,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../checkTiming/" class="md-nav__link">
+      <a href="../matlab_api/checkTiming/" class="md-nav__link">
         
   
   
@@ -910,7 +778,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../compressShape/" class="md-nav__link">
+      <a href="../matlab_api/compressShape/" class="md-nav__link">
         
   
   
@@ -933,7 +801,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../compressShape_mat/" class="md-nav__link">
+      <a href="../matlab_api/compressShape_mat/" class="md-nav__link">
         
   
   
@@ -956,7 +824,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../conjugate/" class="md-nav__link">
+      <a href="../matlab_api/conjugate/" class="md-nav__link">
         
   
   
@@ -979,7 +847,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../convert/" class="md-nav__link">
+      <a href="../matlab_api/convert/" class="md-nav__link">
         
   
   
@@ -1002,7 +870,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../decompressShape/" class="md-nav__link">
+      <a href="../matlab_api/decompressShape/" class="md-nav__link">
         
   
   
@@ -1025,7 +893,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../duration/" class="md-nav__link">
+      <a href="../matlab_api/duration/" class="md-nav__link">
         
   
   
@@ -1048,7 +916,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../evalLabels/" class="md-nav__link">
+      <a href="../matlab_api/evalLabels/" class="md-nav__link">
         
   
   
@@ -1071,7 +939,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../EventLibrary/" class="md-nav__link">
+      <a href="../matlab_api/EventLibrary/" class="md-nav__link">
         
   
   
@@ -1094,7 +962,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../findBlockByTime/" class="md-nav__link">
+      <a href="../matlab_api/findBlockByTime/" class="md-nav__link">
         
   
   
@@ -1117,7 +985,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../findFlank/" class="md-nav__link">
+      <a href="../matlab_api/findFlank/" class="md-nav__link">
         
   
   
@@ -1140,7 +1008,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../flipGradAxis/" class="md-nav__link">
+      <a href="../matlab_api/flipGradAxis/" class="md-nav__link">
         
   
   
@@ -1163,7 +1031,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../fromRotMat/" class="md-nav__link">
+      <a href="../matlab_api/fromRotMat/" class="md-nav__link">
         
   
   
@@ -1186,7 +1054,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../gauss/" class="md-nav__link">
+      <a href="../matlab_api/gauss/" class="md-nav__link">
         
   
   
@@ -1209,7 +1077,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getBlock/" class="md-nav__link">
+      <a href="../matlab_api/getBlock/" class="md-nav__link">
         
   
   
@@ -1232,7 +1100,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getDefinition/" class="md-nav__link">
+      <a href="../matlab_api/getDefinition/" class="md-nav__link">
         
   
   
@@ -1255,7 +1123,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getSupportedLabels/" class="md-nav__link">
+      <a href="../matlab_api/getSupportedLabels/" class="md-nav__link">
         
   
   
@@ -1278,7 +1146,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getSupportedRfUse/" class="md-nav__link">
+      <a href="../matlab_api/getSupportedRfUse/" class="md-nav__link">
         
   
   
@@ -1301,7 +1169,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../init/" class="md-nav__link">
+      <a href="../matlab_api/init/" class="md-nav__link">
         
   
   
@@ -1324,7 +1192,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../install/" class="md-nav__link">
+      <a href="../matlab_api/install/" class="md-nav__link">
         
   
   
@@ -1347,7 +1215,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../isOctave/" class="md-nav__link">
+      <a href="../matlab_api/isOctave/" class="md-nav__link">
         
   
   
@@ -1370,7 +1238,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../makeAdc/" class="md-nav__link">
+      <a href="../matlab_api/makeAdc/" class="md-nav__link">
         
   
   
@@ -1393,7 +1261,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../makeAdiabaticPulse/" class="md-nav__link">
+      <a href="../matlab_api/makeAdiabaticPulse/" class="md-nav__link">
         
   
   
@@ -1416,7 +1284,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../makeArbitraryGrad/" class="md-nav__link">
+      <a href="../matlab_api/makeArbitraryGrad/" class="md-nav__link">
         
   
   
@@ -1439,7 +1307,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../makeArbitraryRf/" class="md-nav__link">
+      <a href="../matlab_api/makeArbitraryRf/" class="md-nav__link">
         
   
   
@@ -1462,7 +1330,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../makeBlockPulse/" class="md-nav__link">
+      <a href="../matlab_api/makeBlockPulse/" class="md-nav__link">
         
   
   
@@ -1485,7 +1353,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../makeDelay/" class="md-nav__link">
+      <a href="../matlab_api/makeDelay/" class="md-nav__link">
         
   
   
@@ -1508,7 +1376,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../makeDigitalOutputPulse/" class="md-nav__link">
+      <a href="../matlab_api/makeDigitalOutputPulse/" class="md-nav__link">
         
   
   
@@ -1531,7 +1399,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../makeExtendedTrapezoid/" class="md-nav__link">
+      <a href="../matlab_api/makeExtendedTrapezoid/" class="md-nav__link">
         
   
   
@@ -1554,7 +1422,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../makeExtendedTrapezoidArea/" class="md-nav__link">
+      <a href="../matlab_api/makeExtendedTrapezoidArea/" class="md-nav__link">
         
   
   
@@ -1577,7 +1445,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../makeGaussPulse/" class="md-nav__link">
+      <a href="../matlab_api/makeGaussPulse/" class="md-nav__link">
         
   
   
@@ -1600,7 +1468,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../makeLabel/" class="md-nav__link">
+      <a href="../matlab_api/makeLabel/" class="md-nav__link">
         
   
   
@@ -1623,7 +1491,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../makeSincPulse/" class="md-nav__link">
+      <a href="../matlab_api/makeSincPulse/" class="md-nav__link">
         
   
   
@@ -1646,7 +1514,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../makeSLRpulse/" class="md-nav__link">
+      <a href="../matlab_api/makeSLRpulse/" class="md-nav__link">
         
   
   
@@ -1669,7 +1537,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../makeSoftDelay/" class="md-nav__link">
+      <a href="../matlab_api/makeSoftDelay/" class="md-nav__link">
         
   
   
@@ -1692,7 +1560,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../makeTrapezoid/" class="md-nav__link">
+      <a href="../matlab_api/makeTrapezoid/" class="md-nav__link">
         
   
   
@@ -1715,7 +1583,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../makeTrigger/" class="md-nav__link">
+      <a href="../matlab_api/makeTrigger/" class="md-nav__link">
         
   
   
@@ -1738,7 +1606,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../md5/" class="md-nav__link">
+      <a href="../matlab_api/md5/" class="md-nav__link">
         
   
   
@@ -1761,7 +1629,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../melodyToPitchesAndDurations/" class="md-nav__link">
+      <a href="../matlab_api/melodyToPitchesAndDurations/" class="md-nav__link">
         
   
   
@@ -1784,7 +1652,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../melodyToScale/" class="md-nav__link">
+      <a href="../matlab_api/melodyToScale/" class="md-nav__link">
         
   
   
@@ -1807,7 +1675,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../modGradAxis/" class="md-nav__link">
+      <a href="../matlab_api/modGradAxis/" class="md-nav__link">
         
   
   
@@ -1830,7 +1698,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../multiply/" class="md-nav__link">
+      <a href="../matlab_api/multiply/" class="md-nav__link">
         
   
   
@@ -1853,7 +1721,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../musicToSequence/" class="md-nav__link">
+      <a href="../matlab_api/musicToSequence/" class="md-nav__link">
         
   
   
@@ -1876,7 +1744,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../normalize/" class="md-nav__link">
+      <a href="../matlab_api/normalize/" class="md-nav__link">
         
   
   
@@ -1899,7 +1767,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../opts/" class="md-nav__link">
+      <a href="../matlab_api/opts/" class="md-nav__link">
         
   
   
@@ -1922,7 +1790,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../paperPlot/" class="md-nav__link">
+      <a href="../matlab_api/paperPlot/" class="md-nav__link">
         
   
   
@@ -1945,7 +1813,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../parsemr/" class="md-nav__link">
+      <a href="../matlab_api/parsemr/" class="md-nav__link">
         
   
   
@@ -1968,7 +1836,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../plot/" class="md-nav__link">
+      <a href="../matlab_api/plot/" class="md-nav__link">
         
   
   
@@ -1991,7 +1859,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../pts2waveform/" class="md-nav__link">
+      <a href="../matlab_api/pts2waveform/" class="md-nav__link">
         
   
   
@@ -2014,7 +1882,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../read/" class="md-nav__link">
+      <a href="../matlab_api/read/" class="md-nav__link">
         
   
   
@@ -2037,7 +1905,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../readasc/" class="md-nav__link">
+      <a href="../matlab_api/readasc/" class="md-nav__link">
         
   
   
@@ -2060,7 +1928,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../readBinary/" class="md-nav__link">
+      <a href="../matlab_api/readBinary/" class="md-nav__link">
         
   
   
@@ -2083,7 +1951,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../restoreAdditionalShapeSamples/" class="md-nav__link">
+      <a href="../matlab_api/restoreAdditionalShapeSamples/" class="md-nav__link">
         
   
   
@@ -2106,7 +1974,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../rotate/" class="md-nav__link">
+      <a href="../matlab_api/rotate/" class="md-nav__link">
         
   
   
@@ -2129,7 +1997,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../rotate3D/" class="md-nav__link">
+      <a href="../matlab_api/rotate3D/" class="md-nav__link">
         
   
   
@@ -2152,7 +2020,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../scaleGrad/" class="md-nav__link">
+      <a href="../matlab_api/scaleGrad/" class="md-nav__link">
         
   
   
@@ -2175,7 +2043,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../SeqPlot/" class="md-nav__link">
+      <a href="../matlab_api/SeqPlot/" class="md-nav__link">
         
   
   
@@ -2198,7 +2066,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../Sequence/" class="md-nav__link">
+      <a href="../matlab_api/Sequence/" class="md-nav__link">
         
   
   
@@ -2221,7 +2089,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setBlock/" class="md-nav__link">
+      <a href="../matlab_api/setBlock/" class="md-nav__link">
         
   
   
@@ -2244,7 +2112,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setDefinition/" class="md-nav__link">
+      <a href="../matlab_api/setDefinition/" class="md-nav__link">
         
   
   
@@ -2267,7 +2135,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../simRf/" class="md-nav__link">
+      <a href="../matlab_api/simRf/" class="md-nav__link">
         
   
   
@@ -2290,7 +2158,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../sinc/" class="md-nav__link">
+      <a href="../matlab_api/sinc/" class="md-nav__link">
         
   
   
@@ -2313,7 +2181,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../sound/" class="md-nav__link">
+      <a href="../matlab_api/sound/" class="md-nav__link">
         
   
   
@@ -2336,7 +2204,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../splitGradient/" class="md-nav__link">
+      <a href="../matlab_api/splitGradient/" class="md-nav__link">
         
   
   
@@ -2359,7 +2227,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../splitGradientAt/" class="md-nav__link">
+      <a href="../matlab_api/splitGradientAt/" class="md-nav__link">
         
   
   
@@ -2382,7 +2250,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../testReport/" class="md-nav__link">
+      <a href="../matlab_api/testReport/" class="md-nav__link">
         
   
   
@@ -2405,7 +2273,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../toRotMat/" class="md-nav__link">
+      <a href="../matlab_api/toRotMat/" class="md-nav__link">
         
   
   
@@ -2428,7 +2296,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../traj2grad/" class="md-nav__link">
+      <a href="../matlab_api/traj2grad/" class="md-nav__link">
         
   
   
@@ -2451,7 +2319,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../transform/" class="md-nav__link">
+      <a href="../matlab_api/transform/" class="md-nav__link">
         
   
   
@@ -2474,7 +2342,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../TransformFOV/" class="md-nav__link">
+      <a href="../matlab_api/TransformFOV/" class="md-nav__link">
         
   
   
@@ -2497,7 +2365,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../version/" class="md-nav__link">
+      <a href="../matlab_api/version/" class="md-nav__link">
         
   
   
@@ -2520,7 +2388,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../waveforms_and_times/" class="md-nav__link">
+      <a href="../matlab_api/waveforms_and_times/" class="md-nav__link">
         
   
   
@@ -2543,7 +2411,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../write/" class="md-nav__link">
+      <a href="../matlab_api/write/" class="md-nav__link">
         
   
   
@@ -2566,7 +2434,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../write_v141/" class="md-nav__link">
+      <a href="../matlab_api/write_v141/" class="md-nav__link">
         
   
   
@@ -2589,7 +2457,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../writeBinary/" class="md-nav__link">
+      <a href="../matlab_api/writeBinary/" class="md-nav__link">
         
   
   
@@ -2647,78 +2515,99 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#syntax" class="md-nav__link">
+  <a href="#system-architecture" class="md-nav__link">
     <span class="md-ellipsis">
-      Syntax
+      System Architecture
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#calling-pattern" class="md-nav__link">
+  <a href="#data-flow-diagram" class="md-nav__link">
     <span class="md-ellipsis">
-      Calling Pattern
+      Data Flow Diagram
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#parameters" class="md-nav__link">
+  <a href="#module-relationships" class="md-nav__link">
     <span class="md-ellipsis">
-      Parameters
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Parameters">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#required-parameters" class="md-nav__link">
-    <span class="md-ellipsis">
-      Required Parameters
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#optional-parameters" class="md-nav__link">
-    <span class="md-ellipsis">
-      Optional Parameters
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#returns" class="md-nav__link">
-    <span class="md-ellipsis">
-      Returns
+      Module Relationships
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#examples" class="md-nav__link">
+  <a href="#session-management-flow" class="md-nav__link">
     <span class="md-ellipsis">
-      Examples
+      Session Management Flow
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#see-also" class="md-nav__link">
+  <a href="#rag-service-architecture" class="md-nav__link">
     <span class="md-ellipsis">
-      See Also
+      RAG Service Architecture
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#decision-flow-built-in-vs-rag-search" class="md-nav__link">
+    <span class="md-ellipsis">
+      Decision Flow - Built-in vs RAG Search
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#component-interaction-diagram" class="md-nav__link">
+    <span class="md-ellipsis">
+      Component Interaction Diagram
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deployment-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      Deployment Architecture
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#error-handling-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Error Handling Flow
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-optimization-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance Optimization Strategy
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-coverage-map" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing Coverage Map
     </span>
   </a>
   
@@ -2740,145 +2629,397 @@
 
 
 
-<h1 id="calculatekspacepp">calculateKspacePP<a class="headerlink" href="#calculatekspacepp" title="Permanent link">&para;</a></h1>
-<p>Calculates the k-space trajectory of a Pulseq sequence using a piecewise-polynomial gradient wave representation. This method is efficient for sequences with simple gradient shapes and long delays.  It considers optional parameters for compensating ADC and gradient timing mismatches and simulating background gradients.</p>
-<h2 id="syntax">Syntax<a class="headerlink" href="#syntax" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="k">function</span><span class="w"> </span><span class="nf">[ktraj_adc, t_adc, ktraj, t_ktraj, t_excitation, t_refocusing, slicepos, t_slicepos, gw_pp, pm_adc] = calculateKspacePP</span><span class="p">(</span>obj, varargin<span class="p">)</span>
+<h1 id="pulsepal-architecture-diagrams">PulsePal Architecture Diagrams<a class="headerlink" href="#pulsepal-architecture-diagrams" title="Permanent link">&para;</a></h1>
+<h2 id="system-architecture">System Architecture<a class="headerlink" href="#system-architecture" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>graph TB
+    subgraph &quot;User Interfaces&quot;
+        CLI[CLI Interface&lt;br/&gt;run_pulsepal.py]
+        WEB[Web Interface&lt;br/&gt;chainlit_app.py]
+    end
+
+    subgraph &quot;Core Agent&quot;
+        AGENT[PulsePal Agent&lt;br/&gt;main_agent.py]
+        DEPS[Dependencies&lt;br/&gt;dependencies.py]
+        TOOLS[Tools&lt;br/&gt;tools.py]
+    end
+
+    subgraph &quot;Services&quot;
+        RAG[RAG Service&lt;br/&gt;rag_service.py]
+        SESSION[Session Manager]
+        SETTINGS[Settings&lt;br/&gt;settings.py]
+    end
+
+    subgraph &quot;External Services&quot;
+        GEMINI[Google Gemini&lt;br/&gt;2.5 Flash]
+        SUPABASE[Supabase&lt;br/&gt;Vector DB]
+        EMBEDDINGS[Google&lt;br/&gt;Embeddings API]
+    end
+
+    CLI --&gt; AGENT
+    WEB --&gt; AGENT
+    AGENT --&gt; DEPS
+    AGENT --&gt; TOOLS
+    TOOLS --&gt; RAG
+    DEPS --&gt; SESSION
+    AGENT --&gt; SETTINGS
+    RAG --&gt; SUPABASE
+    RAG --&gt; EMBEDDINGS
+    AGENT --&gt; GEMINI
+    SETTINGS --&gt; GEMINI
 </code></pre></div>
-<h2 id="calling-pattern">Calling Pattern<a class="headerlink" href="#calling-pattern" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="n">seq</span><span class="p">.</span><span class="n">calculateKspacePP</span><span class="p">(</span><span class="k">...</span><span class="c">)</span>
+<h2 id="data-flow-diagram">Data Flow Diagram<a class="headerlink" href="#data-flow-diagram" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>sequenceDiagram
+    participant User
+    participant Interface as CLI/Web
+    participant Agent as PulsePal Agent
+    participant Router as Semantic Router
+    participant RAG as RAG Service
+    participant Gemini as Google Gemini
+    participant Supabase as Supabase DB
+
+    User-&gt;&gt;Interface: Query
+    Interface-&gt;&gt;Agent: Process Query
+    Agent-&gt;&gt;Router: Analyze Query Type
+
+    alt Needs Documentation
+        Router-&gt;&gt;Agent: Force RAG Search
+        Agent-&gt;&gt;RAG: Search Knowledge
+        RAG-&gt;&gt;Supabase: Vector Search
+        Supabase--&gt;&gt;RAG: Results
+        RAG--&gt;&gt;Agent: Formatted Results
+    else Built-in Knowledge
+        Router-&gt;&gt;Agent: Skip RAG
+    end
+
+    Agent-&gt;&gt;Gemini: Generate Response
+    Gemini--&gt;&gt;Agent: Response
+    Agent--&gt;&gt;Interface: Final Answer
+    Interface--&gt;&gt;User: Display Result
 </code></pre></div>
-<h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
-<h3 id="required-parameters">Required Parameters<a class="headerlink" href="#required-parameters" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Type</th>
-<th>Description</th>
-<th>Example</th>
-<th>Units</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>obj</code></td>
-<td>PulseqSequence object</td>
-<td>The Pulseq sequence object containing the gradient waveforms and timing information.</td>
-<td><code>mySequenceObject</code></td>
-<td></td>
-</tr>
-</tbody>
-</table>
-<h3 id="optional-parameters">Optional Parameters<a class="headerlink" href="#optional-parameters" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Type</th>
-<th>Default</th>
-<th>Description</th>
-<th>Example</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>trajectory_delay</code></td>
-<td>double</td>
-<td><code>0</code></td>
-<td>A compensation factor to align the ADC and gradient timings in k-space reconstruction.  Positive values delay the gradient relative to the ADC. Valid values: Any numeric value (Units: seconds)</td>
-<td><code>0.000001</code></td>
-</tr>
-<tr>
-<td><code>gradient_offset</code></td>
-<td>double</td>
-<td><code>0</code></td>
-<td>Simulates background gradients or helps verify spin-echo conditions by adding a constant offset to the gradient waveforms. Valid values: Any numeric value (Units: Hz/m)</td>
-<td><code>10</code></td>
-</tr>
-<tr>
-<td><code>blockRange</code></td>
-<td>double</td>
-<td><code>[1 inf]</code></td>
-<td>Specifies a range of blocks within the sequence to consider for k-space trajectory calculation. Valid values: A two-element numeric array [start_block end_block], where end_block can be Inf to include all blocks from start_block to the end of the sequence.  start_block must be &gt;=1</td>
-<td><code>[5,10]</code></td>
-</tr>
-<tr>
-<td><code>externalWaveformsAndTimes</code></td>
-<td>struct</td>
-<td><code>struct([])</code></td>
-<td>Allows supplying external gradient waveforms and timing information instead of using those from the Pulseq sequence object.  The struct should contain fields 'gw_data', 'tfp_excitation', 'tfp_refocusing', and 't_adc'.  It may optionally include 'pm_adc'. Valid values: A struct with fields: gw_data (gradient waveforms), tfp_excitation (excitation pulse timings), tfp_refocusing (refocusing pulse timings), t_adc (ADC timings), optionally pm_adc (phase modulation for ADC).</td>
-<td><code>{gw_data: myGradientData, tfp_excitation: myExcitationTimes, tfp_refocusing: myRefocusingTimes, t_adc: myADCtimes}</code></td>
-</tr>
-</tbody>
-</table>
-<h2 id="returns">Returns<a class="headerlink" href="#returns" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>Output</th>
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>ktraj_adc</code></td>
-<td>double</td>
-<td>k-space trajectory corresponding to ADC sampling times.</td>
-</tr>
-<tr>
-<td><code>t_adc</code></td>
-<td>double</td>
-<td>Time points corresponding to ADC samples.</td>
-</tr>
-<tr>
-<td><code>ktraj</code></td>
-<td>double</td>
-<td>Complete k-space trajectory.</td>
-</tr>
-<tr>
-<td><code>t_ktraj</code></td>
-<td>double</td>
-<td>Time points corresponding to the complete k-space trajectory.</td>
-</tr>
-<tr>
-<td><code>t_excitation</code></td>
-<td>double</td>
-<td>Time points of excitation pulses.</td>
-</tr>
-<tr>
-<td><code>t_refocusing</code></td>
-<td>double</td>
-<td>Time points of refocusing pulses.</td>
-</tr>
-<tr>
-<td><code>slicepos</code></td>
-<td>double</td>
-<td>Slice position information.</td>
-</tr>
-<tr>
-<td><code>t_slicepos</code></td>
-<td>double</td>
-<td>Time points corresponding to slice positions.</td>
-</tr>
-<tr>
-<td><code>gw_pp</code></td>
-<td>double</td>
-<td>Piecewise polynomial representation of gradient waveforms (optional output).</td>
-</tr>
-<tr>
-<td><code>pm_adc</code></td>
-<td>double</td>
-<td>Phase modulation for ADC (optional output).</td>
-</tr>
-</tbody>
-</table>
-<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="p">[</span><span class="n">ktraj_adc</span><span class="p">,</span><span class="w"> </span><span class="n">t_adc</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">seq</span><span class="p">.</span><span class="n">calculateKspacePP</span><span class="p">(</span><span class="s">&#39;trajectory_delay&#39;</span><span class="p">,</span><span class="w"> </span><span class="mf">1e-6</span><span class="p">);</span>
+<h2 id="module-relationships">Module Relationships<a class="headerlink" href="#module-relationships" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>graph LR
+    subgraph &quot;Entry Points&quot;
+        CLI[run_pulsepal.py]
+        WEB[chainlit_app.py]
+    end
+
+    subgraph &quot;Core Modules&quot;
+        MAIN[main_agent.py]
+        TOOLS[tools.py]
+        DEPS[dependencies.py]
+    end
+
+    subgraph &quot;Service Modules&quot;
+        RAG[rag_service.py]
+        SETTINGS[settings.py]
+        PROVIDERS[providers.py]
+        LOGGER[conversation_logger.py]
+    end
+
+    subgraph &quot;Support Modules&quot;
+        PROMPTS[system_prompts.py]
+        ROUTER[semantic_router.py]
+        UTILS[utils.py]
+    end
+
+    CLI --&gt; MAIN
+    WEB --&gt; MAIN
+    MAIN --&gt; TOOLS
+    MAIN --&gt; DEPS
+    MAIN --&gt; SETTINGS
+    TOOLS --&gt; RAG
+    DEPS --&gt; RAG
+    RAG --&gt; PROVIDERS
+    MAIN --&gt; PROMPTS
+    MAIN --&gt; ROUTER
+    MAIN --&gt; LOGGER
+    RAG --&gt; UTILS
 </code></pre></div>
-<h2 id="see-also">See Also<a class="headerlink" href="#see-also" title="Permanent link">&para;</a></h2>
-<p><a href="../waveforms_and_times/">waveforms_and_times</a></p>
+<h2 id="session-management-flow">Session Management Flow<a class="headerlink" href="#session-management-flow" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>stateDiagram-v2
+    [*] --&gt; New: User starts conversation
+    New --&gt; Active: Session created
+    Active --&gt; Active: Query processed
+    Active --&gt; Inactive: No activity (2h)
+    Inactive --&gt; Active: User returns
+    Active --&gt; Expired: 24 hours passed
+    Inactive --&gt; Expired: 24 hours passed
+    Expired --&gt; Archived: Cleanup process
+    Archived --&gt; Deleted: 7 days passed
+    Deleted --&gt; [*]
+
+    note right of Active
+        - Stores conversation history
+        - Tracks language preference
+        - Maintains code examples
+    end note
+
+    note right of Archived
+        - Compressed storage
+        - Historical reference
+        - Can be restored
+    end note
+</code></pre></div>
+<h2 id="rag-service-architecture">RAG Service Architecture<a class="headerlink" href="#rag-service-architecture" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>graph TD
+    subgraph &quot;Query Processing&quot;
+        QUERY[User Query]
+        ROUTER[Query Router]
+        OPTIMIZE[Query Optimizer]
+    end
+
+    subgraph &quot;Search Methods&quot;
+        DOC[Documentation Search]
+        FUNC[Function Search]
+        EXAMPLE[Example Search]
+        CODE[Code Search]
+    end
+
+    subgraph &quot;Search Strategy&quot;
+        VECTOR[Vector Search]
+        KEYWORD[Keyword Search]
+        HYBRID[Hybrid Search]
+    end
+
+    subgraph &quot;Results&quot;
+        FORMAT[Result Formatter]
+        CACHE[Result Cache]
+        RESPONSE[Final Response]
+    end
+
+    QUERY --&gt; ROUTER
+    ROUTER --&gt; OPTIMIZE
+
+    OPTIMIZE --&gt; DOC
+    OPTIMIZE --&gt; FUNC
+    OPTIMIZE --&gt; EXAMPLE
+    OPTIMIZE --&gt; CODE
+
+    DOC --&gt; HYBRID
+    FUNC --&gt; HYBRID
+    EXAMPLE --&gt; VECTOR
+    CODE --&gt; KEYWORD
+
+    HYBRID --&gt; FORMAT
+    VECTOR --&gt; FORMAT
+    KEYWORD --&gt; FORMAT
+
+    FORMAT --&gt; CACHE
+    CACHE --&gt; RESPONSE
+</code></pre></div>
+<h2 id="decision-flow-built-in-vs-rag-search">Decision Flow - Built-in vs RAG Search<a class="headerlink" href="#decision-flow-built-in-vs-rag-search" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>flowchart TD
+    START[User Query] --&gt; ANALYZE[Analyze Query]
+    ANALYZE --&gt; PHYSICS{Pure Physics?}
+
+    PHYSICS --&gt;|Yes| BUILTIN[Use Built-in Knowledge]
+    PHYSICS --&gt;|No| SPECIFIC{Specific Pulseq?}
+
+    SPECIFIC --&gt;|Yes| CHECKFUNC{Function Name?}
+    SPECIFIC --&gt;|No| GENERAL{General MRI?}
+
+    CHECKFUNC --&gt;|Yes| RAGSEARCH[Force RAG Search]
+    CHECKFUNC --&gt;|No| CHECKEXAMPLE{Code Example?}
+
+    CHECKEXAMPLE --&gt;|Yes| RAGSEARCH
+    CHECKEXAMPLE --&gt;|No| BUILTIN
+
+    GENERAL --&gt;|Yes| BUILTIN
+    GENERAL --&gt;|No| RAGSEARCH
+
+    BUILTIN --&gt; GEMINI[Generate with Gemini]
+    RAGSEARCH --&gt; SEARCH[Search Supabase]
+    SEARCH --&gt; AUGMENT[Augment Context]
+    AUGMENT --&gt; GEMINI
+
+    GEMINI --&gt; RESPONSE[Final Response]
+</code></pre></div>
+<h2 id="component-interaction-diagram">Component Interaction Diagram<a class="headerlink" href="#component-interaction-diagram" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>graph TB
+    subgraph &quot;Application Layer&quot;
+        UI[User Interface]
+    end
+
+    subgraph &quot;Agent Layer&quot;
+        AGENT[PulsePal Agent]
+        TOOLS[Agent Tools]
+        CONTEXT[Conversation Context]
+    end
+
+    subgraph &quot;Service Layer&quot;
+        RAG[RAG Service]
+        SESSION[Session Service]
+        CONFIG[Configuration Service]
+    end
+
+    subgraph &quot;Data Layer&quot;
+        VECTORDB[(Supabase&lt;br/&gt;Vector DB)]
+        SESSIONS[(Session&lt;br/&gt;Storage)]
+        LOGS[(Conversation&lt;br/&gt;Logs)]
+    end
+
+    subgraph &quot;External APIs&quot;
+        LLM[Google Gemini API]
+        EMBED[Embeddings API]
+    end
+
+    UI &lt;--&gt; AGENT
+    AGENT &lt;--&gt; TOOLS
+    AGENT &lt;--&gt; CONTEXT
+    TOOLS &lt;--&gt; RAG
+    CONTEXT &lt;--&gt; SESSION
+    AGENT &lt;--&gt; CONFIG
+    RAG &lt;--&gt; VECTORDB
+    SESSION &lt;--&gt; SESSIONS
+    AGENT --&gt; LOGS
+    RAG &lt;--&gt; EMBED
+    AGENT &lt;--&gt; LLM
+</code></pre></div>
+<h2 id="deployment-architecture">Deployment Architecture<a class="headerlink" href="#deployment-architecture" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>graph LR
+    subgraph &quot;Development&quot;
+        DEV[Local Development]
+        DEVDB[(Local Supabase)]
+    end
+
+    subgraph &quot;Production&quot;
+        PROD[Production Server]
+        PRODDB[(Production Supabase)]
+
+        subgraph &quot;Services&quot;
+            API[API Server]
+            WEB[Web Server]
+            WORKER[Background Workers]
+        end
+    end
+
+    subgraph &quot;External&quot;
+        GEMINI[Google Gemini]
+        EMBED[Google Embeddings]
+    end
+
+    DEV --&gt; DEVDB
+    DEV --&gt; GEMINI
+    DEV --&gt; EMBED
+
+    PROD --&gt; PRODDB
+    API --&gt; GEMINI
+    API --&gt; EMBED
+    WEB --&gt; API
+    WORKER --&gt; PRODDB
+
+    style DEV fill:#e1f5fe
+    style PROD fill:#c8e6c9
+    style GEMINI fill:#fff3e0
+    style EMBED fill:#fff3e0
+</code></pre></div>
+<h2 id="error-handling-flow">Error Handling Flow<a class="headerlink" href="#error-handling-flow" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>flowchart TD
+    REQUEST[User Request] --&gt; TRY{Try Process}
+
+    TRY --&gt;|Success| RESPONSE[Return Response]
+    TRY --&gt;|API Error| APIHANDLE{API Handler}
+    TRY --&gt;|Session Error| SESSIONHANDLE{Session Handler}
+    TRY --&gt;|RAG Error| RAGHANDLE{RAG Handler}
+
+    APIHANDLE --&gt;|Rate Limit| WAIT[Wait &amp; Retry]
+    APIHANDLE --&gt;|Auth Error| FAIL[Return Error]
+
+    SESSIONHANDLE --&gt;|Not Found| CREATE[Create New Session]
+    SESSIONHANDLE --&gt;|Corrupted| REBUILD[Rebuild Session]
+
+    RAGHANDLE --&gt;|No Results| FALLBACK[Use Built-in Knowledge]
+    RAGHANDLE --&gt;|Timeout| CACHE[Check Cache]
+
+    WAIT --&gt; TRY
+    CREATE --&gt; TRY
+    REBUILD --&gt; TRY
+    FALLBACK --&gt; RESPONSE
+    CACHE --&gt; RESPONSE
+    FAIL --&gt; ERROR[Error Message]
+</code></pre></div>
+<h2 id="performance-optimization-strategy">Performance Optimization Strategy<a class="headerlink" href="#performance-optimization-strategy" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>graph TD
+    subgraph &quot;Query Processing&quot;
+        Q1[Query Analysis&lt;br/&gt;~50ms]
+        Q2[Semantic Routing&lt;br/&gt;~100ms]
+    end
+
+    subgraph &quot;Knowledge Decision&quot;
+        D1{Use RAG?}
+        D2[Built-in Knowledge&lt;br/&gt;~0ms]
+        D3[RAG Search&lt;br/&gt;~500-1000ms]
+    end
+
+    subgraph &quot;Response Generation&quot;
+        G1[Gemini Processing&lt;br/&gt;~1000-2000ms]
+        G2[Format Response&lt;br/&gt;~50ms]
+    end
+
+    subgraph &quot;Optimizations&quot;
+        O1[Session Cache]
+        O2[Result Cache]
+        O3[Query Batching]
+    end
+
+    Q1 --&gt; Q2
+    Q2 --&gt; D1
+    D1 --&gt;|No 90%| D2
+    D1 --&gt;|Yes 10%| D3
+    D2 --&gt; G1
+    D3 --&gt; G1
+    G1 --&gt; G2
+
+    O1 -.-&gt; Q1
+    O2 -.-&gt; D3
+    O3 -.-&gt; G1
+
+    style D2 fill:#c8e6c9
+    style D3 fill:#ffccbc
+</code></pre></div>
+<h2 id="testing-coverage-map">Testing Coverage Map<a class="headerlink" href="#testing-coverage-map" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>graph LR
+    subgraph &quot;Unit Tests&quot;
+        UT1[main_agent.py&lt;br/&gt;90% coverage]
+        UT2[rag_service.py&lt;br/&gt;85% coverage]
+        UT3[dependencies.py&lt;br/&gt;95% coverage]
+        UT4[tools.py&lt;br/&gt;100% coverage]
+    end
+
+    subgraph &quot;Integration Tests&quot;
+        IT1[Agent + RAG&lt;br/&gt;80% coverage]
+        IT2[Session Flow&lt;br/&gt;85% coverage]
+        IT3[API Integration&lt;br/&gt;75% coverage]
+    end
+
+    subgraph &quot;E2E Tests&quot;
+        E2E1[CLI Workflow&lt;br/&gt;70% coverage]
+        E2E2[Web Workflow&lt;br/&gt;60% coverage]
+        E2E3[Full Query Flow&lt;br/&gt;80% coverage]
+    end
+
+    UT1 --&gt; IT1
+    UT2 --&gt; IT1
+    UT3 --&gt; IT2
+    UT4 --&gt; IT3
+
+    IT1 --&gt; E2E3
+    IT2 --&gt; E2E3
+    IT3 --&gt; E2E1
+    IT3 --&gt; E2E2
+
+    style UT4 fill:#c8e6c9
+    style UT3 fill:#c8e6c9
+    style UT1 fill:#dcedc8
+    style E2E2 fill:#ffccbc
+</code></pre></div>
+<hr />
+<p>These diagrams use Mermaid syntax and can be rendered in:
+- GitHub markdown files
+- VS Code with Mermaid extension
+- Online at mermaid.live
+- MkDocs documentation</p>
+<p>To update diagrams, edit the Mermaid code blocks above.</p>
 
 
 
@@ -2948,10 +3089,10 @@
     
     
       
-      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.50899def.min.js"></script>
+      <script src="../assets/javascripts/bundle.50899def.min.js"></script>
       
     
   </body>

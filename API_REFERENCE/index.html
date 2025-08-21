@@ -1,0 +1,3624 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Complete API reference for Pulseq MATLAB functions">
+      
+      
+      
+        <link rel="canonical" href="https://rmoskwa.github.io/Pulsepal/API_REFERENCE/">
+      
+      
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.16">
+    
+    
+      
+        <title>PulsePal API Reference - Pulseq MATLAB API Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.7e37652d.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="light-blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#pulsepal-api-reference" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Pulseq MATLAB API Documentation" class="md-header__button md-logo" aria-label="Pulseq MATLAB API Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Pulseq MATLAB API Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              PulsePal API Reference
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../matlab_api/" class="md-tabs__link">
+          
+  
+  
+  API Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Pulseq MATLAB API Documentation" class="md-nav__button md-logo" aria-label="Pulseq MATLAB API Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Pulseq MATLAB API Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    API Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            API Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Functions
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            Functions
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/addBlock/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    addBlock
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/addGradients/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    addGradients
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/addRamps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    addRamps
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/align/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    align
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/applySoftDelay/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    applySoftDelay
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/applyToBlock/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    applyToBlock
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/applyToSeq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    applyToSeq
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/calcAdcSeg/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    calcAdcSeg
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/calcDuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    calcDuration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/calcMomentsBtensor/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    calcMomentsBtensor
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/calcPNS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    calcPNS
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/calcRamp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    calcRamp
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/calcRfBandwidth/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    calcRfBandwidth
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/calcRfCenter/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    calcRfCenter
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/calcRfPower/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    calcRfPower
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/calculateKspacePP/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    calculateKspacePP
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/checkTiming/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    checkTiming
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/compressShape/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    compressShape
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/compressShape_mat/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    compressShape_mat
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/conjugate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    conjugate
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/convert/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    convert
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/decompressShape/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    decompressShape
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/duration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    duration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/evalLabels/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    evalLabels
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/EventLibrary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    EventLibrary
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/findBlockByTime/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    findBlockByTime
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/findFlank/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    findFlank
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/flipGradAxis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    flipGradAxis
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/fromRotMat/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    fromRotMat
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/gauss/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    gauss
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/getBlock/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    getBlock
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/getDefinition/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    getDefinition
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/getSupportedLabels/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    getSupportedLabels
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/getSupportedRfUse/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    getSupportedRfUse
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/init/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    init
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/install/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    install
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/isOctave/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    isOctave
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/makeAdc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeAdc
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/makeAdiabaticPulse/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeAdiabaticPulse
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/makeArbitraryGrad/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeArbitraryGrad
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/makeArbitraryRf/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeArbitraryRf
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/makeBlockPulse/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeBlockPulse
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/makeDelay/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeDelay
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/makeDigitalOutputPulse/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeDigitalOutputPulse
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/makeExtendedTrapezoid/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeExtendedTrapezoid
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/makeExtendedTrapezoidArea/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeExtendedTrapezoidArea
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/makeGaussPulse/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeGaussPulse
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/makeLabel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeLabel
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/makeSincPulse/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeSincPulse
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/makeSLRpulse/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeSLRpulse
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/makeSoftDelay/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeSoftDelay
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/makeTrapezoid/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeTrapezoid
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/makeTrigger/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeTrigger
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/md5/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    md5
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/melodyToPitchesAndDurations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    melodyToPitchesAndDurations
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/melodyToScale/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    melodyToScale
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/modGradAxis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    modGradAxis
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/multiply/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    multiply
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/musicToSequence/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    musicToSequence
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/normalize/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    normalize
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/opts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    opts
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/paperPlot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    paperPlot
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/parsemr/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    parsemr
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/plot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    plot
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/pts2waveform/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    pts2waveform
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/read/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    read
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/readasc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    readasc
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/readBinary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    readBinary
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/restoreAdditionalShapeSamples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    restoreAdditionalShapeSamples
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/rotate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    rotate
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/rotate3D/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    rotate3D
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/scaleGrad/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    scaleGrad
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/SeqPlot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    SeqPlot
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/Sequence/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Sequence
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/setBlock/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    setBlock
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/setDefinition/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    setDefinition
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/simRf/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    simRf
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/sinc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    sinc
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/sound/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    sound
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/splitGradient/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    splitGradient
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/splitGradientAt/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    splitGradientAt
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/testReport/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    testReport
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/toRotMat/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    toRotMat
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/traj2grad/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    traj2grad
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/transform/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    transform
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/TransformFOV/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    TransformFOV
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/version/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    version
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/waveforms_and_times/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    waveforms_and_times
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/write/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    write
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/write_v141/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    write_v141
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matlab_api/writeBinary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    writeBinary
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#core-modules" class="md-nav__link">
+    <span class="md-ellipsis">
+      Core Modules
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Modules">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pulsepalmain_agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      pulsepal.main_agent
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="pulsepal.main_agent">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Functions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#run_pulsepalquery-str-session_id-str-none-tuplestr-str" class="md-nav__link">
+    <span class="md-ellipsis">
+      run_pulsepal(query: str, session_id: str = None) -&gt; tuple[str, str]
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pulsepal_agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      pulsepal_agent
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pulsepalrag_service" class="md-nav__link">
+    <span class="md-ellipsis">
+      pulsepal.rag_service
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="pulsepal.rag_service">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#classes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Classes
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Classes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#modernpulseqrag" class="md-nav__link">
+    <span class="md-ellipsis">
+      ModernPulseqRAG
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ModernPulseqRAG">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#search_pulseq_knowledgequery-str-search_type-str-auto-str" class="md-nav__link">
+    <span class="md-ellipsis">
+      search_pulseq_knowledge(query: str, search_type: str = "auto") -&gt; str
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#supabaseragclient" class="md-nav__link">
+    <span class="md-ellipsis">
+      SupabaseRAGClient
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="SupabaseRAGClient">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hybrid_searchquery-str-limit-int-5-listdict" class="md-nav__link">
+    <span class="md-ellipsis">
+      hybrid_search(query: str, limit: int = 5) -&gt; List[Dict]
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pulsepaltools" class="md-nav__link">
+    <span class="md-ellipsis">
+      pulsepal.tools
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="pulsepal.tools">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#functions_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Functions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#search_pulseq_knowledgectx-runcontext-query-str-search_type-str-auto-str" class="md-nav__link">
+    <span class="md-ellipsis">
+      search_pulseq_knowledge(ctx: RunContext, query: str, search_type: str = "auto") -&gt; str
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pulsepaldependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      pulsepal.dependencies
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="pulsepal.dependencies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#classes_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Classes
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Classes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sessionmanager" class="md-nav__link">
+    <span class="md-ellipsis">
+      SessionManager
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="SessionManager">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#create_session-str" class="md-nav__link">
+    <span class="md-ellipsis">
+      create_session() -&gt; str
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get_sessionsession_id-str-conversationcontext" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_session(session_id: str) -&gt; ConversationContext
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cleanup_old_sessionsmax_age_hours-int-24" class="md-nav__link">
+    <span class="md-ellipsis">
+      cleanup_old_sessions(max_age_hours: int = 24)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#conversationcontext" class="md-nav__link">
+    <span class="md-ellipsis">
+      ConversationContext
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pulsepaldependencies_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      PulsePalDependencies
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pulsepalsettings" class="md-nav__link">
+    <span class="md-ellipsis">
+      pulsepal.settings
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="pulsepal.settings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#classes_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Classes
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Classes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Settings
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Functions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#get_settings-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_settings() -&gt; Settings
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get_llm_model-geminimodel" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_llm_model() -&gt; GeminiModel
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cli-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      CLI Interface
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="CLI Interface">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#run_pulsepalpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      run_pulsepal.py
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="run_pulsepal.py">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Arguments
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#web-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      Web Interface
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Web Interface">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#chainlit_apppy" class="md-nav__link">
+    <span class="md-ellipsis">
+      chainlit_app.py
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="chainlit_app.py">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#starting-the-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      Starting the Server
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#features" class="md-nav__link">
+    <span class="md-ellipsis">
+      Features
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#error-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      Error Handling
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Error Handling">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-exceptions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Exceptions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Exceptions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sessionnotfounderror" class="md-nav__link">
+    <span class="md-ellipsis">
+      SessionNotFoundError
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ragserviceerror" class="md-nav__link">
+    <span class="md-ellipsis">
+      RAGServiceError
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configurationerror" class="md-nav__link">
+    <span class="md-ellipsis">
+      ConfigurationError
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Environment Variables
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#return-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      Return Types
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Return Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#search-results-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      Search Results Format
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#session-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      Session Format
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Examples
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic Usage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-rag-search" class="md-nav__link">
+    <span class="md-ellipsis">
+      Custom RAG Search
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#session-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      Session Management
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#running-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      Running Tests
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Test Structure
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#support" class="md-nav__link">
+    <span class="md-ellipsis">
+      Support
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="pulsepal-api-reference">PulsePal API Reference<a class="headerlink" href="#pulsepal-api-reference" title="Permanent link">&para;</a></h1>
+<h2 id="core-modules">Core Modules<a class="headerlink" href="#core-modules" title="Permanent link">&para;</a></h2>
+<h3 id="pulsepalmain_agent">pulsepal.main_agent<a class="headerlink" href="#pulsepalmain_agent" title="Permanent link">&para;</a></h3>
+<p>The main agent module contains the core PulsePal intelligent agent.</p>
+<h4 id="functions">Functions<a class="headerlink" href="#functions" title="Permanent link">&para;</a></h4>
+<h5 id="run_pulsepalquery-str-session_id-str-none-tuplestr-str"><code>run_pulsepal(query: str, session_id: str = None) -&gt; tuple[str, str]</code><a class="headerlink" href="#run_pulsepalquery-str-session_id-str-none-tuplestr-str" title="Permanent link">&para;</a></h5>
+<p>Run PulsePal with a query and optional session management.</p>
+<p><strong>Parameters:</strong>
+- <code>query</code> (str): The user's question or request about Pulseq/MRI
+- <code>session_id</code> (str, optional): Existing session ID to continue conversation</p>
+<p><strong>Returns:</strong>
+- <code>tuple[str, str]</code>: Session ID and response text</p>
+<p><strong>Example:</strong>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pulsepal.main_agent</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_pulsepal</span>
+
+<span class="n">session_id</span><span class="p">,</span> <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">run_pulsepal</span><span class="p">(</span>
+    <span class="s2">&quot;How do I create a gradient echo sequence?&quot;</span><span class="p">,</span>
+    <span class="n">session_id</span><span class="o">=</span><span class="s2">&quot;existing-session-123&quot;</span>
+<span class="p">)</span>
+</code></pre></div></p>
+<h5 id="pulsepal_agent"><code>pulsepal_agent</code><a class="headerlink" href="#pulsepal_agent" title="Permanent link">&para;</a></h5>
+<p>The main PydanticAI agent instance configured with Google Gemini.</p>
+<p><strong>Usage:</strong>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pulsepal.main_agent</span><span class="w"> </span><span class="kn">import</span> <span class="n">pulsepal_agent</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">pulsepal_agent</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+    <span class="s2">&quot;Your query here&quot;</span><span class="p">,</span>
+    <span class="n">deps</span><span class="o">=</span><span class="n">dependencies</span>
+<span class="p">)</span>
+</code></pre></div></p>
+<hr />
+<h3 id="pulsepalrag_service">pulsepal.rag_service<a class="headerlink" href="#pulsepalrag_service" title="Permanent link">&para;</a></h3>
+<p>RAG (Retrieval Augmented Generation) service for Pulseq documentation search.</p>
+<h4 id="classes">Classes<a class="headerlink" href="#classes" title="Permanent link">&para;</a></h4>
+<h5 id="modernpulseqrag"><code>ModernPulseqRAG</code><a class="headerlink" href="#modernpulseqrag" title="Permanent link">&para;</a></h5>
+<p>Advanced RAG service with hybrid search capabilities.</p>
+<p><strong>Methods:</strong></p>
+<h6 id="search_pulseq_knowledgequery-str-search_type-str-auto-str"><code>search_pulseq_knowledge(query: str, search_type: str = "auto") -&gt; str</code><a class="headerlink" href="#search_pulseq_knowledgequery-str-search_type-str-auto-str" title="Permanent link">&para;</a></h6>
+<p>Search Pulseq documentation and return relevant information.</p>
+<p><strong>Parameters:</strong>
+- <code>query</code> (str): Search query
+- <code>search_type</code> (str): One of "auto", "documentation", "functions", "examples", "code"</p>
+<p><strong>Returns:</strong>
+- <code>str</code>: Formatted search results</p>
+<p><strong>Example:</strong>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pulsepal.rag_service</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModernPulseqRAG</span>
+
+<span class="n">rag</span> <span class="o">=</span> <span class="n">ModernPulseqRAG</span><span class="p">()</span>
+<span class="n">results</span> <span class="o">=</span> <span class="k">await</span> <span class="n">rag</span><span class="o">.</span><span class="n">search_pulseq_knowledge</span><span class="p">(</span>
+    <span class="s2">&quot;gradient echo parameters&quot;</span><span class="p">,</span>
+    <span class="n">search_type</span><span class="o">=</span><span class="s2">&quot;documentation&quot;</span>
+<span class="p">)</span>
+</code></pre></div></p>
+<h5 id="supabaseragclient"><code>SupabaseRAGClient</code><a class="headerlink" href="#supabaseragclient" title="Permanent link">&para;</a></h5>
+<p>Low-level client for Supabase vector database operations.</p>
+<p><strong>Methods:</strong></p>
+<h6 id="hybrid_searchquery-str-limit-int-5-listdict"><code>hybrid_search(query: str, limit: int = 5) -&gt; List[Dict]</code><a class="headerlink" href="#hybrid_searchquery-str-limit-int-5-listdict" title="Permanent link">&para;</a></h6>
+<p>Perform hybrid vector + keyword search.</p>
+<p><strong>Parameters:</strong>
+- <code>query</code> (str): Search query
+- <code>limit</code> (int): Maximum results to return</p>
+<p><strong>Returns:</strong>
+- <code>List[Dict]</code>: Search results with metadata</p>
+<hr />
+<h3 id="pulsepaltools">pulsepal.tools<a class="headerlink" href="#pulsepaltools" title="Permanent link">&para;</a></h3>
+<p>Tool functions for the PulsePal agent.</p>
+<h4 id="functions_1">Functions<a class="headerlink" href="#functions_1" title="Permanent link">&para;</a></h4>
+<h5 id="search_pulseq_knowledgectx-runcontext-query-str-search_type-str-auto-str"><code>search_pulseq_knowledge(ctx: RunContext, query: str, search_type: str = "auto") -&gt; str</code><a class="headerlink" href="#search_pulseq_knowledgectx-runcontext-query-str-search_type-str-auto-str" title="Permanent link">&para;</a></h5>
+<p>Agent tool for searching Pulseq knowledge base.</p>
+<p><strong>Parameters:</strong>
+- <code>ctx</code>: PydanticAI run context
+- <code>query</code> (str): Search query
+- <code>search_type</code> (str): Search method selection</p>
+<p><strong>Returns:</strong>
+- <code>str</code>: Formatted search results for agent use</p>
+<p><strong>Example:</strong>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pulsepal.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">search_pulseq_knowledge</span>
+
+<span class="c1"># Used internally by the agent</span>
+<span class="nd">@pulsepal_agent</span><span class="o">.</span><span class="n">tool</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">search_tool</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">query</span><span class="p">):</span>
+    <span class="k">return</span> <span class="k">await</span> <span class="n">search_pulseq_knowledge</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">query</span><span class="p">)</span>
+</code></pre></div></p>
+<hr />
+<h3 id="pulsepaldependencies">pulsepal.dependencies<a class="headerlink" href="#pulsepaldependencies" title="Permanent link">&para;</a></h3>
+<p>Session management and conversation context.</p>
+<h4 id="classes_1">Classes<a class="headerlink" href="#classes_1" title="Permanent link">&para;</a></h4>
+<h5 id="sessionmanager"><code>SessionManager</code><a class="headerlink" href="#sessionmanager" title="Permanent link">&para;</a></h5>
+<p>Manages user sessions and conversation history.</p>
+<p><strong>Methods:</strong></p>
+<h6 id="create_session-str"><code>create_session() -&gt; str</code><a class="headerlink" href="#create_session-str" title="Permanent link">&para;</a></h6>
+<p>Create a new session with unique ID.</p>
+<p><strong>Returns:</strong>
+- <code>str</code>: New session ID</p>
+<h6 id="get_sessionsession_id-str-conversationcontext"><code>get_session(session_id: str) -&gt; ConversationContext</code><a class="headerlink" href="#get_sessionsession_id-str-conversationcontext" title="Permanent link">&para;</a></h6>
+<p>Retrieve existing session context.</p>
+<p><strong>Parameters:</strong>
+- <code>session_id</code> (str): Session identifier</p>
+<p><strong>Returns:</strong>
+- <code>ConversationContext</code>: Session data</p>
+<h6 id="cleanup_old_sessionsmax_age_hours-int-24"><code>cleanup_old_sessions(max_age_hours: int = 24)</code><a class="headerlink" href="#cleanup_old_sessionsmax_age_hours-int-24" title="Permanent link">&para;</a></h6>
+<p>Remove expired sessions.</p>
+<p><strong>Parameters:</strong>
+- <code>max_age_hours</code> (int): Maximum session age</p>
+<h5 id="conversationcontext"><code>ConversationContext</code><a class="headerlink" href="#conversationcontext" title="Permanent link">&para;</a></h5>
+<p>Dataclass for storing conversation state.</p>
+<p><strong>Attributes:</strong>
+- <code>session_id</code> (str): Unique session identifier
+- <code>conversation_history</code> (List[Dict]): Previous messages
+- <code>preferred_language</code> (str): "matlab" or "python"
+- <code>code_examples</code> (List[Dict]): Stored code snippets
+- <code>session_start_time</code> (datetime): Creation timestamp
+- <code>last_activity</code> (datetime): Last interaction time</p>
+<p><strong>Example:</strong>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pulsepal.dependencies</span><span class="w"> </span><span class="kn">import</span> <span class="n">SessionManager</span><span class="p">,</span> <span class="n">ConversationContext</span>
+
+<span class="n">manager</span> <span class="o">=</span> <span class="n">SessionManager</span><span class="p">()</span>
+<span class="n">session_id</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">create_session</span><span class="p">()</span>
+<span class="n">context</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_session</span><span class="p">(</span><span class="n">session_id</span><span class="p">)</span>
+
+<span class="c1"># Access conversation history</span>
+<span class="k">for</span> <span class="n">message</span> <span class="ow">in</span> <span class="n">context</span><span class="o">.</span><span class="n">conversation_history</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">message</span><span class="p">[</span><span class="s1">&#39;role&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">message</span><span class="p">[</span><span class="s1">&#39;content&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div></p>
+<h5 id="pulsepaldependencies_1"><code>PulsePalDependencies</code><a class="headerlink" href="#pulsepaldependencies_1" title="Permanent link">&para;</a></h5>
+<p>Dependencies container for the agent.</p>
+<p><strong>Attributes:</strong>
+- <code>conversation_context</code> (ConversationContext): Current session
+- <code>session_manager</code> (SessionManager): Session manager instance
+- <code>rag_initialized</code> (bool): RAG service status
+- <code>force_rag</code> (bool): Force RAG search
+- <code>skip_rag</code> (bool): Skip RAG search</p>
+<hr />
+<h3 id="pulsepalsettings">pulsepal.settings<a class="headerlink" href="#pulsepalsettings" title="Permanent link">&para;</a></h3>
+<p>Configuration management using pydantic-settings.</p>
+<h4 id="classes_2">Classes<a class="headerlink" href="#classes_2" title="Permanent link">&para;</a></h4>
+<h5 id="settings"><code>Settings</code><a class="headerlink" href="#settings" title="Permanent link">&para;</a></h5>
+<p>Application settings with environment variable support.</p>
+<p><strong>Attributes:</strong>
+- <code>google_api_key</code> (str): Google API key for Gemini
+- <code>llm_model</code> (str): Model name (default: "gemini-2.5-flash")
+- <code>supabase_url</code> (str): Supabase project URL
+- <code>supabase_key</code> (str): Supabase API key
+- <code>max_session_duration_hours</code> (int): Session timeout (default: 24)
+- <code>max_conversation_history</code> (int): Max messages per session (default: 100)
+- <code>use_hybrid_search</code> (bool): Enable hybrid search (default: True)</p>
+<h4 id="functions_2">Functions<a class="headerlink" href="#functions_2" title="Permanent link">&para;</a></h4>
+<h5 id="get_settings-settings"><code>get_settings() -&gt; Settings</code><a class="headerlink" href="#get_settings-settings" title="Permanent link">&para;</a></h5>
+<p>Load settings from environment variables.</p>
+<p><strong>Returns:</strong>
+- <code>Settings</code>: Configured settings instance</p>
+<p><strong>Example:</strong>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pulsepal.settings</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_settings</span>
+
+<span class="n">settings</span> <span class="o">=</span> <span class="n">get_settings</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using model: </span><span class="si">{</span><span class="n">settings</span><span class="o">.</span><span class="n">llm_model</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Session timeout: </span><span class="si">{</span><span class="n">settings</span><span class="o">.</span><span class="n">max_session_duration_hours</span><span class="si">}</span><span class="s2"> hours&quot;</span><span class="p">)</span>
+</code></pre></div></p>
+<h5 id="get_llm_model-geminimodel"><code>get_llm_model() -&gt; GeminiModel</code><a class="headerlink" href="#get_llm_model-geminimodel" title="Permanent link">&para;</a></h5>
+<p>Get configured Gemini model instance.</p>
+<p><strong>Returns:</strong>
+- <code>GeminiModel</code>: Configured model for PydanticAI</p>
+<hr />
+<h2 id="cli-interface">CLI Interface<a class="headerlink" href="#cli-interface" title="Permanent link">&para;</a></h2>
+<h3 id="run_pulsepalpy">run_pulsepal.py<a class="headerlink" href="#run_pulsepalpy" title="Permanent link">&para;</a></h3>
+<p>Command-line interface for PulsePal.</p>
+<h4 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="c1"># Interactive mode</span>
+python<span class="w"> </span>run_pulsepal.py
+
+<span class="c1"># Single query</span>
+python<span class="w"> </span>run_pulsepal.py<span class="w"> </span><span class="s2">&quot;Your question here&quot;</span>
+
+<span class="c1"># With session</span>
+python<span class="w"> </span>run_pulsepal.py<span class="w"> </span>--session-id<span class="w"> </span>&lt;id&gt;
+
+<span class="c1"># Help</span>
+python<span class="w"> </span>run_pulsepal.py<span class="w"> </span>--help
+</code></pre></div>
+<h4 id="arguments">Arguments<a class="headerlink" href="#arguments" title="Permanent link">&para;</a></h4>
+<ul>
+<li><code>query</code> (positional, optional): Direct query to process</li>
+<li><code>--session-id</code>: Continue existing session</li>
+<li><code>--interactive</code>: Force interactive mode</li>
+<li><code>--help</code>: Show help message</li>
+</ul>
+<hr />
+<h2 id="web-interface">Web Interface<a class="headerlink" href="#web-interface" title="Permanent link">&para;</a></h2>
+<h3 id="chainlit_apppy">chainlit_app.py<a class="headerlink" href="#chainlit_apppy" title="Permanent link">&para;</a></h3>
+<p>Chainlit web interface for PulsePal.</p>
+<h4 id="starting-the-server">Starting the Server<a class="headerlink" href="#starting-the-server" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code>chainlit<span class="w"> </span>run<span class="w"> </span>chainlit_app.py
+</code></pre></div>
+<h4 id="features">Features<a class="headerlink" href="#features" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Real-time streaming responses</li>
+<li>Session persistence</li>
+<li>Markdown rendering</li>
+<li>Code syntax highlighting</li>
+<li>File upload support</li>
+</ul>
+<h4 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h4>
+<p>Configure in <code>.chainlit/config.toml</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="k">[project]</span>
+<span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;PulsePal&quot;</span>
+<span class="n">description</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;MRI Sequence Assistant&quot;</span>
+
+<span class="k">[UI]</span>
+<span class="n">theme</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;light&quot;</span>
+</code></pre></div>
+<hr />
+<h2 id="error-handling">Error Handling<a class="headerlink" href="#error-handling" title="Permanent link">&para;</a></h2>
+<h3 id="common-exceptions">Common Exceptions<a class="headerlink" href="#common-exceptions" title="Permanent link">&para;</a></h3>
+<h4 id="sessionnotfounderror"><code>SessionNotFoundError</code><a class="headerlink" href="#sessionnotfounderror" title="Permanent link">&para;</a></h4>
+<p>Raised when session ID doesn't exist.</p>
+<div class="highlight"><pre><span></span><code><span class="k">try</span><span class="p">:</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_session</span><span class="p">(</span><span class="s2">&quot;invalid-id&quot;</span><span class="p">)</span>
+<span class="k">except</span> <span class="n">SessionNotFoundError</span><span class="p">:</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">create_session</span><span class="p">()</span>
+</code></pre></div>
+<h4 id="ragserviceerror"><code>RAGServiceError</code><a class="headerlink" href="#ragserviceerror" title="Permanent link">&para;</a></h4>
+<p>Raised when RAG search fails.</p>
+<div class="highlight"><pre><span></span><code><span class="k">try</span><span class="p">:</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="k">await</span> <span class="n">rag</span><span class="o">.</span><span class="n">search_pulseq_knowledge</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+<span class="k">except</span> <span class="n">RAGServiceError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="c1"># Fallback to agent&#39;s built-in knowledge</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="kc">None</span>
+</code></pre></div>
+<h4 id="configurationerror"><code>ConfigurationError</code><a class="headerlink" href="#configurationerror" title="Permanent link">&para;</a></h4>
+<p>Raised when required environment variables are missing.</p>
+<div class="highlight"><pre><span></span><code><span class="k">try</span><span class="p">:</span>
+    <span class="n">settings</span> <span class="o">=</span> <span class="n">get_settings</span><span class="p">()</span>
+<span class="k">except</span> <span class="n">ConfigurationError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Missing configuration: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="environment-variables">Environment Variables<a class="headerlink" href="#environment-variables" title="Permanent link">&para;</a></h2>
+<p>Required environment variables in <code>.env</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Google Gemini API</span>
+<span class="nv">GOOGLE_API_KEY</span><span class="o">=</span>your-api-key
+<span class="nv">LLM_MODEL</span><span class="o">=</span>gemini-2.5-flash
+
+<span class="c1"># Supabase Vector Database</span>
+<span class="nv">SUPABASE_URL</span><span class="o">=</span>your-supabase-url
+<span class="nv">SUPABASE_KEY</span><span class="o">=</span>your-supabase-key
+
+<span class="c1"># Optional: Google Embeddings</span>
+<span class="nv">GOOGLE_API_KEY_EMBEDDING</span><span class="o">=</span>your-embedding-key
+
+<span class="c1"># Session Configuration</span>
+<span class="nv">MAX_SESSION_DURATION_HOURS</span><span class="o">=</span><span class="m">24</span>
+<span class="nv">MAX_CONVERSATION_HISTORY</span><span class="o">=</span><span class="m">100</span>
+
+<span class="c1"># Search Configuration</span>
+<span class="nv">USE_HYBRID_SEARCH</span><span class="o">=</span><span class="nb">true</span>
+</code></pre></div>
+<hr />
+<h2 id="return-types">Return Types<a class="headerlink" href="#return-types" title="Permanent link">&para;</a></h2>
+<h3 id="search-results-format">Search Results Format<a class="headerlink" href="#search-results-format" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+    <span class="s2">&quot;results&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="s2">&quot;Documentation text&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;file.md&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;section&quot;</span><span class="p">:</span> <span class="s2">&quot;gradient_echo&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;relevance&quot;</span><span class="p">:</span> <span class="mf">0.95</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">],</span>
+    <span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="s2">&quot;original query&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;search_type&quot;</span><span class="p">:</span> <span class="s2">&quot;documentation&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="session-format">Session Format<a class="headerlink" href="#session-format" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+    <span class="s2">&quot;session_id&quot;</span><span class="p">:</span> <span class="s2">&quot;uuid-string&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;conversation_history&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="s2">&quot;question&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="s2">&quot;2025-01-18T10:00:00&quot;</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;assistant&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="s2">&quot;response&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="s2">&quot;2025-01-18T10:00:01&quot;</span>
+        <span class="p">}</span>
+    <span class="p">],</span>
+    <span class="s2">&quot;preferred_language&quot;</span><span class="p">:</span> <span class="s2">&quot;matlab&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;created_at&quot;</span><span class="p">:</span> <span class="s2">&quot;2025-01-18T09:59:00&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+<hr />
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
+<h3 id="basic-usage">Basic Usage<a class="headerlink" href="#basic-usage" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pulsepal.main_agent</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_pulsepal</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="c1"># Simple query</span>
+    <span class="n">session_id</span><span class="p">,</span> <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">run_pulsepal</span><span class="p">(</span>
+        <span class="s2">&quot;What is a gradient echo sequence?&quot;</span>
+    <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+
+    <span class="c1"># Follow-up with session</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">response2</span> <span class="o">=</span> <span class="k">await</span> <span class="n">run_pulsepal</span><span class="p">(</span>
+        <span class="s2">&quot;Can you show me the code?&quot;</span><span class="p">,</span>
+        <span class="n">session_id</span><span class="o">=</span><span class="n">session_id</span>
+    <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">response2</span><span class="p">)</span>
+
+<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
+</code></pre></div>
+<h3 id="custom-rag-search">Custom RAG Search<a class="headerlink" href="#custom-rag-search" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pulsepal.rag_service</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModernPulseqRAG</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">search_examples</span><span class="p">():</span>
+    <span class="n">rag</span> <span class="o">=</span> <span class="n">ModernPulseqRAG</span><span class="p">()</span>
+
+    <span class="c1"># Search for code examples</span>
+    <span class="n">examples</span> <span class="o">=</span> <span class="k">await</span> <span class="n">rag</span><span class="o">.</span><span class="n">search_pulseq_knowledge</span><span class="p">(</span>
+        <span class="s2">&quot;EPI sequence implementation&quot;</span><span class="p">,</span>
+        <span class="n">search_type</span><span class="o">=</span><span class="s2">&quot;examples&quot;</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Search for function documentation</span>
+    <span class="n">functions</span> <span class="o">=</span> <span class="k">await</span> <span class="n">rag</span><span class="o">.</span><span class="n">search_pulseq_knowledge</span><span class="p">(</span>
+        <span class="s2">&quot;makeArbitraryGrad parameters&quot;</span><span class="p">,</span>
+        <span class="n">search_type</span><span class="o">=</span><span class="s2">&quot;functions&quot;</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">examples</span><span class="p">,</span> <span class="n">functions</span>
+</code></pre></div>
+<h3 id="session-management">Session Management<a class="headerlink" href="#session-management" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pulsepal.dependencies</span><span class="w"> </span><span class="kn">import</span> <span class="n">SessionManager</span>
+
+<span class="c1"># Create manager</span>
+<span class="n">manager</span> <span class="o">=</span> <span class="n">SessionManager</span><span class="p">()</span>
+
+<span class="c1"># New session</span>
+<span class="n">session_id</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">create_session</span><span class="p">()</span>
+
+<span class="c1"># Get session</span>
+<span class="n">context</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_session</span><span class="p">(</span><span class="n">session_id</span><span class="p">)</span>
+
+<span class="c1"># Update context</span>
+<span class="n">context</span><span class="o">.</span><span class="n">preferred_language</span> <span class="o">=</span> <span class="s2">&quot;python&quot;</span>
+<span class="n">context</span><span class="o">.</span><span class="n">conversation_history</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+    <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="s2">&quot;Show me Python code&quot;</span>
+<span class="p">})</span>
+
+<span class="c1"># Save session</span>
+<span class="n">manager</span><span class="o">.</span><span class="n">save_session</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+
+<span class="c1"># Cleanup old sessions</span>
+<span class="n">manager</span><span class="o">.</span><span class="n">cleanup_old_sessions</span><span class="p">(</span><span class="n">max_age_hours</span><span class="o">=</span><span class="mi">48</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">&para;</a></h2>
+<h3 id="running-tests">Running Tests<a class="headerlink" href="#running-tests" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># All tests</span>
+pytest
+
+<span class="c1"># With coverage</span>
+pytest<span class="w"> </span>--cov<span class="o">=</span>pulsepal
+
+<span class="c1"># Specific module</span>
+pytest<span class="w"> </span>tests/unit/test_main_agent.py
+</code></pre></div>
+<h3 id="test-structure">Test Structure<a class="headerlink" href="#test-structure" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>tests/
+├── unit/          # Unit tests
+├── integration/   # Integration tests
+├── e2e/          # End-to-end tests
+└── fixtures/     # Test data
+</code></pre></div>
+<hr />
+<h2 id="support">Support<a class="headerlink" href="#support" title="Permanent link">&para;</a></h2>
+<p>For issues or questions:
+- Email: rmoskwa@wisc.edu
+- GitHub: https://github.com/rmoskwa/Pulsepal/issues
+- Documentation: This file</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/pulseq/pulseq" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.50899def.min.js"></script>
+      
+    
+  </body>
+</html>

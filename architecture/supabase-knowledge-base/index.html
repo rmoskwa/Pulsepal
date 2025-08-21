@@ -1,0 +1,3470 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Complete API reference for Pulseq MATLAB functions">
+      
+      
+      
+        <link rel="canonical" href="https://rmoskwa.github.io/Pulsepal/architecture/supabase-knowledge-base/">
+      
+      
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.16">
+    
+    
+      
+        <title>PulsePal Supabase Knowledge Base Architecture - Pulseq MATLAB API Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.7e37652d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="light-blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#pulsepal-supabase-knowledge-base-architecture" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Pulseq MATLAB API Documentation" class="md-header__button md-logo" aria-label="Pulseq MATLAB API Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Pulseq MATLAB API Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              PulsePal Supabase Knowledge Base Architecture
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../matlab_api/" class="md-tabs__link">
+          
+  
+  
+  API Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Pulseq MATLAB API Documentation" class="md-nav__button md-logo" aria-label="Pulseq MATLAB API Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Pulseq MATLAB API Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    API Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            API Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Functions
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            Functions
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/addBlock/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    addBlock
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/addGradients/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    addGradients
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/addRamps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    addRamps
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/align/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    align
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/applySoftDelay/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    applySoftDelay
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/applyToBlock/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    applyToBlock
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/applyToSeq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    applyToSeq
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/calcAdcSeg/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    calcAdcSeg
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/calcDuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    calcDuration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/calcMomentsBtensor/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    calcMomentsBtensor
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/calcPNS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    calcPNS
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/calcRamp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    calcRamp
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/calcRfBandwidth/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    calcRfBandwidth
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/calcRfCenter/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    calcRfCenter
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/calcRfPower/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    calcRfPower
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/calculateKspacePP/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    calculateKspacePP
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/checkTiming/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    checkTiming
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/compressShape/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    compressShape
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/compressShape_mat/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    compressShape_mat
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/conjugate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    conjugate
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/convert/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    convert
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/decompressShape/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    decompressShape
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/duration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    duration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/evalLabels/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    evalLabels
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/EventLibrary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    EventLibrary
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/findBlockByTime/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    findBlockByTime
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/findFlank/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    findFlank
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/flipGradAxis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    flipGradAxis
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/fromRotMat/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    fromRotMat
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/gauss/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    gauss
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/getBlock/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    getBlock
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/getDefinition/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    getDefinition
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/getSupportedLabels/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    getSupportedLabels
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/getSupportedRfUse/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    getSupportedRfUse
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/init/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    init
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/install/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    install
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/isOctave/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    isOctave
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/makeAdc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeAdc
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/makeAdiabaticPulse/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeAdiabaticPulse
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/makeArbitraryGrad/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeArbitraryGrad
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/makeArbitraryRf/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeArbitraryRf
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/makeBlockPulse/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeBlockPulse
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/makeDelay/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeDelay
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/makeDigitalOutputPulse/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeDigitalOutputPulse
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/makeExtendedTrapezoid/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeExtendedTrapezoid
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/makeExtendedTrapezoidArea/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeExtendedTrapezoidArea
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/makeGaussPulse/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeGaussPulse
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/makeLabel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeLabel
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/makeSincPulse/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeSincPulse
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/makeSLRpulse/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeSLRpulse
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/makeSoftDelay/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeSoftDelay
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/makeTrapezoid/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeTrapezoid
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/makeTrigger/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    makeTrigger
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/md5/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    md5
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/melodyToPitchesAndDurations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    melodyToPitchesAndDurations
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/melodyToScale/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    melodyToScale
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/modGradAxis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    modGradAxis
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/multiply/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    multiply
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/musicToSequence/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    musicToSequence
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/normalize/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    normalize
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/opts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    opts
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/paperPlot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    paperPlot
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/parsemr/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    parsemr
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/plot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    plot
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/pts2waveform/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    pts2waveform
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/read/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    read
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/readasc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    readasc
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/readBinary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    readBinary
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/restoreAdditionalShapeSamples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    restoreAdditionalShapeSamples
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/rotate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    rotate
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/rotate3D/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    rotate3D
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/scaleGrad/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    scaleGrad
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/SeqPlot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    SeqPlot
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/Sequence/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Sequence
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/setBlock/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    setBlock
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/setDefinition/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    setDefinition
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/simRf/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    simRf
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/sinc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    sinc
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/sound/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    sound
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/splitGradient/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    splitGradient
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/splitGradientAt/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    splitGradientAt
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/testReport/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    testReport
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/toRotMat/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    toRotMat
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/traj2grad/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    traj2grad
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/transform/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    transform
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/TransformFOV/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    TransformFOV
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/version/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    version
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/waveforms_and_times/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    waveforms_and_times
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/write/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    write
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/write_v141/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    write_v141
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../matlab_api/writeBinary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    writeBinary
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#database-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      Database Schema
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Database Schema">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#core-tables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Core Tables
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Tables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-sources-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. sources Table
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-crawled_pages-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. crawled_pages Table
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-api_reference-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. api_reference Table
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#database-views" class="md-nav__link">
+    <span class="md-ellipsis">
+      Database Views
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Database Views">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-official_sequence_examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. official_sequence_examples
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-api_reference_search" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. api_reference_search
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-api_reference_details" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. api_reference_details
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-function_calling_patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. function_calling_patterns
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vector-search-infrastructure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Vector Search Infrastructure
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Vector Search Infrastructure">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#extensions-enabled" class="md-nav__link">
+    <span class="md-ellipsis">
+      Extensions Enabled
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rpc-functions-for-search" class="md-nav__link">
+    <span class="md-ellipsis">
+      RPC Functions for Search
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="RPC Functions for Search">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#core-search-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Core Search Functions
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#migration-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      Migration History
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Migration History">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-migrations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Migrations
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-statistics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Statistics
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#access-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Access Patterns
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Access Patterns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-hybrid-search-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Hybrid Search Strategy
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-intelligent-routing" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Intelligent Routing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-performance-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Performance Optimization
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Security Configuration
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#integration-with-pulsepal" class="md-nav__link">
+    <span class="md-ellipsis">
+      Integration with PulsePal
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Integration with PulsePal">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rag-service-integration-rag_servicepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      RAG Service Integration (rag_service.py)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-integration-points" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Integration Points
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#maintenance-and-updates" class="md-nav__link">
+    <span class="md-ellipsis">
+      Maintenance and Updates
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Maintenance and Updates">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#regular-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Regular Tasks
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-quality-measures" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Quality Measures
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#future-enhancements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Future Enhancements
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Future Enhancements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#planned-improvements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Planned Improvements
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scalability-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scalability Considerations
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#developer-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Developer Notes
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Developer Notes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#connection-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Connection Configuration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#common-queries" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Queries
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing-queries" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing Queries
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#conclusion" class="md-nav__link">
+    <span class="md-ellipsis">
+      Conclusion
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="pulsepal-supabase-knowledge-base-architecture">PulsePal Supabase Knowledge Base Architecture<a class="headerlink" href="#pulsepal-supabase-knowledge-base-architecture" title="Permanent link">&para;</a></h1>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>The PulsePal project utilizes a Supabase PostgreSQL database as its knowledge base for storing and retrieving MRI sequence programming information. The database leverages vector embeddings for semantic search capabilities and maintains a comprehensive collection of Pulseq documentation, API references, and code examples.</p>
+<p><strong>Project ID</strong>: <code>mnbvsrsivuuuwbtkmumt</code></p>
+<h2 id="database-schema">Database Schema<a class="headerlink" href="#database-schema" title="Permanent link">&para;</a></h2>
+<h3 id="core-tables">Core Tables<a class="headerlink" href="#core-tables" title="Permanent link">&para;</a></h3>
+<h4 id="1-sources-table">1. <strong>sources</strong> Table<a class="headerlink" href="#1-sources-table" title="Permanent link">&para;</a></h4>
+<p>Tracks all data sources that have been indexed into the knowledge base.</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>source_id</code></td>
+<td>text (PK)</td>
+<td>Unique identifier for the source (e.g., GitHub repo URL)</td>
+</tr>
+<tr>
+<td><code>summary</code></td>
+<td>text</td>
+<td>Brief description of the source content</td>
+</tr>
+<tr>
+<td><code>total_word_count</code></td>
+<td>integer</td>
+<td>Total word count of all content from this source</td>
+</tr>
+<tr>
+<td><code>created_at</code></td>
+<td>timestamptz</td>
+<td>When the source was first indexed</td>
+</tr>
+<tr>
+<td><code>updated_at</code></td>
+<td>timestamptz</td>
+<td>Last update timestamp</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Current Sources</strong>: 27 sources indexed, primarily GitHub repositories containing Pulseq implementations and examples.</p>
+<h4 id="2-crawled_pages-table">2. <strong>crawled_pages</strong> Table<a class="headerlink" href="#2-crawled_pages-table" title="Permanent link">&para;</a></h4>
+<p>Main content storage for documentation and code examples.</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>bigint (PK)</td>
+<td>Unique identifier</td>
+</tr>
+<tr>
+<td><code>url</code></td>
+<td>varchar</td>
+<td>Source URL of the content</td>
+</tr>
+<tr>
+<td><code>chunk_number</code></td>
+<td>integer</td>
+<td>Chunk sequence number for paginated content</td>
+</tr>
+<tr>
+<td><code>content</code></td>
+<td>text</td>
+<td>Actual text content</td>
+</tr>
+<tr>
+<td><code>source_id</code></td>
+<td>text</td>
+<td>Foreign key to sources table</td>
+</tr>
+<tr>
+<td><code>metadata</code></td>
+<td>jsonb</td>
+<td>Additional metadata (tags, categories, etc.)</td>
+</tr>
+<tr>
+<td><code>created_at</code></td>
+<td>timestamptz</td>
+<td>Indexing timestamp</td>
+</tr>
+<tr>
+<td><code>embedding</code></td>
+<td>vector</td>
+<td>768-dimensional vector embedding for semantic search</td>
+</tr>
+<tr>
+<td><code>sequence_category</code></td>
+<td>varchar</td>
+<td>Classification of sequence type (e.g., 'GRE', 'EPI', 'MPRAGE')</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Statistics</strong>: 
+- Total rows: 1,703
+- Storage size: ~54 MB
+- Contains chunked documentation and code examples</p>
+<h4 id="3-api_reference-table">3. <strong>api_reference</strong> Table<a class="headerlink" href="#3-api_reference-table" title="Permanent link">&para;</a></h4>
+<p>Comprehensive API function reference for Pulseq/pypulseq.</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>bigint (PK)</td>
+<td>Unique identifier</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>text</td>
+<td>Function/method name</td>
+</tr>
+<tr>
+<td><code>language</code></td>
+<td>varchar</td>
+<td>Programming language ('matlab' or 'python')</td>
+</tr>
+<tr>
+<td><code>signature</code></td>
+<td>text</td>
+<td>Function signature</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td>text</td>
+<td>Detailed description</td>
+</tr>
+<tr>
+<td><code>parameters</code></td>
+<td>jsonb</td>
+<td>Parameter details (names, types, descriptions)</td>
+</tr>
+<tr>
+<td><code>returns</code></td>
+<td>jsonb</td>
+<td>Return value information</td>
+</tr>
+<tr>
+<td><code>source_id</code></td>
+<td>text</td>
+<td>Source reference</td>
+</tr>
+<tr>
+<td><code>pulseq_version</code></td>
+<td>varchar</td>
+<td>Pulseq version compatibility</td>
+</tr>
+<tr>
+<td><code>embedding</code></td>
+<td>vector</td>
+<td>Vector embedding for semantic search</td>
+</tr>
+<tr>
+<td><code>function_type</code></td>
+<td>varchar</td>
+<td>Type classification ('main', 'helper', etc.)</td>
+</tr>
+<tr>
+<td><code>usage_examples</code></td>
+<td>jsonb</td>
+<td>Code examples demonstrating usage</td>
+</tr>
+<tr>
+<td><code>related_functions</code></td>
+<td>jsonb</td>
+<td>List of related API functions</td>
+</tr>
+<tr>
+<td><code>has_nargin_pattern</code></td>
+<td>boolean</td>
+<td>MATLAB nargin pattern detection</td>
+</tr>
+<tr>
+<td><code>class_name</code></td>
+<td>text</td>
+<td>Parent class name (if method)</td>
+</tr>
+<tr>
+<td><code>is_class_method</code></td>
+<td>boolean</td>
+<td>Whether function is a class method</td>
+</tr>
+<tr>
+<td><code>calling_pattern</code></td>
+<td>text</td>
+<td>Common calling patterns</td>
+</tr>
+<tr>
+<td><code>instance_variable</code></td>
+<td>text</td>
+<td>Common instance variable name</td>
+</tr>
+<tr>
+<td><code>search_terms</code></td>
+<td>text[]</td>
+<td>Array of search keywords</td>
+</tr>
+<tr>
+<td><code>class_metadata</code></td>
+<td>jsonb</td>
+<td>Additional class information</td>
+</tr>
+<tr>
+<td><code>last_updated</code></td>
+<td>timestamp</td>
+<td>Last update timestamp</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Statistics</strong>: 
+- Total rows: 413
+- Storage size: ~8.8 MB
+- Covers both MATLAB and Python implementations</p>
+<h2 id="database-views">Database Views<a class="headerlink" href="#database-views" title="Permanent link">&para;</a></h2>
+<h3 id="1-official_sequence_examples">1. <strong>official_sequence_examples</strong><a class="headerlink" href="#1-official_sequence_examples" title="Permanent link">&para;</a></h3>
+<p>Filtered view of crawled_pages containing official Pulseq sequence examples with embeddings.</p>
+<h3 id="2-api_reference_search">2. <strong>api_reference_search</strong><a class="headerlink" href="#2-api_reference_search" title="Permanent link">&para;</a></h3>
+<p>Optimized view for searching API functions with enhanced metadata.</p>
+<h3 id="3-api_reference_details">3. <strong>api_reference_details</strong><a class="headerlink" href="#3-api_reference_details" title="Permanent link">&para;</a></h3>
+<p>Detailed view combining API reference with additional context.</p>
+<h3 id="4-function_calling_patterns">4. <strong>function_calling_patterns</strong><a class="headerlink" href="#4-function_calling_patterns" title="Permanent link">&para;</a></h3>
+<p>Analysis view showing common function usage patterns extracted from code examples.</p>
+<h2 id="vector-search-infrastructure">Vector Search Infrastructure<a class="headerlink" href="#vector-search-infrastructure" title="Permanent link">&para;</a></h2>
+<h3 id="extensions-enabled">Extensions Enabled<a class="headerlink" href="#extensions-enabled" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>pgvector</strong> (v0.8.0) - Core vector similarity search</li>
+<li>Supports 768-dimensional embeddings</li>
+<li>Enables cosine similarity, L2 distance, and inner product operations</li>
+<li>
+<p>Used for semantic search across all content</p>
+</li>
+<li>
+<p><strong>pg_stat_statements</strong> - Query performance monitoring</p>
+</li>
+<li><strong>uuid-ossp</strong> - UUID generation for unique identifiers</li>
+<li><strong>pgcrypto</strong> - Cryptographic functions for secure operations</li>
+</ol>
+<h3 id="rpc-functions-for-search">RPC Functions for Search<a class="headerlink" href="#rpc-functions-for-search" title="Permanent link">&para;</a></h3>
+<h4 id="core-search-functions">Core Search Functions<a class="headerlink" href="#core-search-functions" title="Permanent link">&para;</a></h4>
+<ol>
+<li><strong>match_crawled_pages</strong></li>
+<li>Semantic search across documentation and code examples</li>
+<li>Parameters: query_embedding, match_threshold, match_count</li>
+<li>
+<p>Returns: Similar content with similarity scores</p>
+</li>
+<li>
+<p><strong>match_api_reference</strong></p>
+</li>
+<li>Search API functions by semantic similarity</li>
+<li>Includes function signatures, descriptions, and examples</li>
+<li>
+<p>Optimized for finding relevant Pulseq functions</p>
+</li>
+<li>
+<p><strong>match_api_reference_search</strong></p>
+</li>
+<li>Enhanced API search with additional filtering</li>
+<li>
+<p>Supports language-specific searches (MATLAB/Python)</p>
+</li>
+<li>
+<p><strong>match_official_sequences</strong></p>
+</li>
+<li>Search official Pulseq sequence implementations</li>
+<li>Filtered by sequence category</li>
+<li>
+<p>Returns complete sequence examples</p>
+</li>
+<li>
+<p><strong>match_code_examples</strong></p>
+</li>
+<li>Find relevant code snippets and examples</li>
+<li>
+<p>Links to source repositories</p>
+</li>
+<li>
+<p><strong>search_functions_by_capability</strong></p>
+</li>
+<li>Capability-based function discovery</li>
+<li>Maps user intent to specific API functions</li>
+</ol>
+<h2 id="migration-history">Migration History<a class="headerlink" href="#migration-history" title="Permanent link">&para;</a></h2>
+<p>The database has undergone 25 migrations to reach its current state:</p>
+<h3 id="key-migrations">Key Migrations<a class="headerlink" href="#key-migrations" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Sequence Classification System</strong> (2025-08-08)</li>
+<li>Added <code>sequence_category</code> column</li>
+<li>Implemented automatic classification for MRI sequences</li>
+<li>
+<p>Tagged official sequences (GRE, EPI, MPRAGE, etc.)</p>
+</li>
+<li>
+<p><strong>API Reference Enhancements</strong> (2025-08-08)</p>
+</li>
+<li>Created specialized search views</li>
+<li>Added function calling pattern detection</li>
+<li>
+<p>Improved MATLAB/Python differentiation</p>
+</li>
+<li>
+<p><strong>Vector Search Optimization</strong> (2025-08-10)</p>
+</li>
+<li>Added similarity thresholds to RPC functions</li>
+<li>Optimized sorting algorithms</li>
+<li>Implemented consistent search interfaces</li>
+</ul>
+<h2 id="data-statistics">Data Statistics<a class="headerlink" href="#data-statistics" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Entity</th>
+<th>Count</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sources</td>
+<td>27</td>
+<td>GitHub repositories and documentation sources</td>
+</tr>
+<tr>
+<td>Crawled Pages</td>
+<td>1,703</td>
+<td>Documentation chunks and code examples</td>
+</tr>
+<tr>
+<td>API Functions</td>
+<td>413</td>
+<td>Pulseq/pypulseq function references</td>
+</tr>
+<tr>
+<td>Total Storage</td>
+<td>~63 MB</td>
+<td>Combined database size</td>
+</tr>
+</tbody>
+</table>
+<h2 id="access-patterns">Access Patterns<a class="headerlink" href="#access-patterns" title="Permanent link">&para;</a></h2>
+<h3 id="1-hybrid-search-strategy">1. <strong>Hybrid Search Strategy</strong><a class="headerlink" href="#1-hybrid-search-strategy" title="Permanent link">&para;</a></h3>
+<p>The system implements a hybrid search combining:
+- Vector similarity search (semantic understanding)
+- Keyword matching (exact term matching)
+- Category filtering (sequence types, languages)</p>
+<h3 id="2-intelligent-routing">2. <strong>Intelligent Routing</strong><a class="headerlink" href="#2-intelligent-routing" title="Permanent link">&para;</a></h3>
+<p>Based on query analysis:
+- Documentation queries → <code>crawled_pages</code>
+- Function lookups → <code>api_reference</code>
+- Sequence examples → <code>official_sequence_examples</code>
+- Code patterns → <code>function_calling_patterns</code></p>
+<h3 id="3-performance-optimization">3. <strong>Performance Optimization</strong><a class="headerlink" href="#3-performance-optimization" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Indexed vector columns for fast similarity search</li>
+<li>Materialized views for complex queries</li>
+<li>Cached embeddings to avoid recomputation</li>
+</ul>
+<h2 id="security-configuration">Security Configuration<a class="headerlink" href="#security-configuration" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Row Level Security (RLS)</strong>: Enabled on all tables</li>
+<li><strong>API Key Authentication</strong>: Via Supabase service key</li>
+<li><strong>SSL/TLS</strong>: Enforced for all connections</li>
+<li><strong>Access Control</strong>: Read-only access for client applications</li>
+</ul>
+<h2 id="integration-with-pulsepal">Integration with PulsePal<a class="headerlink" href="#integration-with-pulsepal" title="Permanent link">&para;</a></h2>
+<h3 id="rag-service-integration-rag_servicepy">RAG Service Integration (<code>rag_service.py</code>)<a class="headerlink" href="#rag-service-integration-rag_servicepy" title="Permanent link">&para;</a></h3>
+<p>The RAG service interfaces with this knowledge base through:</p>
+<ol>
+<li><strong>Supabase Python Client</strong>: Direct API access</li>
+<li><strong>Google Embeddings API</strong>: Generates query embeddings</li>
+<li><strong>RPC Function Calls</strong>: Executes similarity searches</li>
+<li><strong>Result Processing</strong>: Formats and ranks results</li>
+</ol>
+<h3 id="key-integration-points">Key Integration Points<a class="headerlink" href="#key-integration-points" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Example: Searching for API functions</span>
+<span class="n">results</span> <span class="o">=</span> <span class="k">await</span> <span class="n">supabase</span><span class="o">.</span><span class="n">rpc</span><span class="p">(</span>
+    <span class="s1">&#39;match_api_reference&#39;</span><span class="p">,</span>
+    <span class="p">{</span>
+        <span class="s1">&#39;query_embedding&#39;</span><span class="p">:</span> <span class="n">embedding</span><span class="p">,</span>
+        <span class="s1">&#39;match_threshold&#39;</span><span class="p">:</span> <span class="mf">0.7</span><span class="p">,</span>
+        <span class="s1">&#39;match_count&#39;</span><span class="p">:</span> <span class="mi">10</span>
+    <span class="p">}</span>
+<span class="p">)</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
+</code></pre></div>
+<h2 id="maintenance-and-updates">Maintenance and Updates<a class="headerlink" href="#maintenance-and-updates" title="Permanent link">&para;</a></h2>
+<h3 id="regular-tasks">Regular Tasks<a class="headerlink" href="#regular-tasks" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Source Updates</strong>: Periodic re-crawling of GitHub repositories</li>
+<li><strong>Embedding Updates</strong>: Re-generate embeddings with model improvements</li>
+<li><strong>Classification Refinement</strong>: Update sequence categories as needed</li>
+<li><strong>Performance Monitoring</strong>: Track query patterns and optimize indexes</li>
+</ol>
+<h3 id="data-quality-measures">Data Quality Measures<a class="headerlink" href="#data-quality-measures" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Deduplication of similar content</li>
+<li>Version tracking for API changes</li>
+<li>Source attribution maintained</li>
+<li>Regular validation of embeddings</li>
+</ul>
+<h2 id="future-enhancements">Future Enhancements<a class="headerlink" href="#future-enhancements" title="Permanent link">&para;</a></h2>
+<h3 id="planned-improvements">Planned Improvements<a class="headerlink" href="#planned-improvements" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Multi-language Support</strong>: Expand beyond MATLAB/Python</li>
+<li><strong>Version-aware Search</strong>: Filter by Pulseq version compatibility</li>
+<li><strong>User Feedback Loop</strong>: Learn from search relevance feedback</li>
+<li><strong>Advanced Categorization</strong>: More granular sequence classifications</li>
+<li><strong>Performance Metrics</strong>: Track and optimize slow queries</li>
+</ol>
+<h3 id="scalability-considerations">Scalability Considerations<a class="headerlink" href="#scalability-considerations" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Current design supports up to 100K documents</li>
+<li>Vector index optimized for sub-second searches</li>
+<li>Horizontal scaling possible with Supabase infrastructure</li>
+</ul>
+<h2 id="developer-notes">Developer Notes<a class="headerlink" href="#developer-notes" title="Permanent link">&para;</a></h2>
+<h3 id="connection-configuration">Connection Configuration<a class="headerlink" href="#connection-configuration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Required environment variables</span>
+<span class="n">SUPABASE_URL</span> <span class="o">=</span> <span class="s2">&quot;your-project-url&quot;</span>
+<span class="n">SUPABASE_KEY</span> <span class="o">=</span> <span class="s2">&quot;your-service-key&quot;</span>
+<span class="n">GOOGLE_API_KEY_EMBEDDING</span> <span class="o">=</span> <span class="s2">&quot;embedding-api-key&quot;</span>
+</code></pre></div>
+<h3 id="common-queries">Common Queries<a class="headerlink" href="#common-queries" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1">-- Find all GRE sequences</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">official_sequence_examples</span><span class="w"> </span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">sequence_category</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;GRE&#39;</span><span class="p">;</span>
+
+<span class="c1">-- Get function by name</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">api_reference</span><span class="w"> </span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="k">ILIKE</span><span class="w"> </span><span class="s1">&#39;%addBlock%&#39;</span><span class="w"> </span>
+<span class="k">AND</span><span class="w"> </span><span class="k">language</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;matlab&#39;</span><span class="p">;</span>
+
+<span class="c1">-- Search with embeddings (via RPC)</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">match_crawled_pages</span><span class="p">(</span>
+<span class="w">    </span><span class="n">query_embedding</span><span class="w"> </span><span class="p">:</span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;[...]&#39;</span><span class="p">::</span><span class="n">vector</span><span class="p">,</span>
+<span class="w">    </span><span class="n">match_threshold</span><span class="w"> </span><span class="p">:</span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">7</span><span class="p">,</span>
+<span class="w">    </span><span class="n">match_count</span><span class="w"> </span><span class="p">:</span><span class="o">=</span><span class="w"> </span><span class="mi">5</span>
+<span class="p">);</span>
+</code></pre></div>
+<h3 id="testing-queries">Testing Queries<a class="headerlink" href="#testing-queries" title="Permanent link">&para;</a></h3>
+<p>Always test vector search queries with representative examples to ensure:
+- Appropriate similarity thresholds
+- Reasonable result counts
+- Performance within acceptable limits</p>
+<h2 id="conclusion">Conclusion<a class="headerlink" href="#conclusion" title="Permanent link">&para;</a></h2>
+<p>The Supabase knowledge base provides a robust, scalable foundation for PulsePal's intelligent MRI sequence programming assistance. The combination of structured API references, unstructured documentation, and semantic search capabilities enables sophisticated query understanding and relevant information retrieval.</p>
+<p>For questions or updates to this documentation, please refer to the PulsePal development team or submit a pull request with proposed changes.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/pulseq/pulseq" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.50899def.min.js"></script>
+      
+    
+  </body>
+</html>
