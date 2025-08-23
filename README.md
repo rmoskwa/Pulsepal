@@ -182,12 +182,3 @@ While most of the source code is available on GitHub for anybody interested, ple
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-
-
-
-
-
-
-
-
-# Testing pre-commit hooks
