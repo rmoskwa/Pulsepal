@@ -1,5 +1,5 @@
 """
-Hardcoded index of all 150 MATLAB Pulseq functions.
+Hardcoded index of all 88 MATLAB Pulseq functions.
 Generated from function_calling_patterns table in Supabase.
 """
 
@@ -35,22 +35,22 @@ MATLAB_FUNCTIONS = {
         "addRamps",
         "pts2waveform",
         # Test and validation
-        "testCalcADC",
         "testReport",  # Useful public method
         # Shape operations
         "compressShape",
+        "compressShape_mat",
         "decompressShape",
         "restoreAdditionalShapeSamples",
         # Transform and math
         "rotate3D",
         "transform",
         "traj2grad",
-        "sinc",
-        "gauss",
         # System functions
         "getSupportedRfUse",
         "getSupportedLabels",
         "simRf",
+        "convert",
+        "md5",
         # Constructors
         "Sequence",
         "EventLibrary",
@@ -59,18 +59,9 @@ MATLAB_FUNCTIONS = {
         # Remaining public functions
         "calcAdcSeg",
         "calcRamp",
-        "compressShape_mat",  # MATLAB-compatible version
-        "convert",
-        # Music demo functions (useful for music sequences)
-        "init",  # mrMusic.init
-        "melodyToPitchesAndDurations",  # mrMusic function
-        "melodyToScale",  # mrMusic function
-        "musicToSequence",  # mrMusic function
-        # Utilities
-        "md5",  # Public MD5 hash function
-        "parsemr",  # Public utility for loading/displaying sequences
-        "readasc",  # Siemens ASC file reader
         "version",
+        # Standalone functions (no namespace needed)
+        "parsemr",  # Standalone utility for loading/displaying sequences
     },
     "class_methods": {
         "Sequence": {
@@ -101,6 +92,9 @@ MATLAB_FUNCTIONS = {
             "waveforms_and_times",
             "write_v141",
             "writeBinary",
+            "registerGradEvent",
+            "registerRfEvent",
+            "registerLabelEvent",
         },
         "EventLibrary": {},  # No public methods users should call
         "SeqPlot": {},  # GUI internals - users don't call these directly
@@ -121,6 +115,14 @@ MATLAB_FUNCTIONS = {
         "normalize",
         "rotate",  # Quaternion rotation
         "toRotMat",
+    },
+    "mr_siemens_functions": {  # mr.Siemens.* functions
+        "readasc",  # Siemens ASC file reader
+    },
+    "mrMusic_functions": {  # mrMusic.* functions
+        "melodyToPitchesAndDurations",
+        "melodyToScale",
+        "musicToSequence",
     },
 }
 
@@ -178,6 +180,11 @@ FUNCTION_CLUSTERS = {
     "epi_readout": ["makeTrapezoid", "makeAdc", "scaleGrad", "addGradients"],
     "diffusion_weighting": ["makeTrapezoid", "makeDelay", "calcDuration"],
     "label_control": ["makeLabel", "registerLabelEvent", "evalLabels"],
+    "performance_optimization": [
+        "registerGradEvent",
+        "registerRfEvent",
+        "registerLabelEvent",
+    ],
 }
 
 # Comprehensive namespace mapping for validation
@@ -217,20 +224,23 @@ NAMESPACE_MAP = {
         "addRamps",
         "pts2waveform",
         "compressShape",
+        "compressShape_mat",
         "decompressShape",
+        "restoreAdditionalShapeSamples",
         "rotate3D",
         "transform",
         "traj2grad",
-        "sinc",
-        "gauss",
         "getSupportedRfUse",
         "getSupportedLabels",
         "simRf",
+        "convert",
+        "md5",
     },
     # Functions that MUST use seq. namespace (Sequence methods)
     "seq_only": {
         "addBlock",
         "write",
+        "write_v141",
         "plot",
         "calculateKspacePP",
         "checkTiming",
@@ -247,12 +257,16 @@ NAMESPACE_MAP = {
         "applySoftDelay",
         "flipGradAxis",
         "modGradAxis",
+        "findBlockByTime",
         "testReport",
         "sound",
         "paperPlot",
         "waveforms_and_times",
         "writeBinary",
         "readBinary",
+        "registerGradEvent",
+        "registerRfEvent",
+        "registerLabelEvent",
     },
     # Constructors (can be called without namespace)
     "constructors": {
@@ -262,9 +276,7 @@ NAMESPACE_MAP = {
         "SeqPlot",
     },
     # EventLibrary methods (eve. namespace)
-    "eve_only": {
-        "find_mat",
-    },
+    "eve_only": {},
     # TransformFOV methods (tra. namespace)
     "tra_only": {
         "applyToBlock",
@@ -284,6 +296,20 @@ NAMESPACE_MAP = {
         "normalize",
         "rotate",
         "toRotMat",
+    },
+    # Standalone functions (no namespace)
+    "standalone_only": {
+        "parsemr",
+    },
+    # mr.Siemens functions
+    "mr_siemens_only": {
+        "readasc",
+    },
+    # mrMusic functions
+    "mrMusic_only": {
+        "melodyToPitchesAndDurations",
+        "melodyToScale",
+        "musicToSequence",
     },
 }
 
@@ -308,6 +334,12 @@ def get_correct_namespace(function_name: str) -> str:
         return "mr.aux"
     if function_name in NAMESPACE_MAP["mr_aux_quat_only"]:
         return "mr.aux.quat"
+    if function_name in NAMESPACE_MAP["standalone_only"]:
+        return ""  # No namespace needed for standalone functions
+    if function_name in NAMESPACE_MAP["mr_siemens_only"]:
+        return "mr.Siemens"
+    if function_name in NAMESPACE_MAP["mrMusic_only"]:
+        return "mrMusic"
     return None  # Function not found
 
 
