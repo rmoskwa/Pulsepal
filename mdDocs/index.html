@@ -10,7 +10,7 @@
       
       
       
-        <link rel="canonical" href="https://rmoskwa.github.io/Pulsepal/SESSION_MANAGEMENT/">
+        <link rel="canonical" href="https://rmoskwa.github.io/Pulsepal/mdDocs/">
       
       
       
@@ -20,7 +20,7 @@
     
     
       
-        <title>PulsePal Session Management - Pulseq MATLAB API Documentation</title>
+        <title>PulsePal MATLAB API Documentation - Pulseq MATLAB API Documentation</title>
       
     
     
@@ -70,7 +70,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#pulsepal-session-management" class="md-skip">
+        <a href="#pulsepal-matlab-api-documentation" class="md-skip">
           Skip to content
         </a>
       
@@ -104,7 +104,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              PulsePal Session Management
+              PulsePal MATLAB API Documentation
             
           </span>
         </div>
@@ -179,7 +179,7 @@
   
   
     <li class="md-tabs__item">
-      <a href=".." class="md-tabs__link">
+      <a href="../index.md" class="md-tabs__link">
         
   
   
@@ -252,7 +252,7 @@
   
   
     <li class="md-nav__item">
-      <a href=".." class="md-nav__link">
+      <a href="../index.md" class="md-nav__link">
         
   
   
@@ -2446,28 +2446,28 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
+  <a href="#matlab-function-reference" class="md-nav__link">
     <span class="md-ellipsis">
-      Overview
+      MATLAB Function Reference
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="MATLAB Function Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#quick-links" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick Links
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#session-architecture" class="md-nav__link">
-    <span class="md-ellipsis">
-      Session Architecture
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Session Architecture">
-      <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#core-components" class="md-nav__link">
+  <a href="#getting-started" class="md-nav__link">
     <span class="md-ellipsis">
-      Core Components
+      Getting Started
     </span>
   </a>
   
@@ -2475,333 +2475,6 @@
         
       </ul>
     </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#session-lifecycle" class="md-nav__link">
-    <span class="md-ellipsis">
-      Session Lifecycle
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Session Lifecycle">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#session-creation" class="md-nav__link">
-    <span class="md-ellipsis">
-      Session Creation
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#session-persistence" class="md-nav__link">
-    <span class="md-ellipsis">
-      Session Persistence
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#session-rotation-policy" class="md-nav__link">
-    <span class="md-ellipsis">
-      Session Rotation Policy
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#configuration-options" class="md-nav__link">
-    <span class="md-ellipsis">
-      Configuration Options
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Configuration Options">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#environment-variables" class="md-nav__link">
-    <span class="md-ellipsis">
-      Environment Variables
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#programmatic-configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      Programmatic Configuration
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#archive-process" class="md-nav__link">
-    <span class="md-ellipsis">
-      Archive Process
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Archive Process">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#automatic-archival" class="md-nav__link">
-    <span class="md-ellipsis">
-      Automatic Archival
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#archive-structure" class="md-nav__link">
-    <span class="md-ellipsis">
-      Archive Structure
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#manual-archive-management" class="md-nav__link">
-    <span class="md-ellipsis">
-      Manual Archive Management
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#cli-commands-for-cleanup" class="md-nav__link">
-    <span class="md-ellipsis">
-      CLI Commands for Cleanup
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="CLI Commands for Cleanup">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#basic-cleanup-commands" class="md-nav__link">
-    <span class="md-ellipsis">
-      Basic Cleanup Commands
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#session-management-cli" class="md-nav__link">
-    <span class="md-ellipsis">
-      Session Management CLI
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#scheduled-cleanup" class="md-nav__link">
-    <span class="md-ellipsis">
-      Scheduled Cleanup
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#monitoring-guidelines" class="md-nav__link">
-    <span class="md-ellipsis">
-      Monitoring Guidelines
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Monitoring Guidelines">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#health-metrics" class="md-nav__link">
-    <span class="md-ellipsis">
-      Health Metrics
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#monitoring-dashboard" class="md-nav__link">
-    <span class="md-ellipsis">
-      Monitoring Dashboard
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#alerts" class="md-nav__link">
-    <span class="md-ellipsis">
-      Alerts
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#recovery-procedures" class="md-nav__link">
-    <span class="md-ellipsis">
-      Recovery Procedures
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Recovery Procedures">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#session-recovery" class="md-nav__link">
-    <span class="md-ellipsis">
-      Session Recovery
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#common-issues-and-solutions" class="md-nav__link">
-    <span class="md-ellipsis">
-      Common Issues and Solutions
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#best-practices" class="md-nav__link">
-    <span class="md-ellipsis">
-      Best Practices
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Best Practices">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#session-management" class="md-nav__link">
-    <span class="md-ellipsis">
-      Session Management
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#performance-optimization" class="md-nav__link">
-    <span class="md-ellipsis">
-      Performance Optimization
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#security-considerations" class="md-nav__link">
-    <span class="md-ellipsis">
-      Security Considerations
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#integration-examples" class="md-nav__link">
-    <span class="md-ellipsis">
-      Integration Examples
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Integration Examples">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#web-interface-chainlit" class="md-nav__link">
-    <span class="md-ellipsis">
-      Web Interface (Chainlit)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#cli-interface" class="md-nav__link">
-    <span class="md-ellipsis">
-      CLI Interface
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#api-integration" class="md-nav__link">
-    <span class="md-ellipsis">
-      API Integration
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#troubleshooting" class="md-nav__link">
-    <span class="md-ellipsis">
-      Troubleshooting
-    </span>
-  </a>
   
 </li>
       
@@ -2821,350 +2494,20 @@
 
 
 
-<h1 id="pulsepal-session-management">PulsePal Session Management<a class="headerlink" href="#pulsepal-session-management" title="Permanent link">&para;</a></h1>
-<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p>PulsePal implements sophisticated session management to maintain conversation context, track user preferences, and provide a seamless experience across interactions. Sessions are automatically created and managed to optimize both performance and user experience.</p>
-<h2 id="session-architecture">Session Architecture<a class="headerlink" href="#session-architecture" title="Permanent link">&para;</a></h2>
-<h3 id="core-components">Core Components<a class="headerlink" href="#core-components" title="Permanent link">&para;</a></h3>
+<h1 id="pulsepal-matlab-api-documentation">PulsePal MATLAB API Documentation<a class="headerlink" href="#pulsepal-matlab-api-documentation" title="Permanent link">&para;</a></h1>
+<h2 id="matlab-function-reference">MATLAB Function Reference<a class="headerlink" href="#matlab-function-reference" title="Permanent link">&para;</a></h2>
+<p>This site provides complete documentation for all MATLAB functions in the Pulseq framework.</p>
+<h3 id="quick-links">Quick Links<a class="headerlink" href="#quick-links" title="Permanent link">&para;</a></h3>
+<ul>
+<li><a href="matlab_api/index.md">Browse All Functions</a> - Complete alphabetical listing</li>
+<li><a href="https://github.com/pulseq/pulseq">Official Pulseq Repository</a> - Source code and examples</li>
+</ul>
+<h3 id="getting-started">Getting Started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>SessionManager</strong> (<code>dependencies.py</code>)</li>
-<li>Creates and manages session lifecycles</li>
-<li>Handles session rotation and cleanup</li>
-<li>
-<p>Maintains session persistence</p>
-</li>
-<li>
-<p><strong>ConversationContext</strong></p>
-</li>
-<li>Stores conversation history</li>
-<li>Tracks language preferences (MATLAB/Python)</li>
-<li>Maintains code examples within session</li>
-<li>
-<p>Records session metadata</p>
-</li>
-<li>
-<p><strong>Session Storage</strong></p>
-</li>
-<li>File-based storage in <code>sessions/</code> directory</li>
-<li>JSON format for easy debugging</li>
-<li>Automatic archival of old sessions</li>
+<li>Browse the <a href="matlab_api/index.md">complete function list</a></li>
+<li>Click on any function for detailed documentation</li>
+<li>Each function page includes syntax, parameters, returns, and examples</li>
 </ol>
-<h2 id="session-lifecycle">Session Lifecycle<a class="headerlink" href="#session-lifecycle" title="Permanent link">&para;</a></h2>
-<h3 id="session-creation">Session Creation<a class="headerlink" href="#session-creation" title="Permanent link">&para;</a></h3>
-<p>Sessions are created automatically when:
-- A new user starts a conversation (CLI or web)
-- No session ID is provided
-- An expired session ID is used</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Automatic session creation</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pulsepal.main_agent</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_pulsepal</span>
-<span class="n">session_id</span><span class="p">,</span> <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">run_pulsepal</span><span class="p">(</span><span class="s2">&quot;Your query here&quot;</span><span class="p">)</span>
-
-<span class="c1"># Manual session creation</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pulsepal.dependencies</span><span class="w"> </span><span class="kn">import</span> <span class="n">SessionManager</span>
-<span class="n">session_manager</span> <span class="o">=</span> <span class="n">SessionManager</span><span class="p">()</span>
-<span class="n">session_id</span> <span class="o">=</span> <span class="n">session_manager</span><span class="o">.</span><span class="n">create_session</span><span class="p">()</span>
-</code></pre></div>
-<h3 id="session-persistence">Session Persistence<a class="headerlink" href="#session-persistence" title="Permanent link">&para;</a></h3>
-<p>Sessions persist for:
-- <strong>Default Duration</strong>: 24 hours (configurable)
-- <strong>Maximum History</strong>: 100 messages (configurable)
-- <strong>Inactive Timeout</strong>: 2 hours of inactivity</p>
-<h3 id="session-rotation-policy">Session Rotation Policy<a class="headerlink" href="#session-rotation-policy" title="Permanent link">&para;</a></h3>
-<p>The rotation policy ensures optimal performance:</p>
-<ol>
-<li><strong>Active Sessions</strong> (&lt; 24 hours old)</li>
-<li>Kept in <code>sessions/active/</code></li>
-<li>Fast access for ongoing conversations</li>
-<li>
-<p>Automatically loaded on request</p>
-</li>
-<li>
-<p><strong>Archived Sessions</strong> (&gt; 24 hours old)</p>
-</li>
-<li>Moved to <code>sessions/archive/</code></li>
-<li>Compressed for storage efficiency</li>
-<li>
-<p>Available for historical reference</p>
-</li>
-<li>
-<p><strong>Cleanup Process</strong></p>
-</li>
-<li>Runs automatically every hour</li>
-<li>Archives expired sessions</li>
-<li>Removes sessions older than 7 days (configurable)</li>
-</ol>
-<h2 id="configuration-options">Configuration Options<a class="headerlink" href="#configuration-options" title="Permanent link">&para;</a></h2>
-<h3 id="environment-variables">Environment Variables<a class="headerlink" href="#environment-variables" title="Permanent link">&para;</a></h3>
-<p>Configure session behavior in <code>.env</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Session Duration</span>
-<span class="nv">MAX_SESSION_DURATION_HOURS</span><span class="o">=</span><span class="m">24</span><span class="w">      </span><span class="c1"># How long sessions remain active</span>
-<span class="nv">SESSION_INACTIVE_TIMEOUT_HOURS</span><span class="o">=</span><span class="m">2</span><span class="w">   </span><span class="c1"># Timeout for inactive sessions</span>
-
-<span class="c1"># Session Limits</span>
-<span class="nv">MAX_CONVERSATION_HISTORY</span><span class="o">=</span><span class="m">100</span><span class="w">       </span><span class="c1"># Maximum messages per session</span>
-<span class="nv">MAX_ACTIVE_SESSIONS</span><span class="o">=</span><span class="m">1000</span><span class="w">          </span><span class="c1"># Maximum concurrent active sessions</span>
-
-<span class="c1"># Archive Settings</span>
-<span class="nv">SESSION_ARCHIVE_DAYS</span><span class="o">=</span><span class="m">7</span><span class="w">             </span><span class="c1"># Days to keep archived sessions</span>
-<span class="nv">SESSION_COMPRESSION</span><span class="o">=</span><span class="nb">true</span><span class="w">           </span><span class="c1"># Compress archived sessions</span>
-
-<span class="c1"># Session Storage</span>
-<span class="nv">SESSION_STORAGE_PATH</span><span class="o">=</span>./sessions<span class="w">    </span><span class="c1"># Where to store session files</span>
-</code></pre></div>
-<h3 id="programmatic-configuration">Programmatic Configuration<a class="headerlink" href="#programmatic-configuration" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pulsepal.settings</span><span class="w"> </span><span class="kn">import</span> <span class="n">Settings</span>
-
-<span class="n">settings</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">(</span>
-    <span class="n">max_session_duration_hours</span><span class="o">=</span><span class="mi">48</span><span class="p">,</span>
-    <span class="n">max_conversation_history</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
-    <span class="n">session_storage_path</span><span class="o">=</span><span class="s2">&quot;/custom/path&quot;</span>
-<span class="p">)</span>
-</code></pre></div>
-<h2 id="archive-process">Archive Process<a class="headerlink" href="#archive-process" title="Permanent link">&para;</a></h2>
-<h3 id="automatic-archival">Automatic Archival<a class="headerlink" href="#automatic-archival" title="Permanent link">&para;</a></h3>
-<p>Sessions are automatically archived when:
-- They exceed the maximum duration
-- The cleanup process runs (hourly)
-- Manual cleanup is triggered</p>
-<h3 id="archive-structure">Archive Structure<a class="headerlink" href="#archive-structure" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>sessions/
-├── active/                 # Current sessions
-│   ├── session_abc123.json
-│   └── session_def456.json
-├── archive/               # Archived sessions
-│   ├── 2025-01-18/       # Organized by date
-│   │   ├── session_old1.json.gz
-│   │   └── session_old2.json.gz
-│   └── 2025-01-17/
-└── metadata.json          # Session index
-</code></pre></div>
-<h3 id="manual-archive-management">Manual Archive Management<a class="headerlink" href="#manual-archive-management" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="c1"># Archive all expired sessions</span>
-python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from pulsepal.dependencies import SessionManager; SessionManager().archive_expired_sessions()&quot;</span>
-
-<span class="c1"># Archive specific session</span>
-python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from pulsepal.dependencies import SessionManager; SessionManager().archive_session(&#39;session_id&#39;)&quot;</span>
-
-<span class="c1"># List archived sessions</span>
-python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from pulsepal.dependencies import SessionManager; SessionManager().list_archived_sessions()&quot;</span>
-</code></pre></div>
-<h2 id="cli-commands-for-cleanup">CLI Commands for Cleanup<a class="headerlink" href="#cli-commands-for-cleanup" title="Permanent link">&para;</a></h2>
-<h3 id="basic-cleanup-commands">Basic Cleanup Commands<a class="headerlink" href="#basic-cleanup-commands" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="c1"># Clean up old sessions (removes &gt; 7 days)</span>
-python<span class="w"> </span>scripts/cleanup_sessions.py
-
-<span class="c1"># Clean up with custom retention</span>
-python<span class="w"> </span>scripts/cleanup_sessions.py<span class="w"> </span>--days<span class="w"> </span><span class="m">30</span>
-
-<span class="c1"># Dry run (show what would be deleted)</span>
-python<span class="w"> </span>scripts/cleanup_sessions.py<span class="w"> </span>--dry-run
-
-<span class="c1"># Force cleanup of all sessions</span>
-python<span class="w"> </span>scripts/cleanup_sessions.py<span class="w"> </span>--force<span class="w"> </span>--all
-</code></pre></div>
-<h3 id="session-management-cli">Session Management CLI<a class="headerlink" href="#session-management-cli" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="c1"># List active sessions</span>
-python<span class="w"> </span>-m<span class="w"> </span>pulsepal.cli<span class="w"> </span>sessions<span class="w"> </span>list
-
-<span class="c1"># Show session details</span>
-python<span class="w"> </span>-m<span class="w"> </span>pulsepal.cli<span class="w"> </span>sessions<span class="w"> </span>show<span class="w"> </span>&lt;session_id&gt;
-
-<span class="c1"># Delete specific session</span>
-python<span class="w"> </span>-m<span class="w"> </span>pulsepal.cli<span class="w"> </span>sessions<span class="w"> </span>delete<span class="w"> </span>&lt;session_id&gt;
-
-<span class="c1"># Export session history</span>
-python<span class="w"> </span>-m<span class="w"> </span>pulsepal.cli<span class="w"> </span>sessions<span class="w"> </span><span class="nb">export</span><span class="w"> </span>&lt;session_id&gt;<span class="w"> </span>--output<span class="w"> </span>history.json
-
-<span class="c1"># Import session (restore)</span>
-python<span class="w"> </span>-m<span class="w"> </span>pulsepal.cli<span class="w"> </span>sessions<span class="w"> </span>import<span class="w"> </span>history.json
-</code></pre></div>
-<h3 id="scheduled-cleanup">Scheduled Cleanup<a class="headerlink" href="#scheduled-cleanup" title="Permanent link">&para;</a></h3>
-<p>For production environments, schedule cleanup with cron:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Add to crontab</span>
-<span class="m">0</span><span class="w"> </span>*<span class="w"> </span>*<span class="w"> </span>*<span class="w"> </span>*<span class="w"> </span>python<span class="w"> </span>/path/to/pulsepal/scripts/cleanup_sessions.py
-
-<span class="c1"># Or use systemd timer</span>
-<span class="o">[</span>Unit<span class="o">]</span>
-<span class="nv">Description</span><span class="o">=</span>PulsePal<span class="w"> </span>Session<span class="w"> </span>Cleanup
-
-<span class="o">[</span>Timer<span class="o">]</span>
-<span class="nv">OnCalendar</span><span class="o">=</span>hourly
-<span class="nv">Persistent</span><span class="o">=</span><span class="nb">true</span>
-
-<span class="o">[</span>Install<span class="o">]</span>
-<span class="nv">WantedBy</span><span class="o">=</span>timers.target
-</code></pre></div>
-<h2 id="monitoring-guidelines">Monitoring Guidelines<a class="headerlink" href="#monitoring-guidelines" title="Permanent link">&para;</a></h2>
-<h3 id="health-metrics">Health Metrics<a class="headerlink" href="#health-metrics" title="Permanent link">&para;</a></h3>
-<p>Monitor these session metrics:</p>
-<ol>
-<li>
-<p><strong>Active Session Count</strong>
-   <div class="highlight"><pre><span></span><code><span class="n">session_manager</span><span class="o">.</span><span class="n">get_active_session_count</span><span class="p">()</span>
-</code></pre></div></p>
-</li>
-<li>
-<p><strong>Session Age Distribution</strong>
-   <div class="highlight"><pre><span></span><code><span class="n">session_manager</span><span class="o">.</span><span class="n">get_session_age_stats</span><span class="p">()</span>
-</code></pre></div></p>
-</li>
-<li>
-<p><strong>Storage Usage</strong>
-   <div class="highlight"><pre><span></span><code><span class="n">session_manager</span><span class="o">.</span><span class="n">get_storage_usage</span><span class="p">()</span>
-</code></pre></div></p>
-</li>
-<li>
-<p><strong>Session Activity</strong>
-   <div class="highlight"><pre><span></span><code><span class="n">session_manager</span><span class="o">.</span><span class="n">get_activity_metrics</span><span class="p">()</span>
-</code></pre></div></p>
-</li>
-</ol>
-<h3 id="monitoring-dashboard">Monitoring Dashboard<a class="headerlink" href="#monitoring-dashboard" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="c1"># Simple monitoring script</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pulsepal.dependencies</span><span class="w"> </span><span class="kn">import</span> <span class="n">SessionManager</span>
-
-<span class="n">sm</span> <span class="o">=</span> <span class="n">SessionManager</span><span class="p">()</span>
-<span class="n">stats</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">get_session_stats</span><span class="p">()</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Active Sessions: </span><span class="si">{</span><span class="n">stats</span><span class="p">[</span><span class="s1">&#39;active_count&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Archived Sessions: </span><span class="si">{</span><span class="n">stats</span><span class="p">[</span><span class="s1">&#39;archived_count&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Storage Used: </span><span class="si">{</span><span class="n">stats</span><span class="p">[</span><span class="s1">&#39;storage_mb&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> MB&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Avg Session Age: </span><span class="si">{</span><span class="n">stats</span><span class="p">[</span><span class="s1">&#39;avg_age_hours&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> hours&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Oldest Session: </span><span class="si">{</span><span class="n">stats</span><span class="p">[</span><span class="s1">&#39;oldest_session_id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</code></pre></div>
-<h3 id="alerts">Alerts<a class="headerlink" href="#alerts" title="Permanent link">&para;</a></h3>
-<p>Set up alerts for:
-- High active session count (&gt; 900)
-- Storage usage exceeding limits
-- Failed cleanup processes
-- Corrupted session files</p>
-<h2 id="recovery-procedures">Recovery Procedures<a class="headerlink" href="#recovery-procedures" title="Permanent link">&para;</a></h2>
-<h3 id="session-recovery">Session Recovery<a class="headerlink" href="#session-recovery" title="Permanent link">&para;</a></h3>
-<p>If sessions are corrupted or lost:</p>
-<ol>
-<li>
-<p><strong>Check Backups</strong>
-   <div class="highlight"><pre><span></span><code>ls<span class="w"> </span>sessions/archive/backups/
-</code></pre></div></p>
-</li>
-<li>
-<p><strong>Restore from Archive</strong>
-   <div class="highlight"><pre><span></span><code>python<span class="w"> </span>scripts/restore_session.py<span class="w"> </span>--session-id<span class="w"> </span>&lt;id&gt;<span class="w"> </span>--date<span class="w"> </span><span class="m">2025</span>-01-18
-</code></pre></div></p>
-</li>
-<li>
-<p><strong>Rebuild from Logs</strong>
-   <div class="highlight"><pre><span></span><code>python<span class="w"> </span>scripts/rebuild_sessions.py<span class="w"> </span>--from-logs<span class="w"> </span>conversationLogs/
-</code></pre></div></p>
-</li>
-</ol>
-<h3 id="common-issues-and-solutions">Common Issues and Solutions<a class="headerlink" href="#common-issues-and-solutions" title="Permanent link">&para;</a></h3>
-<ol>
-<li><strong>Session Not Found</strong></li>
-<li>Check if archived: <code>ls sessions/archive/*/session_*.json.gz</code></li>
-<li>
-<p>Restore if needed: <code>gunzip &lt; session.json.gz &gt; sessions/active/session.json</code></p>
-</li>
-<li>
-<p><strong>Session Corruption</strong></p>
-</li>
-<li>Validate JSON: <code>python -m json.tool session.json</code></li>
-<li>Remove corrupted: <code>rm sessions/active/corrupted_session.json</code></li>
-<li>
-<p>Recreate: User starts new conversation</p>
-</li>
-<li>
-<p><strong>Storage Full</strong></p>
-</li>
-<li>Run immediate cleanup: <code>python scripts/cleanup_sessions.py --force</code></li>
-<li>Reduce retention: <code>--days 3</code></li>
-<li>
-<p>Move archives: <code>mv sessions/archive /backup/location/</code></p>
-</li>
-<li>
-<p><strong>Performance Issues</strong></p>
-</li>
-<li>Check session count: Too many active sessions</li>
-<li>Archive old sessions: <code>python scripts/cleanup_sessions.py</code></li>
-<li>Optimize storage: Enable compression</li>
-</ol>
-<h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">&para;</a></h2>
-<h3 id="session-management">Session Management<a class="headerlink" href="#session-management" title="Permanent link">&para;</a></h3>
-<ol>
-<li><strong>Regular Cleanup</strong> - Schedule hourly cleanup in production</li>
-<li><strong>Monitor Storage</strong> - Set up disk usage alerts</li>
-<li><strong>Backup Archives</strong> - Keep backups of important sessions</li>
-<li><strong>Test Recovery</strong> - Regularly test recovery procedures</li>
-<li><strong>Document Sessions</strong> - Keep metadata about important sessions</li>
-</ol>
-<h3 id="performance-optimization">Performance Optimization<a class="headerlink" href="#performance-optimization" title="Permanent link">&para;</a></h3>
-<ol>
-<li><strong>Limit History</strong> - Keep conversation history reasonable (100-200 messages)</li>
-<li><strong>Archive Promptly</strong> - Don't keep old sessions active</li>
-<li><strong>Compress Archives</strong> - Enable compression for archived sessions</li>
-<li><strong>Clean Storage</strong> - Remove very old archives periodically</li>
-</ol>
-<h3 id="security-considerations">Security Considerations<a class="headerlink" href="#security-considerations" title="Permanent link">&para;</a></h3>
-<ol>
-<li><strong>Sanitize Sessions</strong> - Remove sensitive data before archiving</li>
-<li><strong>Encrypt Archives</strong> - Consider encrypting archived sessions</li>
-<li><strong>Access Control</strong> - Limit access to session storage</li>
-<li><strong>Audit Logs</strong> - Log session access and modifications</li>
-</ol>
-<h2 id="integration-examples">Integration Examples<a class="headerlink" href="#integration-examples" title="Permanent link">&para;</a></h2>
-<h3 id="web-interface-chainlit">Web Interface (Chainlit)<a class="headerlink" href="#web-interface-chainlit" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="c1"># Chainlit automatically manages sessions</span>
-<span class="nd">@cl</span><span class="o">.</span><span class="n">on_chat_start</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">start</span><span class="p">():</span>
-    <span class="n">session_id</span> <span class="o">=</span> <span class="n">cl</span><span class="o">.</span><span class="n">user_session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;session_id&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">session_id</span><span class="p">:</span>
-        <span class="n">session_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span>
-        <span class="n">cl</span><span class="o">.</span><span class="n">user_session</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;session_id&quot;</span><span class="p">,</span> <span class="n">session_id</span><span class="p">)</span>
-</code></pre></div>
-<h3 id="cli-interface">CLI Interface<a class="headerlink" href="#cli-interface" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="c1"># CLI with persistent session</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">argparse</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pulsepal.main_agent</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_pulsepal</span>
-
-<span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
-<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--session-id&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Continue existing session&quot;</span><span class="p">)</span>
-<span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
-
-<span class="n">session_id</span><span class="p">,</span> <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">run_pulsepal</span><span class="p">(</span>
-    <span class="n">query</span><span class="o">=</span><span class="s2">&quot;Your query&quot;</span><span class="p">,</span>
-    <span class="n">session_id</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">session_id</span>
-<span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Session: </span><span class="si">{</span><span class="n">session_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Response: </span><span class="si">{</span><span class="n">response</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</code></pre></div>
-<h3 id="api-integration">API Integration<a class="headerlink" href="#api-integration" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="c1"># REST API with session support</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastAPI</span><span class="p">,</span> <span class="n">Header</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
-
-<span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">()</span>
-
-<span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/query&quot;</span><span class="p">)</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">query</span><span class="p">(</span>
-    <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">session_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Header</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
-<span class="p">):</span>
-    <span class="n">session_id</span><span class="p">,</span> <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">run_pulsepal</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">session_id</span><span class="p">)</span>
-    <span class="k">return</span> <span class="p">{</span>
-        <span class="s2">&quot;session_id&quot;</span><span class="p">:</span> <span class="n">session_id</span><span class="p">,</span>
-        <span class="s2">&quot;response&quot;</span><span class="p">:</span> <span class="n">response</span>
-    <span class="p">}</span>
-</code></pre></div>
-<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
-<p>For session-related issues, check:</p>
-<ol>
-<li>Session storage permissions</li>
-<li>Disk space availability</li>
-<li>Session file validity (valid JSON)</li>
-<li>Environment variable configuration</li>
-<li>Cleanup process logs</li>
-</ol>
-<p>For additional support, contact: rmoskwa@wisc.edu</p>
 
 
 

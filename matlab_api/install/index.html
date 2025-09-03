@@ -183,7 +183,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../.." class="md-tabs__link">
+      <a href="../../index.md" class="md-tabs__link">
         
   
   
@@ -258,7 +258,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
+      <a href="../../index.md" class="md-nav__link">
         
   
   
@@ -1236,9 +1236,9 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#required-parameters" class="md-nav__link">
+  <a href="#optional-parameters" class="md-nav__link">
     <span class="md-ellipsis">
-      Required Parameters
+      Optional Parameters
     </span>
   </a>
   
@@ -1259,9 +1259,27 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#usage-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage Modes
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#examples" class="md-nav__link">
     <span class="md-ellipsis">
       Examples
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Notes
     </span>
   </a>
   
@@ -2597,9 +2615,9 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#required-parameters" class="md-nav__link">
+  <a href="#optional-parameters" class="md-nav__link">
     <span class="md-ellipsis">
-      Required Parameters
+      Optional Parameters
     </span>
   </a>
   
@@ -2620,9 +2638,27 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#usage-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage Modes
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#examples" class="md-nav__link">
     <span class="md-ellipsis">
       Examples
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Notes
     </span>
   </a>
   
@@ -2654,7 +2690,7 @@
 
 
 <h1 id="install">install<a class="headerlink" href="#install" title="Permanent link">&para;</a></h1>
-<p>Installs a Pulseq sequence onto a Siemens MRI system.  The function detects the scanner environment (Numaris4 or NumarisX) or allows the user to specify it. It copies the sequence files to the appropriate location on the system, creating necessary subdirectories as needed. The sequence is installed as an 'external.seq' file.</p>
+<p>Installs a Pulseq sequence directly on an MRI scanner system. This function facilitates deployment of sequences to scanner platforms, particularly Siemens systems, by copying the sequence files to the appropriate scanner directories and optionally to the RANGE controller.</p>
 <h2 id="syntax">Syntax<a class="headerlink" href="#syntax" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="k">function</span><span class="w"> </span>ok<span class="p">=</span><span class="nf">install</span><span class="p">(</span>param1,param2<span class="p">)</span>
 </code></pre></div>
@@ -2662,31 +2698,31 @@
 <div class="highlight"><pre><span></span><code><span class="n">seq</span><span class="p">.</span><span class="n">install</span><span class="p">(</span><span class="k">...</span><span class="c">)</span>
 </code></pre></div>
 <h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
-<h3 id="required-parameters">Required Parameters<a class="headerlink" href="#required-parameters" title="Permanent link">&para;</a></h3>
+<h3 id="optional-parameters">Optional Parameters<a class="headerlink" href="#optional-parameters" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
 <th>Name</th>
 <th>Type</th>
+<th>Default</th>
 <th>Description</th>
 <th>Example</th>
-<th>Units</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>param1</code></td>
-<td>string</td>
-<td>Specifies the installation destination or method. Can be 'siemens', 'siemensNX', or a file path/name.</td>
-<td><code>'siemens'</code></td>
+<td>char</td>
 <td></td>
+<td>Scanner type or sequence path/name. If omitted, auto-detects scanner environment. Options: 'siemens' (Numaris4), 'siemensNX' (NumarisX), or a custom sequence path/name</td>
+<td><code>'siemens'</code> or <code>'my_seq/custom_name'</code></td>
 </tr>
 <tr>
 <td><code>param2</code></td>
-<td>string</td>
-<td>Optional parameter; specifies the file path and name when installing to a Siemens system (used with 'siemens' or 'siemensNX' as param1).</td>
-<td><code>'path/to/my/sequence.seq'</code></td>
+<td>char</td>
 <td></td>
+<td>Sequence path or name when param1 specifies scanner type. Creates subdirectories automatically if provided</td>
+<td><code>'sequences/my_epi'</code></td>
 </tr>
 </tbody>
 </table>
@@ -2703,18 +2739,46 @@
 <tr>
 <td><code>ok</code></td>
 <td>logical</td>
-<td>A boolean value indicating success (true) or failure (false) of the installation.</td>
+<td>Returns true if installation was successful, false otherwise</td>
 </tr>
 </tbody>
 </table>
+<h2 id="usage-modes">Usage Modes<a class="headerlink" href="#usage-modes" title="Permanent link">&para;</a></h2>
+<p>The function supports several usage patterns:</p>
+<ol>
+<li><strong>Auto-detect scanner</strong>: <code>seq.install()</code> - Automatically detects the scanner environment and installs with default name</li>
+<li><strong>Custom name with auto-detect</strong>: <code>seq.install('sequence_path_or_name')</code> - Auto-detects scanner and installs with specified name</li>
+<li><strong>Siemens Numaris4</strong>: <code>seq.install('siemens')</code> - Installs as external.seq on Numaris4 system</li>
+<li><strong>Siemens NumarisX</strong>: <code>seq.install('siemensNX')</code> - Installs as external.seq on NumarisX system</li>
+<li><strong>Siemens with custom name</strong>: <code>seq.install('siemens', 'my_seq/custom_name')</code> - Installs with custom path/name on Numaris4</li>
+<li><strong>NumarisX with custom name</strong>: <code>seq.install('siemensNX', 'my_seq/custom_name')</code> - Installs with custom path/name on NumarisX</li>
+</ol>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="n">seq</span><span class="p">.</span><span class="n">install</span><span class="p">()</span>
-<span class="n">seq</span><span class="p">.</span><span class="n">install</span><span class="p">(</span><span class="s">&#39;mySequence.seq&#39;</span><span class="p">)</span>
-<span class="n">seq</span><span class="p">.</span><span class="n">install</span><span class="p">(</span><span class="s">&#39;siemens&#39;</span><span class="p">,</span><span class="w"> </span><span class="s">&#39;path/to/my/sequence&#39;</span><span class="p">)</span>
-<span class="n">seq</span><span class="p">.</span><span class="n">install</span><span class="p">(</span><span class="s">&#39;siemensNX&#39;</span><span class="p">,</span><span class="w"> </span><span class="s">&#39;mySequence&#39;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="c">% Auto-detect scanner and install with default name</span>
+<span class="n">seq</span><span class="p">.</span><span class="n">install</span><span class="p">();</span>
+
+<span class="c">% Install with custom name (auto-detect scanner)</span>
+<span class="n">seq</span><span class="p">.</span><span class="n">install</span><span class="p">(</span><span class="s">&#39;protocols/my_epi_sequence&#39;</span><span class="p">);</span>
+
+<span class="c">% Install on Siemens Numaris4 system as external.seq</span>
+<span class="n">seq</span><span class="p">.</span><span class="n">install</span><span class="p">(</span><span class="s">&#39;siemens&#39;</span><span class="p">);</span>
+
+<span class="c">% Install on Siemens NumarisX with custom name</span>
+<span class="n">seq</span><span class="p">.</span><span class="n">install</span><span class="p">(</span><span class="s">&#39;siemensNX&#39;</span><span class="p">,</span><span class="w"> </span><span class="s">&#39;research/diffusion_seq&#39;</span><span class="p">);</span>
+
+<span class="c">% Install with subdirectory creation</span>
+<span class="n">seq</span><span class="p">.</span><span class="n">install</span><span class="p">(</span><span class="s">&#39;siemens&#39;</span><span class="p">,</span><span class="w"> </span><span class="s">&#39;project_2024/sequences/gre_v2&#39;</span><span class="p">);</span>
 </code></pre></div>
+<h2 id="notes">Notes<a class="headerlink" href="#notes" title="Permanent link">&para;</a></h2>
+<ul>
+<li>The function uses network ping to verify scanner connectivity before installation</li>
+<li>Subdirectories specified in the path are created automatically</li>
+<li>The function is typically commented out during sequence development and uncommented for deployment</li>
+<li>Installation requires appropriate network access and permissions to the scanner system</li>
+<li>On Windows systems, uses Windows-specific ping parameters; on Unix/Mac, uses Unix-style ping</li>
+</ul>
 <h2 id="see-also">See Also<a class="headerlink" href="#see-also" title="Permanent link">&para;</a></h2>
-<p><a href="../write/">Sequence.write</a></p>
+<p><a href="../write/">write</a>, <a href="../read/">read</a>, <a href="../checkTiming/">checkTiming</a></p>
 
 
 

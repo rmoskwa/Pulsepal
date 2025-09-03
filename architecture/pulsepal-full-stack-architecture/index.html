@@ -10,7 +10,7 @@
       
       
       
-        <link rel="canonical" href="https://rmoskwa.github.io/Pulsepal/architecture/database-reorganization-strategy/">
+        <link rel="canonical" href="https://rmoskwa.github.io/Pulsepal/architecture/pulsepal-full-stack-architecture/">
       
       
       
@@ -20,7 +20,7 @@
     
     
       
-        <title>PulsePal Knowledge Base Reorganization Strategy - Pulseq MATLAB API Documentation</title>
+        <title>PulsePal Full-Stack Architecture Document - Pulseq MATLAB API Documentation</title>
       
     
     
@@ -70,7 +70,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#pulsepal-knowledge-base-reorganization-strategy" class="md-skip">
+        <a href="#pulsepal-full-stack-architecture-document" class="md-skip">
           Skip to content
         </a>
       
@@ -104,7 +104,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              PulsePal Knowledge Base Reorganization Strategy
+              PulsePal Full-Stack Architecture Document
             
           </span>
         </div>
@@ -179,7 +179,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../.." class="md-tabs__link">
+      <a href="../../index.md" class="md-tabs__link">
         
   
   
@@ -252,7 +252,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
+      <a href="../../index.md" class="md-nav__link">
         
   
   
@@ -2455,65 +2455,245 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#current-state-analysis" class="md-nav__link">
+  <a href="#system-overview" class="md-nav__link">
     <span class="md-ellipsis">
-      Current State Analysis
+      System Overview
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Current State Analysis">
+    <nav class="md-nav" aria-label="System Overview">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#database-overview" class="md-nav__link">
+  <a href="#core-purpose" class="md-nav__link">
     <span class="md-ellipsis">
-      Database Overview
+      Core Purpose
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#content-distribution" class="md-nav__link">
+  <a href="#key-architectural-principles" class="md-nav__link">
     <span class="md-ellipsis">
-      Content Distribution
+      Key Architectural Principles
     </span>
   </a>
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#key-discoveries" class="md-nav__link">
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#technology-stack" class="md-nav__link">
     <span class="md-ellipsis">
-      Key Discoveries
+      Technology Stack
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Key Discoveries">
+    <nav class="md-nav" aria-label="Technology Stack">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-universal-pulseq-pattern" class="md-nav__link">
+  <a href="#core-technologies" class="md-nav__link">
     <span class="md-ellipsis">
-      1. Universal Pulseq Pattern
+      Core Technologies
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-vendor-adaptations-are-valuable" class="md-nav__link">
+  <a href="#supporting-technologies" class="md-nav__link">
     <span class="md-ellipsis">
-      2. Vendor Adaptations Are Valuable
+      Supporting Technologies
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#system-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      System Architecture
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="System Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#component-hierarchy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Component Hierarchy
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#3-repository-patterns" class="md-nav__link">
+  <a href="#data-flow-architecture" class="md-nav__link">
     <span class="md-ellipsis">
-      3. Repository Patterns
+      Data Flow Architecture
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#core-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      Core Components
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Components">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#main-agent-main_agentpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Main Agent (main_agent.py)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rag-service-rag_servicepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      RAG Service (rag_service.py)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#session-management-dependenciespy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Session Management (dependencies.py)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tools-module-toolspy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tools Module (tools.py)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#database-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      Database Architecture
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Database Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#supabase-schema-design" class="md-nav__link">
+    <span class="md-ellipsis">
+      Supabase Schema Design
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Supabase Schema Design">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#primary-tables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Primary Tables
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vector-search-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Vector Search Strategy
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#integration-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      Integration Architecture
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Integration Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#external-service-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      External Service Integration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="External Service Integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#google-gemini-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Google Gemini Integration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#supabase-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Supabase Integration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#google-embeddings-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      Google Embeddings API
     </span>
   </a>
   
@@ -2530,187 +2710,19 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#reorganization-strategy" class="md-nav__link">
+  <a href="#performance-architecture" class="md-nav__link">
     <span class="md-ellipsis">
-      Reorganization Strategy
+      Performance Architecture
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Reorganization Strategy">
+    <nav class="md-nav" aria-label="Performance Architecture">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#philosophy-intelligent-minimalism" class="md-nav__link">
+  <a href="#optimization-strategies" class="md-nav__link">
     <span class="md-ellipsis">
-      Philosophy: Intelligent Minimalism
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#proposed-table-structure" class="md-nav__link">
-    <span class="md-ellipsis">
-      Proposed Table Structure
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#smart-views-instead-of-tables" class="md-nav__link">
-    <span class="md-ellipsis">
-      Smart Views Instead of Tables
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#implementation-roadmap" class="md-nav__link">
-    <span class="md-ellipsis">
-      Implementation Roadmap
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Implementation Roadmap">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#phase-1-aggressive-cleanup-immediate" class="md-nav__link">
-    <span class="md-ellipsis">
-      Phase 1: Aggressive Cleanup (Immediate)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#phase-2-metadata-enrichment-week-1" class="md-nav__link">
-    <span class="md-ellipsis">
-      Phase 2: Metadata Enrichment (Week 1)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#phase-3-selective-re-crawling-week-2-3" class="md-nav__link">
-    <span class="md-ellipsis">
-      Phase 3: Selective Re-crawling (Week 2-3)
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Phase 3: Selective Re-crawling (Week 2-3)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#priority-1-core-pulseq-functions" class="md-nav__link">
-    <span class="md-ellipsis">
-      Priority 1: Core Pulseq Functions
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#priority-2-vendor-adaptations" class="md-nav__link">
-    <span class="md-ellipsis">
-      Priority 2: Vendor Adaptations
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#priority-3-complex-sequences" class="md-nav__link">
-    <span class="md-ellipsis">
-      Priority 3: Complex Sequences
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#phase-4-create-curated-knowledge-week-3" class="md-nav__link">
-    <span class="md-ellipsis">
-      Phase 4: Create Curated Knowledge (Week 3)
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#expected-outcomes" class="md-nav__link">
-    <span class="md-ellipsis">
-      Expected Outcomes
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Expected Outcomes">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#quantitative-improvements" class="md-nav__link">
-    <span class="md-ellipsis">
-      Quantitative Improvements
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#qualitative-improvements" class="md-nav__link">
-    <span class="md-ellipsis">
-      Qualitative Improvements
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#key-recommendations" class="md-nav__link">
-    <span class="md-ellipsis">
-      Key Recommendations
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#technical-considerations" class="md-nav__link">
-    <span class="md-ellipsis">
-      Technical Considerations
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Technical Considerations">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#why-not-many-tables" class="md-nav__link">
-    <span class="md-ellipsis">
-      Why Not Many Tables?
+      Optimization Strategies
     </span>
   </a>
   
@@ -2731,37 +2743,37 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#specific-examples-of-content-to-remove" class="md-nav__link">
+  <a href="#security-architecture" class="md-nav__link">
     <span class="md-ellipsis">
-      Specific Examples of Content to Remove
+      Security Architecture
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Specific Examples of Content to Remove">
+    <nav class="md-nav" aria-label="Security Architecture">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#generic-utilities-not-mri-specific" class="md-nav__link">
+  <a href="#authentication-authorization" class="md-nav__link">
     <span class="md-ellipsis">
-      Generic Utilities (Not MRI-Specific)
+      Authentication &amp; Authorization
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#archivedoutdated-content" class="md-nav__link">
+  <a href="#data-protection" class="md-nav__link">
     <span class="md-ellipsis">
-      Archived/Outdated Content
+      Data Protection
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#vendor-proprietary-without-pulseq" class="md-nav__link">
+  <a href="#privacy-considerations" class="md-nav__link">
     <span class="md-ellipsis">
-      Vendor-Proprietary Without Pulseq
+      Privacy Considerations
     </span>
   </a>
   
@@ -2773,46 +2785,202 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#specific-examples-of-content-to-re-crawl" class="md-nav__link">
+  <a href="#deployment-architecture" class="md-nav__link">
     <span class="md-ellipsis">
-      Specific Examples of Content to Re-crawl
+      Deployment Architecture
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Specific Examples of Content to Re-crawl">
+    <nav class="md-nav" aria-label="Deployment Architecture">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#core-pulseq-functions-need-structured-extraction" class="md-nav__link">
+  <a href="#development-environment" class="md-nav__link">
     <span class="md-ellipsis">
-      Core Pulseq Functions (Need Structured Extraction)
+      Development Environment
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#vendor-adaptation-patterns-need-pattern-extraction" class="md-nav__link">
+  <a href="#production-deployment" class="md-nav__link">
     <span class="md-ellipsis">
-      Vendor Adaptation Patterns (Need Pattern Extraction)
+      Production Deployment
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#complex-sequences-need-modular-breakdown" class="md-nav__link">
+  <a href="#scaling-strategy" class="md-nav__link">
     <span class="md-ellipsis">
-      Complex Sequences (Need Modular Breakdown)
+      Scaling Strategy
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#error-handling-resilience" class="md-nav__link">
+    <span class="md-ellipsis">
+      Error Handling &amp; Resilience
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Error Handling &amp; Resilience">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#error-categories" class="md-nav__link">
+    <span class="md-ellipsis">
+      Error Categories
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#educational-sequences-need-step-extraction" class="md-nav__link">
+  <a href="#recovery-strategies" class="md-nav__link">
     <span class="md-ellipsis">
-      Educational Sequences (Need Step Extraction)
+      Recovery Strategies
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing Architecture
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Testing Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#test-coverage-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Test Coverage Strategy
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-organization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Test Organization
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#monitoring-observability" class="md-nav__link">
+    <span class="md-ellipsis">
+      Monitoring &amp; Observability
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Monitoring &amp; Observability">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#metrics-collection" class="md-nav__link">
+    <span class="md-ellipsis">
+      Metrics Collection
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logging-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Logging Strategy
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#future-architecture-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Future Architecture Considerations
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Future Architecture Considerations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#planned-enhancements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Planned Enhancements
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scalability-roadmap" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scalability Roadmap
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#maintenance-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Maintenance &amp; Operations
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Maintenance &amp; Operations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#regular-maintenance-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Regular Maintenance Tasks
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#monitoring-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      Monitoring Checklist
     </span>
   </a>
   
@@ -2848,315 +3016,355 @@
 
 
 
-<h1 id="pulsepal-knowledge-base-reorganization-strategy">PulsePal Knowledge Base Reorganization Strategy<a class="headerlink" href="#pulsepal-knowledge-base-reorganization-strategy" title="Permanent link">&para;</a></h1>
+<h1 id="pulsepal-full-stack-architecture-document">PulsePal Full-Stack Architecture Document<a class="headerlink" href="#pulsepal-full-stack-architecture-document" title="Permanent link">&para;</a></h1>
 <h2 id="executive-summary">Executive Summary<a class="headerlink" href="#executive-summary" title="Permanent link">&para;</a></h2>
-<p>PulsePal is an intelligent MRI sequence programming assistant built with PydanticAI and Google Gemini 2.5 Flash. This document outlines a comprehensive strategy to reorganize and optimize its Supabase knowledge base, which currently contains 1,703 crawled documents from 27 GitHub repositories. Our analysis revealed that ~41% of the content is low-value (generic utilities, archived files), while high-value content lacks proper structure for optimal RAG (Retrieval-Augmented Generation) performance.</p>
-<p><strong>Key Findings:</strong>
-- Current database contains significant clutter: 570 generic utility files, 71 archived files, 63 test files
-- Pulseq sequences follow a consistent 6-step modular pattern across all implementations
-- Vendor-specific adaptations (e.g., GE TRID labels) are valuable for real-world deployment
-- Intelligence-first approach works well - Gemini can infer patterns without excessive structure</p>
-<h2 id="current-state-analysis">Current State Analysis<a class="headerlink" href="#current-state-analysis" title="Permanent link">&para;</a></h2>
-<h3 id="database-overview">Database Overview<a class="headerlink" href="#database-overview" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>Total Documents</strong>: 1,703 entries in <code>crawled_pages</code></li>
-<li><strong>API References</strong>: 413 functions in <code>api_reference</code> </li>
-<li><strong>Sources</strong>: 27 GitHub repositories</li>
-<li><strong>Storage Size</strong>: ~63 MB</li>
-<li><strong>Embeddings</strong>: 768-dimensional vectors (Google Embeddings API)</li>
-</ul>
-<h3 id="content-distribution">Content Distribution<a class="headerlink" href="#content-distribution" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>High-Value Sources (Keep All):
-- pulseq/pulseq: 192 files (official implementation)
-- imr-framework/pypulseq: 115 files (Python port)
-- pulseq/tutorials: 47 files (educational)
-
-Mixed-Value Sources (Selective):
-- HarmonizedMRI repositories: Valuable techniques with some clutter
-- Personal projects (MIMOSA, PRIME): 83% utility functions
-
-Low-Value Content:
-- 570 utility files (33%): Generic FFT, crop, reshape functions
-- 71 archived files (4%): Old implementations in /attic/ folders
-- 63 test files (4%): Unit tests with limited educational value
-</code></pre></div>
-<h3 id="key-discoveries">Key Discoveries<a class="headerlink" href="#key-discoveries" title="Permanent link">&para;</a></h3>
-<h4 id="1-universal-pulseq-pattern">1. Universal Pulseq Pattern<a class="headerlink" href="#1-universal-pulseq-pattern" title="Permanent link">&para;</a></h4>
-<p>All Pulseq sequences follow this consistent structure:
-<div class="highlight"><pre><span></span><code><span class="c">% 1. System Setup</span>
-<span class="n">sys</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">mr</span><span class="p">.</span><span class="n">opts</span><span class="p">(</span><span class="s">&#39;MaxGrad&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">40</span><span class="p">,</span><span class="w"> </span><span class="k">...</span><span class="c">);</span>
-
-<span class="c">% 2. Sequence Object Creation  </span>
-<span class="n">seq</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">mr</span><span class="p">.</span><span class="n">Sequence</span><span class="p">(</span><span class="n">sys</span><span class="p">);</span>
-
-<span class="c">% 3. Parameters Definition</span>
-<span class="n">FOV</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mf">256e-3</span><span class="p">;</span><span class="w"> </span><span class="n">Nx</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">128</span><span class="p">;</span><span class="w"> </span><span class="k">...</span>
-
-<span class="c">% 4. Build Blocks (RF, Gradients, ADC)</span>
-<span class="p">[</span><span class="n">rf</span><span class="p">,</span><span class="w"> </span><span class="n">gz</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">mr</span><span class="p">.</span><span class="n">makeSincPulse</span><span class="p">(</span><span class="k">...</span><span class="c">);</span>
-<span class="n">gx</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">mr</span><span class="p">.</span><span class="n">makeTrapezoid</span><span class="p">(</span><span class="k">...</span><span class="c">);</span>
-
-<span class="c">% 5. Assemble Sequence</span>
-<span class="k">for</span><span class="w"> </span><span class="nb">i</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">1</span><span class="p">:</span><span class="n">Ny</span>
-<span class="w">    </span><span class="n">seq</span><span class="p">.</span><span class="n">addBlock</span><span class="p">(</span><span class="n">rf</span><span class="p">,</span><span class="w"> </span><span class="n">gz</span><span class="p">);</span>
-<span class="w">    </span><span class="n">seq</span><span class="p">.</span><span class="n">addBlock</span><span class="p">(</span><span class="n">gx</span><span class="p">,</span><span class="w"> </span><span class="n">adc</span><span class="p">);</span>
-<span class="k">end</span>
-
-<span class="c">% 6. Validate &amp; Export</span>
-<span class="n">seq</span><span class="p">.</span><span class="n">checkTiming</span><span class="p">();</span>
-<span class="n">seq</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;sequence.seq&#39;</span><span class="p">);</span>
-</code></pre></div></p>
-<h4 id="2-vendor-adaptations-are-valuable">2. Vendor Adaptations Are Valuable<a class="headerlink" href="#2-vendor-adaptations-are-valuable" title="Permanent link">&para;</a></h4>
-<p>Initially considered "vendor-specific" content for removal, but analysis showed these are essential:
-- <strong>GE Adaptations</strong>: TRID labeling, timing constraints, seq2ceq conversions
-- <strong>Siemens Adaptations</strong>: Label extensions, reconstruction markers
-- These show how to deploy Pulseq sequences on real scanners</p>
-<h4 id="3-repository-patterns">3. Repository Patterns<a class="headerlink" href="#3-repository-patterns" title="Permanent link">&para;</a></h4>
-<ul>
-<li><strong>SMS-EPI</strong>: 81% in /attic/ folders (deprecated)</li>
-<li><strong>wave-haste</strong>: 96% utility functions but MRI-specific</li>
-<li><strong>Shuffle3DGRE</strong>: Clean, well-organized implementation</li>
-<li><strong>MIMOSA/PRIME</strong>: Massive utility collections with some valuable content</li>
-</ul>
-<h2 id="reorganization-strategy">Reorganization Strategy<a class="headerlink" href="#reorganization-strategy" title="Permanent link">&para;</a></h2>
-<h3 id="philosophy-intelligent-minimalism">Philosophy: Intelligent Minimalism<a class="headerlink" href="#philosophy-intelligent-minimalism" title="Permanent link">&para;</a></h3>
-<p>Balance between structure and AI intelligence - Gemini can infer patterns, so avoid over-structuring.</p>
-<h3 id="proposed-table-structure">Proposed Table Structure<a class="headerlink" href="#proposed-table-structure" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="c1">-- Simplified 3-table approach instead of many specialized tables</span>
-
-<span class="c1">-- 1. Main knowledge base (cleaned and enriched)</span>
-<span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">knowledge_base</span><span class="w"> </span><span class="p">(</span>
-<span class="w">    </span><span class="n">id</span><span class="w"> </span><span class="n">BIGSERIAL</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="p">,</span>
-<span class="w">    </span><span class="n">content</span><span class="w"> </span><span class="nb">TEXT</span><span class="p">,</span>
-<span class="w">    </span><span class="n">content_type</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">50</span><span class="p">),</span><span class="w"> </span><span class="c1">-- &#39;sequence&#39;, &#39;utility&#39;, &#39;concept&#39;</span>
-<span class="w">    </span><span class="n">metadata</span><span class="w"> </span><span class="n">JSONB</span><span class="p">,</span><span class="w">           </span><span class="c1">-- Flexible, searchable metadata</span>
-<span class="w">    </span><span class="n">embedding</span><span class="w"> </span><span class="n">vector</span><span class="p">(</span><span class="mi">768</span><span class="p">),</span>
-<span class="w">    </span><span class="n">quality_score</span><span class="w"> </span><span class="nb">INTEGER</span><span class="p">,</span>
-<span class="w">    </span><span class="n">implementation_type</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span><span class="w"> </span><span class="c1">-- &#39;pulseq_core&#39;, &#39;vendor_adaptation&#39;</span>
-<span class="p">);</span>
-
-<span class="c1">-- 2. Curated patterns (high-value extracted knowledge)</span>
-<span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">curated_patterns</span><span class="w"> </span><span class="p">(</span>
-<span class="w">    </span><span class="n">id</span><span class="w"> </span><span class="n">BIGSERIAL</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="p">,</span>
-<span class="w">    </span><span class="n">pattern_type</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span><span class="w"> </span><span class="c1">-- &#39;vendor_adaptation&#39;, &#39;common_bug&#39;</span>
-<span class="w">    </span><span class="n">pattern_description</span><span class="w"> </span><span class="nb">TEXT</span><span class="p">,</span>
-<span class="w">    </span><span class="n">example_code</span><span class="w"> </span><span class="nb">TEXT</span><span class="p">,</span>
-<span class="w">    </span><span class="n">metadata</span><span class="w"> </span><span class="n">JSONB</span>
-<span class="p">);</span>
-
-<span class="c1">-- 3. Keep existing api_reference (needs precision)</span>
-<span class="c1">-- Already well-structured with 413 function references</span>
-</code></pre></div>
-<h3 id="smart-views-instead-of-tables">Smart Views Instead of Tables<a class="headerlink" href="#smart-views-instead-of-tables" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="c1">-- Vendor adaptations view</span>
-<span class="k">CREATE</span><span class="w"> </span><span class="k">VIEW</span><span class="w"> </span><span class="n">vendor_adaptations</span><span class="w"> </span><span class="k">AS</span>
-<span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">knowledge_base</span>
-<span class="k">WHERE</span><span class="w"> </span><span class="n">metadata</span><span class="o">-&gt;&gt;</span><span class="s1">&#39;has_vendor_adaptation&#39;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;true&#39;</span><span class="p">;</span>
-
-<span class="c1">-- Learning progression view</span>
-<span class="k">CREATE</span><span class="w"> </span><span class="k">VIEW</span><span class="w"> </span><span class="n">learning_path</span><span class="w"> </span><span class="k">AS</span>
-<span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">knowledge_base</span>
-<span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span>
-<span class="w">    </span><span class="k">CASE</span><span class="w"> </span><span class="n">metadata</span><span class="o">-&gt;&gt;</span><span class="s1">&#39;difficulty&#39;</span>
-<span class="w">        </span><span class="k">WHEN</span><span class="w"> </span><span class="s1">&#39;beginner&#39;</span><span class="w"> </span><span class="k">THEN</span><span class="w"> </span><span class="mi">1</span>
-<span class="w">        </span><span class="k">WHEN</span><span class="w"> </span><span class="s1">&#39;intermediate&#39;</span><span class="w"> </span><span class="k">THEN</span><span class="w"> </span><span class="mi">2</span>
-<span class="w">        </span><span class="k">WHEN</span><span class="w"> </span><span class="s1">&#39;advanced&#39;</span><span class="w"> </span><span class="k">THEN</span><span class="w"> </span><span class="mi">3</span>
-<span class="w">    </span><span class="k">END</span><span class="p">;</span>
-
-<span class="c1">-- High-quality sequences only</span>
-<span class="k">CREATE</span><span class="w"> </span><span class="k">VIEW</span><span class="w"> </span><span class="n">premier_sequences</span><span class="w"> </span><span class="k">AS</span>
-<span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">knowledge_base</span>
-<span class="k">WHERE</span><span class="w"> </span><span class="n">quality_score</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">80</span>
-<span class="w">  </span><span class="k">AND</span><span class="w"> </span><span class="n">content_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;sequence&#39;</span><span class="p">;</span>
-</code></pre></div>
-<h2 id="implementation-roadmap">Implementation Roadmap<a class="headerlink" href="#implementation-roadmap" title="Permanent link">&para;</a></h2>
-<h3 id="phase-1-aggressive-cleanup-immediate">Phase 1: Aggressive Cleanup (Immediate)<a class="headerlink" href="#phase-1-aggressive-cleanup-immediate" title="Permanent link">&para;</a></h3>
-<p><strong>Delete ~750 files:</strong></p>
+<p>PulsePal is an intelligent MRI sequence programming assistant built on a modern AI-powered architecture that combines Google Gemini 2.5 Flash's advanced reasoning capabilities with a sophisticated RAG (Retrieval-Augmented Generation) system backed by Supabase's vector database. The system follows a single-agent architecture with intelligent decision-making that routes 90% of queries through built-in knowledge and selectively uses RAG for specific Pulseq function documentation.</p>
+<h2 id="system-overview">System Overview<a class="headerlink" href="#system-overview" title="Permanent link">&para;</a></h2>
+<h3 id="core-purpose">Core Purpose<a class="headerlink" href="#core-purpose" title="Permanent link">&para;</a></h3>
+<p>PulsePal assists MRI researchers, graduate students, and biomedical engineers in developing, debugging, and understanding Pulseq sequences through an intelligent conversational interface that provides both theoretical MRI physics knowledge and practical programming assistance.</p>
+<h3 id="key-architectural-principles">Key Architectural Principles<a class="headerlink" href="#key-architectural-principles" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>Generic Utilities</strong> (570 files)</li>
-<li><code>fft2c.m</code>, <code>ifft2c.m</code>, <code>crop.m</code>, <code>reshape.m</code></li>
-<li>
-<p>Keep only MRI-specific utilities (GRAPPA, SENSE, coil combination)</p>
-</li>
-<li>
-<p><strong>Archived Content</strong> (71 files)</p>
-</li>
-<li>All <code>/attic/</code>, <code>/old/</code>, <code>/deprecated/</code> folders</li>
-<li>
-<p>Example: <code>SMS-EPI/attic/</code> contains outdated TOPPE code</p>
-</li>
-<li>
-<p><strong>Test &amp; Config Files</strong> (100+ files)</p>
-</li>
-<li><code>/test/</code> folders, <code>setup.m</code>, <code>.yml</code> files</li>
-<li><code>Manifest.toml</code>, dependency files</li>
+<li><strong>Intelligence-First Design</strong>: Leverages Gemini's built-in MRI physics knowledge for most queries</li>
+<li><strong>Selective RAG Enhancement</strong>: Uses vector search only when specific Pulseq documentation is needed</li>
+<li><strong>Single Agent Architecture</strong>: One intelligent agent handles all queries without delegation</li>
+<li><strong>Session-Aware Context</strong>: Maintains conversation history and user preferences across interactions</li>
+<li><strong>Dual Interface Support</strong>: Provides both CLI and web interfaces for different usage scenarios</li>
 </ol>
-<div class="highlight"><pre><span></span><code><span class="k">DELETE</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">crawled_pages</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span>
-<span class="w">    </span><span class="n">metadata</span><span class="o">-&gt;&gt;</span><span class="s1">&#39;file_path&#39;</span><span class="w"> </span><span class="k">LIKE</span><span class="w"> </span><span class="s1">&#39;%/attic/%&#39;</span>
-<span class="w">    </span><span class="k">OR</span><span class="w"> </span><span class="n">metadata</span><span class="o">-&gt;&gt;</span><span class="s1">&#39;file_path&#39;</span><span class="w"> </span><span class="k">LIKE</span><span class="w"> </span><span class="s1">&#39;%/test/%&#39;</span>
-<span class="w">    </span><span class="k">OR</span><span class="w"> </span><span class="p">(</span><span class="n">metadata</span><span class="o">-&gt;&gt;</span><span class="s1">&#39;file_path&#39;</span><span class="w"> </span><span class="k">LIKE</span><span class="w"> </span><span class="s1">&#39;%/utils/%&#39;</span><span class="w"> </span>
-<span class="w">        </span><span class="k">AND</span><span class="w"> </span><span class="n">content</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">LIKE</span><span class="w"> </span><span class="s1">&#39;%GRAPPA%&#39;</span>
-<span class="w">        </span><span class="k">AND</span><span class="w"> </span><span class="n">content</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">LIKE</span><span class="w"> </span><span class="s1">&#39;%SENSE%&#39;</span><span class="p">);</span>
-</code></pre></div>
-<h3 id="phase-2-metadata-enrichment-week-1">Phase 2: Metadata Enrichment (Week 1)<a class="headerlink" href="#phase-2-metadata-enrichment-week-1" title="Permanent link">&para;</a></h3>
-<p><strong>Enrich existing high-value content:</strong></p>
-<div class="highlight"><pre><span></span><code><span class="c1">-- Tag vendor adaptations</span>
-<span class="k">UPDATE</span><span class="w"> </span><span class="n">crawled_pages</span>
-<span class="k">SET</span><span class="w"> </span><span class="n">metadata</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">jsonb_set</span><span class="p">(</span><span class="n">metadata</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;{has_vendor_adaptation}&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;true&#39;</span><span class="p">)</span>
-<span class="k">WHERE</span><span class="w"> </span><span class="n">content</span><span class="w"> </span><span class="k">LIKE</span><span class="w"> </span><span class="s1">&#39;%TRID%&#39;</span><span class="w"> </span><span class="k">OR</span><span class="w"> </span><span class="n">content</span><span class="w"> </span><span class="k">LIKE</span><span class="w"> </span><span class="s1">&#39;%seq2ceq%&#39;</span><span class="p">;</span>
-
-<span class="c1">-- Add quality scores</span>
-<span class="k">UPDATE</span><span class="w"> </span><span class="n">crawled_pages</span>
-<span class="k">SET</span><span class="w"> </span><span class="n">quality_score</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>
-<span class="w">    </span><span class="k">CASE</span><span class="w"> </span>
-<span class="w">        </span><span class="k">WHEN</span><span class="w"> </span><span class="n">source_id</span><span class="w"> </span><span class="k">LIKE</span><span class="w"> </span><span class="s1">&#39;%pulseq/pulseq%&#39;</span><span class="w"> </span><span class="k">THEN</span><span class="w"> </span><span class="mi">100</span>
-<span class="w">        </span><span class="k">WHEN</span><span class="w"> </span><span class="n">content</span><span class="w"> </span><span class="k">LIKE</span><span class="w"> </span><span class="s1">&#39;%seq.write%&#39;</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">content</span><span class="w"> </span><span class="k">LIKE</span><span class="w"> </span><span class="s1">&#39;%checkTiming%&#39;</span><span class="w"> </span><span class="k">THEN</span><span class="w"> </span><span class="mi">80</span>
-<span class="w">        </span><span class="k">WHEN</span><span class="w"> </span><span class="n">metadata</span><span class="o">-&gt;&gt;</span><span class="s1">&#39;file_path&#39;</span><span class="w"> </span><span class="k">LIKE</span><span class="w"> </span><span class="s1">&#39;%utils%&#39;</span><span class="w"> </span><span class="k">THEN</span><span class="w"> </span><span class="mi">30</span>
-<span class="w">        </span><span class="k">ELSE</span><span class="w"> </span><span class="mi">50</span>
-<span class="w">    </span><span class="k">END</span><span class="p">;</span>
-
-<span class="c1">-- Mark educational content</span>
-<span class="k">UPDATE</span><span class="w"> </span><span class="n">crawled_pages</span>
-<span class="k">SET</span><span class="w"> </span><span class="n">metadata</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">jsonb_set</span><span class="p">(</span><span class="n">metadata</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;{educational_value}&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;&quot;high&quot;&#39;</span><span class="p">)</span>
-<span class="k">WHERE</span><span class="w"> </span><span class="n">source_id</span><span class="w"> </span><span class="k">LIKE</span><span class="w"> </span><span class="s1">&#39;%tutorials%&#39;</span><span class="w"> </span>
-<span class="w">   </span><span class="k">OR</span><span class="w"> </span><span class="n">content</span><span class="w"> </span><span class="k">LIKE</span><span class="w"> </span><span class="s1">&#39;%step-by-step%&#39;</span><span class="p">;</span>
-</code></pre></div>
-<h3 id="phase-3-selective-re-crawling-week-2-3">Phase 3: Selective Re-crawling (Week 2-3)<a class="headerlink" href="#phase-3-selective-re-crawling-week-2-3" title="Permanent link">&para;</a></h3>
-<p><strong>Re-crawl ~200 high-value files with structured extraction:</strong></p>
-<h4 id="priority-1-core-pulseq-functions">Priority 1: Core Pulseq Functions<a class="headerlink" href="#priority-1-core-pulseq-functions" title="Permanent link">&para;</a></h4>
-<div class="highlight"><pre><span></span><code><span class="c1"># Extract structured data from functions</span>
-<span class="p">{</span>
-    <span class="s1">&#39;function_signature&#39;</span><span class="p">:</span> <span class="s1">&#39;mr.makeSincPulse(flip, ...)&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;parameters&#39;</span><span class="p">:</span> <span class="p">{</span><span class="o">...</span><span class="p">},</span>
-    <span class="s1">&#39;returns&#39;</span><span class="p">:</span> <span class="p">{</span><span class="o">...</span><span class="p">},</span>
-    <span class="s1">&#39;usage_examples&#39;</span><span class="p">:</span> <span class="p">[</span><span class="o">...</span><span class="p">],</span>
-    <span class="s1">&#39;related_functions&#39;</span><span class="p">:</span> <span class="p">[</span><span class="o">...</span><span class="p">]</span>
-<span class="p">}</span>
-</code></pre></div>
-<h4 id="priority-2-vendor-adaptations">Priority 2: Vendor Adaptations<a class="headerlink" href="#priority-2-vendor-adaptations" title="Permanent link">&para;</a></h4>
-<div class="highlight"><pre><span></span><code><span class="c1"># Extract vendor patterns</span>
-<span class="p">{</span>
-    <span class="s1">&#39;vendor&#39;</span><span class="p">:</span> <span class="s1">&#39;GE&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;adaptations&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;TRID_labels&#39;</span><span class="p">,</span> <span class="s1">&#39;timing_constraints&#39;</span><span class="p">],</span>
-    <span class="s1">&#39;code_patterns&#39;</span><span class="p">:</span> <span class="p">[</span><span class="o">...</span><span class="p">],</span>
-    <span class="s1">&#39;conversion_workflow&#39;</span><span class="p">:</span> <span class="p">[</span><span class="o">...</span><span class="p">]</span>
-<span class="p">}</span>
-</code></pre></div>
-<h4 id="priority-3-complex-sequences">Priority 3: Complex Sequences<a class="headerlink" href="#priority-3-complex-sequences" title="Permanent link">&para;</a></h4>
-<div class="highlight"><pre><span></span><code><span class="c1"># Break down into components</span>
-<span class="p">{</span>
-    <span class="s1">&#39;sequence_type&#39;</span><span class="p">:</span> <span class="s1">&#39;MPRAGE&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;preparation&#39;</span><span class="p">:</span> <span class="p">{</span><span class="o">...</span><span class="p">},</span>
-    <span class="s1">&#39;readout&#39;</span><span class="p">:</span> <span class="p">{</span><span class="o">...</span><span class="p">},</span>
-    <span class="s1">&#39;reconstruction_notes&#39;</span><span class="p">:</span> <span class="p">{</span><span class="o">...</span><span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>
-<h3 id="phase-4-create-curated-knowledge-week-3">Phase 4: Create Curated Knowledge (Week 3)<a class="headerlink" href="#phase-4-create-curated-knowledge-week-3" title="Permanent link">&para;</a></h3>
-<p><strong>Add high-value patterns discovered during analysis:</strong></p>
-<div class="highlight"><pre><span></span><code><span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="n">curated_patterns</span><span class="w"> </span><span class="p">(</span><span class="n">pattern_type</span><span class="p">,</span><span class="w"> </span><span class="n">pattern_description</span><span class="p">,</span><span class="w"> </span><span class="n">example_code</span><span class="p">)</span>
-<span class="k">VALUES</span><span class="w"> </span>
-<span class="p">(</span><span class="s1">&#39;pulseq_structure&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;Standard 6-step Pulseq sequence pattern&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;...&#39;</span><span class="p">),</span>
-<span class="p">(</span><span class="s1">&#39;ge_trid&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;GE requires TRID labels to mark segment boundaries&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;...&#39;</span><span class="p">),</span>
-<span class="p">(</span><span class="s1">&#39;timing_constraints&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;GE gradient raster must be 4us, RF raster 2us&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;...&#39;</span><span class="p">),</span>
-<span class="p">(</span><span class="s1">&#39;common_error&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;Gradients must ramp to zero at segment boundaries&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;...&#39;</span><span class="p">);</span>
-</code></pre></div>
-<h2 id="expected-outcomes">Expected Outcomes<a class="headerlink" href="#expected-outcomes" title="Permanent link">&para;</a></h2>
-<h3 id="quantitative-improvements">Quantitative Improvements<a class="headerlink" href="#quantitative-improvements" title="Permanent link">&para;</a></h3>
+<h2 id="technology-stack">Technology Stack<a class="headerlink" href="#technology-stack" title="Permanent link">&para;</a></h2>
+<h3 id="core-technologies">Core Technologies<a class="headerlink" href="#core-technologies" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>Reduced volume</strong>: 850 high-quality entries vs 1,703 mixed</li>
-<li><strong>Better relevance</strong>: 50% less noise in search results</li>
-<li><strong>Faster queries</strong>: Searching 850 rows vs 1,703</li>
-<li><strong>Cost savings</strong>: &lt;$1 for selective re-crawling vs $5 for full</li>
+<li><strong>LLM</strong>: Google Gemini 2.5 Flash (primary reasoning engine)</li>
+<li><strong>Framework</strong>: PydanticAI (agent orchestration and tool management)</li>
+<li><strong>Vector Database</strong>: Supabase with pgvector extension</li>
+<li><strong>Embeddings</strong>: Google Embeddings API (768-dimensional vectors)</li>
+<li><strong>Web Framework</strong>: Chainlit (web interface with streaming support)</li>
+<li><strong>Language</strong>: Python 3.10+ with async/await support</li>
 </ul>
-<h3 id="qualitative-improvements">Qualitative Improvements<a class="headerlink" href="#qualitative-improvements" title="Permanent link">&para;</a></h3>
+<h3 id="supporting-technologies">Supporting Technologies<a class="headerlink" href="#supporting-technologies" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>Structured vendor knowledge</strong>: Properly categorized adaptation patterns</li>
-<li><strong>Clear learning paths</strong>: Progressive difficulty from FID to MPRAGE</li>
-<li><strong>Preserved intelligence</strong>: Trust Gemini for pattern recognition</li>
-<li><strong>Maintainable structure</strong>: Simple tables with flexible JSONB metadata</li>
+<li><strong>Session Management</strong>: Custom in-memory session store with 24-hour retention</li>
+<li><strong>Logging</strong>: Python logging with conversation archival system</li>
+<li><strong>Configuration</strong>: Pydantic-settings with environment variable management</li>
+<li><strong>Authentication</strong>: API key-based auth with rate limiting (optional)</li>
+<li><strong>Semantic Routing</strong>: Local transformer model for query classification</li>
 </ul>
-<h2 id="key-recommendations">Key Recommendations<a class="headerlink" href="#key-recommendations" title="Permanent link">&para;</a></h2>
+<h2 id="system-architecture">System Architecture<a class="headerlink" href="#system-architecture" title="Permanent link">&para;</a></h2>
+<h3 id="component-hierarchy">Component Hierarchy<a class="headerlink" href="#component-hierarchy" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>PulsePal System
+├── User Interfaces
+│   ├── CLI Interface (run_pulsepal.py)
+│   └── Web Interface (chainlit_app.py)
+├── Core Agent Layer
+│   ├── Main Agent (main_agent.py)
+│   ├── Dependencies (dependencies.py)
+│   └── Tools (tools.py)
+├── Service Layer
+│   ├── RAG Service (rag_service.py)
+│   ├── Session Manager
+│   ├── Semantic Router (semantic_router.py)
+│   └── Settings Manager (settings.py)
+├── Data Layer
+│   ├── Supabase Client (supabase_client.py)
+│   ├── Embeddings Service (embeddings.py)
+│   └── Conversation Logger
+└── External Services
+    ├── Google Gemini API
+    ├── Google Embeddings API
+    └── Supabase Vector Database
+</code></pre></div>
+<h3 id="data-flow-architecture">Data Flow Architecture<a class="headerlink" href="#data-flow-architecture" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>Start with cleanup</strong>: Immediate value from removing junk</li>
-<li><strong>Avoid over-structuring</strong>: 2-3 smart tables better than 10+ specialized ones</li>
-<li><strong>Trust AI intelligence</strong>: Gemini can infer patterns from clean content</li>
-<li><strong>Keep vendor adaptations</strong>: Essential for real-world deployment</li>
-<li><strong>Use views not tables</strong>: Different perspectives without data duplication</li>
-<li><strong>Focus on quality</strong>: Better to have 850 excellent entries than 1,703 mixed</li>
+<li><strong>Query Reception</strong></li>
+<li>User submits query through CLI or web interface</li>
+<li>Interface creates/retrieves session context</li>
+<li>
+<p>Query passed to main agent with session dependencies</p>
+</li>
+<li>
+<p><strong>Intelligent Routing</strong></p>
+</li>
+<li>Semantic router analyzes query intent (100ms)</li>
+<li>Determines if RAG search is needed (10% of queries)</li>
+<li>
+<p>Detects mentioned functions for potential validation</p>
+</li>
+<li>
+<p><strong>Knowledge Retrieval</strong> (when needed)</p>
+</li>
+<li>RAG service performs hybrid search (vector + keyword)</li>
+<li>Sources include API docs, examples, tutorials</li>
+<li>
+<p>Results formatted with source attribution</p>
+</li>
+<li>
+<p><strong>Response Generation</strong></p>
+</li>
+<li>Gemini processes query with context</li>
+<li>Validates functions if code generation requested</li>
+<li>
+<p>Generates comprehensive response</p>
+</li>
+<li>
+<p><strong>Session Persistence</strong></p>
+</li>
+<li>Response logged to conversation history</li>
+<li>Session context updated</li>
+<li>Optional archival for important sessions</li>
 </ol>
-<h2 id="technical-considerations">Technical Considerations<a class="headerlink" href="#technical-considerations" title="Permanent link">&para;</a></h2>
-<h3 id="why-not-many-tables">Why Not Many Tables?<a class="headerlink" href="#why-not-many-tables" title="Permanent link">&para;</a></h3>
+<h2 id="core-components">Core Components<a class="headerlink" href="#core-components" title="Permanent link">&para;</a></h2>
+<h3 id="main-agent-main_agentpy">Main Agent (main_agent.py)<a class="headerlink" href="#main-agent-main_agentpy" title="Permanent link">&para;</a></h3>
+<p>The central intelligence hub that orchestrates all PulsePal functionality:
+- <strong>System Prompt</strong>: Comprehensive MRI physics and Pulseq expertise
+- <strong>Tool Registration</strong>: Manages RAG search, validation, and code tools
+- <strong>Session Management</strong>: Creates and maintains conversation context
+- <strong>Response Generation</strong>: Leverages Gemini for intelligent responses</p>
+<h3 id="rag-service-rag_servicepy">RAG Service (rag_service.py)<a class="headerlink" href="#rag-service-rag_servicepy" title="Permanent link">&para;</a></h3>
+<p>Modern retrieval system with source-aware search capabilities:
+- <strong>Multi-Source Search</strong>: API docs, examples, tutorials, community content
+- <strong>Hybrid Search Strategy</strong>: Combines vector similarity with keyword matching
+- <strong>Smart Result Formatting</strong>: Groups results by source with synthesis hints
+- <strong>Performance Optimization</strong>: Query caching and result optimization</p>
+<h3 id="session-management-dependenciespy">Session Management (dependencies.py)<a class="headerlink" href="#session-management-dependenciespy" title="Permanent link">&para;</a></h3>
+<p>Sophisticated conversation and context management:
+- <strong>Conversation History</strong>: Maintains up to 100 exchanges per session
+- <strong>Language Detection</strong>: Tracks preferred programming language (MATLAB/Python)
+- <strong>Code Examples</strong>: Stores and references generated code snippets
+- <strong>Session Lifecycle</strong>: 24-hour retention with automatic cleanup</p>
+<h3 id="tools-module-toolspy">Tools Module (tools.py)<a class="headerlink" href="#tools-module-toolspy" title="Permanent link">&para;</a></h3>
+<p>Unified interface for agent capabilities:
+- <strong>search_pulseq_knowledge</strong>: Intelligent RAG search with source selection
+- <strong>validate_pulseq_function</strong>: Deterministic function validation
+- <strong>verify_function_namespace</strong>: Checks function existence in database
+- <strong>validate_code_block</strong>: Validates entire code segments</p>
+<h2 id="database-architecture">Database Architecture<a class="headerlink" href="#database-architecture" title="Permanent link">&para;</a></h2>
+<h3 id="supabase-schema-design">Supabase Schema Design<a class="headerlink" href="#supabase-schema-design" title="Permanent link">&para;</a></h3>
+<h4 id="primary-tables">Primary Tables<a class="headerlink" href="#primary-tables" title="Permanent link">&para;</a></h4>
+<ol>
+<li><strong>pulseq_sequences</strong>: Complete sequence implementations</li>
+<li>Full code storage with language specification</li>
+<li>Classification system (family, contrast, trajectory)</li>
+<li>Dependency tracking and architecture type</li>
+<li>Feature arrays for smart filtering</li>
+<li>
+<p>Semantic embeddings for similarity search</p>
+</li>
+<li>
+<p><strong>sequence_chunks</strong>: Code sections for granular retrieval</p>
+</li>
+<li>Universal 6-section pattern recognition</li>
+<li>Function and concept extraction</li>
+<li>Educational value assessment</li>
+<li>
+<p>Section-specific embeddings</p>
+</li>
+<li>
+<p><strong>crawled_code</strong>: Supporting code and dependencies</p>
+</li>
+<li>Helper functions and utilities</li>
+<li>Data files and calibration sequences</li>
+<li>Documentation and tutorials</li>
+<li>
+<p>Cross-reference tracking</p>
+</li>
+<li>
+<p><strong>api_reference</strong>: Authoritative function documentation</p>
+</li>
+<li>Complete function signatures</li>
+<li>Parameter specifications</li>
+<li>Return value documentation</li>
+<li>Usage examples</li>
+</ol>
+<h3 id="vector-search-strategy">Vector Search Strategy<a class="headerlink" href="#vector-search-strategy" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>Maintenance burden</strong>: Every table needs updates, migrations</li>
-<li><strong>Query complexity</strong>: JOINs across 10 tables slower than single table with good indexes</li>
-<li><strong>AI capability</strong>: Gemini already excels at pattern recognition</li>
-<li><strong>Flexibility</strong>: JSONB metadata allows evolution without schema changes</li>
+<li><strong>Embedding Model</strong>: Google's text-embedding-004 (768 dimensions)</li>
+<li><strong>Similarity Metric</strong>: Cosine similarity with pgvector</li>
+<li><strong>Hybrid Approach</strong>: Combines vector search with SQL full-text search</li>
+<li><strong>Reranking</strong>: Optional cross-encoder for result refinement</li>
 </ul>
+<h2 id="integration-architecture">Integration Architecture<a class="headerlink" href="#integration-architecture" title="Permanent link">&para;</a></h2>
+<h3 id="external-service-integration">External Service Integration<a class="headerlink" href="#external-service-integration" title="Permanent link">&para;</a></h3>
+<h4 id="google-gemini-integration">Google Gemini Integration<a class="headerlink" href="#google-gemini-integration" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Model</strong>: gemini-2.5-flash with 0.1 temperature</li>
+<li><strong>Context Window</strong>: 1M tokens for comprehensive understanding</li>
+<li><strong>Safety Settings</strong>: Configured for technical content</li>
+<li><strong>Rate Limiting</strong>: Automatic retry with exponential backoff</li>
+</ul>
+<h4 id="supabase-integration">Supabase Integration<a class="headerlink" href="#supabase-integration" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Connection Pooling</strong>: Persistent client with connection reuse</li>
+<li><strong>RPC Functions</strong>: Custom PostgreSQL functions for complex queries</li>
+<li><strong>Row-Level Security</strong>: Configured for multi-tenant support</li>
+<li><strong>Backup Strategy</strong>: Automated daily backups with point-in-time recovery</li>
+</ul>
+<h4 id="google-embeddings-api">Google Embeddings API<a class="headerlink" href="#google-embeddings-api" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Batch Processing</strong>: Efficient batch embedding generation</li>
+<li><strong>Caching Layer</strong>: Local cache for frequently embedded queries</li>
+<li><strong>Fallback Strategy</strong>: Graceful degradation if service unavailable</li>
+</ul>
+<h2 id="performance-architecture">Performance Architecture<a class="headerlink" href="#performance-architecture" title="Permanent link">&para;</a></h2>
+<h3 id="optimization-strategies">Optimization Strategies<a class="headerlink" href="#optimization-strategies" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Intelligent Query Routing</strong></li>
+<li>90% queries handled with built-in knowledge (0ms retrieval)</li>
+<li>10% requiring RAG search (500-1000ms retrieval)</li>
+<li>
+<p>Semantic routing decision in ~100ms</p>
+</li>
+<li>
+<p><strong>Caching Mechanisms</strong></p>
+</li>
+<li>Session-level conversation cache</li>
+<li>RAG result caching (15-minute TTL)</li>
+<li>
+<p>Embedding cache for common queries</p>
+</li>
+<li>
+<p><strong>Lazy Loading</strong></p>
+</li>
+<li>Semantic router loaded on-demand</li>
+<li>Cross-encoder reranker loaded when needed</li>
+<li>
+<p>Database connections established lazily</p>
+</li>
+<li>
+<p><strong>Response Streaming</strong></p>
+</li>
+<li>Chainlit streaming for progressive display</li>
+<li>Chunked response generation</li>
+<li>Early result display while processing continues</li>
+</ol>
 <h3 id="performance-metrics">Performance Metrics<a class="headerlink" href="#performance-metrics" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="c1">-- Current: 1,703 rows, mixed quality</span>
-<span class="c1">-- Query time: ~100ms average</span>
-<span class="c1">-- Relevance: ~60% useful results</span>
-
-<span class="c1">-- After cleanup: 850 rows, high quality</span>
-<span class="c1">-- Expected query time: ~50ms</span>
-<span class="c1">-- Expected relevance: ~90% useful results</span>
+<ul>
+<li><strong>Average Response Time</strong>: 1-2 seconds for built-in knowledge</li>
+<li><strong>RAG-Enhanced Response</strong>: 2-3 seconds with documentation</li>
+<li><strong>Session Creation</strong>: &lt;100ms</li>
+<li><strong>Query Classification</strong>: ~100ms with semantic router</li>
+</ul>
+<h2 id="security-architecture">Security Architecture<a class="headerlink" href="#security-architecture" title="Permanent link">&para;</a></h2>
+<h3 id="authentication-authorization">Authentication &amp; Authorization<a class="headerlink" href="#authentication-authorization" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>API Key Management</strong>: SHA-256 hashed keys with salt</li>
+<li><strong>Rate Limiting</strong>: Per-user daily limits with Redis tracking</li>
+<li><strong>Session Security</strong>: UUID4 session identifiers</li>
+<li><strong>CORS Configuration</strong>: Restrictive origin policies</li>
+</ul>
+<h3 id="data-protection">Data Protection<a class="headerlink" href="#data-protection" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Environment Variables</strong>: All secrets in .env files</li>
+<li><strong>No Credential Storage</strong>: No passwords or keys in code</li>
+<li><strong>Secure Communication</strong>: HTTPS for all external APIs</li>
+<li><strong>Input Validation</strong>: Pydantic models for all inputs</li>
+</ul>
+<h3 id="privacy-considerations">Privacy Considerations<a class="headerlink" href="#privacy-considerations" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Conversation Logging</strong>: Optional with user consent</li>
+<li><strong>Data Retention</strong>: 30-day default with configurable policies</li>
+<li><strong>PII Handling</strong>: No personal data in vector embeddings</li>
+<li><strong>Audit Trail</strong>: Complete query and response logging</li>
+</ul>
+<h2 id="deployment-architecture">Deployment Architecture<a class="headerlink" href="#deployment-architecture" title="Permanent link">&para;</a></h2>
+<h3 id="development-environment">Development Environment<a class="headerlink" href="#development-environment" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Local Setup</strong>: Docker Compose for services</li>
+<li><strong>Hot Reload</strong>: Automatic agent reload on code changes</li>
+<li><strong>Debug Mode</strong>: Verbose logging and error traces</li>
+<li><strong>Test Data</strong>: Synthetic sequences for development</li>
+</ul>
+<h3 id="production-deployment">Production Deployment<a class="headerlink" href="#production-deployment" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Server Requirements</strong>: 4GB RAM, 2 CPU cores minimum</li>
+<li><strong>Process Management</strong>: Gunicorn with multiple workers</li>
+<li><strong>Load Balancing</strong>: Nginx reverse proxy</li>
+<li><strong>Monitoring</strong>: Prometheus metrics and Grafana dashboards</li>
+</ul>
+<h3 id="scaling-strategy">Scaling Strategy<a class="headerlink" href="#scaling-strategy" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Horizontal Scaling</strong>: Multiple agent instances</li>
+<li><strong>Database Scaling</strong>: Supabase automatic scaling</li>
+<li><strong>Cache Distribution</strong>: Redis for distributed caching</li>
+<li><strong>CDN Integration</strong>: Static asset delivery</li>
+</ul>
+<h2 id="error-handling-resilience">Error Handling &amp; Resilience<a class="headerlink" href="#error-handling-resilience" title="Permanent link">&para;</a></h2>
+<h3 id="error-categories">Error Categories<a class="headerlink" href="#error-categories" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>API Errors</strong>: Rate limits, authentication, timeouts</li>
+<li><strong>Database Errors</strong>: Connection failures, query timeouts</li>
+<li><strong>Session Errors</strong>: Corruption, expiration, overflow</li>
+<li><strong>Validation Errors</strong>: Invalid functions, malformed code</li>
+</ol>
+<h3 id="recovery-strategies">Recovery Strategies<a class="headerlink" href="#recovery-strategies" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Automatic Retry</strong>: Exponential backoff for transient errors</li>
+<li><strong>Fallback Mechanisms</strong>: Built-in knowledge when RAG fails</li>
+<li><strong>Graceful Degradation</strong>: Reduced functionality vs. failure</li>
+<li><strong>Error Reporting</strong>: Detailed logs with context</li>
+</ul>
+<h2 id="testing-architecture">Testing Architecture<a class="headerlink" href="#testing-architecture" title="Permanent link">&para;</a></h2>
+<h3 id="test-coverage-strategy">Test Coverage Strategy<a class="headerlink" href="#test-coverage-strategy" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Unit Tests</strong>: 85% coverage for core modules</li>
+<li><strong>Integration Tests</strong>: API and database integration</li>
+<li><strong>E2E Tests</strong>: Complete user workflows</li>
+<li><strong>Performance Tests</strong>: Load and stress testing</li>
+</ul>
+<h3 id="test-organization">Test Organization<a class="headerlink" href="#test-organization" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>tests/
+├── unit/           # Component-level tests
+├── integration/    # Service interaction tests
+├── e2e/           # User workflow tests
+└── fixtures/      # Shared test data
 </code></pre></div>
-<h2 id="specific-examples-of-content-to-remove">Specific Examples of Content to Remove<a class="headerlink" href="#specific-examples-of-content-to-remove" title="Permanent link">&para;</a></h2>
-<h3 id="generic-utilities-not-mri-specific">Generic Utilities (Not MRI-Specific)<a class="headerlink" href="#generic-utilities-not-mri-specific" title="Permanent link">&para;</a></h3>
+<h2 id="monitoring-observability">Monitoring &amp; Observability<a class="headerlink" href="#monitoring-observability" title="Permanent link">&para;</a></h2>
+<h3 id="metrics-collection">Metrics Collection<a class="headerlink" href="#metrics-collection" title="Permanent link">&para;</a></h3>
 <ul>
-<li><code>fft2c.m</code>, <code>ifft2c.m</code>, <code>fftc.m</code>, <code>ifftc.m</code> - Basic FFT operations</li>
-<li><code>crop.m</code> - Generic array cropping  </li>
-<li><code>dot_mult.m</code> - Element-wise multiplication</li>
-<li><code>reshape.m</code> - Array reshaping</li>
-<li><code>safe_plot.m</code> - Generic plotting utilities</li>
-<li><code>setup.m</code> - Path configuration scripts</li>
+<li><strong>Response Times</strong>: P50, P95, P99 latencies</li>
+<li><strong>Error Rates</strong>: By category and severity</li>
+<li><strong>Usage Patterns</strong>: Query types and frequencies</li>
+<li><strong>Resource Usage</strong>: CPU, memory, database connections</li>
 </ul>
-<h3 id="archivedoutdated-content">Archived/Outdated Content<a class="headerlink" href="#archivedoutdated-content" title="Permanent link">&para;</a></h3>
+<h3 id="logging-strategy">Logging Strategy<a class="headerlink" href="#logging-strategy" title="Permanent link">&para;</a></h3>
 <ul>
-<li>All files in <code>/attic/</code> folders (71 files)</li>
-<li>All files in <code>/old/</code> folders</li>
-<li>All files in <code>/deprecated/</code> folders</li>
-<li>Test files in <code>/test/</code> folders (63 files)</li>
+<li><strong>Structured Logging</strong>: JSON format for analysis</li>
+<li><strong>Log Levels</strong>: DEBUG, INFO, WARNING, ERROR, CRITICAL</li>
+<li><strong>Conversation Archival</strong>: Searchable conversation history</li>
+<li><strong>Performance Logging</strong>: Detailed timing information</li>
 </ul>
-<h3 id="vendor-proprietary-without-pulseq">Vendor-Proprietary Without Pulseq<a class="headerlink" href="#vendor-proprietary-without-pulseq" title="Permanent link">&para;</a></h3>
+<h2 id="future-architecture-considerations">Future Architecture Considerations<a class="headerlink" href="#future-architecture-considerations" title="Permanent link">&para;</a></h2>
+<h3 id="planned-enhancements">Planned Enhancements<a class="headerlink" href="#planned-enhancements" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Multi-Agent Architecture</strong>: Specialized agents for different domains</li>
+<li><strong>Advanced Caching</strong>: Distributed cache with Redis Cluster</li>
+<li><strong>Real-time Collaboration</strong>: WebSocket support for shared sessions</li>
+<li><strong>Plugin System</strong>: Extensible tool architecture</li>
+</ol>
+<h3 id="scalability-roadmap">Scalability Roadmap<a class="headerlink" href="#scalability-roadmap" title="Permanent link">&para;</a></h3>
 <ul>
-<li>Pure TOPPE files without Pulseq conversion</li>
-<li>EPIC-only implementations</li>
-<li>Scanner-specific config files</li>
+<li><strong>Microservices Migration</strong>: Separate RAG and agent services</li>
+<li><strong>Event-Driven Architecture</strong>: Message queue integration</li>
+<li><strong>Multi-Region Deployment</strong>: Geographic distribution</li>
+<li><strong>Advanced Load Balancing</strong>: Smart routing based on load</li>
 </ul>
-<h2 id="specific-examples-of-content-to-re-crawl">Specific Examples of Content to Re-crawl<a class="headerlink" href="#specific-examples-of-content-to-re-crawl" title="Permanent link">&para;</a></h2>
-<h3 id="core-pulseq-functions-need-structured-extraction">Core Pulseq Functions (Need Structured Extraction)<a class="headerlink" href="#core-pulseq-functions-need-structured-extraction" title="Permanent link">&para;</a></h3>
+<h2 id="maintenance-operations">Maintenance &amp; Operations<a class="headerlink" href="#maintenance-operations" title="Permanent link">&para;</a></h2>
+<h3 id="regular-maintenance-tasks">Regular Maintenance Tasks<a class="headerlink" href="#regular-maintenance-tasks" title="Permanent link">&para;</a></h3>
 <ul>
-<li><code>mr.makeSincPulse()</code> implementations</li>
-<li><code>mr.makeTrapezoid()</code> variants</li>
-<li><code>mr.makeArbitraryRf()</code> functions</li>
-<li><code>mr.addGradients()</code> utilities</li>
+<li><strong>Database Optimization</strong>: Weekly VACUUM and ANALYZE</li>
+<li><strong>Log Rotation</strong>: Daily rotation with 30-day retention</li>
+<li><strong>Cache Cleanup</strong>: Hourly expired entry removal</li>
+<li><strong>Session Cleanup</strong>: Daily removal of expired sessions</li>
 </ul>
-<h3 id="vendor-adaptation-patterns-need-pattern-extraction">Vendor Adaptation Patterns (Need Pattern Extraction)<a class="headerlink" href="#vendor-adaptation-patterns-need-pattern-extraction" title="Permanent link">&para;</a></h3>
+<h3 id="monitoring-checklist">Monitoring Checklist<a class="headerlink" href="#monitoring-checklist" title="Permanent link">&para;</a></h3>
 <ul>
-<li>Files with TRID labeling patterns</li>
-<li><code>seq2ceq</code> conversion examples</li>
-<li>Timing constraint implementations</li>
-</ul>
-<h3 id="complex-sequences-need-modular-breakdown">Complex Sequences (Need Modular Breakdown)<a class="headerlink" href="#complex-sequences-need-modular-breakdown" title="Permanent link">&para;</a></h3>
-<ul>
-<li>MPRAGE implementations</li>
-<li>MOLLI sequences</li>
-<li>Advanced EPI variants</li>
-</ul>
-<h3 id="educational-sequences-need-step-extraction">Educational Sequences (Need Step Extraction)<a class="headerlink" href="#educational-sequences-need-step-extraction" title="Permanent link">&para;</a></h3>
-<ul>
-<li>Tutorial sequences with progressive complexity</li>
-<li>Demo sequences with extensive comments</li>
-<li>Workshop examples</li>
+<li>API availability and response times</li>
+<li>Database query performance</li>
+<li>Error rate thresholds</li>
+<li>Resource utilization trends</li>
+<li>User satisfaction metrics</li>
 </ul>
 <h2 id="conclusion">Conclusion<a class="headerlink" href="#conclusion" title="Permanent link">&para;</a></h2>
-<p>The PulsePal knowledge base reorganization focuses on <strong>quality over quantity</strong> and <strong>intelligent simplicity over complex structure</strong>. By removing ~750 low-value files and selectively re-crawling ~200 high-value sources with structured extraction, we can transform the knowledge base from a "document dump" into a focused, high-quality resource optimized for Gemini's intelligence.</p>
-<p>The key insight: <strong>Clean, well-organized content with minimal structure</strong> performs better than complex schemas when paired with modern LLMs. This approach respects both the AI's capabilities and the need for precise, reliable information in MRI sequence programming.</p>
-<hr />
-<p><em>This strategy was developed through analysis of the current Supabase knowledge base (project: mnbvsrsivuuuwbtkmumt) containing 1,703 documents from 27 sources, with particular focus on patterns in SMS-EPI, wave-haste, and Shuffle3DGRE repositories.</em></p>
-<p><em>Document created: January 2025</em>
-<em>Last updated: January 2025</em></p>
+<p>PulsePal's architecture represents a modern, scalable approach to AI-powered assistance that balances intelligence with performance. The system's strength lies in its intelligent routing mechanism that leverages built-in knowledge for most queries while maintaining the ability to access specific documentation when needed. This architecture ensures fast response times, high accuracy, and excellent user experience while remaining maintainable and extensible for future enhancements.</p>
+<p>The combination of Google Gemini's advanced reasoning, Supabase's vector capabilities, and PydanticAI's robust framework creates a powerful platform for MRI sequence development assistance that serves both educational and practical needs of the MRI research community.</p>
 
 
 

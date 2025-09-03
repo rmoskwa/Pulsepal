@@ -179,7 +179,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../.." class="md-tabs__link">
+      <a href="../../index.md" class="md-tabs__link">
         
   
   
@@ -252,7 +252,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
+      <a href="../../index.md" class="md-nav__link">
         
   
   
@@ -2501,6 +2501,33 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#4-pulseq_sequences-table-new" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. pulseq_sequences Table (NEW)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-sequence_chunks-table-new" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. sequence_chunks Table (NEW)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-crawled_code-table-new" class="md-nav__link">
+    <span class="md-ellipsis">
+      6. crawled_code Table (NEW)
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2641,6 +2668,30 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Data Statistics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#current-database-metrics-january-2025" class="md-nav__link">
+    <span class="md-ellipsis">
+      Current Database Metrics (January 2025)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#content-distribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Content Distribution
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2761,6 +2812,39 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#enhanced-architecture-features-new" class="md-nav__link">
+    <span class="md-ellipsis">
+      Enhanced Architecture Features (NEW)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Enhanced Architecture Features (NEW)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#three-tier-table-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Three-Tier Table Structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advanced-search-capabilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced Search Capabilities
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#future-enhancements" class="md-nav__link">
     <span class="md-ellipsis">
       Future Enhancements
@@ -2836,6 +2920,39 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#key-improvements-in-enhanced-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Improvements in Enhanced Architecture
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Key Improvements in Enhanced Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#whats-new" class="md-nav__link">
+    <span class="md-ellipsis">
+      What's New
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance-impact" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance Impact
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#conclusion" class="md-nav__link">
     <span class="md-ellipsis">
       Conclusion
@@ -2862,10 +2979,12 @@
 
 <h1 id="pulsepal-supabase-knowledge-base-architecture">PulsePal Supabase Knowledge Base Architecture<a class="headerlink" href="#pulsepal-supabase-knowledge-base-architecture" title="Permanent link">&para;</a></h1>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p>The PulsePal project utilizes a Supabase PostgreSQL database as its knowledge base for storing and retrieving MRI sequence programming information. The database leverages vector embeddings for semantic search capabilities and maintains a comprehensive collection of Pulseq documentation, API references, and code examples.</p>
-<p><strong>Project ID</strong>: <code>mnbvsrsivuuuwbtkmumt</code></p>
+<p>The PulsePal project utilizes a Supabase PostgreSQL database as its knowledge base for storing and retrieving MRI sequence programming information. The database leverages vector embeddings for semantic search capabilities and maintains a comprehensive collection of Pulseq documentation, API references, code examples, and complete sequence implementations.</p>
+<p><strong>Project ID</strong>: <code>mnbvsrsivuuuwbtkmumt</code><br />
+<strong>Last Updated</strong>: January 2025</p>
 <h2 id="database-schema">Database Schema<a class="headerlink" href="#database-schema" title="Permanent link">&para;</a></h2>
 <h3 id="core-tables">Core Tables<a class="headerlink" href="#core-tables" title="Permanent link">&para;</a></h3>
+<p>The knowledge base consists of six primary tables that work together to provide comprehensive MRI sequence programming support:</p>
 <h4 id="1-sources-table">1. <strong>sources</strong> Table<a class="headerlink" href="#1-sources-table" title="Permanent link">&para;</a></h4>
 <p>Tracks all data sources that have been indexed into the knowledge base.</p>
 <table>
@@ -2904,7 +3023,10 @@
 </tr>
 </tbody>
 </table>
-<p><strong>Current Sources</strong>: 27 sources indexed, primarily GitHub repositories containing Pulseq implementations and examples.</p>
+<p><strong>Statistics</strong>: 
+- Total sources: 27
+- Storage size: 16 KB
+- Primary content: GitHub repositories containing Pulseq implementations</p>
 <h4 id="2-crawled_pages-table">2. <strong>crawled_pages</strong> Table<a class="headerlink" href="#2-crawled_pages-table" title="Permanent link">&para;</a></h4>
 <p>Main content storage for documentation and code examples.</p>
 <table>
@@ -2953,7 +3075,7 @@
 </tr>
 <tr>
 <td><code>embedding</code></td>
-<td>vector</td>
+<td>vector(768)</td>
 <td>768-dimensional vector embedding for semantic search</td>
 </tr>
 <tr>
@@ -2964,11 +3086,12 @@
 </tbody>
 </table>
 <p><strong>Statistics</strong>: 
-- Total rows: 1,703
-- Storage size: ~54 MB
-- Contains chunked documentation and code examples</p>
+- Total rows: 1,427
+- Storage size: 2.6 MB
+- Contains chunked documentation and code examples
+- Includes official Pulseq sequence implementations</p>
 <h4 id="3-api_reference-table">3. <strong>api_reference</strong> Table<a class="headerlink" href="#3-api_reference-table" title="Permanent link">&para;</a></h4>
-<p>Comprehensive API function reference for Pulseq/pypulseq.</p>
+<p>Comprehensive API function reference for Pulseq/pypulseq with enhanced metadata.</p>
 <table>
 <thead>
 <tr>
@@ -3025,7 +3148,7 @@
 </tr>
 <tr>
 <td><code>embedding</code></td>
-<td>vector</td>
+<td>vector(768)</td>
 <td>Vector embedding for semantic search</td>
 </tr>
 <tr>
@@ -3086,9 +3209,336 @@
 </tbody>
 </table>
 <p><strong>Statistics</strong>: 
-- Total rows: 413
-- Storage size: ~8.8 MB
-- Covers both MATLAB and Python implementations</p>
+- Total rows: 128
+- Storage size: 544 KB
+- Covers both MATLAB and Python implementations
+- Includes complete function signatures and usage patterns</p>
+<h4 id="4-pulseq_sequences-table-new">4. <strong>pulseq_sequences</strong> Table (NEW)<a class="headerlink" href="#4-pulseq_sequences-table-new" title="Permanent link">&para;</a></h4>
+<p>Complete Pulseq sequences with rich metadata for intelligent retrieval.</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>bigserial (PK)</td>
+<td>Unique identifier</td>
+</tr>
+<tr>
+<td><code>file_name</code></td>
+<td>text</td>
+<td>Name of the sequence file</td>
+</tr>
+<tr>
+<td><code>full_path</code></td>
+<td>text</td>
+<td>Full file path in repository</td>
+</tr>
+<tr>
+<td><code>repository</code></td>
+<td>text</td>
+<td>Source repository URL</td>
+</tr>
+<tr>
+<td><code>full_code</code></td>
+<td>text</td>
+<td>Complete sequence code</td>
+</tr>
+<tr>
+<td><code>line_count</code></td>
+<td>integer</td>
+<td>Number of lines in sequence</td>
+</tr>
+<tr>
+<td><code>language</code></td>
+<td>text</td>
+<td>Programming language (default: 'matlab')</td>
+</tr>
+<tr>
+<td><code>sequence_family</code></td>
+<td>text</td>
+<td>Primary type (GRE, EPI, TSE, PRESS, etc.)</td>
+</tr>
+<tr>
+<td><code>contrast_mechanism</code></td>
+<td>text</td>
+<td>Contrast generation method</td>
+</tr>
+<tr>
+<td><code>trajectory_type</code></td>
+<td>text</td>
+<td>K-space sampling pattern</td>
+</tr>
+<tr>
+<td><code>dimensionality</code></td>
+<td>text</td>
+<td>0D, 1D, 2D, 3D classification</td>
+</tr>
+<tr>
+<td><code>architecture_type</code></td>
+<td>text</td>
+<td>Code organization (single-file/modular/workflow)</td>
+</tr>
+<tr>
+<td><code>complexity_level</code></td>
+<td>integer</td>
+<td>Complexity rating (1-5)</td>
+</tr>
+<tr>
+<td><code>dependencies</code></td>
+<td>jsonb</td>
+<td>References to helper files</td>
+</tr>
+<tr>
+<td><code>external_requirements</code></td>
+<td>text[]</td>
+<td>External dependencies</td>
+</tr>
+<tr>
+<td><code>preparation_techniques</code></td>
+<td>text[]</td>
+<td>Preparation methods used</td>
+</tr>
+<tr>
+<td><code>acceleration_methods</code></td>
+<td>text[]</td>
+<td>Acceleration techniques</td>
+</tr>
+<tr>
+<td><code>advanced_features</code></td>
+<td>text[]</td>
+<td>Advanced sequence features</td>
+</tr>
+<tr>
+<td><code>educational_value</code></td>
+<td>text</td>
+<td>Educational rating (high/medium/low)</td>
+</tr>
+<tr>
+<td><code>typical_applications</code></td>
+<td>text[]</td>
+<td>Clinical applications</td>
+</tr>
+<tr>
+<td><code>hardware_requirements</code></td>
+<td>text[]</td>
+<td>Scanner requirements</td>
+</tr>
+<tr>
+<td><code>embedding</code></td>
+<td>vector(768)</td>
+<td>Semantic search embedding</td>
+</tr>
+<tr>
+<td><code>created_at</code></td>
+<td>timestamptz</td>
+<td>Creation timestamp</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Statistics</strong>: 
+- Total rows: 5
+- Storage size: 8 KB
+- Complete sequence implementations with analysis</p>
+<h4 id="5-sequence_chunks-table-new">5. <strong>sequence_chunks</strong> Table (NEW)<a class="headerlink" href="#5-sequence_chunks-table-new" title="Permanent link">&para;</a></h4>
+<p>Code sections from sequences following universal pattern recognition.</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>bigserial (PK)</td>
+<td>Unique identifier</td>
+</tr>
+<tr>
+<td><code>sequence_id</code></td>
+<td>bigint</td>
+<td>Reference to pulseq_sequences</td>
+</tr>
+<tr>
+<td><code>chunk_type</code></td>
+<td>text</td>
+<td>Section type (parameter_definition, rf_gradient_creation, etc.)</td>
+</tr>
+<tr>
+<td><code>chunk_order</code></td>
+<td>integer</td>
+<td>Order within sequence</td>
+</tr>
+<tr>
+<td><code>start_line</code></td>
+<td>integer</td>
+<td>Starting line number</td>
+</tr>
+<tr>
+<td><code>end_line</code></td>
+<td>integer</td>
+<td>Ending line number</td>
+</tr>
+<tr>
+<td><code>percentage_of_sequence</code></td>
+<td>integer</td>
+<td>Percentage of total sequence</td>
+</tr>
+<tr>
+<td><code>is_pulseq</code></td>
+<td>boolean</td>
+<td>True for sequence code, false for reconstruction</td>
+</tr>
+<tr>
+<td><code>code_content</code></td>
+<td>text</td>
+<td>Actual code for this section</td>
+</tr>
+<tr>
+<td><code>pulseq_functions</code></td>
+<td>text[]</td>
+<td>Pulseq API functions used</td>
+</tr>
+<tr>
+<td><code>key_concepts</code></td>
+<td>text[]</td>
+<td>MRI concepts in section</td>
+</tr>
+<tr>
+<td><code>key_variables</code></td>
+<td>text[]</td>
+<td>Important variables</td>
+</tr>
+<tr>
+<td><code>mri_concept</code></td>
+<td>text</td>
+<td>Primary MRI concept</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td>text</td>
+<td>Human-readable description</td>
+</tr>
+<tr>
+<td><code>embedding</code></td>
+<td>vector(768)</td>
+<td>Section-specific embedding</td>
+</tr>
+<tr>
+<td><code>created_at</code></td>
+<td>timestamptz</td>
+<td>Creation timestamp</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Statistics</strong>: 
+- Total rows: 34
+- Storage size: 40 KB
+- Granular code sections for targeted retrieval</p>
+<h4 id="6-crawled_code-table-new">6. <strong>crawled_code</strong> Table (NEW)<a class="headerlink" href="#6-crawled_code-table-new" title="Permanent link">&para;</a></h4>
+<p>All sequence-related code files including helpers and dependencies.</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>bigserial (PK)</td>
+<td>Unique identifier</td>
+</tr>
+<tr>
+<td><code>content</code></td>
+<td>text</td>
+<td>Full file content</td>
+</tr>
+<tr>
+<td><code>source_id</code></td>
+<td>text</td>
+<td>Repository/source identifier</td>
+</tr>
+<tr>
+<td><code>content_type</code></td>
+<td>text</td>
+<td>File classification (main_sequence, helper_function, etc.)</td>
+</tr>
+<tr>
+<td><code>parent_sequences</code></td>
+<td>bigint[]</td>
+<td>Array of sequences using this file</td>
+</tr>
+<tr>
+<td><code>dependency_type</code></td>
+<td>text</td>
+<td>Required or optional dependency</td>
+</tr>
+<tr>
+<td><code>file_name</code></td>
+<td>text</td>
+<td>Name of the file</td>
+</tr>
+<tr>
+<td><code>file_extension</code></td>
+<td>text</td>
+<td>File extension</td>
+</tr>
+<tr>
+<td><code>language_detected</code></td>
+<td>text</td>
+<td>Detected programming language</td>
+</tr>
+<tr>
+<td><code>line_count</code></td>
+<td>integer</td>
+<td>Number of lines</td>
+</tr>
+<tr>
+<td><code>pulseq_functions_used</code></td>
+<td>text[]</td>
+<td>Pulseq functions in file</td>
+</tr>
+<tr>
+<td><code>custom_functions_defined</code></td>
+<td>text[]</td>
+<td>Functions defined in file</td>
+</tr>
+<tr>
+<td><code>imports_files</code></td>
+<td>text[]</td>
+<td>Files imported/required</td>
+</tr>
+<tr>
+<td><code>metadata</code></td>
+<td>jsonb</td>
+<td>Content-specific metadata</td>
+</tr>
+<tr>
+<td><code>embedding</code></td>
+<td>vector(768)</td>
+<td>File-level embedding</td>
+</tr>
+<tr>
+<td><code>created_at</code></td>
+<td>timestamptz</td>
+<td>Creation timestamp</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Statistics</strong>: 
+- Total rows: 15
+- Storage size: 24 KB
+- Supporting files and dependencies</p>
 <h2 id="database-views">Database Views<a class="headerlink" href="#database-views" title="Permanent link">&para;</a></h2>
 <h3 id="1-official_sequence_examples">1. <strong>official_sequence_examples</strong><a class="headerlink" href="#1-official_sequence_examples" title="Permanent link">&para;</a></h3>
 <p>Filtered view of crawled_pages containing official Pulseq sequence examples with embeddings.</p>
@@ -3104,8 +3554,9 @@
 <li><strong>pgvector</strong> (v0.8.0) - Core vector similarity search</li>
 <li>Supports 768-dimensional embeddings</li>
 <li>Enables cosine similarity, L2 distance, and inner product operations</li>
+<li>Used for semantic search across all content</li>
 <li>
-<p>Used for semantic search across all content</p>
+<p>Optimized indexes on embedding columns</p>
 </li>
 <li>
 <p><strong>pg_stat_statements</strong> - Query performance monitoring</p>
@@ -3118,14 +3569,16 @@
 <ol>
 <li><strong>match_crawled_pages</strong></li>
 <li>Semantic search across documentation and code examples</li>
-<li>Parameters: query_embedding, match_threshold, match_count</li>
+<li>Parameters: <code>query_embedding</code> (vector), <code>match_threshold</code> (float), <code>match_count</code> (int)</li>
+<li>Returns: Similar content with similarity scores</li>
 <li>
-<p>Returns: Similar content with similarity scores</p>
+<p>Searches the crawled_pages table</p>
 </li>
 <li>
 <p><strong>match_api_reference</strong></p>
 </li>
 <li>Search API functions by semantic similarity</li>
+<li>Parameters: <code>query_embedding</code> (vector), <code>match_threshold</code> (float), <code>match_count</code> (int)</li>
 <li>Includes function signatures, descriptions, and examples</li>
 <li>
 <p>Optimized for finding relevant Pulseq functions</p>
@@ -3134,13 +3587,16 @@
 <p><strong>match_api_reference_search</strong></p>
 </li>
 <li>Enhanced API search with additional filtering</li>
+<li>Parameters: <code>query_embedding</code> (vector), <code>match_threshold</code> (float), <code>match_count</code> (int)</li>
+<li>Supports language-specific searches (MATLAB/Python)</li>
 <li>
-<p>Supports language-specific searches (MATLAB/Python)</p>
+<p>Uses the api_reference_search view</p>
 </li>
 <li>
 <p><strong>match_official_sequences</strong></p>
 </li>
 <li>Search official Pulseq sequence implementations</li>
+<li>Parameters: <code>query_embedding</code> (vector), <code>match_threshold</code> (float), <code>match_count</code> (int)</li>
 <li>Filtered by sequence category</li>
 <li>
 <p>Returns complete sequence examples</p>
@@ -3149,72 +3605,111 @@
 <p><strong>match_code_examples</strong></p>
 </li>
 <li>Find relevant code snippets and examples</li>
-<li>
-<p>Links to source repositories</p>
-</li>
-<li>
-<p><strong>search_functions_by_capability</strong></p>
-</li>
-<li>Capability-based function discovery</li>
-<li>Maps user intent to specific API functions</li>
+<li>Parameters: <code>query_embedding</code> (vector), <code>match_threshold</code> (float), <code>match_count</code> (int)</li>
+<li>Links to source repositories</li>
+<li>Searches crawled_pages with code content</li>
 </ol>
 <h2 id="migration-history">Migration History<a class="headerlink" href="#migration-history" title="Permanent link">&para;</a></h2>
-<p>The database has undergone 25 migrations to reach its current state:</p>
+<p>The database has undergone 29 migrations to reach its current state:</p>
 <h3 id="key-migrations">Key Migrations<a class="headerlink" href="#key-migrations" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>Sequence Classification System</strong> (2025-08-08)</li>
-<li>Added <code>sequence_category</code> column</li>
-<li>Implemented automatic classification for MRI sequences</li>
+<li><strong>Enhanced Tables Creation</strong> (2025-08-24)</li>
+<li>Added <code>pulseq_sequences</code> table for complete sequences</li>
+<li>Created <code>sequence_chunks</code> table for granular retrieval</li>
+<li>Implemented <code>crawled_code</code> table for dependencies</li>
 <li>
-<p>Tagged official sequences (GRE, EPI, MPRAGE, etc.)</p>
+<p>Established relationships between tables</p>
+</li>
+<li>
+<p><strong>Sequence Classification System</strong> (2025-08-08)</p>
+</li>
+<li>Added <code>sequence_category</code> column to crawled_pages</li>
+<li>Implemented automatic classification for MRI sequences</li>
+<li>Tagged official sequences (GRE, EPI, MPRAGE, etc.)</li>
+<li>
+<p>Fixed classification word boundaries and patterns</p>
 </li>
 <li>
 <p><strong>API Reference Enhancements</strong> (2025-08-08)</p>
 </li>
 <li>Created specialized search views</li>
 <li>Added function calling pattern detection</li>
+<li>Improved MATLAB/Python differentiation</li>
 <li>
-<p>Improved MATLAB/Python differentiation</p>
+<p>Enhanced metadata for class methods</p>
 </li>
 <li>
 <p><strong>Vector Search Optimization</strong> (2025-08-10)</p>
 </li>
-<li>Added similarity thresholds to RPC functions</li>
-<li>Optimized sorting algorithms</li>
+<li>Added similarity thresholds to all RPC functions</li>
+<li>Optimized sorting algorithms for relevance</li>
 <li>Implemented consistent search interfaces</li>
+<li>Improved match functions with proper typing</li>
 </ul>
 <h2 id="data-statistics">Data Statistics<a class="headerlink" href="#data-statistics" title="Permanent link">&para;</a></h2>
+<h3 id="current-database-metrics-january-2025">Current Database Metrics (January 2025)<a class="headerlink" href="#current-database-metrics-january-2025" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
-<th>Entity</th>
-<th>Count</th>
+<th>Table</th>
+<th>Row Count</th>
+<th>Storage Size</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Sources</td>
+<td>sources</td>
 <td>27</td>
-<td>GitHub repositories and documentation sources</td>
+<td>16 KB</td>
+<td>GitHub repositories indexed</td>
 </tr>
 <tr>
-<td>Crawled Pages</td>
-<td>1,703</td>
-<td>Documentation chunks and code examples</td>
+<td>crawled_pages</td>
+<td>1,427</td>
+<td>2.6 MB</td>
+<td>Documentation and code chunks</td>
 </tr>
 <tr>
-<td>API Functions</td>
-<td>413</td>
-<td>Pulseq/pypulseq function references</td>
+<td>api_reference</td>
+<td>128</td>
+<td>544 KB</td>
+<td>Pulseq/pypulseq functions</td>
 </tr>
 <tr>
-<td>Total Storage</td>
-<td>~63 MB</td>
-<td>Combined database size</td>
+<td>pulseq_sequences</td>
+<td>5</td>
+<td>8 KB</td>
+<td>Complete sequence implementations</td>
+</tr>
+<tr>
+<td>sequence_chunks</td>
+<td>34</td>
+<td>40 KB</td>
+<td>Granular code sections</td>
+</tr>
+<tr>
+<td>crawled_code</td>
+<td>15</td>
+<td>24 KB</td>
+<td>Helper files and dependencies</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td><strong>1,636</strong></td>
+<td><strong>~3.2 MB</strong></td>
+<td><strong>Complete knowledge base</strong></td>
 </tr>
 </tbody>
 </table>
+<h3 id="content-distribution">Content Distribution<a class="headerlink" href="#content-distribution" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Documentation Pages</strong>: ~1,400 chunks</li>
+<li><strong>API Functions</strong>: 128 documented functions</li>
+<li><strong>Complete Sequences</strong>: 5 analyzed implementations</li>
+<li><strong>Code Sections</strong>: 34 classified chunks</li>
+<li><strong>Helper Files</strong>: 15 supporting files</li>
+</ul>
 <h2 id="access-patterns">Access Patterns<a class="headerlink" href="#access-patterns" title="Permanent link">&para;</a></h2>
 <h3 id="1-hybrid-search-strategy">1. <strong>Hybrid Search Strategy</strong><a class="headerlink" href="#1-hybrid-search-strategy" title="Permanent link">&para;</a></h3>
 <p>The system implements a hybrid search combining:
@@ -3275,20 +3770,55 @@
 <li>Source attribution maintained</li>
 <li>Regular validation of embeddings</li>
 </ul>
+<h2 id="enhanced-architecture-features-new">Enhanced Architecture Features (NEW)<a class="headerlink" href="#enhanced-architecture-features-new" title="Permanent link">&para;</a></h2>
+<h3 id="three-tier-table-structure">Three-Tier Table Structure<a class="headerlink" href="#three-tier-table-structure" title="Permanent link">&para;</a></h3>
+<p>The enhanced database architecture implements a three-tier structure for optimal retrieval:</p>
+<ol>
+<li><strong>Complete Sequences</strong> (<code>pulseq_sequences</code>)</li>
+<li>Full implementations with rich metadata</li>
+<li>Classification across multiple dimensions</li>
+<li>
+<p>Feature arrays for smart filtering</p>
+</li>
+<li>
+<p><strong>Granular Sections</strong> (<code>sequence_chunks</code>)</p>
+</li>
+<li>Universal 6-section pattern recognition</li>
+<li>Function and concept extraction</li>
+<li>
+<p>Section-specific embeddings</p>
+</li>
+<li>
+<p><strong>Supporting Files</strong> (<code>crawled_code</code>)</p>
+</li>
+<li>Helper functions and utilities</li>
+<li>Dependency tracking</li>
+<li>Cross-reference maintenance</li>
+</ol>
+<h3 id="advanced-search-capabilities">Advanced Search Capabilities<a class="headerlink" href="#advanced-search-capabilities" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Multi-dimensional Classification</strong>: Sequences classified by family, contrast, trajectory, and dimensionality</li>
+<li><strong>Feature-based Filtering</strong>: Arrays for preparation techniques, acceleration methods, and advanced features</li>
+<li><strong>Dependency Resolution</strong>: Automatic tracking of file dependencies and relationships</li>
+<li><strong>Educational Value Assessment</strong>: Sequences rated for teaching effectiveness</li>
+</ul>
 <h2 id="future-enhancements">Future Enhancements<a class="headerlink" href="#future-enhancements" title="Permanent link">&para;</a></h2>
 <h3 id="planned-improvements">Planned Improvements<a class="headerlink" href="#planned-improvements" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>Multi-language Support</strong>: Expand beyond MATLAB/Python</li>
+<li><strong>Expanded Sequence Collection</strong>: Target 100+ complete sequences</li>
+<li><strong>Multi-language Support</strong>: Expand beyond MATLAB/Python to Julia, C++</li>
 <li><strong>Version-aware Search</strong>: Filter by Pulseq version compatibility</li>
 <li><strong>User Feedback Loop</strong>: Learn from search relevance feedback</li>
 <li><strong>Advanced Categorization</strong>: More granular sequence classifications</li>
 <li><strong>Performance Metrics</strong>: Track and optimize slow queries</li>
+<li><strong>Reconstruction Integration</strong>: Better support for reconstruction code</li>
 </ol>
 <h3 id="scalability-considerations">Scalability Considerations<a class="headerlink" href="#scalability-considerations" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Current design supports up to 100K documents</li>
 <li>Vector index optimized for sub-second searches</li>
 <li>Horizontal scaling possible with Supabase infrastructure</li>
+<li>Prepared for migration to dedicated vector database if needed</li>
 </ul>
 <h2 id="developer-notes">Developer Notes<a class="headerlink" href="#developer-notes" title="Permanent link">&para;</a></h2>
 <h3 id="connection-configuration">Connection Configuration<a class="headerlink" href="#connection-configuration" title="Permanent link">&para;</a></h3>
@@ -3298,14 +3828,27 @@
 <span class="n">GOOGLE_API_KEY_EMBEDDING</span> <span class="o">=</span> <span class="s2">&quot;embedding-api-key&quot;</span>
 </code></pre></div>
 <h3 id="common-queries">Common Queries<a class="headerlink" href="#common-queries" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="c1">-- Find all GRE sequences</span>
-<span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">official_sequence_examples</span><span class="w"> </span>
+<div class="highlight"><pre><span></span><code><span class="c1">-- Find all GRE sequences in crawled_pages</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">crawled_pages</span><span class="w"> </span>
 <span class="k">WHERE</span><span class="w"> </span><span class="n">sequence_category</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;GRE&#39;</span><span class="p">;</span>
+
+<span class="c1">-- Get complete sequences by type</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">pulseq_sequences</span><span class="w"> </span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">sequence_family</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;EPI&#39;</span><span class="p">;</span>
 
 <span class="c1">-- Get function by name</span>
 <span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">api_reference</span><span class="w"> </span>
 <span class="k">WHERE</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="k">ILIKE</span><span class="w"> </span><span class="s1">&#39;%addBlock%&#39;</span><span class="w"> </span>
 <span class="k">AND</span><span class="w"> </span><span class="k">language</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;matlab&#39;</span><span class="p">;</span>
+
+<span class="c1">-- Find sequence chunks by type</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">sequence_chunks</span><span class="w"> </span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">chunk_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;rf_gradient_creation&#39;</span><span class="p">;</span>
+
+<span class="c1">-- Get helper functions for a sequence</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">cc</span><span class="p">.</span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">crawled_code</span><span class="w"> </span><span class="n">cc</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">cc</span><span class="p">.</span><span class="n">content_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;helper_function&#39;</span>
+<span class="k">AND</span><span class="w"> </span><span class="n">cc</span><span class="p">.</span><span class="n">parent_sequences</span><span class="w"> </span><span class="o">@&gt;</span><span class="w"> </span><span class="nb">ARRAY</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="nb">bigint</span><span class="p">];</span>
 
 <span class="c1">-- Search with embeddings (via RPC)</span>
 <span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">match_crawled_pages</span><span class="p">(</span>
@@ -3319,8 +3862,32 @@
 - Appropriate similarity thresholds
 - Reasonable result counts
 - Performance within acceptable limits</p>
+<h2 id="key-improvements-in-enhanced-architecture">Key Improvements in Enhanced Architecture<a class="headerlink" href="#key-improvements-in-enhanced-architecture" title="Permanent link">&para;</a></h2>
+<h3 id="whats-new">What's New<a class="headerlink" href="#whats-new" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Three Additional Tables</strong>: Added comprehensive sequence storage with <code>pulseq_sequences</code>, <code>sequence_chunks</code>, and <code>crawled_code</code></li>
+<li><strong>Granular Retrieval</strong>: Code sections can be retrieved at the chunk level for precise assistance</li>
+<li><strong>Dependency Tracking</strong>: Automatic relationship management between sequences and helper files</li>
+<li><strong>Rich Metadata</strong>: Multi-dimensional classification system for intelligent filtering</li>
+<li><strong>Educational Focus</strong>: Sequences rated and organized for teaching effectiveness</li>
+</ol>
+<h3 id="performance-impact">Performance Impact<a class="headerlink" href="#performance-impact" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Faster Searches</strong>: Granular chunks reduce result size and improve relevance</li>
+<li><strong>Better Context</strong>: Complete sequences provide full implementation context</li>
+<li><strong>Smart Routing</strong>: Multiple tables allow optimized queries for different use cases</li>
+<li><strong>Reduced Hallucination</strong>: Complete function signatures and examples in api_reference</li>
+</ul>
 <h2 id="conclusion">Conclusion<a class="headerlink" href="#conclusion" title="Permanent link">&para;</a></h2>
-<p>The Supabase knowledge base provides a robust, scalable foundation for PulsePal's intelligent MRI sequence programming assistance. The combination of structured API references, unstructured documentation, and semantic search capabilities enables sophisticated query understanding and relevant information retrieval.</p>
+<p>The Supabase knowledge base provides a robust, scalable foundation for PulsePal's intelligent MRI sequence programming assistance. The enhanced architecture with six specialized tables enables:</p>
+<ul>
+<li>Comprehensive coverage of Pulseq documentation and implementations</li>
+<li>Granular retrieval at multiple levels (full sequences, chunks, functions)</li>
+<li>Intelligent classification and filtering capabilities</li>
+<li>Semantic search with 768-dimensional embeddings</li>
+<li>Dependency tracking and relationship management</li>
+</ul>
+<p>The combination of structured API references, complete sequence implementations, granular code chunks, and semantic search capabilities enables sophisticated query understanding and highly relevant information retrieval for MRI sequence development.</p>
 <p>For questions or updates to this documentation, please refer to the PulsePal development team or submit a pull request with proposed changes.</p>
 
 
