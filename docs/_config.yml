@@ -2,14 +2,12 @@
 title: PulsePal Documentation
 description: MRI Sequence Programming Assistant Documentation
 
-# Include HTML files
+# Include files
 include:
-  - sequences.html
   - sequences/
 
 # Keep files as-is
 keep_files:
-  - sequences.html
   - sequences/sequence_catalog.json
 
 # Plugins
