@@ -1,9 +1,9 @@
 # Sequence Library
 
 <script>
-window.location.href = 'sequences/index.html';
+window.location.href = '/Pulsepal/sequences/index.html';
 </script>
 
-[Click here if you are not automatically redirected](sequences/index.html)
+[Click here if you are not automatically redirected](/Pulsepal/sequences/index.html)
 
 Loading sequence library...
