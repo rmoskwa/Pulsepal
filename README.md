@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 # ![Pulsepal Logo](pulsepal.png)
 
 **An advanced PydanticAI system with intelligent decision-making for Pulseq MRI sequence development**
@@ -226,73 +225,6 @@ Think of Pulsepal as a coworker or researcher who has extensive Pulseq and MRI k
 
 Believe it or not, MRI pulse sequence design is hard! This applies to LLM's as well. They perform great when you provide specific details and work incrementally.
 
-## 🚀 Getting Started
-
-### Installation
-
-1. Clone the repository:
-```bash
-git clone https://github.com/rmoskwa/Pulsepal.git
-cd pulsepal
-```
-
-2. Create and activate a virtual environment:
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
-
-3. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
-
-4. Set up environment variables:
-```bash
-cp .env.example .env
-# Edit .env with your API keys:
-# - GOOGLE_API_KEY (required for Gemini)
-# - SUPABASE_URL and SUPABASE_KEY (required for RAG)
-```
-
-### Usage
-
-#### Command-Line Interface
-```bash
-# Interactive mode
-python run_pulsepal.py
-
-# Single query
-python run_pulsepal.py "How do I create a gradient echo sequence?"
-
-# With session management
-python run_pulsepal.py --session-id my-session
-```
-
-#### Web Interface (Chainlit)
-```bash
-# Start the web UI (Note: Not supported on WSL2)
-chainlit run chainlit_app.py
-```
-
-### Session Management
-
-PulsePal maintains conversation context across interactions:
-
-- **Automatic Session Creation**: Sessions are created automatically when you start a conversation
-- **Session Persistence**: Conversations are saved for up to 24 hours (configurable)
-- **Language Detection**: Automatically detects MATLAB vs Python preferences
-- **Context Awareness**: Remembers previous queries and code examples within a session
-
-To manage sessions:
-```bash
-# Continue a previous session
-python run_pulsepal.py --session-id <your-session-id>
-
-# Clean up old sessions
-python -c "from pulsepal.dependencies import SessionManager; SessionManager().cleanup_old_sessions()"
-```
-
 ## 🤝 Contributing
 
 While most of the source code is available on GitHub for anybody interested, please reach out to rmoskwa@wisc.edu for ways you can contribute.
@@ -300,5 +232,3 @@ While most of the source code is available on GitHub for anybody interested, ple
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
->>>>>>> Stashed changes
