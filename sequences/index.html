@@ -1,2550 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pulseq Sequence Library - PulsePal</title>
+    <style>
+        :root {
+            --primary-color: #0066cc;
+            --secondary-color: #4a90e2;
+            --background: #f5f7fa;
+            --card-background: white;
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --border: #e1e8ed;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+        }
 
-<!doctype html>
-<html lang="en" class="no-js">
-  <head>
-    
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width,initial-scale=1">
-      
-        <meta name="description" content="Complete API reference for Pulseq MATLAB functions">
-      
-      
-      
-        <link rel="canonical" href="https://rmoskwa.github.io/Pulsepal/sequences/">
-      
-      
-        <link rel="prev" href="..">
-      
-      
-        <link rel="next" href="../matlab_api/">
-      
-      
-      <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.16">
-    
-    
-      
-        <title>Sequence Library - Pulseq MATLAB API Documentation</title>
-      
-    
-    
-      <link rel="stylesheet" href="../assets/stylesheets/main.7e37652d.min.css">
-      
-        
-        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
-      
-      
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--background);
+            min-height: 100vh;
+            padding: 20px;
+        }
 
-    
-    
-      
-    
-    
-      
-        
-        
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
-        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
-      
-    
-    
-    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
-    
-      
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
 
-    
-    
-    
-  </head>
-  
-  
-    
-    
-    
-    
-    
-    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="light-blue">
-  
-    
-    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
-    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
-    <label class="md-overlay" for="__drawer"></label>
-    <div data-md-component="skip">
-      
-        
-        <a href="#sequence-library" class="md-skip">
-          Skip to content
-        </a>
-      
-    </div>
-    <div data-md-component="announce">
-      
-    </div>
-    
-    
-      
+        .header h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
 
-<header class="md-header" data-md-component="header">
-  <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href=".." title="Pulseq MATLAB API Documentation" class="md-header__button md-logo" aria-label="Pulseq MATLAB API Documentation" data-md-component="logo">
-      
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
 
-    </a>
-    <label class="md-header__button md-icon" for="__drawer">
-      
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
-    </label>
-    <div class="md-header__title" data-md-component="header-title">
-      <div class="md-header__ellipsis">
-        <div class="md-header__topic">
-          <span class="md-ellipsis">
-            Pulseq MATLAB API Documentation
-          </span>
+        .header a {
+            color: var(--primary-color);
+            text-decoration: none;
+            margin-right: 20px;
+        }
+
+        .header a:hover {
+            text-decoration: underline;
+        }
+
+        .nav-links {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .controls-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .search-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .search-icon {
+            color: var(--text-secondary);
+            font-size: 20px;
+        }
+
+        .search-box {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .filters-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filter-select {
+            padding: 10px 16px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background: white;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: border-color 0.3s;
+            min-width: 180px;
+        }
+
+        .filter-select:hover {
+            border-color: var(--primary-color);
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .sequences-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .sequence-card {
+            background: var(--card-background);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sequence-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        }
+
+        .sequence-title {
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-family: 'Courier New', Courier, monospace;
+            word-wrap: break-word;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+        }
+
+        .sequence-repository {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .sequence-summary {
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 15px;
+            flex-grow: 1;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+        }
+
+        .sequence-tags-container {
+            margin-top: auto;
+        }
+
+        .sequence-tag-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .sequence-tag-label {
+            font-weight: bold;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            min-width: 70px;
+        }
+
+        .sequence-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .tag-contrast {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .tag-trajectory {
+            background: #f3e5f5;
+            color: #6a1b9a;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s;
+        }
+
+        .modal.active {
+            display: block;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 50px auto;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideIn 0.3s;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .modal-title {
+            color: var(--text-primary);
+            font-size: 1.8rem;
+            font-weight: 600;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.3s;
+        }
+
+        .close-modal:hover {
+            color: var(--text-primary);
+        }
+
+        .modal-section {
+            margin-bottom: 25px;
+        }
+
+        .modal-section h3 {
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal-section-content {
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding-left: 20px;
+        }
+
+        .modal-repository-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 500;
+            transition: opacity 0.3s;
+        }
+
+        .modal-repository-link:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .no-results-icon {
+            font-size: 48px;
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+        }
+
+        .no-results-title {
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .no-results-message {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sequences-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filters-row {
+                flex-direction: column;
+            }
+
+            .filter-select {
+                width: 100%;
+            }
+
+            .stats-bar {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🧲 Pulseq Sequence Library</h1>
+        <p>Browse and explore MRI sequences from the Pulseq community</p>
+        <div class="nav-links">
+            <a href="../">← Back to Documentation</a>
+            <a href="../matlab_api/">API Reference</a>
         </div>
-        <div class="md-header__topic" data-md-component="header-topic">
-          <span class="md-ellipsis">
-            
-              Sequence Library
-            
-          </span>
-        </div>
-      </div>
-    </div>
-    
-      
-    
-    
-    
-    
-      
-      
-        <label class="md-header__button md-icon" for="__search">
-          
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
-        </label>
-        <div class="md-search" data-md-component="search" role="dialog">
-  <label class="md-search__overlay" for="__search"></label>
-  <div class="md-search__inner" role="search">
-    <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
-      <label class="md-search__icon md-icon" for="__search">
-        
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
-        
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
-      </label>
-      <nav class="md-search__options" aria-label="Search">
-        
-        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
-          
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-        </button>
-      </nav>
-      
-        <div class="md-search__suggest" data-md-component="search-suggest"></div>
-      
-    </form>
-    <div class="md-search__output">
-      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
-        <div class="md-search-result" data-md-component="search-result">
-          <div class="md-search-result__meta">
-            Initializing search
-          </div>
-          <ol class="md-search-result__list" role="presentation"></ol>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-      
-    
-    
-  </nav>
-  
-</header>
-    
-    <div class="md-container" data-md-component="container">
-      
-      
-        
-          
-            
-<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
-  <div class="md-grid">
-    <ul class="md-tabs__list">
-      
-        
-  
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href=".." class="md-tabs__link">
-        
-  
-  
-    
-  
-  Home
-
-      </a>
-    </li>
-  
-
-      
-        
-  
-  
-  
-    
-  
-  
-    <li class="md-tabs__item md-tabs__item--active">
-      <a href="./" class="md-tabs__link">
-        
-  
-  
-    
-  
-  Sequence Library
-
-      </a>
-    </li>
-  
-
-      
-        
-  
-  
-  
-  
-    
-    
-      <li class="md-tabs__item">
-        <a href="../matlab_api/" class="md-tabs__link">
-          
-  
-  
-  API Reference
-
-        </a>
-      </li>
-    
-  
-
-      
-    </ul>
-  </div>
-</nav>
-          
-        
-      
-      <main class="md-main" data-md-component="main">
-        <div class="md-main__inner md-grid">
-          
-            
-              
-              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
-                <div class="md-sidebar__scrollwrap">
-                  <div class="md-sidebar__inner">
-                    
-
-
-  
-
-
-<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
-  <label class="md-nav__title" for="__drawer">
-    <a href=".." title="Pulseq MATLAB API Documentation" class="md-nav__button md-logo" aria-label="Pulseq MATLAB API Documentation" data-md-component="logo">
-      
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
-
-    </a>
-    Pulseq MATLAB API Documentation
-  </label>
-  
-  <ul class="md-nav__list" data-md-scrollfix>
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href=".." class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Home
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-    
-  
-  
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
-        
-  
-  
-  <span class="md-ellipsis">
-    Sequence Library
-    
-  </span>
-  
-
-      </a>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
-        
-          
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    API Reference
-    
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3">
-            <span class="md-nav__icon md-icon"></span>
-            API Reference
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Overview
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_2" >
-        
-          
-          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    Functions
-    
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_2">
-            <span class="md-nav__icon md-icon"></span>
-            Functions
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/EventLibrary/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    EventLibrary
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/SeqPlot/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    SeqPlot
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/Sequence/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Sequence
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/TransformFOV/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    TransformFOV
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/addBlock/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    addBlock
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/addGradients/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    addGradients
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/addRamps/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    addRamps
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/align/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    align
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/applySoftDelay/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    applySoftDelay
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/applyToBlock/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    applyToBlock
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/applyToSeq/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    applyToSeq
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/calcAdcSeg/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    calcAdcSeg
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/calcDuration/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    calcDuration
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/calcMomentsBtensor/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    calcMomentsBtensor
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/calcPNS/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    calcPNS
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/calcRamp/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    calcRamp
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/calcRfBandwidth/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    calcRfBandwidth
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/calcRfCenter/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    calcRfCenter
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/calcRfPower/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    calcRfPower
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/calculateKspacePP/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    calculateKspacePP
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/checkTiming/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    checkTiming
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/compressShape/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    compressShape
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/compressShape_mat/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    compressShape_mat
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/conjugate/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    conjugate
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/convert/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    convert
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/decompressShape/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    decompressShape
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/duration/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    duration
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/evalLabels/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    evalLabels
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/findBlockByTime/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    findBlockByTime
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/findFlank/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    findFlank
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/flipGradAxis/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    flipGradAxis
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/fromRotMat/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    fromRotMat
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/getBlock/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    getBlock
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/getDefinition/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    getDefinition
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/getSupportedLabels/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    getSupportedLabels
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/getSupportedRfUse/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    getSupportedRfUse
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/install/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    install
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/isOctave/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    isOctave
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/makeAdc/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    makeAdc
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/makeAdiabaticPulse/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    makeAdiabaticPulse
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/makeArbitraryGrad/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    makeArbitraryGrad
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/makeArbitraryRf/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    makeArbitraryRf
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/makeBlockPulse/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    makeBlockPulse
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/makeDelay/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    makeDelay
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/makeDigitalOutputPulse/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    makeDigitalOutputPulse
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/makeExtendedTrapezoid/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    makeExtendedTrapezoid
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/makeExtendedTrapezoidArea/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    makeExtendedTrapezoidArea
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/makeGaussPulse/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    makeGaussPulse
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/makeLabel/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    makeLabel
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/makeSLRpulse/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    makeSLRpulse
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/makeSincPulse/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    makeSincPulse
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/makeSoftDelay/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    makeSoftDelay
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/makeTrapezoid/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    makeTrapezoid
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/makeTrigger/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    makeTrigger
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/modGradAxis/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    modGradAxis
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/multiply/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    multiply
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/normalize/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    normalize
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/opts/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    opts
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/paperPlot/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    paperPlot
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/plot/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    plot
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/pts2waveform/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    pts2waveform
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/read/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    read
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/readBinary/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    readBinary
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/readasc/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    readasc
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/registerGradEvent/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    registerGradEvent
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/registerLabelEvent/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    registerLabelEvent
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/registerRfEvent/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    registerRfEvent
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/restoreAdditionalShapeSamples/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    restoreAdditionalShapeSamples
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/rotate/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    rotate
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/rotate3D/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    rotate3D
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/scaleGrad/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    scaleGrad
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/setBlock/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    setBlock
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/setDefinition/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    setDefinition
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/simRf/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    simRf
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/sound/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    sound
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/splitGradient/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    splitGradient
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/splitGradientAt/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    splitGradientAt
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/testReport/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    testReport
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/toRotMat/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    toRotMat
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/traj2grad/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    traj2grad
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/transform/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    transform
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/version/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    version
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/waveforms_and_times/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    waveforms_and_times
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/write/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    write
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/writeBinary/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    writeBinary
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../matlab_api/write_v141/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    write_v141
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-  </ul>
-</nav>
-                  </div>
-                </div>
-              </div>
-            
-            
-              
-              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
-                <div class="md-sidebar__scrollwrap">
-                  <div class="md-sidebar__inner">
-                    
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-</nav>
-                  </div>
-                </div>
-              </div>
-            
-          
-          
-            <div class="md-content" data-md-component="content">
-              <article class="md-content__inner md-typeset">
-                
-                  
-
-
-
-<h1 id="sequence-library">Sequence Library<a class="headerlink" href="#sequence-library" title="Permanent link">&para;</a></h1>
-<script>
-window.location.href = '/Pulsepal/sequences/index.html';
-</script>
-
-<p><a href="/Pulsepal/sequences/index.html">Click here if you are not automatically redirected</a></p>
-<p>Loading sequence library...</p>
-
-
-
-
-
-
-
-
-
-
-
-
-                
-              </article>
+        <div class="stats-bar">
+            <div class="stat-item">
+                <span class="stat-number" id="totalSequences">0</span>
+                <span class="stat-label">Total Sequences</span>
             </div>
-          
-          
-<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+            <div class="stat-item">
+                <span class="stat-number" id="totalRepositories">0</span>
+                <span class="stat-label">Repositories</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" id="visibleSequences">0</span>
+                <span class="stat-label">Showing</span>
+            </div>
         </div>
-        
-          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
-  Back to top
-</button>
-        
-      </main>
-      
-        <footer class="md-footer">
-  
-  <div class="md-footer-meta md-typeset">
-    <div class="md-footer-meta__inner md-grid">
-      <div class="md-copyright">
-  
-  
-    Made with
-    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
-      Material for MkDocs
-    </a>
-  
-</div>
-      
-        <div class="md-social">
-  
-    
-    
-    
-    
-      
-      
-    
-    <a href="https://github.com/pulseq/pulseq" target="_blank" rel="noopener" title="github.com" class="md-social__link">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
-    </a>
-  
-</div>
-      
     </div>
-  </div>
-</footer>
-      
+
+    <div class="controls-section">
+        <div class="search-container">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchBox" class="search-box" placeholder="Search sequences by name, description, or features...">
+        </div>
+        <div class="filters-row">
+            <select id="familyFilter" class="filter-select">
+                <option value="">All Sequence Families</option>
+            </select>
+            <select id="trajectoryFilter" class="filter-select">
+                <option value="">All Trajectories</option>
+            </select>
+            <select id="repositoryFilter" class="filter-select">
+                <option value="">All Repositories</option>
+            </select>
+        </div>
     </div>
-    <div class="md-dialog" data-md-component="dialog">
-      <div class="md-dialog__inner md-typeset"></div>
+
+    <div id="sequencesGrid" class="sequences-grid">
+        <!-- Sequences will be loaded here -->
     </div>
-    
-    
-    
-      
-      <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
-    
-    
-      <script src="../assets/javascripts/bundle.50899def.min.js"></script>
-      
-    
-  </body>
+
+    <div id="noResults" class="no-results" style="display: none;">
+        <div class="no-results-icon">🔍</div>
+        <h2 class="no-results-title">No sequences found</h2>
+        <p class="no-results-message">Try adjusting your search or filters</p>
+    </div>
+
+    <!-- Modal -->
+    <div id="sequenceModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle"></h2>
+                <button class="close-modal" onclick="closeModal()">&times;</button>
+            </div>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+    let sequences = [];
+    let filteredSequences = [];
+
+    // Load sequences
+    async function loadSequences() {
+        try {
+            const response = await fetch('/Pulsepal/sequences/sequence_catalog.json');
+            sequences = await response.json();
+            filteredSequences = [...sequences];
+            initializeFilters();
+            displaySequences();
+            updateStats();
+        } catch (error) {
+            console.error('Error loading sequences:', error);
+            document.getElementById('sequencesGrid').innerHTML =
+                '<div class="no-results"><p>Error loading sequence data</p></div>';
+        }
+    }
+
+    // Initialize filter options
+    function initializeFilters() {
+        // Get unique values for each filter
+        const families = [...new Set(sequences.map(s => s.sequence_family).filter(Boolean))].sort();
+        const trajectories = [...new Set(sequences.map(s => s.trajectory_type).filter(Boolean))].sort();
+        const repositories = [...new Set(sequences.map(s => s.repository_source).filter(Boolean))].sort();
+
+        // Populate family filter
+        const familyFilter = document.getElementById('familyFilter');
+        families.forEach(family => {
+            const option = document.createElement('option');
+            option.value = family;
+            option.textContent = family;
+            familyFilter.appendChild(option);
+        });
+
+        // Populate trajectory filter
+        const trajectoryFilter = document.getElementById('trajectoryFilter');
+        trajectories.forEach(trajectory => {
+            const option = document.createElement('option');
+            option.value = trajectory;
+            option.textContent = trajectory;
+            trajectoryFilter.appendChild(option);
+        });
+
+        // Populate repository filter
+        const repositoryFilter = document.getElementById('repositoryFilter');
+        repositories.forEach(repo => {
+            const option = document.createElement('option');
+            option.value = repo;
+            option.textContent = repo.replace('github.com/', '');
+            repositoryFilter.appendChild(option);
+        });
+    }
+
+    // Display sequences in grid
+    function displaySequences() {
+        const grid = document.getElementById('sequencesGrid');
+        const noResults = document.getElementById('noResults');
+
+        if (filteredSequences.length === 0) {
+            grid.style.display = 'none';
+            noResults.style.display = 'block';
+            return;
+        }
+
+        grid.style.display = 'grid';
+        noResults.style.display = 'none';
+
+        grid.innerHTML = filteredSequences.map(seq => `
+            <div class="sequence-card" onclick="showSequenceDetails(${sequences.indexOf(seq)})">
+                <h3 class="sequence-title">${seq.filename}</h3>
+                <div class="sequence-repository">
+                    <span>📁</span>
+                    <span>${seq.repository_source.replace('github.com/', '')}</span>
+                </div>
+                <p class="sequence-summary">${seq.content_summary || 'No description available'}</p>
+                <div class="sequence-tags-container">
+                    ${seq.contrast_mechanism ? `
+                        <div class="sequence-tag-row">
+                            <span class="sequence-tag-label">Contrast:</span>
+                            <div class="sequence-tags">
+                                <span class="tag tag-contrast">${seq.contrast_mechanism}</span>
+                            </div>
+                        </div>
+                    ` : ''}
+                    ${seq.trajectory_type ? `
+                        <div class="sequence-tag-row">
+                            <span class="sequence-tag-label">Trajectory:</span>
+                            <div class="sequence-tags">
+                                <span class="tag tag-trajectory">${seq.trajectory_type}</span>
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        `).join('');
+
+        updateStats();
+    }
+
+    // Show sequence details in modal
+    function showSequenceDetails(index) {
+        const seq = sequences[index];
+        const modal = document.getElementById('sequenceModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalBody = document.getElementById('modalBody');
+
+        modalTitle.textContent = seq.filename;
+
+        let detailsHTML = `
+            <div class="modal-section">
+                <h3>📁 Repository</h3>
+                <div class="modal-section-content">
+                    <a href="https://${seq.repository_source}" target="_blank" class="modal-repository-link">
+                        ${seq.repository_source}
+                    </a>
+                </div>
+            </div>
+        `;
+
+        if (seq.content_summary) {
+            detailsHTML += `
+                <div class="modal-section">
+                    <h3>📝 Summary</h3>
+                    <div class="modal-section-content">${seq.content_summary}</div>
+                </div>
+            `;
+        }
+
+        const features = [];
+        if (seq.sequence_family) features.push(`<strong>Family:</strong> ${seq.sequence_family}`);
+        if (seq.contrast_mechanism) features.push(`<strong>Contrast:</strong> ${seq.contrast_mechanism}`);
+        if (seq.trajectory_type) features.push(`<strong>Trajectory:</strong> ${seq.trajectory_type}`);
+        if (seq.external_requirements) features.push(`<strong>External Requirements:</strong> ${seq.external_requirements}`);
+        if (seq.preparation_technique) features.push(`<strong>Preparation:</strong> ${seq.preparation_technique}`);
+        if (seq.acceleration_method) features.push(`<strong>Acceleration:</strong> ${seq.acceleration_method}`);
+        if (seq.advanced_feature) features.push(`<strong>Advanced Features:</strong> ${seq.advanced_feature}`);
+        if (seq.vendor_feature) features.push(`<strong>Vendor Features:</strong> ${seq.vendor_feature}`);
+
+        if (features.length > 0) {
+            detailsHTML += `
+                <div class="modal-section">
+                    <h3>🔧 Features</h3>
+                    <div class="modal-section-content">
+                        ${features.join('<br>')}
+                    </div>
+                </div>
+            `;
+        }
+
+        if (seq.dependencies && seq.dependencies.length > 0) {
+            detailsHTML += `
+                <div class="modal-section">
+                    <h3>📦 Dependencies</h3>
+                    <div class="modal-section-content">
+                        ${seq.dependencies.map(dep => `• ${dep}`).join('<br>')}
+                    </div>
+                </div>
+            `;
+        }
+
+        modalBody.innerHTML = detailsHTML;
+        modal.classList.add('active');
+    }
+
+    // Close modal
+    function closeModal() {
+        const modal = document.getElementById('sequenceModal');
+        modal.classList.remove('active');
+    }
+
+    // Filter sequences
+    function filterSequences() {
+        const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+        const familyFilter = document.getElementById('familyFilter').value;
+        const trajectoryFilter = document.getElementById('trajectoryFilter').value;
+        const repositoryFilter = document.getElementById('repositoryFilter').value;
+
+        filteredSequences = sequences.filter(seq => {
+            // Search filter
+            if (searchTerm) {
+                const searchableText = [
+                    seq.filename,
+                    seq.content_summary,
+                    seq.sequence_family,
+                    seq.contrast_mechanism,
+                    seq.trajectory_type,
+                    seq.external_requirements,
+                    seq.preparation_technique,
+                    seq.acceleration_method,
+                    seq.advanced_feature,
+                    seq.vendor_feature,
+                    seq.repository_source
+                ].filter(Boolean).join(' ').toLowerCase();
+
+                if (!searchableText.includes(searchTerm)) {
+                    return false;
+                }
+            }
+
+            // Family filter
+            if (familyFilter && seq.sequence_family !== familyFilter) {
+                return false;
+            }
+
+            // Trajectory filter
+            if (trajectoryFilter && seq.trajectory_type !== trajectoryFilter) {
+                return false;
+            }
+
+            // Repository filter
+            if (repositoryFilter && seq.repository_source !== repositoryFilter) {
+                return false;
+            }
+
+            return true;
+        });
+
+        displaySequences();
+    }
+
+    // Update statistics
+    function updateStats() {
+        document.getElementById('totalSequences').textContent = sequences.length;
+        document.getElementById('totalRepositories').textContent =
+            [...new Set(sequences.map(s => s.repository_source))].length;
+        document.getElementById('visibleSequences').textContent = filteredSequences.length;
+    }
+
+    // Event listeners
+    document.getElementById('searchBox').addEventListener('input', filterSequences);
+    document.getElementById('familyFilter').addEventListener('change', filterSequences);
+    document.getElementById('trajectoryFilter').addEventListener('change', filterSequences);
+    document.getElementById('repositoryFilter').addEventListener('change', filterSequences);
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('sequenceModal');
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+
+    // Load sequences when page loads
+    loadSequences();
+    </script>
+</body>
 </html>
