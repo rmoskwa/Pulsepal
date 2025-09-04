@@ -463,7 +463,7 @@ let filteredSequences = [];
 // Load sequences
 async function loadSequences() {
     try {
-        const response = await fetch('sequences/sequence_catalog.json');
+        const response = await fetch('sequence_catalog.json');
         sequences = await response.json();
         filteredSequences = [...sequences];
         initializeFilters();
