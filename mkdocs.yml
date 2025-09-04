@@ -35,6 +35,7 @@ markdown_extensions:
     permalink: true
 nav:
 - Home: index.md
+- Sequence Library: sequences.html
 - API Reference:
   - Overview: matlab_api/index.md
   - Functions:
