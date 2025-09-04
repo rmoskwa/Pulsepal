@@ -482,7 +482,8 @@
     async function loadSequences() {
         try {
             const response = await fetch('/Pulsepal/sequences/sequence_catalog.json');
-            sequences = await response.json();
+            const data = await response.json();
+            sequences = data.sequences || data;
             filteredSequences = [...sequences];
             initializeFilters();
             displaySequences();
