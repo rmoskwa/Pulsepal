@@ -7,7 +7,7 @@ This site provides complete documentation for all MATLAB functions in the Pulseq
 ### Quick Links
 
 - [Browse All Functions](matlab_api/index.md) - Complete alphabetical listing
-- [🧲 Sequence Library Browser](sequences.md) - Browse 115+ Pulseq sequences with search and filtering
+- [Sequence Library Browser](sequences.md) - Browse Pulseq sequences with search and filtering
 - [Official Pulseq Repository](https://github.com/pulseq/pulseq) - Source code and examples
 
 ### Getting Started
