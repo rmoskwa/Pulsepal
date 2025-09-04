@@ -1,0 +1,3691 @@
+{
+  "sequences": [
+    {
+      "id": "HarmonizedMRI_B0shimming_makescanfiles",
+      "repository": "github.com/HarmonizedMRI/B0shimming",
+      "filename": "makescanfiles.m",
+      "title": "Makescanfiles",
+      "description": "This sequence generates 3D B0 field maps for shim calibration on both Siemens and GE scanners. It uses a multi-echo gradient echo acquisition with RF spoiling to measure field inhomogeneities. The sequence demonstrates cross-platform development using both Pulseq and TOPPE frameworks with automatic waveform conversion.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "multi_echo",
+        "calibration_scan"
+      ],
+      "vendor_features": [
+        "toppe_conversion",
+        "pge2_conversion",
+        "vendor_conversion_tools",
+        "vendor_timing_adjustments",
+        "vendor_specific_mode"
+      ],
+      "external_requirements": [
+        "TOPPE",
+        "PulseGEq",
+        "GE Scanner",
+        "Siemens Scanner"
+      ],
+      "vendor_support": [
+        "Siemens",
+        "GE"
+      ]
+    },
+    {
+      "id": "HarmonizedMRI_Calibration_b04ge",
+      "repository": "github.com/HarmonizedMRI/Calibration",
+      "filename": "b04ge.m",
+      "title": "B04ge",
+      "description": "This is a 3D RF-spoiled gradient echo sequence designed for B0 field mapping on GE scanners using the TOPPE framework. It acquires multiple echoes with different echo times to calculate field inhomogeneities using phase difference methods. The sequence is commonly used for calibration and shimming procedures before main imaging protocols.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "multi_echo",
+        "dummy_scans"
+      ],
+      "vendor_features": [
+        "toppe_conversion",
+        "pge2_conversion"
+      ],
+      "external_requirements": [
+        "TOPPE",
+        "GE scanner",
+        "MATLAB"
+      ],
+      "vendor_support": [
+        "GE"
+      ]
+    },
+    {
+      "id": "HarmonizedMRI_Calibration_blochsiegert4ge",
+      "repository": "github.com/HarmonizedMRI/Calibration",
+      "filename": "blochsiegert4ge.m",
+      "title": "Blochsiegert4ge",
+      "description": "This sequence implements Bloch-Siegert B1+ mapping using a 3D FLASH acquisition with segmented EPI readout. It measures the transmit B1 field by applying off-resonance Fermi pulses at positive and negative frequency offsets and analyzing the resulting phase difference. The sequence is designed for the GE scanner platform using the TOPPE framework.",
+      "sequence_family": "CALIBRATION",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "epi_cartesian",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "off_resonance_pulse",
+        "segmented_acquisition",
+        "dummy_scans"
+      ],
+      "vendor_features": [
+        "toppe_conversion",
+        "pge2_conversion",
+        "vendor_conversion_tools"
+      ],
+      "external_requirements": [
+        "GE scanner",
+        "TOPPE framework",
+        "toppe.utils toolbox"
+      ],
+      "vendor_support": [
+        "GE"
+      ]
+    },
+    {
+      "id": "HarmonizedMRI_Calibration_flash4ge",
+      "repository": "github.com/HarmonizedMRI/Calibration",
+      "filename": "flash4ge.m",
+      "title": "Flash4ge",
+      "description": "This is a 3D RF-spoiled gradient echo (FLASH/SPGR) calibration sequence designed for the TOPPE framework on GE scanners. It enables multiple acquisitions with variable flip angles, TR, and TE values for quantitative imaging and system calibration. The sequence uses TOPPE's modular approach to create RF and gradient waveforms.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "variable_flip_angle",
+        "variable_tr",
+        "variable_te"
+      ],
+      "vendor_features": [
+        "toppe_conversion",
+        "pge2_conversion"
+      ],
+      "external_requirements": [
+        "TOPPE",
+        "GE scanner"
+      ],
+      "vendor_support": [
+        "GE"
+      ]
+    },
+    {
+      "id": "HarmonizedMRI_Pulseq_diffusion_writeepidiffusionrs_3shot_v2_2us_appa_spoiler",
+      "repository": "github.com/HarmonizedMRI/Pulseq-diffusion",
+      "filename": "writeEpiDiffusionRS_3shot_v2_2us_appa_spoiler.m",
+      "title": "Epidiffusionramp Sampling 3shot v2 2us Appa Spoiler",
+      "description": "Three-shot EPI reference sequence for diffusion calibration with b=0. Used as reference scan for multishot diffusion reconstruction, featuring fat saturation, spoiler gradients, and echo time shifting for multishot acquisition. Optimized for Siemens scanners at 2.89T field strength.",
+      "sequence_family": "DIFFUSION",
+      "contrast_mechanism": "diffusion",
+      "trajectory_type": "epi_cartesian",
+      "applications": [
+        "DTI",
+        "DWI",
+        "brain_connectivity"
+      ],
+      "acceleration_methods": [
+        "partial_fourier"
+      ],
+      "preparation_techniques": [
+        "fat_saturation"
+      ],
+      "advanced_features": [
+        "gradient_spoiling",
+        "multishot",
+        "reference_scan",
+        "digital_triggers",
+        "interleaved_slices"
+      ],
+      "vendor_features": [
+        "digital_triggers"
+      ],
+      "external_requirements": [
+        "Siemens scanner"
+      ],
+      "vendor_support": [
+        "Siemens",
+        "GE"
+      ]
+    },
+    {
+      "id": "HarmonizedMRI_Pulseq_diffusion_writeepidiffusionrs_multishot_dti_v2_appa_r3_1003",
+      "repository": "github.com/HarmonizedMRI/Pulseq-diffusion",
+      "filename": "writeEpiDiffusionRS_multishot_dti_v2_appa_R3_1003.m",
+      "title": "Epidiffusionramp Sampling Multishot Dti v2 Appa R3 1003",
+      "description": "This sequence implements multi-shell diffusion tensor imaging (DTI) with multishot EPI readout for brain imaging. It uses 30 diffusion directions with b-values of 0 and 1000 s/mm², incorporating fat suppression and acoustic resonance checking. The sequence is optimized for Siemens Prisma scanners and demonstrates advanced Pulseq techniques including 3D diffusion gradient rotation, multishot EPI timing management, and vendor-specific optimizations.",
+      "sequence_family": "DIFFUSION",
+      "contrast_mechanism": "diffusion",
+      "trajectory_type": "epi_cartesian",
+      "applications": [
+        "DTI",
+        "DWI",
+        "brain_connectivity"
+      ],
+      "acceleration_methods": [
+        "parallel_imaging"
+      ],
+      "preparation_techniques": [
+        "diffusion_prep",
+        "fat_saturation"
+      ],
+      "advanced_features": [
+        "multi_echo",
+        "interleaved_slices",
+        "digital_triggers",
+        "gradient_reversal",
+        "phase_blips",
+        "split_gradients"
+      ],
+      "vendor_features": [
+        "digital_triggers",
+        "scanner_labels",
+        "vendor_timing_adjustments",
+        "whisper_mode"
+      ],
+      "external_requirements": [
+        "MATLAB",
+        "Excel file reader",
+        "Siemens scanner"
+      ],
+      "vendor_support": [
+        "Siemens",
+        "GE"
+      ]
+    },
+    {
+      "id": "HarmonizedMRI_SMS_EPI_writeepi",
+      "repository": "github.com/HarmonizedMRI/SMS-EPI",
+      "filename": "writeEPI.m",
+      "title": "Epi",
+      "description": "This sequence implements vendor-agnostic Simultaneous Multi-Slice (SMS) EPI for functional MRI with 6x multiband acceleration. It generates high-speed whole-brain coverage using CAIPI shift patterns to reduce g-factor penalties, supporting both Siemens and GE scanners through configurable vendor parameters.",
+      "sequence_family": "EPI",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "epi_cartesian",
+      "applications": [
+        "functional_imaging",
+        "T1_weighted",
+        "fMRI",
+        "diffusion"
+      ],
+      "acceleration_methods": [
+        "SMS",
+        "CAIPI",
+        "partial_fourier"
+      ],
+      "preparation_techniques": [
+        "fat_saturation"
+      ],
+      "advanced_features": [
+        "rf_spoiling",
+        "dummy_scans",
+        "label_tracking",
+        "phase_blips",
+        "digital_triggers",
+        "calibration_scan",
+        "multi_echo"
+      ],
+      "vendor_features": [
+        "TRID_segments",
+        "toppe_conversion",
+        "vendor_timing_adjustments"
+      ],
+      "external_requirements": [
+        "Python 3",
+        "3DEPI caipi scripts",
+        "PulCeq converter",
+        "TOPPE v1.9.1"
+      ],
+      "vendor_support": [
+        "GE"
+      ]
+    },
+    {
+      "id": "HarmonizedMRI_SequenceExamples_GE_epical",
+      "repository": "github.com/HarmonizedMRI/SequenceExamples-GE",
+      "filename": "EPIcal.m",
+      "title": "Epical",
+      "description": "EPIcal is an EPI calibration sequence for receiver gain tuning and ghost correction. It excites the volume to steady state, then acquires multiple readout lines without phase encode blips for calibration data. This sequence is designed to work with randomized 3D EPI acquisitions on GE scanners using the pge2 interpreter.",
+      "sequence_family": "EPI",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "epi_cartesian",
+      "applications": [
+        "functional_imaging",
+        "T1_weighted",
+        "fMRI",
+        "diffusion"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [
+        "fat_saturation",
+        "calibration_scan"
+      ],
+      "advanced_features": [
+        "rf_spoiling",
+        "dummy_scans",
+        "label_tracking",
+        "calibration_scan"
+      ],
+      "vendor_features": [
+        "TRID_segments",
+        "pislquant",
+        "pge2_conversion"
+      ],
+      "external_requirements": [
+        "TOPPE",
+        "pge2",
+        "GE scanner"
+      ],
+      "vendor_support": [
+        "GE"
+      ]
+    },
+    {
+      "id": "HarmonizedMRI_SequenceExamples_GE_gre",
+      "repository": "github.com/HarmonizedMRI/SequenceExamples-GE",
+      "filename": "GRE.m",
+      "title": "Gre",
+      "description": "This is a T1-weighted gradient echo sequence designed for sensitivity map estimation in fMRI protocols. It acquires a larger FOV than the EPI sequence with full k-space sampling, used for coil sensitivity calibration. The sequence implements RF spoiling, fat saturation, and includes dummy shots for steady-state preparation, with specific support for GE scanner gain calibration via pislquant events.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [
+        "fat_saturation"
+      ],
+      "advanced_features": [
+        "rf_spoiling",
+        "dummy_scans",
+        "calibration_scan",
+        "gradient_spoiling"
+      ],
+      "vendor_features": [
+        "pge2_conversion",
+        "pislquant",
+        "TRID_segments"
+      ],
+      "external_requirements": [
+        "GE Scanner",
+        "pge2 interpreter",
+        "seq2ceq toolbox"
+      ],
+      "vendor_support": [
+        "GE"
+      ]
+    },
+    {
+      "id": "HarmonizedMRI_SequenceExamples_GE_randepi",
+      "repository": "github.com/HarmonizedMRI/SequenceExamples-GE",
+      "filename": "randEPI.m",
+      "title": "Randepi",
+      "description": "This is a randomized 3D EPI sequence designed for functional MRI with CAIPI acceleration. It implements temporally incoherent k-space sampling patterns to reduce physiological artifacts in fMRI acquisitions. The sequence uses the Pulseq framework with GE-specific extensions for the pge2 interpreter, featuring RF spoiling and comprehensive gradient spoiling for artifact suppression.",
+      "sequence_family": "EPI",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "epi_cartesian",
+      "applications": [
+        "functional_imaging",
+        "T1_weighted",
+        "fMRI",
+        "diffusion"
+      ],
+      "acceleration_methods": [
+        "CAIPI",
+        "parallel_imaging"
+      ],
+      "preparation_techniques": [
+        "fat_saturation"
+      ],
+      "advanced_features": [
+        "rf_spoiling",
+        "gradient_spoiling",
+        "dummy_scans",
+        "randomized_sampling",
+        "label_tracking",
+        "calibration_scan"
+      ],
+      "vendor_features": [
+        "pge2_conversion",
+        "TRID_segments",
+        "pislquant"
+      ],
+      "external_requirements": [
+        "GE Scanner",
+        "pge2 interpreter",
+        "seq2ceq",
+        "writeceq"
+      ],
+      "vendor_support": [
+        "GE"
+      ]
+    },
+    {
+      "id": "HarmonizedMRI_SequenceExamples_GE_write2dgre",
+      "repository": "github.com/HarmonizedMRI/SequenceExamples-GE",
+      "filename": "write2DGRE.m",
+      "title": "2dgre",
+      "description": "This is a 2D spoiled gradient echo (GRE) sequence designed for GE scanners using the pge2 interpreter. It acquires two echoes with different bandwidths and resolutions, implements RF and gradient spoiling for T1-weighted contrast, includes automatic receive gain calibration (pislquant), and converts Pulseq format to GE-compatible .ceq format. The sequence demonstrates GE-specific features like TRID segment labeling and is part of the HarmonizedMRI initiative for cross-vendor pulse sequence compatibility.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "gradient_spoiling",
+        "dummy_scans",
+        "label_tracking",
+        "multi_echo"
+      ],
+      "vendor_features": [
+        "TRID_segments",
+        "pislquant",
+        "pge2_conversion",
+        "dummy_gain_calibration"
+      ],
+      "external_requirements": [
+        "GE Scanner",
+        "pge2 interpreter",
+        "seq2ceq",
+        "Orchestra SDK"
+      ],
+      "vendor_support": [
+        "GE"
+      ]
+    },
+    {
+      "id": "HarmonizedMRI_SequenceExamples_GE_write2dgretv6",
+      "repository": "github.com/HarmonizedMRI/SequenceExamples-GE",
+      "filename": "write2DGREtv6.m",
+      "title": "2dgretv6",
+      "description": "This is a 2D spoiled gradient echo (GRE) sequence specifically designed for GE scanners using the tv6/TOPPE interpreter. It implements RF and gradient spoiling for T1-weighted contrast, includes automatic receive gain calibration (pislquant) with 10 dedicated shots, and uses 100 dummy shots for steady state preparation. The sequence converts Pulseq format to GE-compatible TOPPE tar-ball format and demonstrates GE-specific features like TRID segment labeling optimized for the tv6 interpreter.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "gradient_spoiling",
+        "dummy_scans",
+        "label_tracking"
+      ],
+      "vendor_features": [
+        "TRID_segments",
+        "pislquant",
+        "toppe_conversion",
+        "dummy_gain_calibration"
+      ],
+      "external_requirements": [
+        "TOPPE",
+        "GE Scanner",
+        "tv6 interpreter",
+        "Orchestra SDK"
+      ],
+      "vendor_support": [
+        "GE"
+      ]
+    },
+    {
+      "id": "HarmonizedMRI_SequenceExamples_GE_write2dgretv6trig",
+      "repository": "github.com/HarmonizedMRI/SequenceExamples-GE",
+      "filename": "write2DGREtv6trig.m",
+      "title": "2dgretv6trig",
+      "description": "This is a 2D gradient echo sequence with external hardware triggering capability designed for GE scanners. It demonstrates how to use Pulseq's digital output pulse feature to synchronize MRI acquisitions with external hardware devices. The sequence includes RF spoiling, dummy shots for steady-state preparation, and automatic receive gain calibration (pislquant) specific to GE scanners.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "dummy_scans",
+        "digital_triggers",
+        "label_tracking"
+      ],
+      "vendor_features": [
+        "TRID_segments",
+        "pislquant",
+        "toppe_conversion",
+        "digital_triggers",
+        "dummy_gain_calibration"
+      ],
+      "external_requirements": [
+        "TOPPE",
+        "GE scanner with tv6 interpreter",
+        "Orchestra SDK"
+      ],
+      "vendor_support": [
+        "GE"
+      ]
+    },
+    {
+      "id": "HarmonizedMRI_SequenceExamples_GE_writeasl",
+      "repository": "github.com/HarmonizedMRI/SequenceExamples-GE",
+      "filename": "writeASL.m",
+      "title": "Asl",
+      "description": "This sequence implements velocity-selective arterial spin labeling (ASL) with stack-of-spirals readout for GE scanners. It uses velocity-selective inversion for blood labeling with background suppression through dual adiabatic inversions, providing robust perfusion imaging with minimal sensitivity to arterial transit time.",
+      "sequence_family": "ASL",
+      "contrast_mechanism": "magnetization_preparation",
+      "trajectory_type": "stack_of_spirals",
+      "applications": [
+        "perfusion",
+        "CBF_measurement"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [
+        "velocity_selective",
+        "adiabatic_inversion",
+        "saturation",
+        "background_suppression"
+      ],
+      "advanced_features": [
+        "label_tracking",
+        "dummy_scans",
+        "multi_frame"
+      ],
+      "vendor_features": [
+        "TRID_segments",
+        "pislquant",
+        "pge2_conversion"
+      ],
+      "external_requirements": [
+        "GE Scanner",
+        "pge2 interpreter",
+        "seq2ceq conversion tools"
+      ],
+      "vendor_support": [
+        "GE"
+      ]
+    },
+    {
+      "id": "HarmonizedMRI_SequenceExamples_GE_writeir",
+      "repository": "github.com/HarmonizedMRI/SequenceExamples-GE",
+      "filename": "writeIR.m",
+      "title": "IR",
+      "description": "This is a multi-TI inversion recovery sequence with stack-of-spirals readout for T1 mapping and inversion pulse calibration. It creates multiple inversion recovery experiments with logarithmically spaced TI values from 50ms to 2s. The sequence is designed for GE scanners using the pge2 interpreter and includes TRID labeling for proper segment control.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "inversion_recovery",
+      "trajectory_type": "stack_of_spirals",
+      "applications": [
+        "T1_mapping"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [
+        "inversion",
+        "adiabatic_inversion"
+      ],
+      "advanced_features": [
+        "label_tracking",
+        "dummy_scans"
+      ],
+      "vendor_features": [
+        "TRID_segments",
+        "pge2_conversion",
+        "pislquant"
+      ],
+      "external_requirements": [
+        "pge2",
+        "GE scanner",
+        "PulCeq",
+        "toppe"
+      ],
+      "vendor_support": [
+        "GE"
+      ]
+    },
+    {
+      "id": "HarmonizedMRI_SequenceExamples_GE_writeir2",
+      "repository": "github.com/HarmonizedMRI/SequenceExamples-GE",
+      "filename": "writeIR2.m",
+      "title": "Ir2",
+      "description": "This sequence implements a multiple TI inversion-recovery stack-of-spirals sequence for T1 mapping and inversion pulse verification. It uses logarithmically spaced inversion times with adiabatic inversion pulses for background suppression and spiral readout trajectories. Part of an ASL suite designed for GE scanners with pge2 interpreter support.",
+      "sequence_family": "ASL",
+      "contrast_mechanism": "inversion_recovery",
+      "trajectory_type": "stack_of_spirals",
+      "applications": [
+        "T1_mapping",
+        "perfusion",
+        "CBF_measurement"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [
+        "inversion",
+        "adiabatic_inversion"
+      ],
+      "advanced_features": [
+        "rf_spoiling",
+        "gradient_spoiling",
+        "multi_echo",
+        "label_tracking"
+      ],
+      "vendor_features": [
+        "TRID_segments",
+        "pge2_conversion"
+      ],
+      "external_requirements": [
+        "GE Orchestra",
+        "TOPPE",
+        "pge2 interpreter"
+      ],
+      "vendor_support": [
+        "GE"
+      ]
+    },
+    {
+      "id": "HarmonizedMRI_SequenceExamples_GE_writeintspiralfw",
+      "repository": "github.com/HarmonizedMRI/SequenceExamples-GE",
+      "filename": "writeIntSpiralFW.m",
+      "title": "Intspiralfw",
+      "description": "This sequence implements an interleaved spiral gradient echo acquisition with fat-water separation capabilities. It's designed for GE scanners using the pge2 interpreter and features variable density spiral trajectories for efficient k-space coverage. The sequence demonstrates integration with TOPPE framework and includes both pseudoinverse and NUFFT reconstruction methods.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "spiral",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "interleaved_slices",
+        "rf_spoiling",
+        "label_tracking"
+      ],
+      "vendor_features": [
+        "TRID_segments",
+        "pislquant",
+        "pge2_conversion"
+      ],
+      "external_requirements": [
+        "GE Orchestra SDK",
+        "MIRT toolbox",
+        "pge2 interpreter"
+      ],
+      "vendor_support": [
+        "GE"
+      ]
+    },
+    {
+      "id": "HarmonizedMRI_SequenceExamples_GE_writespiral",
+      "repository": "github.com/HarmonizedMRI/SequenceExamples-GE",
+      "filename": "writeSpiral.m",
+      "title": "Spiral",
+      "description": "This sequence implements a 2D spiral gradient echo sequence optimized for the GE tv6/TOPPE interpreter. It uses an Archimedean spiral trajectory with gradient and slew rate optimization, includes fat saturation preparation, and performs automatic timing adjustments to meet GE scanner requirements. The sequence is designed for rapid imaging applications and requires conversion to TOPPE format for execution on GE scanners.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "spiral",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [
+        "fat_saturation"
+      ],
+      "advanced_features": [
+        "gradient_spoiling"
+      ],
+      "vendor_features": [
+        "TRID_segments",
+        "toppe_conversion",
+        "vendor_timing_adjustments"
+      ],
+      "external_requirements": [
+        "TOPPE",
+        "GE scanner with tv6 interpreter",
+        "seq2ge conversion tool"
+      ],
+      "vendor_support": [
+        "GE"
+      ]
+    },
+    {
+      "id": "HarmonizedMRI_SequenceExamples_GE_writevir",
+      "repository": "github.com/HarmonizedMRI/SequenceExamples-GE",
+      "filename": "writeVIR.m",
+      "title": "Vir",
+      "description": "This sequence implements velocity-selective inversion recovery (VIR) with multiple inversion times for measuring inversion efficiency in ASL imaging. It uses a stack-of-spirals readout and includes velocity-selective pulses for arterial spin labeling with QA reference scans.",
+      "sequence_family": "ASL",
+      "contrast_mechanism": "inversion_recovery",
+      "trajectory_type": "stack_of_spirals",
+      "applications": [
+        "T1_mapping",
+        "perfusion",
+        "CBF_measurement"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [
+        "velocity_selective",
+        "inversion"
+      ],
+      "advanced_features": [
+        "label_tracking",
+        "multiple_TI",
+        "logarithmic_TI_spacing"
+      ],
+      "vendor_features": [
+        "TRID_segments",
+        "pge2_conversion",
+        "pislquant",
+        "vendor_timing_adjustments"
+      ],
+      "external_requirements": [
+        "GE Scanner",
+        "pge2 interpreter",
+        "MATLAB"
+      ],
+      "vendor_support": [
+        "GE"
+      ]
+    },
+    {
+      "id": "HarmonizedMRI_SequenceExamples_GE_write_seq",
+      "repository": "github.com/HarmonizedMRI/SequenceExamples-GE",
+      "filename": "write_seq.m",
+      "title": "Seq",
+      "description": "This is a 3D spiral gradient echo sequence with variable density trajectory design. It implements true 3D spiral imaging (not stack-of-spirals) using the TINY golden angle rotation scheme for optimal k-space sampling. The sequence is designed for GE scanners using the pge2 interpreter and includes 3D NUFFT reconstruction capability.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "spiral",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "gradient_spoiling",
+        "label_tracking",
+        "digital_triggers"
+      ],
+      "vendor_features": [
+        "pge2_conversion",
+        "TRID_segments"
+      ],
+      "external_requirements": [
+        "PulCeq",
+        "pge2 interpreter",
+        "GE scanner"
+      ],
+      "vendor_support": [
+        "GE"
+      ]
+    },
+    {
+      "id": "HarmonizedMRI_qualityAssurance_write_qa_tran_epirs",
+      "repository": "github.com/HarmonizedMRI/qualityAssurance",
+      "filename": "write_QA_Tran_EPIrs.m",
+      "title": "QA Tran Epirs",
+      "description": "This is a high-performance EPI sequence designed for fMRI stability quality assurance measurements. It implements an experimental approach using split gradient blips overlapped with readout gradients combined with ramp sampling for improved efficiency. The sequence is part of a vendor-independent QA protocol following ACR standards and includes features like fat saturation, navigator echoes for ghost suppression, and multi-vendor support for both Siemens and GE scanners.",
+      "sequence_family": "EPI",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "epi_cartesian",
+      "applications": [
+        "functional_imaging",
+        "T1_weighted",
+        "fMRI",
+        "diffusion"
+      ],
+      "acceleration_methods": [
+        "ramp_sampling",
+        "partial_fourier"
+      ],
+      "preparation_techniques": [
+        "fat_saturation",
+        "navigator_echoes"
+      ],
+      "advanced_features": [
+        "split_gradients",
+        "gradient_reversal",
+        "phase_blips",
+        "interleaved_slices",
+        "digital_triggers",
+        "label_tracking",
+        "gradient_spoiling"
+      ],
+      "vendor_features": [
+        "digital_triggers",
+        "pre_registration",
+        "scanner_labels"
+      ],
+      "external_requirements": [
+        "Siemens scanner",
+        "GE scanner"
+      ],
+      "vendor_support": [
+        "Siemens",
+        "GE"
+      ]
+    },
+    {
+      "id": "HarmonizedMRI_qualityAssurance_write_qa_tran_t1",
+      "repository": "github.com/HarmonizedMRI/qualityAssurance",
+      "filename": "write_QA_Tran_T1.m",
+      "title": "QA Tran T1",
+      "description": "This is an ACR-compliant spin-echo sequence designed for MRI quality assurance and structural imaging. It implements a standard T1-weighted spin-echo protocol with interleaved multi-slice acquisition, SLR pulse design for precise slice profiles, and vendor-specific adaptations for both Siemens and GE scanners. Within the Pulseq framework, it serves as a reference implementation for clinical QA protocols with proper timing validation and standardized parameter settings.",
+      "sequence_family": "SE",
+      "contrast_mechanism": "spin_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T2_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "gradient_spoiling",
+        "dummy_scans",
+        "interleaved_slices",
+        "label_tracking",
+        "phase_cycling"
+      ],
+      "vendor_features": [],
+      "external_requirements": [
+        "MATLAB",
+        "Siemens scanner",
+        "GE scanner"
+      ],
+      "vendor_support": [
+        "Siemens",
+        "GE"
+      ]
+    },
+    {
+      "id": "HarmonizedMRI_wave_haste_script_wave_haste_sequence",
+      "repository": "github.com/HarmonizedMRI/wave-haste",
+      "filename": "script_wave_haste_sequence.m",
+      "title": "Wave Haste Sequence",
+      "description": "Wave-encoded HASTE (Half-Fourier Acquisition Single-shot Turbo spin Echo) sequence with parallel imaging acceleration (R=3). Implements sinusoidal wave gradient encoding during readout to improve image quality in accelerated single-shot imaging. This Pulseq implementation includes integrated PNS safety monitoring, GRE-based ACS calibration, and complete SENSE reconstruction pipeline with wave PSF correction.",
+      "sequence_family": "HASTE",
+      "contrast_mechanism": "spin_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T2_weighted"
+      ],
+      "acceleration_methods": [
+        "parallel_imaging",
+        "partial_fourier",
+        "WAVE"
+      ],
+      "preparation_techniques": [
+        "inversion",
+        "water_suppression"
+      ],
+      "advanced_features": [
+        "rf_spoiling",
+        "gradient_spoiling",
+        "dummy_scans",
+        "split_gradients",
+        "label_tracking",
+        "wave_encoding",
+        "calibration_scan",
+        "pns_monitoring"
+      ],
+      "vendor_features": [
+        "wave_encoding",
+        "pns_safety_checks",
+        "twix_data_format"
+      ],
+      "external_requirements": [
+        "MATLAB R2019b+",
+        "Siemens Prisma scanner",
+        "TWIX data format support"
+      ],
+      "vendor_support": [
+        "Siemens"
+      ]
+    },
+    {
+      "id": "HarmonizedMRI_wave_haste_script_wave_tse_sequence",
+      "repository": "github.com/HarmonizedMRI/wave-haste",
+      "filename": "script_wave_tse_sequence.m",
+      "title": "Wave Tse Sequence",
+      "description": "Wave-encoded TSE calibration sequence for PSF estimation in wave imaging. This sequence generates sinusoidal wave gradients during readout to spread k-space information, enabling improved parallel imaging performance. Designed as a calibration companion to wave-HASTE acquisition.",
+      "sequence_family": "TSE",
+      "contrast_mechanism": "spin_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T2_weighted"
+      ],
+      "acceleration_methods": [
+        "wave_encoding"
+      ],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "wave_gradients",
+        "pns_monitoring",
+        "psf_calibration",
+        "extended_trapezoids",
+        "dummy_scans"
+      ],
+      "vendor_features": [],
+      "external_requirements": [
+        "Siemens scanner",
+        "Wave-HASTE sequence for main imaging"
+      ],
+      "vendor_support": [
+        "Siemens"
+      ]
+    },
+    {
+      "id": "RitaSchmidt_Shuffle3DGRE_shuffle3dgre",
+      "repository": "github.com/RitaSchmidt/Shuffle3DGRE",
+      "filename": "Shuffle3DGRE.m",
+      "title": "Shuffle3dgre",
+      "description": "3D gradient echo sequence with flexible Cartesian trajectory ordering designed to reduce physiological fluctuation artifacts. Implements 7 different trajectory schemes including local/segmented shuffling and Gilbert curves. Highly optimized for Siemens Terra 7T scanner with comprehensive GRAPPA support.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [
+        "GRAPPA"
+      ],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "trajectory_shuffling",
+        "local_scrambling",
+        "segmented_scrambling",
+        "gilbert_curve_trajectory",
+        "trajectory_interleaving",
+        "rf_spoiling",
+        "gradient_spoiling",
+        "dummy_scans",
+        "multi_echo",
+        "label_tracking",
+        "elliptical_scanning"
+      ],
+      "vendor_features": [
+        "siemens_specific_mode",
+        "GRAPPA_patching",
+        "elliptical_scanning",
+        "MDH_flags",
+        "whisper_mode",
+        "scanner_labels",
+        "interpreter_patches",
+        "vendor_timing_adjustments"
+      ],
+      "external_requirements": [
+        "Siemens Terra 7T scanner",
+        "Siemens interpreter v1.4.3"
+      ],
+      "vendor_support": [
+        "Siemens"
+      ]
+    },
+    {
+      "id": "asgaspar_OpenMOLLI_openmolli_us",
+      "repository": "github.com/asgaspar/OpenMOLLI",
+      "filename": "OpenMOLLI_US.m",
+      "title": "Openmolli US",
+      "description": "This is an undersampled MOLLI (Modified Look-Locker Inversion recovery) sequence for accelerated myocardial T1 mapping. It implements the clinical MOLLI protocol with interactive parameter selection for different acceleration factors (R=1-4) and uses a custom hypersecant adiabatic inversion pulse. The sequence integrates with Pulseq to provide cardiac-gated T1 mapping with flexible k-space undersampling patterns compatible with GRAPPA reconstruction.",
+      "sequence_family": "MOLLI",
+      "contrast_mechanism": "inversion_recovery",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "cardiac",
+        "myocardial_characterization",
+        "T1_mapping"
+      ],
+      "acceleration_methods": [
+        "GRAPPA",
+        "partial_fourier"
+      ],
+      "preparation_techniques": [
+        "inversion",
+        "adiabatic_inversion"
+      ],
+      "advanced_features": [
+        "rf_spoiling",
+        "gradient_spoiling",
+        "dummy_scans",
+        "interleaved_slices",
+        "digital_triggers",
+        "calibration_scan",
+        "physiological_triggering"
+      ],
+      "vendor_features": [],
+      "external_requirements": [
+        "ECG triggering hardware",
+        "Multi-channel coil",
+        "GRAPPA reconstruction"
+      ],
+      "vendor_support": [
+        "GE"
+      ]
+    },
+    {
+      "id": "asgaspar_OpenMOLLI_openmolli_centric",
+      "repository": "github.com/asgaspar/OpenMOLLI",
+      "filename": "OpenMOLLI_centric.m",
+      "title": "Openmolli Centric",
+      "description": "This is a Modified Look-Locker Inversion recovery (MOLLI) sequence with centric k-space ordering for myocardial T1 mapping. It implements the clinical standard 5(3)3 MOLLI protocol with ECG triggering and adiabatic hyperbolic secant inversion pulses. The sequence uses centric phase encoding to capture k-space center at optimal inversion times for enhanced T1 contrast and reduced motion sensitivity in cardiac imaging.",
+      "sequence_family": "MOLLI",
+      "contrast_mechanism": "inversion_recovery",
+      "trajectory_type": "cartesian_centric",
+      "applications": [
+        "cardiac",
+        "myocardial_characterization",
+        "T1_mapping"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [
+        "adiabatic_inversion"
+      ],
+      "advanced_features": [
+        "gradient_spoiling",
+        "dummy_scans",
+        "digital_triggers",
+        "physiological_triggering",
+        "centric_ordering",
+        "phase_cycling"
+      ],
+      "vendor_features": [],
+      "external_requirements": [
+        "ECG triggering hardware",
+        "Cardiac monitoring"
+      ],
+      "vendor_support": [
+        "GE"
+      ]
+    },
+    {
+      "id": "asgaspar_OpenMOLLI_openmolli_linear",
+      "repository": "github.com/asgaspar/OpenMOLLI",
+      "filename": "OpenMOLLI_linear.m",
+      "title": "Openmolli Linear",
+      "description": "This sequence implements the MOdified Look-Locker Inversion recovery (MOLLI) protocol for myocardial T1 mapping using linear k-space ordering. It employs a clinical standard 5(3)3 acquisition scheme with ECG triggering and adiabatic inversion pulses for robust B1-insensitive preparation. The sequence uses balanced steady-state free precession (bSSFP) readout and is designed for cardiac tissue characterization in clinical MRI applications.",
+      "sequence_family": "MOLLI",
+      "contrast_mechanism": "inversion_recovery",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "cardiac",
+        "myocardial_characterization",
+        "T1_mapping"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [
+        "inversion",
+        "adiabatic_inversion"
+      ],
+      "advanced_features": [
+        "rf_spoiling",
+        "dummy_scans",
+        "phase_blips",
+        "digital_triggers",
+        "calibration_scan"
+      ],
+      "vendor_features": [],
+      "external_requirements": [
+        "ECG triggering hardware",
+        "Cardiac-capable scanner"
+      ],
+      "vendor_support": [
+        "GE"
+      ]
+    },
+    {
+      "id": "fmrifrey_lps_gre3d_write_seq",
+      "repository": "github.com/fmrifrey/lps",
+      "filename": "gre3d_write_seq.m",
+      "title": "Gre3d Seq",
+      "description": "This sequence implements a 3D gradient echo acquisition with CAIPI (Controlled Aliasing in Parallel Imaging) acceleration patterns for efficient k-space sampling. It serves as both a calibration scan for the LpS silent MRI system and a standalone high-quality 3D anatomical imaging sequence. The implementation includes flexible phase encoding patterns (snake or spiral-out), RF spoiling for improved contrast, optional fat saturation, and generates output files compatible with GE scanners through the PulCeq framework.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [
+        "CAIPI",
+        "parallel_imaging"
+      ],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "gradient_spoiling",
+        "dummy_scans",
+        "calibration_scan",
+        "phase_blips"
+      ],
+      "vendor_features": [
+        "TRID_segments",
+        "pislquant",
+        "pge2_conversion"
+      ],
+      "external_requirements": [
+        "PulCeq v7",
+        "Toppe v7",
+        "GE Orchestra 2.1+"
+      ],
+      "vendor_support": [
+        "GE"
+      ]
+    },
+    {
+      "id": "fmrifrey_lps_lps_write_seq",
+      "repository": "github.com/fmrifrey/lps",
+      "filename": "lps_write_seq.m",
+      "title": "Lps Seq",
+      "description": "The Looping Star (LpS) sequence implements a groundbreaking silent MRI technique that combines zero-echo-time principles with multiplexed radial acquisitions to achieve >30dB acoustic noise reduction. It uses 3D golden angle trajectory with sophisticated gradient waveform design to maintain image quality while operating at slew rates <10 T/m/s. This sequence is specifically designed for the Pulseq framework with GE scanner deployment through PulCeq conversion.",
+      "sequence_family": "ZTE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "radial",
+      "applications": [
+        "lung_imaging",
+        "bone_imaging",
+        "short_T2",
+        "T1_weighted"
+      ],
+      "acceleration_methods": [
+        "golden_angle"
+      ],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "dummy_scans",
+        "label_tracking",
+        "golden_angle",
+        "calibration_scan"
+      ],
+      "vendor_features": [
+        "TRID_segments",
+        "pislquant",
+        "pge2_conversion",
+        "dummy_gain_calibration"
+      ],
+      "external_requirements": [
+        "TOPPE",
+        "GE Orchestra",
+        "MIRT toolbox"
+      ],
+      "vendor_support": [
+        "GE"
+      ]
+    },
+    {
+      "id": "pulseq_ISMRM_Virtual_Meeting__November_15_17_2023_s02_se",
+      "repository": "github.com/pulseq/ISMRM-Virtual-Meeting--November-15-17-2023",
+      "filename": "s02_SE.m",
+      "title": "S2 Spin Echo",
+      "description": "This is a basic spin echo sequence without spatial encoding gradients, designed for educational purposes in the ISMRM Virtual Meeting tutorial. It demonstrates fundamental spin echo physics with a 90-degree excitation pulse followed by a 180-degree refocusing pulse to generate an echo at the specified TE. The sequence serves as a foundational building block for understanding more complex spin echo variants like TSE/FSE sequences.",
+      "sequence_family": "SE",
+      "contrast_mechanism": "spin_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T2_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_ISMRM_Virtual_Meeting__November_15_17_2023_s03_se_crushers",
+      "repository": "github.com/pulseq/ISMRM-Virtual-Meeting--November-15-17-2023",
+      "filename": "s03_SE_crushers.m",
+      "title": "S3 Spin Echo Crushers",
+      "description": "This is an educational spin echo sequence with crusher gradients designed for the ISMRM Virtual Meeting tutorial series. It demonstrates the implementation of symmetric crusher (spoiler) gradients around the 180° refocusing pulse to eliminate unwanted coherences. The sequence is part of a progressive tutorial series and builds upon basic SE concepts by introducing gradient spoiling techniques within the Pulseq framework.",
+      "sequence_family": "SE",
+      "contrast_mechanism": "spin_echo",
+      "trajectory_type": "fid",
+      "applications": [
+        "T2_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "gradient_spoiling"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_ISMRM_Virtual_Meeting__November_15_17_2023_s11_gre2d",
+      "repository": "github.com/pulseq/ISMRM-Virtual-Meeting--November-15-17-2023",
+      "filename": "s11_GRE2D.m",
+      "title": "S11 Gre2d",
+      "description": "This is a standard 2D gradient echo (GRE) imaging sequence for MRI. It demonstrates fundamental Pulseq concepts including slice selection, phase encoding, frequency encoding, and spoiling. As part of the ISMRM Virtual Meeting tutorials, it serves as the first complete imaging sequence that students learn after basic RF pulse examples.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "gradient_spoiling"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_ISMRM_Virtual_Meeting__November_15_17_2023_s12_gre2d_optimizedspoiler",
+      "repository": "github.com/pulseq/ISMRM-Virtual-Meeting--November-15-17-2023",
+      "filename": "s12_GRE2D_optimizedSpoiler.m",
+      "title": "S12 Gre2d Optimizedspoiler",
+      "description": "This sequence implements an optimized 2D gradient echo (GRE) sequence demonstrating advanced spoiler gradient optimization techniques. It showcases Pulseq's gradient manipulation capabilities including gradient splitting, combining, and extended trapezoid design for improved sequence efficiency. The sequence maintains image quality while reducing TR through clever gradient timing optimization.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "gradient_spoiling",
+        "split_gradients",
+        "optimized_spoilers",
+        "gradient_combining"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_ISMRM_Virtual_Meeting__November_15_17_2023_s13_gre2d_acceleratedcomputation",
+      "repository": "github.com/pulseq/ISMRM-Virtual-Meeting--November-15-17-2023",
+      "filename": "s13_GRE2D_acceleratedComputation.m",
+      "title": "S13 Gre2d Acceleratedcomputation",
+      "description": "This is a computationally optimized 2D gradient echo sequence that demonstrates advanced performance optimization through event pre-registration. It uses Pulseq's registerGradEvent() and registerRfEvent() functions to achieve 10x faster sequence compilation while maintaining identical imaging performance to standard implementations. The sequence is part of an educational tutorial series showing progressive optimization techniques for MRI sequence development.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "gradient_spoiling",
+        "split_gradients"
+      ],
+      "vendor_features": [
+        "pre_registration"
+      ],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_ISMRM_Virtual_Meeting__November_15_17_2023_s21_gre2d_grappa",
+      "repository": "github.com/pulseq/ISMRM-Virtual-Meeting--November-15-17-2023",
+      "filename": "s21_GRE2D_GRAPPA.m",
+      "title": "S21 Gre2d Grappa",
+      "description": "This sequence implements a GRAPPA-accelerated 2D gradient echo with R=2 acceleration factor and proper scanner labeling for integrated reconstruction. It demonstrates how to make Pulseq sequences reconstruction-aware by using labels to mark ACS lines and undersampled data, enabling automatic GRAPPA reconstruction on the scanner. The sequence includes RF and gradient spoiling for improved image quality.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [
+        "GRAPPA",
+        "parallel_imaging"
+      ],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "gradient_spoiling",
+        "noise_scan",
+        "label_tracking",
+        "split_gradients"
+      ],
+      "vendor_features": [
+        "scanner_labels",
+        "GRAPPA_patching"
+      ],
+      "external_requirements": [
+        "Scanner with GRAPPA reconstruction"
+      ],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_ISMRM_Virtual_Meeting__November_15_17_2023_write2dgre__",
+      "repository": "github.com/pulseq/ISMRM-Virtual-Meeting--November-15-17-2023",
+      "filename": "write2DGRE__.m",
+      "title": "2dgre",
+      "description": "This is a 2D spoiled gradient echo sequence specifically optimized for GE scanners. It demonstrates vendor-specific sequence implementation with proper segment labeling for GE interpreter compatibility. The sequence uses RF spoiling and gradient spoiling to achieve T1-weighted contrast and includes GE-specific timing optimizations.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "gradient_spoiling",
+        "label_tracking"
+      ],
+      "vendor_features": [
+        "scanner_labels",
+        "pge2_conversion"
+      ],
+      "external_requirements": [
+        "GE scanner"
+      ],
+      "vendor_support": [
+        "GE"
+      ]
+    },
+    {
+      "id": "pulseq_ISMRM_Virtual_Meeting__November_15_17_2023_writeb0",
+      "repository": "github.com/pulseq/ISMRM-Virtual-Meeting--November-15-17-2023",
+      "filename": "writeB0.m",
+      "title": "B0",
+      "description": "This sequence implements 3D gradient echo B0 field mapping with dual echo times for measuring magnetic field inhomogeneities. It generates phase difference maps between two echo times to calculate B0 field variations across the imaging volume. The sequence includes optimized timing for fat-water in-phase imaging and GE scanner compatibility through TOPPE export.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "gradient_spoiling",
+        "dummy_scans",
+        "split_gradients",
+        "label_tracking",
+        "digital_triggers"
+      ],
+      "vendor_features": [
+        "toppe_conversion",
+        "pge2_conversion"
+      ],
+      "external_requirements": [
+        "TOPPE",
+        "GE scanner"
+      ],
+      "vendor_support": [
+        "GE"
+      ]
+    },
+    {
+      "id": "pulseq_ISMRM_Virtual_Meeting__November_15_17_2023_writeepi",
+      "repository": "github.com/pulseq/ISMRM-Virtual-Meeting--November-15-17-2023",
+      "filename": "writeEPI.m",
+      "title": "Epi",
+      "description": "This sequence implements advanced Simultaneous Multi-Slice (SMS) EPI with multi-band factor up to 6 and CAIPI acceleration for fMRI applications. It demonstrates state-of-the-art acceleration techniques including multi-band RF pulse design, CAIPI phase modulation patterns, and optional fat saturation. The sequence is production-ready with GE scanner export capability via TOPPE.",
+      "sequence_family": "EPI",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "epi_cartesian",
+      "applications": [
+        "functional_imaging",
+        "T1_weighted",
+        "fMRI",
+        "diffusion"
+      ],
+      "acceleration_methods": [
+        "SMS",
+        "CAIPI",
+        "partial_fourier"
+      ],
+      "preparation_techniques": [
+        "fat_saturation"
+      ],
+      "advanced_features": [
+        "multi_band",
+        "rf_spoiling",
+        "gradient_spoiling",
+        "dummy_scans",
+        "interleaved_slices",
+        "digital_triggers",
+        "calibration_scan",
+        "phase_blips"
+      ],
+      "vendor_features": [
+        "pge2_conversion",
+        "toppe_conversion",
+        "digital_triggers",
+        "segment_labeling"
+      ],
+      "external_requirements": [
+        "TOPPE",
+        "Python 3.8+",
+        "GE scanner",
+        "getsmspulse",
+        "skippedcaipi_sampling.py"
+      ],
+      "vendor_support": [
+        "GE"
+      ]
+    },
+    {
+      "id": "pulseq_ISMRM_Virtual_Meeting__November_15_17_2023_writeepirs__",
+      "repository": "github.com/pulseq/ISMRM-Virtual-Meeting--November-15-17-2023",
+      "filename": "writeEpiRS__.m",
+      "title": "Epiramp Sampling",
+      "description": "This is an experimental high-performance EPI sequence that uses split gradients to overlap blips with readout gradients combined with ramp sampling. It implements state-of-the-art EPI optimization techniques including ADC during gradient ramps, achieving >40% readout time reduction. The sequence supports multi-slice acquisition with interleaving, integrated fat saturation, and digital trigger outputs for fMRI synchronization.",
+      "sequence_family": "EPI",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "epi_cartesian",
+      "applications": [
+        "functional_imaging",
+        "T1_weighted",
+        "fMRI",
+        "diffusion"
+      ],
+      "acceleration_methods": [
+        "ramp_sampling",
+        "partial_fourier"
+      ],
+      "preparation_techniques": [
+        "fat_saturation"
+      ],
+      "advanced_features": [
+        "gradient_spoiling",
+        "split_gradients",
+        "digital_triggers",
+        "interleaved_slices",
+        "phase_blips"
+      ],
+      "vendor_features": [
+        "digital_triggers"
+      ],
+      "external_requirements": [],
+      "vendor_support": [
+        "GE"
+      ]
+    },
+    {
+      "id": "pulseq_pulseq_script_mwf_qalas_hbcd_1mm_r5",
+      "repository": "github.com/pulseq/pulseq",
+      "filename": "script_mwf_qalas_hbcd_1mm_R5.m",
+      "title": "Mwf Qalas Hbcd 1mm R5",
+      "description": "Pediatric-optimized multi-contrast QALAS sequence for the HEALthy Brain and Child Development (HBCD) study. This sequence generates 6 different T1/T2 weightings using T2 preparation and inversion recovery preparations to enable quantification of T1, T2, proton density, and myelin water fraction in developing brains. Designed with enhanced safety validation for pediatric populations.",
+      "sequence_family": "QALAS",
+      "contrast_mechanism": "multi_parametric",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "multi_parametric",
+        "quantitative_imaging",
+        "brain_mapping"
+      ],
+      "acceleration_methods": [
+        "parallel_imaging"
+      ],
+      "preparation_techniques": [
+        "T2_prep",
+        "inversion",
+        "dummy_scans",
+        "B0_calibration"
+      ],
+      "advanced_features": [
+        "rf_spoiling",
+        "gradient_spoiling",
+        "dummy_scans",
+        "multi_echo",
+        "calibration_scan"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_pulseq_writecinegradientecho",
+      "repository": "github.com/pulseq/pulseq",
+      "filename": "writeCineGradientEcho.m",
+      "title": "Cinegradientecho",
+      "description": "This is a cardiac cine gradient echo sequence designed for dynamic cardiac imaging across multiple phases of the cardiac cycle. It implements segmented k-space acquisition synchronized to cardiac triggers, capturing multiple cardiac phases per heartbeat. The sequence uses RF spoiling for T1 contrast and is optimized for real-time cardiac wall motion assessment and functional analysis in the Pulseq framework.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "gradient_spoiling",
+        "physiological_triggering",
+        "multi_phase",
+        "digital_triggers",
+        "segmented_acquisition"
+      ],
+      "vendor_features": [
+        "digital_triggers"
+      ],
+      "external_requirements": [
+        "Cardiac triggering support",
+        "Digital output channels"
+      ],
+      "vendor_support": [
+        "GE"
+      ]
+    },
+    {
+      "id": "pulseq_pulseq_writeepi",
+      "repository": "github.com/pulseq/pulseq",
+      "filename": "writeEpi.m",
+      "title": "Epi",
+      "description": "This is a basic educational Echo Planar Imaging (EPI) sequence that demonstrates fundamental principles of single-shot 2D acquisition. It acquires complete 2D images after a single RF excitation using alternating readout polarities with phase blips, making it ideal for functional MRI and fast imaging applications. The sequence uses the Pulseq framework to generate an EPI trajectory without ramp sampling, focusing on educational clarity over performance optimization.",
+      "sequence_family": "EPI",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "epi_cartesian",
+      "applications": [
+        "functional_imaging",
+        "T1_weighted",
+        "fMRI",
+        "diffusion"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "interleaved_slices"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_pulseq_writeepidiffusionrs",
+      "repository": "github.com/pulseq/pulseq",
+      "filename": "writeEpiDiffusionRS.m",
+      "title": "Epidiffusionramp Sampling",
+      "description": "This is an advanced diffusion-weighted EPI sequence using the Stejskal-Tanner diffusion scheme with high-performance features. It implements split gradients to overlap blips with readout gradients combined with ramp sampling for efficient k-space traversal. The sequence is designed for diffusion tensor imaging (DTI) and diffusion-weighted imaging (DWI) applications within the Pulseq framework.",
+      "sequence_family": "EPI",
+      "contrast_mechanism": "diffusion",
+      "trajectory_type": "epi_cartesian",
+      "applications": [
+        "functional_imaging",
+        "fMRI",
+        "diffusion"
+      ],
+      "acceleration_methods": [
+        "partial_fourier",
+        "ramp_sampling"
+      ],
+      "preparation_techniques": [
+        "fat_saturation",
+        "diffusion_prep"
+      ],
+      "advanced_features": [
+        "split_gradients",
+        "digital_triggers",
+        "gradient_reversal"
+      ],
+      "vendor_features": [
+        "digital_triggers"
+      ],
+      "external_requirements": [],
+      "vendor_support": [
+        "GE"
+      ]
+    },
+    {
+      "id": "pulseq_pulseq_writeepidiffusionrs_pmc",
+      "repository": "github.com/pulseq/pulseq",
+      "filename": "writeEpiDiffusionRS_PMC.m",
+      "title": "Epidiffusionramp Sampling Pmc",
+      "description": "An experimental high-performance EPI sequence with diffusion weighting using the Stejskal-Tanner scheme. This advanced Pulseq implementation features split gradients to overlap blips with readout gradients, ramp sampling for efficient k-space coverage, and PMC (Prospective Motion Correction) labeling support. The sequence demonstrates sophisticated gradient timing optimization while maintaining diffusion contrast for DTI applications.",
+      "sequence_family": "EPI",
+      "contrast_mechanism": "diffusion",
+      "trajectory_type": "epi_cartesian",
+      "applications": [
+        "functional_imaging",
+        "fMRI",
+        "diffusion"
+      ],
+      "acceleration_methods": [
+        "ramp_sampling",
+        "partial_fourier"
+      ],
+      "preparation_techniques": [
+        "diffusion_prep",
+        "fat_saturation"
+      ],
+      "advanced_features": [
+        "split_gradients",
+        "label_tracking",
+        "digital_triggers",
+        "gradient_reversal",
+        "rf_spoiling"
+      ],
+      "vendor_features": [
+        "digital_triggers",
+        "scanner_labels"
+      ],
+      "external_requirements": [
+        "MATLAB"
+      ],
+      "vendor_support": [
+        "GE"
+      ]
+    },
+    {
+      "id": "pulseq_pulseq_writeepirs",
+      "repository": "github.com/pulseq/pulseq",
+      "filename": "writeEpiRS.m",
+      "title": "Epiramp Sampling",
+      "description": "This is a high-performance Echo Planar Imaging (EPI) sequence with ramp sampling optimization for rapid imaging applications. It uses split gradients to overlap phase blips with readout gradients, enabling efficient k-space traversal with reduced echo spacing. The sequence implements fat saturation, partial Fourier acceleration, and interleaved multi-slice acquisition, making it ideal for functional MRI and diffusion imaging preparations.",
+      "sequence_family": "EPI",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "epi_cartesian",
+      "applications": [
+        "functional_imaging",
+        "T1_weighted",
+        "fMRI",
+        "diffusion"
+      ],
+      "acceleration_methods": [
+        "ramp_sampling",
+        "partial_fourier"
+      ],
+      "preparation_techniques": [
+        "fat_saturation"
+      ],
+      "advanced_features": [
+        "split_gradients",
+        "gradient_blips",
+        "interleaved_slices",
+        "digital_triggers",
+        "phase_blips"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_pulseq_writeepirs_label",
+      "repository": "github.com/pulseq/pulseq",
+      "filename": "writeEpiRS_label.m",
+      "title": "Epiramp Sampling Label",
+      "description": "High-performance EPI sequence with ramp sampling and advanced labeling for functional MRI. Features split gradients to overlap blips with readout gradients for optimal efficiency. Designed for Siemens scanners with ICE reconstruction support.",
+      "sequence_family": "EPI",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "epi_cartesian",
+      "applications": [
+        "functional_imaging",
+        "T1_weighted",
+        "fMRI",
+        "diffusion"
+      ],
+      "acceleration_methods": [
+        "ramp_sampling",
+        "partial_fourier"
+      ],
+      "preparation_techniques": [
+        "fat_saturation",
+        "navigator_echoes"
+      ],
+      "advanced_features": [
+        "split_gradients",
+        "digital_triggers",
+        "label_tracking",
+        "gradient_reversal",
+        "phase_blips",
+        "interleaved_slices"
+      ],
+      "vendor_features": [
+        "digital_triggers",
+        "scanner_labels",
+        "MDH_flags"
+      ],
+      "external_requirements": [
+        "MATLAB R2016b+",
+        "Siemens scanner"
+      ],
+      "vendor_support": [
+        "Siemens",
+        "GE"
+      ]
+    },
+    {
+      "id": "pulseq_pulseq_writeepirs_label_softdelay",
+      "repository": "github.com/pulseq/pulseq",
+      "filename": "writeEpiRS_label_softdelay.m",
+      "title": "Epiramp Sampling Label Softdelay",
+      "description": "This is an experimental high-performance EPI sequence with soft delay extensions for flexible TE/TR control. It implements ramp sampling with split gradients to overlap blips with readout gradients, includes labeling support for ASL applications, and features navigator echoes for ghost suppression. Designed primarily for Siemens scanners with ICE reconstruction support.",
+      "sequence_family": "EPI",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "epi_cartesian",
+      "applications": [
+        "functional_imaging",
+        "T1_weighted",
+        "fMRI",
+        "diffusion"
+      ],
+      "acceleration_methods": [
+        "ramp_sampling",
+        "partial_fourier"
+      ],
+      "preparation_techniques": [
+        "fat_saturation",
+        "navigator_echoes"
+      ],
+      "advanced_features": [
+        "soft_delays",
+        "label_tracking",
+        "phase_blips",
+        "split_gradients",
+        "interleaved_slices",
+        "digital_triggers"
+      ],
+      "vendor_features": [
+        "scanner_labels"
+      ],
+      "external_requirements": [
+        "MATLAB R2016b+",
+        "Siemens scanner"
+      ],
+      "vendor_support": [
+        "Siemens"
+      ]
+    },
+    {
+      "id": "pulseq_pulseq_writeepispinecho",
+      "repository": "github.com/pulseq/pulseq",
+      "filename": "writeEpiSpinEcho.m",
+      "title": "Epispinecho",
+      "description": "This sequence implements a spin-echo echo-planar imaging (SE-EPI) sequence, combining 180° refocusing with EPI readout. It demonstrates the basic principles of spin-echo EPI, which provides T2 weighting while maintaining the fast acquisition speed of EPI. The sequence is particularly useful for applications requiring reduced susceptibility artifacts compared to gradient-echo EPI.",
+      "sequence_family": "EPI",
+      "contrast_mechanism": "spin_echo",
+      "trajectory_type": "epi_cartesian",
+      "applications": [
+        "T2_weighted",
+        "functional_imaging",
+        "fMRI",
+        "diffusion"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "gradient_reversal",
+        "k_space_trajectory_calculation"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_pulseq_writeepispinechors",
+      "repository": "github.com/pulseq/pulseq",
+      "filename": "writeEpiSpinEchoRS.m",
+      "title": "Epispinechoramp Sampling",
+      "description": "This is an experimental high-performance EPI sequence with spin echo readout that uses split gradients to overlap blips with readout gradients combined with ramp sampling. It implements a 180-degree refocusing pulse for T2-weighted contrast, fat saturation, and optimized gradient timing for reduced acoustic noise and improved efficiency. The sequence is designed for multi-slice 2D imaging with partial Fourier acceleration.",
+      "sequence_family": "EPI",
+      "contrast_mechanism": "spin_echo",
+      "trajectory_type": "epi_cartesian",
+      "applications": [
+        "T2_weighted",
+        "functional_imaging",
+        "fMRI",
+        "diffusion"
+      ],
+      "acceleration_methods": [
+        "ramp_sampling",
+        "partial_fourier"
+      ],
+      "preparation_techniques": [
+        "fat_saturation",
+        "gradient_spoiling"
+      ],
+      "advanced_features": [
+        "split_gradients",
+        "digital_triggers",
+        "rf_spoiling"
+      ],
+      "vendor_features": [
+        "digital_triggers"
+      ],
+      "external_requirements": [
+        "MATLAB",
+        "Siemens scanner"
+      ],
+      "vendor_support": [
+        "Siemens",
+        "GE"
+      ]
+    },
+    {
+      "id": "pulseq_pulseq_writeepi_label",
+      "repository": "github.com/pulseq/pulseq",
+      "filename": "writeEpi_label.m",
+      "title": "Epi Label",
+      "description": "This is an educational EPI sequence that demonstrates the LABEL extension for setting data header values to guide scanner reconstruction. It implements navigator echoes for phase correction, supports physiological triggering, and uses comprehensive label management to track slices, k-space lines, segments, and averages. The sequence uses the Pulseq framework to show how labels can be used for integrated image reconstruction or offline reconstruction tools.",
+      "sequence_family": "EPI",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "epi_cartesian",
+      "applications": [
+        "functional_imaging",
+        "T1_weighted",
+        "fMRI",
+        "diffusion"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [
+        "navigator_echoes"
+      ],
+      "advanced_features": [
+        "interleaved_slices",
+        "label_tracking",
+        "digital_triggers"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_pulseq_writefastradialgradientecho",
+      "repository": "github.com/pulseq/pulseq",
+      "filename": "writeFastRadialGradientEcho.m",
+      "title": "Fastradialgradientecho",
+      "description": "This sequence implements a fast 2D radial gradient echo with golden angle trajectory ordering for motion-robust imaging. It uses RF spoiling with quadratic phase increment and gradient spoiling in the slice direction. The radial readout provides inherent motion robustness and efficient k-space coverage, making it ideal for free-breathing acquisitions.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "radial",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [
+        "golden_angle"
+      ],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "gradient_spoiling",
+        "dummy_scans",
+        "rotation_operators"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_pulseq_writefastradialgradientecho_rot3d",
+      "repository": "github.com/pulseq/pulseq",
+      "filename": "writeFastRadialGradientEcho_rot3D.m",
+      "title": "Fastradialgradientecho Rot3d",
+      "description": "This is a fast 3D radial gradient echo sequence with rotating spokes. It implements a 3D radial k-space trajectory using rotation matrices (rotz) to distribute spokes in 3D space. The sequence features RF spoiling for steady-state maintenance and is optimized for fast imaging with short TR.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "radial",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "gradient_spoiling",
+        "dummy_scans",
+        "3d_rotation"
+      ],
+      "vendor_features": [],
+      "external_requirements": [
+        "MATLAB R2016b+"
+      ],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_pulseq_writefid",
+      "repository": "github.com/pulseq/pulseq",
+      "filename": "writeFid.m",
+      "title": "Fid",
+      "description": "This is a basic Free Induction Decay (FID) sequence, the simplest possible MRI sequence. It demonstrates fundamental Pulseq concepts with a non-selective RF excitation pulse followed by signal acquisition. The sequence is designed for educational purposes and system testing, implementing the core MRI physics principle of nuclear spin excitation and decay without spatial encoding gradients.",
+      "sequence_family": "FID",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_pulseq_writegre_live_demo",
+      "repository": "github.com/pulseq/pulseq",
+      "filename": "writeGRE_live_demo.m",
+      "title": "Gre Live Demo",
+      "description": "Interactive gradient echo sequence demonstrating progressive optimization through 6 different steps. Starts with basic GRE and progressively adds spoiler gradients, phase refocusing, RF spoiling with quasi-random phase cycling, receiver phase tracking, and dummy scans. Designed for educational purposes to show how sequence performance improves with each optimization step.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "gradient_spoiling",
+        "dummy_scans",
+        "phase_refocusing"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_pulseq_writegre_live_demo_step0",
+      "repository": "github.com/pulseq/pulseq",
+      "filename": "writeGRE_live_demo_step0.m",
+      "title": "Gre Live Demo Step0",
+      "description": "This is a simplified gradient echo sequence designed as the initial step in a live demonstration series for teaching Pulseq programming. It implements a basic 2D single-slice gradient echo with minimal complexity, focusing on fundamental concepts of RF excitation, gradient encoding, and data acquisition. The sequence serves as an entry point for understanding Pulseq sequence development, demonstrating core components without advanced features or optimizations.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_pulseq_writegre_rfshim",
+      "repository": "github.com/pulseq/pulseq",
+      "filename": "writeGRE_rfShim.m",
+      "title": "Gre Rfshim",
+      "description": "This is a gradient echo sequence with RF shimming capabilities designed for B1 field optimization. It demonstrates the use of multiple repetitions with different RF shim patterns to improve transmit field homogeneity, particularly useful for high-field imaging. The sequence integrates label tracking for proper image reconstruction on Siemens scanners.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "gradient_spoiling",
+        "rf_shimming",
+        "label_tracking",
+        "multi_repetition"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_pulseq_writegradientecho",
+      "repository": "github.com/pulseq/pulseq",
+      "filename": "writeGradientEcho.m",
+      "title": "Gradientecho",
+      "description": "This is a standard 2D gradient echo (GRE) sequence that demonstrates fundamental MRI pulse sequence programming concepts. It implements a basic Cartesian k-space trajectory with RF and gradient spoiling for enhanced T1-weighted contrast, making it ideal for anatomical imaging applications. The sequence showcases core Pulseq functionality including RF pulse generation, gradient waveform design, and proper timing calculations while maintaining educational clarity through its well-commented single-file architecture.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "gradient_spoiling"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_pulseq_writegradientecho3d",
+      "repository": "github.com/pulseq/pulseq",
+      "filename": "writeGradientEcho3D.m",
+      "title": "Gradientecho3d",
+      "description": "This is a 3D gradient echo sequence implementation for volumetric imaging. It demonstrates efficient 3D k-space sampling with RF spoiling for steady-state magnetization and optional pre-registration for computational acceleration. The sequence is designed for isotropic resolution T1-weighted structural imaging in the Pulseq framework.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "dummy_scans",
+        "pre_registration"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_pulseq_writegradientecho_grappa",
+      "repository": "github.com/pulseq/pulseq",
+      "filename": "writeGradientEcho_grappa.m",
+      "title": "Gradientecho Grappa",
+      "description": "This is a 2D gradient echo sequence with GRAPPA parallel imaging acceleration (R=2). It demonstrates the implementation of parallel imaging in Pulseq using scanner labels for proper data acquisition and reconstruction, including autocalibration scan (ACS) lines and noise scan for optimal reconstruction.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [
+        "GRAPPA",
+        "partial_fourier"
+      ],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "gradient_spoiling",
+        "interleaved_slices",
+        "noise_scan",
+        "label_tracking",
+        "calibration_scan"
+      ],
+      "vendor_features": [
+        "scanner_labels",
+        "GRAPPA_patching"
+      ],
+      "external_requirements": [
+        "Siemens scanner",
+        "GRAPPA reconstruction"
+      ],
+      "vendor_support": [
+        "Siemens"
+      ]
+    },
+    {
+      "id": "pulseq_pulseq_writegradientecho_label",
+      "repository": "github.com/pulseq/pulseq",
+      "filename": "writeGradientEcho_label.m",
+      "title": "Gradientecho Label",
+      "description": "This is a demonstration gradient echo sequence that uses the LABEL extension to produce raw data reconstructable by integrated scanner image reconstruction. It implements a 2D multi-slice GRE with RF and gradient spoiling, supporting multiple echo times for field mapping applications. The sequence showcases proper label management for scanner compatibility including REV, LIN, SLC, ECO, and REP counters.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "gradient_spoiling",
+        "label_tracking",
+        "multi_echo_support"
+      ],
+      "vendor_features": [
+        "scanner_labels"
+      ],
+      "external_requirements": [
+        "Siemens scanner"
+      ],
+      "vendor_support": [
+        "Siemens"
+      ]
+    },
+    {
+      "id": "pulseq_pulseq_writehaste",
+      "repository": "github.com/pulseq/pulseq",
+      "filename": "writeHASTE.m",
+      "title": "Haste",
+      "description": "This sequence implements HASTE (Half-Fourier Acquisition Single-shot Turbo spin Echo), a fast T2-weighted imaging technique. It uses a single-shot turbo spin echo readout with partial Fourier acquisition to achieve rapid T2-weighted imaging in a single TR period. The sequence is commonly used for motion-insensitive T2-weighted imaging in clinical protocols.",
+      "sequence_family": "HASTE",
+      "contrast_mechanism": "spin_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T2_weighted"
+      ],
+      "acceleration_methods": [
+        "partial_fourier"
+      ],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "dummy_scans",
+        "multi_echo",
+        "split_gradients"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_pulseq_writemprage",
+      "repository": "github.com/pulseq/pulseq",
+      "filename": "writeMPRAGE.m",
+      "title": "Mprage",
+      "description": "MPRAGE (Magnetization Prepared Rapid Gradient Echo) is a 3D T1-weighted brain imaging sequence. It uses an adiabatic inversion pulse followed by a segmented gradient echo readout to achieve excellent gray/white matter contrast. This implementation features centric k-space ordering and RF spoiling for optimal image quality in the Pulseq framework.",
+      "sequence_family": "MPRAGE",
+      "contrast_mechanism": "inversion_recovery",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T1_mapping"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [
+        "inversion",
+        "adiabatic_inversion"
+      ],
+      "advanced_features": [
+        "rf_spoiling",
+        "label_tracking",
+        "split_gradients",
+        "pre_registration"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_pulseq_writemprage_4ge",
+      "repository": "github.com/pulseq/pulseq",
+      "filename": "writeMPRAGE_4ge.m",
+      "title": "Mprage 4ge",
+      "description": "This is a 3D MPRAGE (Magnetization Prepared Rapid Gradient Echo) sequence specifically designed for GE scanners using the TOPPE framework. The sequence implements T1-weighted brain imaging with inversion recovery preparation and GRAPPA acceleration. It bridges Pulseq and GE environments by generating both .seq files for Pulseq and .mod files with scanloop.txt for TOPPE execution on GE scanners.",
+      "sequence_family": "MPRAGE",
+      "contrast_mechanism": "inversion_recovery",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T1_mapping"
+      ],
+      "acceleration_methods": [
+        "GRAPPA"
+      ],
+      "preparation_techniques": [
+        "inversion",
+        "fat_saturation"
+      ],
+      "advanced_features": [
+        "rf_spoiling",
+        "dummy_scans",
+        "label_tracking",
+        "noise_scan"
+      ],
+      "vendor_features": [
+        "TRID_segments",
+        "toppe_conversion",
+        "digital_triggers",
+        "vendor_conversion_tools",
+        "vendor_timing_adjustments",
+        "vendor_specific_mode"
+      ],
+      "external_requirements": [
+        "TOPPE",
+        "GE scanner",
+        "MATLAB"
+      ],
+      "vendor_support": [
+        "GE"
+      ]
+    },
+    {
+      "id": "pulseq_pulseq_writemprage_grappa",
+      "repository": "github.com/pulseq/pulseq",
+      "filename": "writeMPRAGE_grappa.m",
+      "title": "Mprage Grappa",
+      "description": "This sequence implements a 3D MPRAGE (Magnetization Prepared Rapid Gradient Echo) sequence with GRAPPA parallel imaging acceleration. MPRAGE is the gold standard for T1-weighted brain imaging, providing excellent gray-white matter contrast through inversion recovery preparation. The implementation includes GRAPPA undersampling with auto-calibration signal (ACS) lines for 2x acceleration in the phase encoding direction.",
+      "sequence_family": "MPRAGE",
+      "contrast_mechanism": "inversion_recovery",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T1_mapping"
+      ],
+      "acceleration_methods": [
+        "GRAPPA"
+      ],
+      "preparation_techniques": [
+        "inversion",
+        "adiabatic_inversion"
+      ],
+      "advanced_features": [
+        "rf_spoiling",
+        "label_tracking",
+        "gradient_reversal",
+        "noise_scan"
+      ],
+      "vendor_features": [
+        "GRAPPA_patching",
+        "scanner_labels"
+      ],
+      "external_requirements": [
+        "MATLAB R2015a+",
+        "Siemens scanner"
+      ],
+      "vendor_support": [
+        "Siemens"
+      ]
+    },
+    {
+      "id": "pulseq_pulseq_writepress",
+      "repository": "github.com/pulseq/pulseq",
+      "filename": "writePRESS.m",
+      "title": "Press",
+      "description": "PRESS (Point RESolved Spectroscopy) is a single-voxel MR spectroscopy sequence for metabolite quantification. It uses two 180° refocusing pulses to create a stimulated echo at TE time, providing localized spectroscopy data from a specific voxel. This Pulseq implementation includes SLR pulses for improved slice profiles, water suppression using the WET algorithm, and composite spoiler gradients for artifact reduction.",
+      "sequence_family": "PRESS",
+      "contrast_mechanism": "spectroscopy",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "spectroscopy",
+        "metabolite_quantification"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [
+        "water_suppression",
+        "WET_algorithm"
+      ],
+      "advanced_features": [
+        "gradient_spoiling",
+        "composite_gradients",
+        "SLR_pulses"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_pulseq_writeradialgradientecho",
+      "repository": "github.com/pulseq/pulseq",
+      "filename": "writeRadialGradientEcho.m",
+      "title": "Radialgradientecho",
+      "description": "This is a 2D radial gradient echo sequence that samples k-space using radial spokes instead of Cartesian lines. It implements RF spoiling for steady-state magnetization and supports golden angle ordering for improved temporal resolution. The sequence is particularly useful for motion-robust imaging and dynamic acquisitions.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "radial",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "golden_angle",
+        "dummy_scans"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_pulseq_writeselectiverf",
+      "repository": "github.com/pulseq/pulseq",
+      "filename": "writeSelectiveRf.m",
+      "title": "Selectiverf",
+      "description": "This sequence demonstrates spatially selective RF excitation using a 2D spiral k-space trajectory combined with an arbitrary RF pulse design. It creates a selective excitation pattern with a spin-echo readout for visualization of the excitation profile. The sequence is a key educational tool in the Pulseq framework for understanding spatial RF encoding and advanced pulse design techniques.",
+      "sequence_family": "RF_DESIGN",
+      "contrast_mechanism": "spin_echo",
+      "trajectory_type": "spiral",
+      "applications": [
+        "T2_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "spiral_trajectory",
+        "selective_excitation",
+        "arbitrary_rf_pulse"
+      ],
+      "vendor_features": [],
+      "external_requirements": [
+        "Pulseq MATLAB v1.4.0+"
+      ],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_pulseq_writesemilaser",
+      "repository": "github.com/pulseq/pulseq",
+      "filename": "writeSemiLaser.m",
+      "title": "Semilaser",
+      "description": "Semi-LASER spectroscopy sequence implementing localized single-voxel MR spectroscopy with four adiabatic refocusing pulses. This advanced spectroscopy technique provides improved chemical shift displacement and B1 insensitivity compared to PRESS, making it ideal for high-field metabolite quantification in brain tissue.",
+      "sequence_family": "PRESS",
+      "contrast_mechanism": "spectroscopy",
+      "trajectory_type": "spectroscopy",
+      "applications": [
+        "spectroscopy",
+        "metabolite_quantification"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "gradient_spoiling",
+        "adiabatic_pulses",
+        "split_gradients"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_pulseq_writespinecho_softdelay",
+      "repository": "github.com/pulseq/pulseq",
+      "filename": "writeSpinEcho_softdelay.m",
+      "title": "Spinecho Softdelay",
+      "description": "This is a spin-echo sequence with adjustable TE and TR using the soft delay extension for flexible timing control. It demonstrates how to implement a standard 2D multi-slice spin-echo sequence with proper timing calculations and vendor-specific gradient polarity adjustments. The sequence utilizes Pulseq's soft delay feature to manage TE/TR dependencies and includes interleaved slice acquisition for reduced crosstalk.",
+      "sequence_family": "SE",
+      "contrast_mechanism": "spin_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T2_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "soft_delays",
+        "rf_spoiling",
+        "interleaved_slices",
+        "vendor_specific_orientation"
+      ],
+      "vendor_features": [],
+      "external_requirements": [
+        "Pulseq MATLAB v1.4.0+"
+      ],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_pulseq_writespiral",
+      "repository": "github.com/pulseq/pulseq",
+      "filename": "writeSpiral.m",
+      "title": "Spiral",
+      "description": "This sequence implements a single-shot Archimedean spiral gradient echo sequence with fat saturation. It demonstrates advanced trajectory design with gradient and slew rate optimization for efficient k-space sampling. The sequence uses complex mathematical calculations to generate optimal spiral gradients while respecting hardware limits.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "spiral",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [
+        "fat_saturation"
+      ],
+      "advanced_features": [
+        "gradient_spoiling",
+        "digital_triggers"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_pulseq_writetse",
+      "repository": "github.com/pulseq/pulseq",
+      "filename": "writeTSE.m",
+      "title": "Tspin Echo",
+      "description": "This sequence implements a Turbo Spin Echo (TSE) with multiple refocusing pulses to rapidly acquire T2-weighted images. It uses an echo train to collect multiple phase encoding lines per excitation, significantly reducing scan time compared to conventional spin echo. The implementation includes optimized k-space ordering to achieve the desired effective echo time (TEeff).",
+      "sequence_family": "TSE",
+      "contrast_mechanism": "spin_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T2_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "echo_train",
+        "split_gradients",
+        "k_space_reordering"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_pulseq_writetrufi",
+      "repository": "github.com/pulseq/pulseq",
+      "filename": "writeTrufi.m",
+      "title": "Trufi",
+      "description": "This sequence implements a True-FISP (TrueFISP) or balanced steady-state free precession (bSSFP) sequence with optimized timing. It uses intensive gradient reshuffling and extended trapezoid functionality to achieve near-optimal TR while maintaining the balanced gradient condition required for bSSFP imaging. The sequence includes an alpha/2 preparation pulse for steady-state establishment and phase cycling for artifact reduction.",
+      "sequence_family": "bSSFP",
+      "contrast_mechanism": "balanced_steady_state",
+      "trajectory_type": "cartesian",
+      "applications": [],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "split_gradients",
+        "gradient_reversal",
+        "phase_cycling",
+        "label_tracking"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_pulseq_writeute",
+      "repository": "github.com/pulseq/pulseq",
+      "filename": "writeUTE.m",
+      "title": "Ute",
+      "description": "Ultra-short echo time (UTE) sequence achieving TE of 300-400 microseconds for imaging short T2 species. This sequence uses a 3D radial (koosh-ball) k-space trajectory with alternating slice gradients to achieve center-out k-space sampling. Designed for imaging tissues with very short T2 relaxation times like bone, tendons, and lung parenchyma.",
+      "sequence_family": "UTE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "3d_radial",
+      "applications": [
+        "lung_imaging",
+        "bone_imaging",
+        "short_T2",
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "half_echo",
+        "alternating_gradients",
+        "radial_spokes"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_pulseq_writeute_rs",
+      "repository": "github.com/pulseq/pulseq",
+      "filename": "writeUTE_rs.m",
+      "title": "Ute rs",
+      "description": "This sequence implements an Ultra-short TE (UTE) imaging technique with ramp sampling to achieve echo times below 100 microseconds. The sequence uses radial k-space sampling with alternating slice-select gradients and RF pulse resampling to minimize the delay between excitation and acquisition. This makes it ideal for imaging tissues with very short T2 relaxation times such as bone, tendons, and lung parenchyma within the Pulseq framework.",
+      "sequence_family": "UTE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "radial",
+      "applications": [
+        "lung_imaging",
+        "bone_imaging",
+        "short_T2",
+        "T1_weighted"
+      ],
+      "acceleration_methods": [
+        "ramp_sampling"
+      ],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "dummy_scans",
+        "gradient_reversal",
+        "radial_acquisition"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_pulseq_writezte_petra",
+      "repository": "github.com/pulseq/pulseq",
+      "filename": "writeZTE_Petra.m",
+      "title": "Zte Petra",
+      "description": "This sequence implements Zero TE (ZTE) imaging with PETRA (Pointwise Encoding Time reduction with Radial Acquisition) reconstruction for ultra-short echo time MRI. It achieves echo times around 70 microseconds by using 3D radial center-out k-space sampling with the gradients on during RF excitation, combined with single-point imaging (SPI) for the k-space center that cannot be sampled with ZTE.",
+      "sequence_family": "ZTE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "3d_radial",
+      "applications": [
+        "lung_imaging",
+        "bone_imaging",
+        "short_T2",
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "zero_te",
+        "petra_reconstruction",
+        "spherical_sampling",
+        "spi_center_filling",
+        "gradient_ramping_optimization",
+        "interleaved_acquisition"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_pulseq_writezte_petra_na",
+      "repository": "github.com/pulseq/pulseq",
+      "filename": "writeZTE_Petra_Na.m",
+      "title": "Zte Petra Na",
+      "description": "This is a 3D Zero TE (ZTE) PETRA sequence optimized for sodium (23Na) imaging. It uses radial k-space sampling with ultra-short echo times (~70 μs) to capture signal from short T2 species. The sequence implements spherical sampling for the outer k-space and Single Point Imaging (SPI) for the inner k-space to achieve complete coverage.",
+      "sequence_family": "ZTE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "3d_radial",
+      "applications": [
+        "lung_imaging",
+        "bone_imaging",
+        "short_T2",
+        "T1_weighted"
+      ],
+      "acceleration_methods": [
+        "undersampling"
+      ],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "golden_angle",
+        "interleaved_acquisition",
+        "rf_spoiling"
+      ],
+      "vendor_features": [],
+      "external_requirements": [
+        "Sodium coil",
+        "23Na capability"
+      ],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_pulseq_write_qa_sag_localizer",
+      "repository": "github.com/pulseq/pulseq",
+      "filename": "write_QA_Sag_Localizer.m",
+      "title": "QA Sag Localizer",
+      "description": "This is an ACR (American College of Radiology) spin-echo sequence designed for quality control using a sagittal localizer. It implements a standard spin-echo acquisition with 90-degree excitation and 180-degree refocusing pulses for robust T2-weighted contrast. The sequence is specifically optimized for Siemens scanners with appropriate gradient polarity adjustments and label tracking for proper image reconstruction.",
+      "sequence_family": "SE",
+      "contrast_mechanism": "spin_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T2_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "dummy_scans",
+        "interleaved_slices",
+        "label_tracking",
+        "gradient_spoiling"
+      ],
+      "vendor_features": [
+        "scanner_labels"
+      ],
+      "external_requirements": [
+        "MATLAB R2017a+",
+        "Siemens scanner"
+      ],
+      "vendor_support": [
+        "Siemens"
+      ]
+    },
+    {
+      "id": "pulseq_pulseq_write_qa_tran_epirs",
+      "repository": "github.com/pulseq/pulseq",
+      "filename": "write_QA_Tran_EPIrs.m",
+      "title": "QA Tran Epirs",
+      "description": "This is a quality control EPI sequence for fMRI stability measurements with TR=2s and TE=30ms. It implements high-performance EPI readout using split gradients to overlap blips with readout gradients combined with ramp sampling. The sequence is optimized for Siemens 3T scanners and includes fat saturation, navigator echoes for ghost suppression, and digital triggers for synchronization.",
+      "sequence_family": "EPI",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "epi_cartesian",
+      "applications": [
+        "functional_imaging",
+        "T1_weighted",
+        "fMRI",
+        "diffusion"
+      ],
+      "acceleration_methods": [
+        "ramp_sampling",
+        "partial_fourier"
+      ],
+      "preparation_techniques": [
+        "fat_saturation",
+        "navigator_echoes"
+      ],
+      "advanced_features": [
+        "split_gradients",
+        "label_tracking",
+        "gradient_reversal",
+        "interleaved_slices",
+        "digital_triggers",
+        "rf_spoiling",
+        "gradient_spoiling"
+      ],
+      "vendor_features": [
+        "digital_triggers"
+      ],
+      "external_requirements": [
+        "MATLAB",
+        "Siemens scanner"
+      ],
+      "vendor_support": [
+        "Siemens",
+        "GE"
+      ]
+    },
+    {
+      "id": "pulseq_pulseq_write_qa_tran_t1",
+      "repository": "github.com/pulseq/pulseq",
+      "filename": "write_QA_Tran_T1.m",
+      "title": "QA Tran T1",
+      "description": "ACR-compliant spin echo sequence for quality assurance and T1 measurement with transversal orientation. Implements multi-slice acquisition with interleaved slice ordering and phase cycling for artifact reduction. Designed for systematic T1 contrast assessment in QA protocols.",
+      "sequence_family": "SE",
+      "contrast_mechanism": "spin_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T2_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "gradient_spoiling",
+        "interleaved_slices",
+        "label_tracking",
+        "phase_cycling"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_tutorials_s01_cartesianse",
+      "repository": "github.com/pulseq/tutorials",
+      "filename": "s01_CartesianSE.m",
+      "title": "S1 Cartesianspin Echo",
+      "description": "This is a basic 2D Cartesian spin echo sequence serving as a reference implementation for non-Cartesian comparisons. It demonstrates fundamental spin echo imaging with 90-180 degree RF pulses, Cartesian k-space sampling, and proper TE/TR timing. The sequence is part of the Pulseq tutorials showing the standard approach before introducing radial and spiral trajectories.",
+      "sequence_family": "SE",
+      "contrast_mechanism": "spin_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T2_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "dummy_scans"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_tutorials_s01_fid",
+      "repository": "github.com/pulseq/tutorials",
+      "filename": "s01_FID.m",
+      "title": "S1 Fid",
+      "description": "This is the simplest possible MR sequence demonstrating free induction decay (FID) acquisition. It consists of a single RF excitation pulse followed by signal acquisition, serving as the fundamental building block for understanding Pulseq sequence programming. The sequence is designed for educational purposes, showing basic timing relationships and sequence structure in the Pulseq framework.",
+      "sequence_family": "FID",
+      "contrast_mechanism": "free_induction_decay",
+      "trajectory_type": "fid",
+      "applications": [],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_tutorials_s01_gre_tutorial_step0",
+      "repository": "github.com/pulseq/tutorials",
+      "filename": "s01_GRE_tutorial_step0.m",
+      "title": "S1 Gre Tutorial Step0",
+      "description": "This is the simplest 2D gradient echo sequence from the official Pulseq tutorials, designed as the starting point for learning 2D MRI imaging. It implements basic gradient echo without any advanced features like RF spoiling or steady-state preparation, making it ideal for understanding fundamental k-space traversal and image formation in the Pulseq framework.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_tutorials_s01_gradientecho",
+      "repository": "github.com/pulseq/tutorials",
+      "filename": "s01_GradientEcho.m",
+      "title": "S1 Gradientecho",
+      "description": "This is a standard 2D gradient echo sequence with support for multiple echo times, designed as the starting point for the GRE-to-EPI tutorial series. It demonstrates fundamental gradient echo imaging with RF spoiling for T1-weighted contrast and includes options for multi-echo acquisition suitable for field mapping. The sequence represents a clean implementation of the gradient echo principle using the Pulseq framework.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "gradient_spoiling",
+        "multi_echo"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_tutorials_s02_fid_multiplefas",
+      "repository": "github.com/pulseq/tutorials",
+      "filename": "s02_FID_multipleFAs.m",
+      "title": "S2 Fid Multiplefas",
+      "description": "This is a Free Induction Decay (FID) sequence with variable flip angles designed for educational purposes. It demonstrates loop structures for acquiring multiple measurements with systematically varied flip angles from pi/9 to pi radians. Part of the Pulseq tutorials, this sequence teaches basic parameter variation and timing control in MR spectroscopy acquisitions.",
+      "sequence_family": "FID",
+      "contrast_mechanism": "free_induction_decay",
+      "trajectory_type": "0D",
+      "applications": [],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_tutorials_s02_gre_tutorial_step1",
+      "repository": "github.com/pulseq/tutorials",
+      "filename": "s02_GRE_tutorial_step1.m",
+      "title": "S2 Gre Tutorial Step1",
+      "description": "This is a basic 2D gradient echo sequence with gradient spoiling, designed as step 1 in a tutorial series. It demonstrates fundamental concepts of 2D Cartesian imaging including phase encoding, readout gradients, and spoiler gradients. The sequence implements a simple GRE with configurable TE/TR and flip angle, serving as an educational foundation for understanding MRI sequence programming in the Pulseq framework.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "gradient_spoiling"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_tutorials_s02_multigradientecho",
+      "repository": "github.com/pulseq/tutorials",
+      "filename": "s02_MultiGradientEcho.m",
+      "title": "S2 Multigradientecho",
+      "description": "This sequence implements a multi-echo gradient echo (mGRE) acquisition that collects multiple gradient echoes after a single RF excitation. It demonstrates efficient T2* mapping by acquiring three echo times (4ms, 9ms, 15ms) in a single TR, using RF and gradient spoiling for steady-state control. This educational example from the Pulseq tutorials shows how to handle multiple ADC events and gradient refocusing within the TR period.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "gradient_spoiling",
+        "multi_echo"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_tutorials_s02_radialse",
+      "repository": "github.com/pulseq/tutorials",
+      "filename": "s02_RadialSE.m",
+      "title": "S2 Radialspin Echo",
+      "description": "This is a radial spin echo sequence that demonstrates non-Cartesian k-space sampling with radial projections. It uses a selective 90-degree excitation pulse followed by a non-selective 180-degree refocusing pulse to generate spin echoes. The sequence implements radial trajectory rotation, spoiler gradients, and includes dummy scans for steady-state preparation.",
+      "sequence_family": "SE",
+      "contrast_mechanism": "spin_echo",
+      "trajectory_type": "radial",
+      "applications": [
+        "T2_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "dummy_scans",
+        "gradient_rotation"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_tutorials_s03_bipolarmultigradientecho",
+      "repository": "github.com/pulseq/tutorials",
+      "filename": "s03_BipolarMultiGradientEcho.m",
+      "title": "S3 Bipolarmultigradientecho",
+      "description": "This sequence implements a bipolar multi-gradient echo (BMGRE) acquisition that collects multiple echoes with alternating readout gradient polarity. Part of the Pulseq tutorials showing the evolution from basic GRE to EPI, it demonstrates efficient multi-echo acquisition by reversing the readout gradient polarity between echoes, eliminating the need for rewinding gradients.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "gradient_spoiling",
+        "multi_echo",
+        "bipolar_readout"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_tutorials_s03_cartesiangradientecho",
+      "repository": "github.com/pulseq/tutorials",
+      "filename": "s03_CartesianGradientEcho.m",
+      "title": "S3 Cartesiangradientecho",
+      "description": "This is a 2D Cartesian gradient echo sequence from the official Pulseq tutorials. It demonstrates a standard GRE implementation with RF and gradient spoiling for T1-weighted imaging. As part of the radial/non-Cartesian tutorial series, it serves as a Cartesian reference for comparison with radial variants.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "gradient_spoiling",
+        "dummy_scans"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_tutorials_s03_gre_tutorial_step2",
+      "repository": "github.com/pulseq/tutorials",
+      "filename": "s03_GRE_tutorial_step2.m",
+      "title": "S3 Gre Tutorial Step2",
+      "description": "This is a 2D gradient echo sequence tutorial demonstrating timing optimization techniques in Pulseq. It implements a standard Cartesian GRE with calculated TE/TR delays, gradient spoiling, and phase encoding. The sequence is part of a progressive tutorial series teaching GRE implementation from basic to advanced concepts.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "gradient_spoiling",
+        "rf_spoiling",
+        "timing_optimization"
+      ],
+      "vendor_features": [],
+      "external_requirements": [
+        "MATLAB"
+      ],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_tutorials_s03_se",
+      "repository": "github.com/pulseq/tutorials",
+      "filename": "s03_SE.m",
+      "title": "S3 Spin Echo",
+      "description": "A basic spin echo sequence demonstrating fundamental MRI physics with 90° excitation and 180° refocusing pulses. This educational sequence shows proper TE timing calculation and echo formation without spatial encoding gradients. Part of the Pulseq tutorials showing the progression from FID to PRESS spectroscopy.",
+      "sequence_family": "SE",
+      "contrast_mechanism": "spin_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T2_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_tutorials_s04_gre_tutorial_step3",
+      "repository": "github.com/pulseq/tutorials",
+      "filename": "s04_GRE_tutorial_step3.m",
+      "title": "S4 Gre Tutorial Step3",
+      "description": "This is a basic gradient echo (GRE) tutorial sequence that demonstrates RF phase cycling and gradient spoiling. It implements a standard 2D Cartesian GRE sequence with configurable FOV, resolution, and timing parameters, designed for educational purposes to teach fundamental Pulseq programming concepts.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "gradient_spoiling"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_tutorials_s04_radialgradientecho",
+      "repository": "github.com/pulseq/tutorials",
+      "filename": "s04_RadialGradientEcho.m",
+      "title": "S4 Radialgradientecho",
+      "description": "This sequence implements a 2D radial gradient echo sequence with RF spoiling. It demonstrates non-Cartesian k-space sampling using radial spokes with configurable angular increment (including golden angle), making it suitable for motion-robust imaging. The sequence includes gradient spoiling, dummy scans for steady-state preparation, and visualization of the radial k-space trajectory.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "radial",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "gradient_spoiling",
+        "dummy_scans",
+        "golden_angle"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_tutorials_s04_se_withbackgrad",
+      "repository": "github.com/pulseq/tutorials",
+      "filename": "s04_SE_withBackGrad.m",
+      "title": "S4 Spin Echo Withbackgrad",
+      "description": "This is a spin echo sequence with background crusher gradients for improved signal coherence. It demonstrates the addition of constant background gradients during the spin echo to suppress unwanted coherences, a fundamental technique in MR spectroscopy. The sequence uses the Pulseq framework to create a basic spin echo with pi/2 excitation and pi refocusing pulses, with programmable background gradient strength.",
+      "sequence_family": "SE",
+      "contrast_mechanism": "spin_echo",
+      "trajectory_type": "0D",
+      "applications": [
+        "T2_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "gradient_spoiling"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_tutorials_s04a_segmentedgradientecho",
+      "repository": "github.com/pulseq/tutorials",
+      "filename": "s04a_SegmentedGradientEcho.m",
+      "title": "S4a Segmentedgradientecho",
+      "description": "This is a segmented gradient echo sequence that demonstrates k-space segmentation techniques for faster acquisition. It implements a 2D gradient echo with the k-space divided into multiple segments (5 by default), allowing multiple k-space lines to be acquired per TR using gradient blips between readouts. The sequence includes RF spoiling for steady-state control and gradient spoiling to suppress unwanted coherences, making it suitable for T1-weighted imaging with reduced scan time compared to conventional gradient echo.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "gradient_spoiling",
+        "k_space_segmentation",
+        "bipolar_readout"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_tutorials_s04b_segmentedgradientecho",
+      "repository": "github.com/pulseq/tutorials",
+      "filename": "s04b_SegmentedGradientEcho.m",
+      "title": "S4b Segmentedgradientecho",
+      "description": "This sequence implements a segmented gradient echo acquisition that serves as an educational bridge between standard gradient echo and echo planar imaging. It demonstrates k-space segmentation by dividing the phase encoding steps into multiple segments acquired after each excitation, introducing the concept of blip gradients for efficient k-space traversal. The sequence includes RF and gradient spoiling for steady-state control and provides a foundation for understanding multi-echo acquisitions.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "gradient_spoiling",
+        "split_gradients",
+        "phase_blips"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_tutorials_s04c_segmentedgradientecho",
+      "repository": "github.com/pulseq/tutorials",
+      "filename": "s04c_SegmentedGradientEcho.m",
+      "title": "S4c Segmentedgradientecho",
+      "description": "This sequence implements a segmented gradient echo acquisition that bridges traditional GRE and EPI imaging. It demonstrates k-space segmentation with gradient blips for phase encoding between readouts, serving as an educational stepping stone to understand EPI trajectory design. Part of the Pulseq tutorials, it shows how to handle segment-specific gradient manipulations and proper timing calculations for segmented acquisitions.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "epi_cartesian",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "gradient_spoiling",
+        "split_gradients",
+        "interleaved_slices"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_tutorials_s05_echoplanarimaging",
+      "repository": "github.com/pulseq/tutorials",
+      "filename": "s05_EchoPlanarImaging.m",
+      "title": "S5 Echoplanarimaging",
+      "description": "This is a single-shot Echo Planar Imaging (EPI) sequence implementation in Pulseq. It demonstrates efficient k-space traversal using a zig-zag trajectory with gradient blips for phase encoding and ramp sampling for fast readout. The sequence is designed for rapid image acquisition suitable for functional MRI or diffusion imaging applications.",
+      "sequence_family": "EPI",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "epi_cartesian",
+      "applications": [
+        "functional_imaging",
+        "T1_weighted",
+        "fMRI",
+        "diffusion"
+      ],
+      "acceleration_methods": [
+        "ramp_sampling"
+      ],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "gradient_spoiling",
+        "digital_triggers",
+        "phase_blips",
+        "ramp_sampling"
+      ],
+      "vendor_features": [
+        "digital_triggers",
+        "scanner_labels"
+      ],
+      "external_requirements": [
+        "Siemens scanner"
+      ],
+      "vendor_support": [
+        "Siemens",
+        "GE"
+      ]
+    },
+    {
+      "id": "pulseq_tutorials_s05_fastradialgradientecho",
+      "repository": "github.com/pulseq/tutorials",
+      "filename": "s05_FastRadialGradientEcho.m",
+      "title": "S5 Fastradialgradientecho",
+      "description": "This sequence implements a fast radial gradient echo sequence with golden angle sampling for non-Cartesian MRI. It uses radial k-space trajectories with flexible angular increments, making it suitable for dynamic imaging and motion-robust acquisitions. The sequence demonstrates non-Cartesian trajectory design within the Pulseq framework.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "radial",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "gradient_spoiling",
+        "golden_angle"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_tutorials_s05_gre_tutorial_step4",
+      "repository": "github.com/pulseq/tutorials",
+      "filename": "s05_GRE_tutorial_step4.m",
+      "title": "S5 Gre Tutorial Step4",
+      "description": "This is step 4 of the gradient echo tutorial series, implementing a 2D gradient echo sequence with RF spoiling for improved steady-state contrast. The sequence uses quasi-random RF phase cycling to suppress unwanted coherence pathways and includes gradient spoilers on all axes. Part of the official Pulseq tutorials for teaching MRI sequence programming fundamentals.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "gradient_spoiling"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_tutorials_s05_se_withspolers",
+      "repository": "github.com/pulseq/tutorials",
+      "filename": "s05_SE_withSpolers.m",
+      "title": "S5 Spin Echo Withspolers",
+      "description": "This sequence demonstrates a basic spin echo with spoiler gradients for educational purposes. It implements a non-selective spin echo sequence with configurable spoiler gradients to demonstrate coherence pathway control in MRI. The sequence is part of the Pulseq tutorials teaching progression from FID to PRESS spectroscopy sequences.",
+      "sequence_family": "SE",
+      "contrast_mechanism": "spin_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T2_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "gradient_spoiling"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_tutorials_s06_epi_singletraj",
+      "repository": "github.com/pulseq/tutorials",
+      "filename": "s06_EPI_SingleTraj.m",
+      "title": "S6 Epi Singletraj",
+      "description": "This sequence implements a single-shot EPI trajectory with optimized gradient waveforms for rapid k-space coverage. It demonstrates advanced EPI concepts including ramp sampling, gradient blip calculations, and trajectory export for reconstruction. The sequence uses a dummy sequence object to create and export the complete EPI trajectory as arbitrary gradient waveforms, enabling precise control over the readout timing.",
+      "sequence_family": "EPI",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "epi_cartesian",
+      "applications": [
+        "functional_imaging",
+        "T1_weighted",
+        "fMRI",
+        "diffusion"
+      ],
+      "acceleration_methods": [
+        "ramp_sampling"
+      ],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "dummy_scans",
+        "split_gradients",
+        "gradient_reversal",
+        "phase_blips",
+        "digital_triggers"
+      ],
+      "vendor_features": [
+        "digital_triggers"
+      ],
+      "external_requirements": [],
+      "vendor_support": [
+        "GE"
+      ]
+    },
+    {
+      "id": "pulseq_tutorials_s06_gre_tutorial_step5",
+      "repository": "github.com/pulseq/tutorials",
+      "filename": "s06_GRE_tutorial_step5.m",
+      "title": "S6 Gre Tutorial Step5",
+      "description": "A 2D gradient echo sequence with RF spoiling and dummy scans for steady-state preparation. This educational sequence demonstrates advanced steady-state magnetization control techniques, implementing quadratic phase cycling for RF spoiling to suppress transverse coherences. Part of the official Pulseq tutorials for teaching gradient echo imaging concepts.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "gradient_spoiling",
+        "dummy_scans"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_tutorials_s06_press",
+      "repository": "github.com/pulseq/tutorials",
+      "filename": "s06_PRESS.m",
+      "title": "S6 Press",
+      "description": "PRESS (Point RESolved Spectroscopy) sequence for localized MR spectroscopy. This sequence uses slice-selective excitation and two orthogonal refocusing pulses to achieve 3D voxel localization for metabolite detection. Implements gradient spoiling to suppress unwanted coherence pathways and demonstrates the construction of a clinical spectroscopy sequence in the Pulseq framework.",
+      "sequence_family": "PRESS",
+      "contrast_mechanism": "spin_echo",
+      "trajectory_type": "spectroscopy",
+      "applications": [
+        "spectroscopy",
+        "metabolite_quantification",
+        "T2_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "gradient_spoiling"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "pulseq_tutorials_s06_spiral",
+      "repository": "github.com/pulseq/tutorials",
+      "filename": "s06_Spiral.m",
+      "title": "S6 Spiral",
+      "description": "This sequence implements a 2D spiral gradient echo acquisition with Archimedean spiral trajectory. It demonstrates advanced trajectory optimization for hardware limits, fat saturation preparation, and Siemens-specific ADC segmentation for compatibility. The sequence is designed for rapid imaging applications requiring non-Cartesian sampling.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "spiral",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [
+        "fat_saturation"
+      ],
+      "advanced_features": [
+        "spiral_trajectory",
+        "gradient_optimization",
+        "adc_segmentation",
+        "slew_rate_limiting",
+        "trajectory_interpolation"
+      ],
+      "vendor_features": [
+        "adc_segmentation_siemens",
+        "pns_calculation"
+      ],
+      "external_requirements": [
+        "MATLAB",
+        "Siemens scanner"
+      ],
+      "vendor_support": [
+        "Siemens"
+      ]
+    },
+    {
+      "id": "rextlfung_rand3depi_epical",
+      "repository": "github.com/rextlfung/rand3depi",
+      "filename": "EPIcal.m",
+      "title": "Epical",
+      "description": "This is an EPI calibration sequence designed to optimize receiver gains and correct odd/even echo artifacts before running the main randomized 3D EPI acquisition. It serves as an essential preparation step in the Fast-fMRI workflow, acquiring fully-sampled reference data for system calibration. The sequence implements RF spoiling, fat saturation, and includes conversion tools for both Siemens Pulseq and GE TOPPE/pge2 platforms.",
+      "sequence_family": "EPI",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "epi_cartesian",
+      "applications": [
+        "functional_imaging",
+        "T1_weighted",
+        "fMRI",
+        "diffusion"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [
+        "fat_saturation"
+      ],
+      "advanced_features": [
+        "rf_spoiling",
+        "dummy_scans",
+        "calibration_scan",
+        "receiver_gain_optimization",
+        "odd_even_echo_correction",
+        "circular_readout_shifting"
+      ],
+      "vendor_features": [
+        "TRID_segments",
+        "pge2_conversion",
+        "toppe_conversion",
+        "pislquant"
+      ],
+      "external_requirements": [
+        "GE scanner",
+        "pge2 interpreter",
+        "MATLAB R2019b+"
+      ],
+      "vendor_support": [
+        "GE"
+      ]
+    },
+    {
+      "id": "rextlfung_rand3depi_gre",
+      "repository": "github.com/rextlfung/rand3depi",
+      "filename": "GRE.m",
+      "title": "Gre",
+      "description": "This GRE sequence generates low-resolution 3D gradient echo images for coil sensitivity mapping. Essential for parallel imaging reconstruction in multi-coil fMRI acquisitions, it provides spatial sensitivity profiles needed for GRAPPA/SENSE unaliasing. Features fat saturation, RF spoiling, and GE-specific optimizations including pislquant calibration.",
+      "sequence_family": "GRE",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "T1_weighted"
+      ],
+      "acceleration_methods": [],
+      "preparation_techniques": [
+        "fat_saturation"
+      ],
+      "advanced_features": [
+        "rf_spoiling",
+        "gradient_spoiling",
+        "dummy_scans",
+        "label_tracking"
+      ],
+      "vendor_features": [
+        "pge2_conversion",
+        "toppe_conversion",
+        "pislquant",
+        "TRID_segments"
+      ],
+      "external_requirements": [
+        "GE Scanner",
+        "PGE2 interpreter",
+        "TOPPE v6/v7"
+      ],
+      "vendor_support": [
+        "GE"
+      ]
+    },
+    {
+      "id": "rextlfung_rand3depi_randepi",
+      "repository": "github.com/rextlfung/rand3depi",
+      "filename": "randEPI.m",
+      "title": "Randepi",
+      "description": "Pseudo-random 3D EPI sequence with CAIPI-like shifting for highly accelerated fMRI acquisition. Uses temporally varying sampling patterns to create incoherent aliasing artifacts that can be resolved with advanced reconstruction techniques. Part of a research framework for testing novel acceleration strategies in functional MRI using the Pulseq framework.",
+      "sequence_family": "EPI",
+      "contrast_mechanism": "gradient_echo",
+      "trajectory_type": "epi_cartesian",
+      "applications": [
+        "functional_imaging",
+        "T1_weighted",
+        "fMRI",
+        "diffusion"
+      ],
+      "acceleration_methods": [
+        "random_undersampling",
+        "CAIPI",
+        "gaussian_sampling",
+        "temporal_incoherence"
+      ],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "gradient_spoiling",
+        "continuous_readout",
+        "phase_blips",
+        "golden_angle",
+        "calibration_scan",
+        "digital_triggers"
+      ],
+      "vendor_features": [
+        "pge2_conversion",
+        "toppe_conversion",
+        "trap4ge_timing",
+        "pislquant",
+        "TRID_segments"
+      ],
+      "external_requirements": [
+        "TOPPE",
+        "pge2",
+        "GE Scanner",
+        "MATLAB Signal Processing Toolbox"
+      ],
+      "vendor_support": [
+        "GE"
+      ]
+    },
+    {
+      "id": "shoheifujitaSF_mwf_qalas_script_mwf_qalas_adult_1mm_r5",
+      "repository": "github.com/shoheifujitaSF/mwf-qalas",
+      "filename": "script_mwf_qalas_adult_1mm_R5.m",
+      "title": "Mwf Qalas Adult 1mm R5",
+      "description": "MWF-QALAS is a sophisticated multi-contrast quantitative sequence that acquires T1, T2, proton density, and myelin water fraction maps in a single 3D scan. It uses 6 different T1/T2 weightings with T2 preparation modules (TE=20ms and 80ms) and inversion recovery preparation to enable comprehensive brain tissue characterization. This Pulseq implementation is optimized for adult brain imaging at 1mm isotropic resolution with R=5 acceleration.",
+      "sequence_family": "QALAS",
+      "contrast_mechanism": "multi_parametric",
+      "trajectory_type": "cartesian",
+      "applications": [
+        "multi_parametric",
+        "quantitative_imaging",
+        "brain_mapping"
+      ],
+      "acceleration_methods": [
+        "parallel_imaging"
+      ],
+      "preparation_techniques": [
+        "T2_prep",
+        "inversion"
+      ],
+      "advanced_features": [
+        "rf_spoiling",
+        "multi_echo",
+        "calibration_scan",
+        "dummy_scans"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "shoheifujitaSF_mwf_qalas_script_tafi_adult",
+      "repository": "github.com/shoheifujitaSF/mwf-qalas",
+      "filename": "script_tAFI_adult.m",
+      "title": "Tafi Adult",
+      "description": "This is a Turbo Actual Flip angle Imaging (tAFI) sequence for B1+ field mapping in adult brain imaging. It uses a dual TR approach (TR1=19ms, TR2=95ms) with a spiral trajectory to efficiently map the transmit field inhomogeneity. The sequence is designed as a calibration scan for accurate quantitative MRI, particularly for correcting flip angles in QALAS acquisitions.",
+      "sequence_family": "AFI",
+      "contrast_mechanism": "flip_angle_mapping",
+      "trajectory_type": "spiral",
+      "applications": [],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "gradient_spoiling",
+        "spiral_trajectory",
+        "dual_TR"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "shoheifujitaSF_mwf_qalas_script_tafi_hbcd",
+      "repository": "github.com/shoheifujitaSF/mwf-qalas",
+      "filename": "script_tAFI_hbcd.m",
+      "title": "Tafi Hbcd",
+      "description": "This is a pediatric-optimized Turbo Actual Flip angle Imaging (tAFI) sequence for B1+ field mapping in developing brains. It uses a dual TR approach (TR1=19ms, TR2=95ms) to measure the actual flip angle distribution across the brain. The sequence is specifically designed for the HBCD study with reduced FOV (228x176mm) appropriate for pediatric subjects.",
+      "sequence_family": "AFI",
+      "contrast_mechanism": "dual_TR_B1_mapping",
+      "trajectory_type": "cartesian",
+      "applications": [],
+      "acceleration_methods": [],
+      "preparation_techniques": [],
+      "advanced_features": [
+        "rf_spoiling",
+        "gradient_spoiling",
+        "dual_TR_acquisition",
+        "echo_train_length"
+      ],
+      "vendor_features": [],
+      "external_requirements": [],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "yohan_jun_PRIME_p_pr_1mm_b1k_dir3_shared",
+      "repository": "github.com/yohan-jun/PRIME",
+      "filename": "P_PR_1mm_b1k_dir3_shared.m",
+      "title": "P PR 1mm B1k Dir3 Shared",
+      "description": "This is a PRIME (Phase Reversed Interleaved Multi-Echo) diffusion sequence implementing distortion-free diffusion MRI through BUDA (blipped-up/down acquisition) technique. The sequence combines multi-band excitation, in-plane acceleration, and phase-reversed interleaving to achieve high-quality diffusion imaging without geometric distortions. Within the Pulseq framework, it demonstrates advanced acceleration strategies and phase correction methods for state-of-the-art diffusion MRI.",
+      "sequence_family": "EPI",
+      "contrast_mechanism": "diffusion",
+      "trajectory_type": "epi_cartesian",
+      "applications": [
+        "functional_imaging",
+        "fMRI",
+        "diffusion"
+      ],
+      "acceleration_methods": [
+        "SMS",
+        "GRAPPA",
+        "CAIPI",
+        "partial_fourier",
+        "ramp_sampling"
+      ],
+      "preparation_techniques": [
+        "fat_saturation",
+        "diffusion_prep",
+        "gradient_spoiling"
+      ],
+      "advanced_features": [
+        "rf_spoiling",
+        "gradient_spoiling",
+        "dummy_scans",
+        "phase_reversal",
+        "multi_echo",
+        "split_gradients",
+        "label_tracking",
+        "digital_triggers",
+        "phase_blips",
+        "interleaved_slices",
+        "golden_angle"
+      ],
+      "vendor_features": [],
+      "external_requirements": [
+        "MATLAB R2019b+",
+        "Advanced gradient system"
+      ],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "yutingchen11_MIMOSA_write_mimosa_1iso",
+      "repository": "github.com/yutingchen11/MIMOSA",
+      "filename": "write_MIMOSA_1iso.m",
+      "title": "Mimosa 1iso",
+      "description": "MIMOSA (Multiple-tissue Isotropic Multi-parametric MRI Of brain using Self-supervised Algorithm) sequence for 3T scanners with 1mm isotropic resolution. This sequence implements a sophisticated multi-contrast acquisition strategy with variable acceleration factors (R=3.26 to 11.75) using CPLM-optimized spiral trajectories, enabling rapid quantitative T1/T2/PD mapping in 3-4 minutes. Designed for integration with zero-shot self-supervised learning reconstruction.",
+      "sequence_family": "MIMOSA",
+      "contrast_mechanism": "multi_parametric",
+      "trajectory_type": "spiral_CPLM",
+      "applications": [],
+      "acceleration_methods": [
+        "CPLM_optimization",
+        "variable_acceleration"
+      ],
+      "preparation_techniques": [
+        "T2_prep",
+        "inversion",
+        "calibration_scan"
+      ],
+      "advanced_features": [
+        "rf_spoiling",
+        "multi_echo",
+        "label_tracking",
+        "calibration_scan",
+        "dummy_scans"
+      ],
+      "vendor_features": [],
+      "external_requirements": [
+        "MATLAB R2020b+",
+        "Zero-Shot SSL reconstruction",
+        "TensorFlow 2.x",
+        "GPU with 8+ GB memory"
+      ],
+      "vendor_support": [
+        "Universal"
+      ]
+    },
+    {
+      "id": "yutingchen11_MIMOSA_write_mimosa_750um_iso_r4",
+      "repository": "github.com/yutingchen11/MIMOSA",
+      "filename": "write_MIMOSA_750um_iso_R4.m",
+      "title": "Mimosa 750um Iso R4",
+      "description": "MIMOSA (Multiple-tissue Isotropic Multi-parametric MRI Of brain using Self-supervised Algorithm) sequence for 7T scanners with 750µm isotropic resolution. This advanced multi-contrast quantitative MRI sequence enables simultaneous T1, T2, and PD mapping through multiple preparation modules and sophisticated readout strategies, optimized for ultra-high field strength with R=4 acceleration.",
+      "sequence_family": "MIMOSA",
+      "contrast_mechanism": "multi_parametric",
+      "trajectory_type": "cartesian_uniform",
+      "applications": [],
+      "acceleration_methods": [
+        "uniform_undersampling",
+        "parallel_imaging"
+      ],
+      "preparation_techniques": [
+        "T2_prep",
+        "inversion",
+        "rf_spoiling",
+        "calibration_scan"
+      ],
+      "advanced_features": [
+        "rf_spoiling",
+        "gradient_spoiling",
+        "dummy_scans",
+        "multi_echo",
+        "calibration_scan",
+        "phase_cycling"
+      ],
+      "vendor_features": [],
+      "external_requirements": [
+        "MATLAB Signal Processing Toolbox",
+        "7T scanner",
+        "GPU for reconstruction"
+      ],
+      "vendor_support": [
+        "Universal"
+      ]
+    }
+  ],
+  "metadata": {
+    "total_sequences": 115,
+    "last_updated": "2024-12-04",
+    "version": "1.0",
+    "repositories": 17,
+    "sequence_families": [
+      "AFI",
+      "ASL",
+      "CALIBRATION",
+      "DIFFUSION",
+      "EPI",
+      "FID",
+      "GRE",
+      "HASTE",
+      "MIMOSA",
+      "MOLLI",
+      "MPRAGE",
+      "PRESS",
+      "QALAS",
+      "RF_DESIGN",
+      "SE",
+      "TSE",
+      "UTE",
+      "ZTE",
+      "bSSFP"
+    ]
+  }
+}

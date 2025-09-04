@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pulseq Sequence Library - PulsePal</title>
+    <style>
+        :root {
+            --primary-color: #0066cc;
+            --secondary-color: #4a90e2;
+            --background: #f5f7fa;
+            --card-background: white;
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --border: #e1e8ed;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: var(--card-background);
+            border-bottom: 2px solid var(--border);
+            padding: 30px 0;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1em;
+        }
+
+        .filters {
+            background: var(--card-background);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .filter-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input, select {
+            padding: 10px 12px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+        }
+
+        .search-box {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding-left: 12px;
+        }
+
+        .search-icon {
+            font-size: 1.2em;
+            color: var(--text-secondary);
+        }
+
+        .stats {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            color: white;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            opacity: 0.9;
+        }
+
+        .sequence-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+        }
+
+        .sequence-card {
+            background: var(--card-background);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            cursor: pointer;
+            overflow: hidden;
+            word-wrap: break-word;
+        }
+
+        .sequence-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+            border-color: var(--primary-color);
+        }
+
+        .sequence-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .sequence-title {
+            font-family: 'Courier New', Consolas, Monaco, monospace;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+            word-wrap: break-word;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+            line-height: 1.3;
+        }
+
+        .sequence-description {
+            color: var(--text-primary);
+            margin-bottom: 15px;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .sequence-tags {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 15px;
+        }
+
+        .tag-line {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tag-line strong {
+            color: var(--text-primary);
+            font-size: 0.9em;
+            min-width: 70px;
+        }
+
+        .tag {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+
+        .tag-contrast {
+            background: #fff4e6;
+            color: #f39c12;
+        }
+
+        .tag-trajectory {
+            background: #e8f5e9;
+            color: #27ae60;
+        }
+
+        .tag-vendor {
+            background: #fce4ec;
+            color: #e91e63;
+        }
+
+        .repository-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9em;
+            transition: color 0.3s ease;
+        }
+
+        .repository-link:hover {
+            color: var(--primary-color);
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .no-results h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2em;
+            color: var(--text-secondary);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--card-background);
+            border-radius: 12px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 30px;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: color 0.3s ease;
+        }
+
+        .modal-close:hover {
+            color: var(--text-primary);
+        }
+
+        .detail-section {
+            margin-bottom: 25px;
+        }
+
+        .detail-section h3 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .detail-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .detail-list li {
+            padding: 5px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .detail-list li::before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: var(--secondary-color);
+        }
+
+        @media (max-width: 768px) {
+            .sequence-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-group {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🧲 Pulseq Sequence Library</h1>
+            <p class="subtitle">Browse and search through Pulseq MRI sequences from various repositories</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="filters">
+            <div class="filter-group">
+                <div class="filter-item">
+                    <label for="search">Search Sequences</label>
+                    <div class="search-box">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="search" placeholder="Name, description, or repository...">
+                    </div>
+                </div>
+                <div class="filter-item">
+                    <label for="family">Sequence Family</label>
+                    <select id="family">
+                        <option value="">All Families</option>
+                        <option value="GRE">GRE</option>
+                        <option value="SE">Spin Echo</option>
+                        <option value="EPI">EPI</option>
+                        <option value="TSE">TSE/FSE</option>
+                        <option value="MOLLI">MOLLI</option>
+                        <option value="ASL">ASL</option>
+                        <option value="DIFFUSION">Diffusion</option>
+                        <option value="ZTE">ZTE/UTE</option>
+                        <option value="bSSFP">bSSFP</option>
+                        <option value="PRESS">Spectroscopy</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label for="trajectory">Trajectory Type</label>
+                    <select id="trajectory">
+                        <option value="">All Trajectories</option>
+                        <option value="cartesian">Cartesian</option>
+                        <option value="radial">Radial</option>
+                        <option value="spiral">Spiral</option>
+                        <option value="epi_cartesian">EPI Cartesian</option>
+                        <option value="stack_of_spirals">Stack of Spirals</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label for="repository">Repository</label>
+                    <select id="repository">
+                        <option value="">All Repositories</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="stats">
+                <div class="stat-item">
+                    <span class="stat-value" id="total-count">115</span>
+                    <span class="stat-label">Total Sequences</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="filtered-count">115</span>
+                    <span class="stat-label">Filtered Results</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="repo-count">15</span>
+                    <span class="stat-label">Repositories</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="sequence-grid" id="sequence-grid">
+            <div class="loading">Loading sequences...</div>
+        </div>
+    </div>
+
+    <div class="modal" id="sequence-modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal()">✕</span>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <script>
+        let allSequences = [];
+        let filteredSequences = [];
+
+        // Load sequence data
+        async function loadSequences() {
+            try {
+                const response = await fetch('sequences/sequence_catalog.json');
+                const data = await response.json();
+                allSequences = data.sequences;
+                filteredSequences = allSequences;
+
+                populateFilters();
+                renderSequences();
+                updateStats();
+            } catch (error) {
+                console.error('Error loading sequences:', error);
+                document.getElementById('sequence-grid').innerHTML =
+                    '<div class="no-results"><h3>Error Loading Sequences</h3><p>Please try refreshing the page.</p></div>';
+            }
+        }
+
+        function populateFilters() {
+            const repositories = [...new Set(allSequences.map(s => s.repository))];
+            const repoSelect = document.getElementById('repository');
+
+            repositories.sort().forEach(repo => {
+                const option = document.createElement('option');
+                option.value = repo;
+                option.textContent = repo.replace('github.com/', '');
+                repoSelect.appendChild(option);
+            });
+
+            document.getElementById('repo-count').textContent = repositories.length;
+        }
+
+        function renderSequences() {
+            const grid = document.getElementById('sequence-grid');
+
+            if (filteredSequences.length === 0) {
+                grid.innerHTML = '<div class="no-results"><h3>No sequences found</h3><p>Try adjusting your filters</p></div>';
+                return;
+            }
+
+            grid.innerHTML = filteredSequences.map(seq => `
+                <div class="sequence-card" onclick='showSequenceDetail(${JSON.stringify(seq).replace(/'/g, "&apos;")})'>
+                    <div class="sequence-header">
+                        <div>
+                            <div class="sequence-title">${seq.filename}</div>
+                        </div>
+                    </div>
+                    <div class="sequence-description">${seq.description}</div>
+                    <div class="sequence-tags">
+                        <div class="tag-line">
+                            <strong>Contrast:</strong> <span class="tag tag-contrast">${seq.contrast_mechanism}</span>
+                        </div>
+                        <div class="tag-line">
+                            <strong>Trajectory:</strong> <span class="tag tag-trajectory">${seq.trajectory_type}</span>
+                        </div>
+                    </div>
+                    <a href="https://${seq.repository}" target="_blank" class="repository-link">
+                        📁 ${seq.repository.replace('github.com/', '')}
+                    </a>
+                </div>
+            `).join('');
+        }
+
+        function updateStats() {
+            document.getElementById('total-count').textContent = allSequences.length;
+            document.getElementById('filtered-count').textContent = filteredSequences.length;
+        }
+
+        function filterSequences() {
+            const searchTerm = document.getElementById('search').value.toLowerCase();
+            const family = document.getElementById('family').value;
+            const trajectory = document.getElementById('trajectory').value;
+            const repository = document.getElementById('repository').value;
+
+            filteredSequences = allSequences.filter(seq => {
+                const matchesSearch = !searchTerm ||
+                    seq.filename.toLowerCase().includes(searchTerm) ||
+                    seq.description.toLowerCase().includes(searchTerm) ||
+                    seq.repository.toLowerCase().includes(searchTerm) ||
+                    (seq.title && seq.title.toLowerCase().includes(searchTerm));
+
+                const matchesFamily = !family || seq.sequence_family === family;
+                const matchesTrajectory = !trajectory || seq.trajectory_type === trajectory;
+                const matchesRepository = !repository || seq.repository === repository;
+
+                return matchesSearch && matchesFamily && matchesTrajectory && matchesRepository;
+            });
+
+            renderSequences();
+            updateStats();
+        }
+
+        function showSequenceDetail(sequence) {
+            const modal = document.getElementById('sequence-modal');
+            const modalBody = document.getElementById('modal-body');
+
+            modalBody.innerHTML = `
+                <h2>${sequence.filename}</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                    From ${sequence.repository}
+                </p>
+
+                <div class="detail-section">
+                    <h3>Description</h3>
+                    <p>${sequence.description}</p>
+                </div>
+
+                <div class="detail-section">
+                    <h3>Technical Details</h3>
+                    <ul class="detail-list">
+                        <li><strong>Sequence Family:</strong> ${sequence.sequence_family}</li>
+                        <li><strong>Contrast Mechanism:</strong> ${sequence.contrast_mechanism}</li>
+                        <li><strong>Trajectory Type:</strong> ${sequence.trajectory_type}</li>
+                    </ul>
+                </div>
+
+                ${sequence.applications ? `
+                <div class="detail-section">
+                    <h3>Applications</h3>
+                    <ul class="detail-list">
+                        ${sequence.applications.map(app => `<li>${app}</li>`).join('')}
+                    </ul>
+                </div>
+                ` : ''}
+
+                ${sequence.acceleration_methods && sequence.acceleration_methods.length > 0 ? `
+                <div class="detail-section">
+                    <h3>Acceleration Methods</h3>
+                    <ul class="detail-list">
+                        ${sequence.acceleration_methods.map(method => `<li>${method}</li>`).join('')}
+                    </ul>
+                </div>
+                ` : ''}
+
+                ${sequence.external_requirements ? `
+                <div class="detail-section">
+                    <h3>External Requirements</h3>
+                    <ul class="detail-list">
+                        ${sequence.external_requirements.map(req => `<li>${req}</li>`).join('')}
+                    </ul>
+                </div>
+                ` : ''}
+
+                <div class="detail-section">
+                    <h3>Source</h3>
+                    <a href="https://${sequence.repository}/blob/main/${sequence.filename}" target="_blank" class="repository-link">
+                        View on GitHub →
+                    </a>
+                </div>
+            `;
+
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('sequence-modal').classList.remove('active');
+        }
+
+        // Event listeners
+        document.getElementById('search').addEventListener('input', filterSequences);
+        document.getElementById('family').addEventListener('change', filterSequences);
+        document.getElementById('trajectory').addEventListener('change', filterSequences);
+        document.getElementById('repository').addEventListener('change', filterSequences);
+
+        // Close modal on outside click
+        document.getElementById('sequence-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Initialize
+        loadSequences();
+    </script>
+</body>
+</html>

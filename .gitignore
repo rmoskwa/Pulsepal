@@ -132,6 +132,7 @@ temp/
 tmp/
 .temp/
 .tmp/
+embedding-strategy.md
 
 # ====================================
 # Database & Data
@@ -198,6 +199,8 @@ $RECYCLE.BIN/
 # ====================================
 # Project Specific
 # ====================================
+
+scripts/
 
 # Chainlit
 .chainlit/
