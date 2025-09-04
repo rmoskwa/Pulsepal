@@ -413,7 +413,7 @@
 </head>
 <body>
     <div class="header">
-        <h1>🧲 Pulseq Sequence Library</h1>
+        <h1>Pulseq Sequence Library</h1>
         <p>Browse and explore MRI sequences from the Pulseq community</p>
         <div class="nav-links">
             <a href="https://rmoskwa.github.io/Pulsepal/">← Back to Documentation</a>
@@ -482,7 +482,8 @@
     async function loadSequences() {
         try {
             const response = await fetch('https://rmoskwa.github.io/Pulsepal/sequences/sequence_catalog.json');
-            sequences = await response.json();
+            const data = await response.json();
+            sequences = data.sequences || data;
             filteredSequences = [...sequences];
             initializeFilters();
             displaySequences();
