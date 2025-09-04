@@ -500,7 +500,7 @@
         // Get unique values for each filter
         const families = [...new Set(sequences.map(s => s.sequence_family).filter(Boolean))].sort();
         const trajectories = [...new Set(sequences.map(s => s.trajectory_type).filter(Boolean))].sort();
-        const repositories = [...new Set(sequences.map(s => s.repository_source).filter(Boolean))].sort();
+        const repositories = [...new Set(sequences.map(s => s.repository || s.repository_source).filter(Boolean))].sort();
 
         // Populate family filter
         const familyFilter = document.getElementById('familyFilter');
@@ -549,9 +549,9 @@
                 <h3 class="sequence-title">${seq.filename}</h3>
                 <div class="sequence-repository">
                     <span>📁</span>
-                    <span>${seq.repository_source.replace('github.com/', '')}</span>
+                    <span>${(seq.repository || seq.repository_source || '').replace('github.com/', '')}</span>
                 </div>
-                <p class="sequence-summary">${seq.content_summary || 'No description available'}</p>
+                <p class="sequence-summary">${seq.description || seq.content_summary || 'No description available'}</p>
                 <div class="sequence-tags-container">
                     ${seq.contrast_mechanism ? `
                         <div class="sequence-tag-row">
@@ -589,18 +589,18 @@
             <div class="modal-section">
                 <h3>📁 Repository</h3>
                 <div class="modal-section-content">
-                    <a href="https://${seq.repository_source}" target="_blank" class="modal-repository-link">
-                        ${seq.repository_source}
+                    <a href="https://${seq.repository || seq.repository_source}" target="_blank" class="modal-repository-link">
+                        ${seq.repository || seq.repository_source}
                     </a>
                 </div>
             </div>
         `;
 
-        if (seq.content_summary) {
+        if (seq.description || seq.content_summary) {
             detailsHTML += `
                 <div class="modal-section">
                     <h3>📝 Summary</h3>
-                    <div class="modal-section-content">${seq.content_summary}</div>
+                    <div class="modal-section-content">${seq.description || seq.content_summary}</div>
                 </div>
             `;
         }
@@ -659,15 +659,21 @@
             if (searchTerm) {
                 const searchableText = [
                     seq.filename,
+                    seq.description,
                     seq.content_summary,
                     seq.sequence_family,
                     seq.contrast_mechanism,
                     seq.trajectory_type,
                     seq.external_requirements,
                     seq.preparation_technique,
+                    seq.preparation_techniques,
                     seq.acceleration_method,
+                    seq.acceleration_methods,
                     seq.advanced_feature,
+                    seq.advanced_features,
                     seq.vendor_feature,
+                    seq.vendor_features,
+                    seq.repository,
                     seq.repository_source
                 ].filter(Boolean).join(' ').toLowerCase();
 
@@ -687,7 +693,7 @@
             }
 
             // Repository filter
-            if (repositoryFilter && seq.repository_source !== repositoryFilter) {
+            if (repositoryFilter && seq.repository !== repositoryFilter && seq.repository_source !== repositoryFilter) {
                 return false;
             }
 
@@ -701,7 +707,7 @@
     function updateStats() {
         document.getElementById('totalSequences').textContent = sequences.length;
         document.getElementById('totalRepositories').textContent =
-            [...new Set(sequences.map(s => s.repository_source))].length;
+            [...new Set(sequences.map(s => s.repository || s.repository_source))].length;
         document.getElementById('visibleSequences').textContent = filteredSequences.length;
     }
 
