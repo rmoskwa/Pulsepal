@@ -1,7 +1,4 @@
----
-layout: default
-title: Pulseq Sequence Library
----
+# Pulseq Sequence Library
 
 <style>
     :root {
