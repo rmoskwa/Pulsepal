@@ -1,5 +1,3 @@
 # Sequence Library Browser
 
-<meta http-equiv="refresh" content="0; url=./sequences-standalone.html">
-
-[Click here if you are not redirected automatically](sequences-standalone.html)
+<iframe src="https://rmoskwa.github.io/Pulsepal/sequences-standalone.html" style="width: 100%; height: 100vh; border: none;"></iframe>
