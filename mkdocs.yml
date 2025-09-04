@@ -22,6 +22,8 @@ plugins:
 - search:
     lang: en
     separator: '[\s\-\.]+'
+# Copy HTML files and other assets
+use_directory_urls: true
 markdown_extensions:
 - pymdownx.highlight
 - pymdownx.superfences
@@ -35,7 +37,6 @@ markdown_extensions:
     permalink: true
 nav:
 - Home: index.md
-- Sequence Library: sequences.html
 - API Reference:
   - Overview: matlab_api/index.md
   - Functions:
