@@ -11,6 +11,7 @@ mkdir -p api-docs-deploy/docs
 cp -r docs/matlab_api api-docs-deploy/docs/
 cp -r docs/sequences api-docs-deploy/docs/
 cp docs/sequences-standalone.html api-docs-deploy/docs/
+cp docs/sequences.md api-docs-deploy/docs/
 cp docs/index.md api-docs-deploy/docs/
 cp mkdocs.yml api-docs-deploy/
 
