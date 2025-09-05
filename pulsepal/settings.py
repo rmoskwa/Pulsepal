@@ -145,6 +145,28 @@ class Settings(BaseSettings):
         alias="ROTATION_INTERVAL",
     )
 
+    # Reranker Configuration
+    reranker_model_path: str = Field(
+        default="/app/models",
+        description="Path to store/load reranker model files (Railway volume)",
+        alias="RERANKER_MODEL_PATH",
+    )
+    reranker_model_name: str = Field(
+        default="BAAI/bge-reranker-base",
+        description="HuggingFace model identifier for reranker",
+        alias="RERANKER_MODEL_NAME",
+    )
+    reranker_batch_size: int = Field(
+        default=15,
+        description="Maximum documents to process in reranking batch",
+        alias="RERANKER_BATCH_SIZE",
+    )
+    reranker_timeout: int = Field(
+        default=30,
+        description="Model initialization timeout in seconds",
+        alias="RERANKER_TIMEOUT",
+    )
+
 
 def load_settings() -> Settings:
     """Load settings with proper error handling and environment loading."""

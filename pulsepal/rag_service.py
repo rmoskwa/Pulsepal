@@ -14,7 +14,7 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
 from .rag_fusion import merge_search_results, select_top_results
-
+from .reranker_service import BGERerankerService
 from .rag_formatters import format_unified_response
 from .settings import get_settings
 from .source_profiles import MULTI_CHUNK_DOCUMENTS
@@ -42,6 +42,7 @@ class ModernPulseqRAG:
     def __init__(self):
         """Initialize RAG service with Supabase client."""
         self._supabase_client = None
+        self._reranker = None
         self.settings = get_settings()
 
     @property
@@ -50,6 +51,18 @@ class ModernPulseqRAG:
         if self._supabase_client is None:
             self._supabase_client = get_supabase_client()
         return self._supabase_client
+
+    @property
+    def reranker(self) -> BGERerankerService:
+        """Lazy load reranker service."""
+        if self._reranker is None:
+            self._reranker = BGERerankerService(
+                model_path=self.settings.reranker_model_path,
+                model_name=self.settings.reranker_model_name,
+                batch_size=self.settings.reranker_batch_size,
+                timeout=self.settings.reranker_timeout,
+            )
+        return self._reranker
 
     async def search_with_source_awareness(
         self,
@@ -972,14 +985,48 @@ class ModernPulseqRAG:
             # Select top results for reranking
             top_results = select_top_results(fused_results, top_n=15)
 
-            # Return requested limit (may be less than 15)
-            sorted_results = top_results[:limit]
+            # Apply neural reranking to top 15 results
+            try:
+                rerank_start = time.time()
+                (
+                    relevance_scores,
+                    reranked_results,
+                ) = await self.reranker.rerank_documents(
+                    query=query,
+                    documents=top_results,
+                    top_k=3,  # Return top 3 reranked results to LLM
+                )
+                rerank_latency = (time.time() - rerank_start) * 1000  # Convert to ms
 
-            # Add metadata including performance info
-            for result in sorted_results:
-                result["_source"] = "hybrid_search"
-                result["_search_type"] = "hybrid"
-                result["_parallel_search"] = True
+                logger.info(
+                    f"Reranking completed in {rerank_latency:.2f}ms, "
+                    f"top score: {relevance_scores[0] if relevance_scores else 0:.3f}"
+                )
+
+                # Use reranked results if successful
+                sorted_results = reranked_results[:limit]
+
+                # Add reranking metadata
+                for i, result in enumerate(sorted_results):
+                    result["_source"] = "hybrid_search"
+                    result["_search_type"] = "hybrid"
+                    result["_parallel_search"] = True
+                    result["_reranked"] = True
+                    result["_rerank_score"] = (
+                        relevance_scores[i] if i < len(relevance_scores) else 0.0
+                    )
+
+            except Exception as e:
+                # Fallback to RRF-only results if reranking fails
+                logger.warning(f"Reranking failed, using RRF-only results: {e}")
+                sorted_results = top_results[:limit]
+
+                # Add metadata without reranking info
+                for result in sorted_results:
+                    result["_source"] = "hybrid_search"
+                    result["_search_type"] = "hybrid"
+                    result["_parallel_search"] = True
+                    result["_reranked"] = False
 
             logger.info(
                 f"Hybrid search returned {len(sorted_results)} results "
