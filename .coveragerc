@@ -1,0 +1,72 @@
+[run]
+# Coverage.py configuration for PulsePal
+
+# Source packages to measure
+source = pulsepal
+
+# Files and directories to omit from coverage
+omit =
+    */tests/*
+    */test_*.py
+    */__pycache__/*
+    */site-packages/*
+    */.venv/*
+    */.venv-wsl/*
+    */migrations/*
+    */config/*
+    */scripts/*
+    setup.py
+    */cli.py
+    */run_*.py
+
+# Enable branch coverage
+branch = True
+
+# Enable coverage for multiprocessing
+parallel = True
+concurrency = thread
+
+[report]
+# Reporting options
+precision = 2
+show_missing = True
+skip_covered = False
+skip_empty = True
+
+# Exclude lines from coverage
+exclude_lines =
+    # Standard pragma
+    pragma: no cover
+
+    # Debug code
+    def __repr__
+    def __str__
+
+    # Defensive programming
+    raise AssertionError
+    raise NotImplementedError
+
+    # Non-executed code
+    if __name__ == .__main__.:
+    if TYPE_CHECKING:
+    @abstract
+    @abstractmethod
+
+    # Logging
+    logger.debug
+    logger.info
+    logger.warning
+    logger.error
+    logger.critical
+
+# Ignore missing source files
+ignore_errors = True
+
+[html]
+# HTML report settings
+directory = htmlcov
+title = PulsePal Test Coverage Report
+
+[xml]
+# XML report for CI integration
+output = coverage.xml
