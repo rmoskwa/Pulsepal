@@ -6,8 +6,10 @@ to appropriate data sources (API docs, examples, tutorials) based on user intent
 Includes deterministic function validation to prevent hallucinations.
 """
 
+import asyncio
 import logging
 import re
+import time
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
@@ -54,9 +56,11 @@ class ModernPulseqRAG:
         forced: bool = False,
         source_hints: Optional[Dict] = None,
         detected_functions: Optional[List[Dict]] = None,
+        use_parallel: bool = True,  # New parameter to enable parallel search
     ) -> Dict:
         """
         Perform source-aware search across Supabase tables.
+        Now supports parallel BM25 and vector search execution.
 
         Args:
             query: User's search query
@@ -64,6 +68,7 @@ class ModernPulseqRAG:
             forced: Whether this search was forced by semantic routing
             source_hints: Additional hints about which sources to prioritize
             detected_functions: Functions detected by semantic router for direct lookup
+            use_parallel: Whether to use parallel BM25+vector search (default True)
 
         Returns:
             Formatted results organized by source with synthesis hints
@@ -82,14 +87,59 @@ class ModernPulseqRAG:
                 f"Detected functions: {func_names[:5]}..."
             )  # Log first 5 for debugging
 
-            # Note: We could optionally do targeted lookups here if the query
-            # specifically asks about one of these functions, but for now
-            # we'll let the LLM's search decision take precedence
+        # If LLM didn't specify sources, use parallel search for better performance
+        if not sources and use_parallel:
+            logger.info("Using parallel BM25+vector search for comprehensive results")
 
-        # If LLM didn't specify sources, default to comprehensive search
+            # Execute parallel search
+            parallel_results = await self._parallel_search(query, limit=20)
+
+            # Combine results from both search methods
+            all_results = []
+            all_results.extend(parallel_results.get("bm25_results", []))
+            all_results.extend(parallel_results.get("vector_results", []))
+
+            # Deduplicate results based on content similarity
+            seen_keys = set()
+            unique_results = []
+            for result in all_results:
+                # Create a key based on source_table and id
+                key = f"{result.get('source_table', '')}_{result.get('id', '')}"
+                if key not in seen_keys and key != "_":
+                    seen_keys.add(key)
+                    unique_results.append(result)
+
+            # Format results for unified response
+            source_results = {
+                "parallel_search": unique_results[:30]
+            }  # Limit to 30 total
+
+            # Format results using rag_formatters
+            query_context = {
+                "original_query": query,
+                "forced": forced,
+                "source_hints": source_hints,
+                "search_mode": "parallel",
+                "detected_functions": detected_functions,
+                "performance": parallel_results.get("metadata", {}).get(
+                    "performance", {}
+                ),
+            }
+
+            # Log search summary with performance metrics
+            perf = parallel_results.get("metadata", {}).get("performance", {})
+            logger.info(
+                f"Parallel search complete: {len(unique_results)} unique results | "
+                f"Latency - BM25: {perf.get('bm25_latency_ms', 0)}ms, "
+                f"Vector: {perf.get('vector_latency_ms', 0)}ms, "
+                f"Total: {perf.get('total_latency_ms', 0)}ms"
+            )
+
+            return format_unified_response(source_results, query_context)
+
+        # Fall back to original source-specific search if sources are specified
         if not sources:
             # Default to all sources with balanced top-k approach
-            # This ensures comprehensive coverage without overwhelming the LLM
             sources = ["api_reference", "crawled_pages", "official_sequence_examples"]
             logger.info(
                 f"No sources specified, using top-k from all sources: {sources}"
@@ -346,62 +396,217 @@ class ModernPulseqRAG:
 
         return result
 
-    async def _vector_search(self, query: str, limit: int = 30) -> List[Dict[str, Any]]:
-        """Perform vector similarity search."""
+    async def _parallel_search(
+        self,
+        query: str,
+        limit: int = 20,
+    ) -> Dict[str, Any]:
+        """
+        Execute BM25 and vector searches in parallel using asyncio.gather.
+
+        Args:
+            query: Search query text
+            limit: Maximum results per search method (default 20)
+
+        Returns:
+            Dictionary with results from both search methods and performance metrics
+        """
+        # Performance timing
+        start_time = time.perf_counter()
+        bm25_start = vector_start = 0
+        bm25_end = vector_end = 0
+
+        # Create async tasks for parallel execution
+        async def timed_bm25_search():
+            nonlocal bm25_start, bm25_end
+            bm25_start = time.perf_counter()
+            try:
+                results = await self._search_bm25_async(query=query, limit=limit)
+                bm25_end = time.perf_counter()
+                return results
+            except Exception as e:
+                bm25_end = time.perf_counter()
+                logger.error(f"BM25 search failed in parallel execution: {e}")
+                return []
+
+        async def timed_vector_search():
+            nonlocal vector_start, vector_end
+            vector_start = time.perf_counter()
+            try:
+                results = await self._search_vector_async(query=query, limit=limit)
+                vector_end = time.perf_counter()
+                return results
+            except Exception as e:
+                vector_end = time.perf_counter()
+                logger.error(f"Vector search failed in parallel execution: {e}")
+                return []
+
+        # Execute both searches in parallel with error handling
+        bm25_results, vector_results = await asyncio.gather(
+            timed_bm25_search(),
+            timed_vector_search(),
+            return_exceptions=False,  # We handle exceptions inside the tasks
+        )
+
+        # Calculate latencies
+        total_time = time.perf_counter() - start_time
+        bm25_latency = bm25_end - bm25_start if bm25_end else 0
+        vector_latency = vector_end - vector_start if vector_end else 0
+
+        # Log performance metrics at INFO level
+        logger.info(
+            f"Parallel search completed for query: '{query[:50]}...' | "
+            f"Total: {total_time:.3f}s | "
+            f"BM25: {bm25_latency:.3f}s ({len(bm25_results)} results) | "
+            f"Vector: {vector_latency:.3f}s ({len(vector_results)} results)"
+        )
+
+        # Combine results with metadata
+        combined_results = {
+            "bm25_results": bm25_results,
+            "vector_results": vector_results,
+            "metadata": {
+                "query": query,
+                "total_results": len(bm25_results) + len(vector_results),
+                "bm25_count": len(bm25_results),
+                "vector_count": len(vector_results),
+                "performance": {
+                    "total_latency_ms": round(total_time * 1000, 2),
+                    "bm25_latency_ms": round(bm25_latency * 1000, 2),
+                    "vector_latency_ms": round(vector_latency * 1000, 2),
+                    "parallel_efficiency": round(
+                        max(bm25_latency, vector_latency) / total_time * 100, 1
+                    )
+                    if total_time > 0
+                    else 0,  # How close to perfect parallelization
+                },
+                "partial_failure": (len(bm25_results) == 0)
+                != (len(vector_results) == 0),
+            },
+        }
+
+        # Maintain source tracking for each result
+        for result in combined_results["bm25_results"]:
+            if "_source" not in result:
+                result["_source"] = "bm25_search"
+            if "score" not in result:
+                result["score"] = result.get("rank", 0)
+
+        for result in combined_results["vector_results"]:
+            if "_source" not in result:
+                result["_source"] = "vector_search"
+            if "score" not in result:
+                result["score"] = result.get("similarity", 0)
+
+        return combined_results
+
+    async def _search_vector_async(
+        self, query: str, limit: int = 20, similarity_threshold: float = 0.3
+    ) -> List[Dict[str, Any]]:
+        """
+        Perform async vector similarity search with proper async pattern.
+
+        Args:
+            query: Query text for vector search
+            limit: Maximum number of results (default 20)
+            similarity_threshold: Minimum similarity threshold
+
+        Returns:
+            List of vector search results with source attribution
+        """
         results = []
 
-        # Get embedding for query
-        from .embeddings import create_embedding
+        try:
+            # Get embedding for query
+            from .embeddings import create_embedding
 
-        query_embedding = create_embedding(query)
+            # Run embedding generation in executor for async
+            loop = asyncio.get_event_loop()
+            query_embedding = await loop.run_in_executor(None, create_embedding, query)
 
-        # Search crawled pages
-        crawled_response = self.supabase_client.rpc(
-            "match_crawled_pages",
-            {
-                "query_embedding": query_embedding,
-                "match_threshold": 0.3,  # Lower threshold for crawled pages
-                "match_count": limit // 2,  # Split between sources
-            },
-        ).execute()
+            # Execute vector searches in parallel
+            async def search_crawled_pages():
+                return await loop.run_in_executor(
+                    None,
+                    lambda: self.supabase_client.rpc(
+                        "match_crawled_pages",
+                        {
+                            "query_embedding": query_embedding,
+                            "match_threshold": similarity_threshold,
+                            "match_count": limit // 2,  # Split between sources
+                        },
+                    ).execute(),
+                )
 
-        # Search API reference
-        api_response = self.supabase_client.rpc(
-            "match_api_reference",
-            {
-                "query_embedding": query_embedding,
-                "match_threshold": 0.5,  # Balanced threshold to catch semantic matches
-                "match_count": limit // 2,
-            },
-        ).execute()
+            async def search_api_reference():
+                return await loop.run_in_executor(
+                    None,
+                    lambda: self.supabase_client.rpc(
+                        "match_api_reference",
+                        {
+                            "query_embedding": query_embedding,
+                            "match_threshold": 0.5,  # Higher threshold for API reference
+                            "match_count": limit // 2,
+                        },
+                    ).execute(),
+                )
 
-        # Process crawled pages results
-        if hasattr(crawled_response, "data") and crawled_response.data:
-            for item in crawled_response.data:
-                doc = {
-                    "content": item.get("content", ""),
-                    "url": item.get("url", ""),
-                    "title": item.get("title", ""),
-                    "similarity": item.get("similarity", 0),
-                    "_source": "crawled_pages",
-                    "_type": self._detect_content_type(item.get("url", "")),
-                }
-                results.append(doc)
+            # Execute both searches in parallel
+            crawled_response, api_response = await asyncio.gather(
+                search_crawled_pages(),
+                search_api_reference(),
+                return_exceptions=True,  # Don't fail if one search fails
+            )
 
-        # Process API reference results
-        if hasattr(api_response, "data") and api_response.data:
-            for item in api_response.data:
-                doc = {
-                    "content": item.get("content", ""),
-                    "function_name": item.get("function_name", ""),
-                    "category": item.get("category", ""),
-                    "similarity": item.get("similarity", 0),
-                    "_source": "api_reference",
-                    "_type": "api_function",
-                }
-                results.append(doc)
+            # Process crawled pages results
+            if not isinstance(crawled_response, Exception):
+                if hasattr(crawled_response, "data") and crawled_response.data:
+                    for item in crawled_response.data:
+                        doc = {
+                            "content": item.get("content", ""),
+                            "url": item.get("url", ""),
+                            "title": item.get("title", ""),
+                            "similarity": item.get("similarity", 0),
+                            "_source": "crawled_pages",
+                            "_search_type": "vector",
+                            "_type": self._detect_content_type(item.get("url", "")),
+                            "source_attribution": "Vector search from crawled_pages",
+                        }
+                        results.append(doc)
+            else:
+                logger.error(f"Crawled pages vector search failed: {crawled_response}")
 
-        return results
+            # Process API reference results
+            if not isinstance(api_response, Exception):
+                if hasattr(api_response, "data") and api_response.data:
+                    for item in api_response.data:
+                        doc = {
+                            "content": item.get("content", ""),
+                            "function_name": item.get("function_name", ""),
+                            "category": item.get("category", ""),
+                            "similarity": item.get("similarity", 0),
+                            "_source": "api_reference",
+                            "_search_type": "vector",
+                            "_type": "api_function",
+                            "source_attribution": "Vector search from api_reference",
+                        }
+                        results.append(doc)
+            else:
+                logger.error(f"API reference vector search failed: {api_response}")
+
+            return results
+
+        except Exception as e:
+            logger.error(f"Async vector search failed: {e}")
+            return []
+
+    async def _vector_search(self, query: str, limit: int = 30) -> List[Dict[str, Any]]:
+        """
+        Perform vector similarity search.
+        Legacy method kept for backward compatibility.
+        """
+        # Use the new async method with adjusted limit
+        return await self._search_vector_async(query, limit)
 
     async def _get_function_docs(
         self,
@@ -648,6 +853,54 @@ class ModernPulseqRAG:
 
         return results
 
+    async def _search_bm25_async(
+        self,
+        query: str,
+        table_name: Optional[str] = None,
+        limit: int = 20,
+        rank_threshold: float = 0.01,
+    ) -> List[Dict]:
+        """
+        Perform async BM25 full-text search on keyword_for_search columns.
+
+        Args:
+            query: Query text for BM25 search
+            table_name: Optional specific table to search (None for all tables)
+            limit: Maximum number of results (default 20)
+            rank_threshold: Minimum rank score threshold (default 0.01)
+
+        Returns:
+            List of BM25 search results with source attribution
+        """
+        try:
+            # Run the synchronous BM25 search in an executor for true async
+            loop = asyncio.get_event_loop()
+            results = await loop.run_in_executor(
+                None,
+                self.supabase_client.search_bm25,
+                query,
+                table_name,
+                limit,
+                rank_threshold,
+            )
+
+            # Add source tracking and formatting to results
+            for result in results:
+                result["_source"] = "bm25_search"
+                result["_search_type"] = "keyword"
+                # Ensure source attribution
+                if not result.get("source_attribution"):
+                    result["source_attribution"] = (
+                        f"BM25 search from {result.get('source_table', 'unknown')}"
+                    )
+
+            return results
+
+        except Exception as e:
+            logger.error(f"Async BM25 search failed: {e}")
+            # Return empty list on failure for graceful degradation
+            return []
+
     async def _search_bm25(
         self,
         query: str,
@@ -656,6 +909,7 @@ class ModernPulseqRAG:
     ) -> List[Dict]:
         """
         Perform BM25 full-text search on keyword_for_search columns.
+        Legacy method kept for backward compatibility.
 
         Args:
             query: Query text for BM25 search
@@ -665,23 +919,8 @@ class ModernPulseqRAG:
         Returns:
             List of BM25 search results
         """
-        try:
-            results = self.supabase_client.search_bm25(
-                query=query,
-                table_name=table_name,
-                match_count=limit,
-            )
-
-            # Add source tracking to results
-            for result in results:
-                result["_source"] = "bm25_search"
-                result["_search_type"] = "keyword"
-
-            return results
-
-        except Exception as e:
-            logger.error(f"BM25 search failed: {e}")
-            return []
+        # Use the new async method
+        return await self._search_bm25_async(query, table_name, limit)
 
     async def _search_hybrid(
         self,
@@ -690,7 +929,8 @@ class ModernPulseqRAG:
         vector_weight: float = 0.5,
     ) -> List[Dict]:
         """
-        Perform hybrid search combining vector similarity and BM25.
+        Perform hybrid search using parallel BM25 and vector searches.
+        Now uses the optimized _parallel_search for better performance.
 
         Args:
             query: Query text
@@ -701,9 +941,22 @@ class ModernPulseqRAG:
             List of combined and re-ranked results
         """
         try:
-            # Get results from both search methods
-            vector_results = await self._vector_search(query, limit=limit * 2)
-            bm25_results = await self._search_bm25(query, limit=limit * 2)
+            # Use the new parallel search implementation
+            parallel_results = await self._parallel_search(query, limit=limit * 2)
+
+            # Extract results from parallel search
+            vector_results = parallel_results.get("vector_results", [])
+            bm25_results = parallel_results.get("bm25_results", [])
+
+            # Log performance from parallel search
+            perf = parallel_results.get("metadata", {}).get("performance", {})
+            if perf:
+                logger.debug(
+                    f"Hybrid search using parallel execution: "
+                    f"BM25: {perf.get('bm25_latency_ms', 0)}ms, "
+                    f"Vector: {perf.get('vector_latency_ms', 0)}ms, "
+                    f"Efficiency: {perf.get('parallel_efficiency', 0)}%"
+                )
 
             # Create combined result set with weighted scores
             combined = {}
@@ -745,12 +998,16 @@ class ModernPulseqRAG:
                 reverse=True,
             )[:limit]
 
-            # Add metadata
+            # Add metadata including performance info
             for result in sorted_results:
                 result["_source"] = "hybrid_search"
                 result["_search_type"] = "hybrid"
+                result["_parallel_search"] = True
 
-            logger.info(f"Hybrid search returned {len(sorted_results)} results")
+            logger.info(
+                f"Hybrid search returned {len(sorted_results)} results "
+                f"(from {len(bm25_results)} BM25 + {len(vector_results)} vector)"
+            )
             return sorted_results
 
         except Exception as e:
