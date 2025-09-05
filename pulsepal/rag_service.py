@@ -75,7 +75,7 @@ class ModernPulseqRAG:
     ) -> Dict:
         """
         Perform source-aware search across Supabase tables.
-        Now supports parallel BM25 and vector search execution.
+        Now uses hybrid search (BM25 + vector) with RRF fusion and reranking by default.
 
         Args:
             query: User's search query
@@ -88,9 +88,15 @@ class ModernPulseqRAG:
         Returns:
             Formatted results organized by source with synthesis hints
         """
-        # IMPORTANT: Function detection provides hints, not directives
-        # Detected functions are passed as metadata to help inform search,
-        # but we don't force lookups - let the LLM decide what's needed
+        # Get settings for hybrid search configuration
+        settings = get_settings()
+
+        # Check if hybrid search is enabled
+        if not settings.hybrid_search_enabled:
+            logger.info("Hybrid search disabled, falling back to vector-only search")
+            return await self._fallback_to_vector_search(
+                query, sources, forced, source_hints, detected_functions
+            )
 
         # Log detected functions as hints (if any)
         if detected_functions:
@@ -102,39 +108,81 @@ class ModernPulseqRAG:
                 f"Detected functions: {func_names[:5]}..."
             )  # Log first 5 for debugging
 
-        # If LLM didn't specify sources, use parallel search for better performance
-        if not sources and use_parallel:
-            logger.info("Using parallel BM25+vector search for comprehensive results")
+        try:
+            # Use hybrid search as the primary approach
+            logger.info("Using hybrid search with RRF fusion and reranking")
 
-            # Execute parallel search
-            parallel_results = await self._parallel_search(query, limit=20)
+            # Execute parallel BM25 and vector searches
+            parallel_results = await self._parallel_search(
+                query, limit=max(settings.hybrid_bm25_k, settings.hybrid_vector_k)
+            )
 
-            # Combine results from both search methods
-            all_results = []
-            all_results.extend(parallel_results.get("bm25_results", []))
-            all_results.extend(parallel_results.get("vector_results", []))
+            # Extract results from parallel search
+            bm25_results = parallel_results.get("bm25_results", [])
+            vector_results = parallel_results.get("vector_results", [])
 
-            # Deduplicate results based on content similarity
-            seen_keys = set()
-            unique_results = []
-            for result in all_results:
-                # Create a key based on source_table and id
-                key = f"{result.get('source_table', '')}_{result.get('id', '')}"
-                if key not in seen_keys and key != "_":
-                    seen_keys.add(key)
-                    unique_results.append(result)
+            # Apply RRF fusion to merge results
+            from .rag_fusion import merge_search_results, select_top_results
+
+            fused_results = merge_search_results(
+                bm25_results=bm25_results[: settings.hybrid_bm25_k],
+                vector_results=vector_results[: settings.hybrid_vector_k],
+                k=settings.hybrid_rrf_k,
+            )
+
+            # Select top results for reranking
+            top_results = select_top_results(
+                fused_results, top_n=settings.hybrid_rerank_top_k
+            )
+
+            # Apply neural reranking to top results
+            try:
+                rerank_start = time.time()
+                (
+                    relevance_scores,
+                    reranked_results,
+                ) = await self.reranker.rerank_documents(
+                    query=query,
+                    documents=top_results,
+                    top_k=settings.hybrid_final_top_k,  # Return top 3 by default
+                )
+                rerank_latency = (time.time() - rerank_start) * 1000  # Convert to ms
+
+                logger.info(
+                    f"Reranking completed in {rerank_latency:.2f}ms, "
+                    f"top score: {relevance_scores[0] if relevance_scores else 0:.3f}"
+                )
+
+                # Use reranked results
+                final_results = reranked_results
+
+                # Add metadata to results
+                for i, result in enumerate(final_results):
+                    result["_source"] = "hybrid_search"
+                    result["_search_type"] = "hybrid_reranked"
+                    result["_rerank_score"] = (
+                        relevance_scores[i] if i < len(relevance_scores) else 0.0
+                    )
+
+            except Exception as e:
+                # Fallback to RRF-fused results if reranking fails
+                logger.warning(f"Reranking failed, using RRF-fused results: {e}")
+                final_results = top_results[: settings.hybrid_final_top_k]
+
+                # Add metadata without reranking info
+                for result in final_results:
+                    result["_source"] = "hybrid_search"
+                    result["_search_type"] = "hybrid_rrf_only"
 
             # Format results for unified response
-            source_results = {
-                "parallel_search": unique_results[:30]
-            }  # Limit to 30 total
+            source_results = {"hybrid_search": final_results}
 
             # Format results using rag_formatters
             query_context = {
                 "original_query": query,
                 "forced": forced,
                 "source_hints": source_hints,
-                "search_mode": "parallel",
+                "search_mode": "hybrid_reranked",
                 "detected_functions": detected_functions,
                 "performance": parallel_results.get("metadata", {}).get(
                     "performance", {}
@@ -144,7 +192,9 @@ class ModernPulseqRAG:
             # Log search summary with performance metrics
             perf = parallel_results.get("metadata", {}).get("performance", {})
             logger.info(
-                f"Parallel search complete: {len(unique_results)} unique results | "
+                f"Hybrid search complete: {len(final_results)} final results | "
+                f"BM25: {len(bm25_results)} results, "
+                f"Vector: {len(vector_results)} results | "
                 f"Latency - BM25: {perf.get('bm25_latency_ms', 0)}ms, "
                 f"Vector: {perf.get('vector_latency_ms', 0)}ms, "
                 f"Total: {perf.get('total_latency_ms', 0)}ms"
@@ -152,9 +202,41 @@ class ModernPulseqRAG:
 
             return format_unified_response(source_results, query_context)
 
-        # Fall back to original source-specific search if sources are specified
+        except Exception as e:
+            # Complete hybrid search failure - fallback to vector-only search
+            logger.error(
+                f"Hybrid search failed completely, falling back to vector search: {e}"
+            )
+            return await self._fallback_to_vector_search(
+                query, sources, forced, source_hints, detected_functions
+            )
+
+    async def _fallback_to_vector_search(
+        self,
+        query: str,
+        sources: Optional[List[str]] = None,
+        forced: bool = False,
+        source_hints: Optional[Dict] = None,
+        detected_functions: Optional[List[Dict]] = None,
+    ) -> Dict:
+        """
+        Fallback to vector-only search when hybrid search fails or is disabled.
+        This maintains the existing vector search behavior.
+
+        Args:
+            query: User's search query
+            sources: Specific sources to search (LLM-specified or None for all)
+            forced: Whether this search was forced by semantic routing
+            source_hints: Additional hints about which sources to prioritize
+            detected_functions: Functions detected by semantic router for direct lookup
+
+        Returns:
+            Formatted results using vector-only search
+        """
+        logger.info("Using fallback vector-only search")
+
+        # Default to all sources with balanced top-k approach if not specified
         if not sources:
-            # Default to all sources with balanced top-k approach
             sources = ["api_reference", "crawled_pages", "official_sequence_examples"]
             logger.info(
                 f"No sources specified, using top-k from all sources: {sources}"
@@ -193,14 +275,14 @@ class ModernPulseqRAG:
             "original_query": query,
             "forced": forced,
             "source_hints": source_hints,
-            "search_mode": "top_k_balanced" if use_top_k else "targeted",
+            "search_mode": "vector_only_fallback",
             "detected_functions": detected_functions,  # Pass as hints, not directives
         }
 
         # Log search summary
         total_results = sum(len(results) for results in source_results.values())
         logger.info(
-            f"Search complete: {total_results} results from {len(source_results)} sources"
+            f"Vector search complete: {total_results} results from {len(source_results)} sources"
         )
         if use_top_k:
             logger.info(

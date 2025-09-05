@@ -88,10 +88,37 @@ class Settings(BaseSettings):
         default=False,
         description="Use contextual embeddings for document chunks",
     )
+
+    # Hybrid Search Configuration
+    hybrid_search_enabled: bool = Field(
+        default=True,
+        description="Enable hybrid search (BM25 + vector) with RRF fusion and reranking",
+        alias="HYBRID_SEARCH_ENABLED",
+    )
+    hybrid_bm25_k: int = Field(
+        default=20,
+        description="Number of results to retrieve from BM25 keyword search",
+        alias="HYBRID_BM25_K",
+    )
+    hybrid_vector_k: int = Field(
+        default=20,
+        description="Number of results to retrieve from vector semantic search",
+        alias="HYBRID_VECTOR_K",
+    )
     hybrid_rrf_k: int = Field(
         default=60,
         description="RRF k parameter for combining BM25 and vector search results",
         alias="HYBRID_RRF_K",
+    )
+    hybrid_rerank_top_k: int = Field(
+        default=15,
+        description="Number of top results to send to neural reranker",
+        alias="HYBRID_RERANK_TOP_K",
+    )
+    hybrid_final_top_k: int = Field(
+        default=3,
+        description="Number of final reranked results to return to LLM",
+        alias="HYBRID_FINAL_TOP_K",
     )
 
     # Language Configuration
@@ -147,7 +174,7 @@ class Settings(BaseSettings):
 
     # Reranker Configuration
     reranker_model_path: str = Field(
-        default="/app/models",
+        default="/tmp/models",  # Use /tmp for local testing, /app/models for Railway
         description="Path to store/load reranker model files (Railway volume)",
         alias="RERANKER_MODEL_PATH",
     )

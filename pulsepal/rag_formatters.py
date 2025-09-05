@@ -761,6 +761,35 @@ def format_unified_response(
                 "Official sequences are tested and educational",
             )
 
+        elif source_type in ["hybrid_search", "parallel_search"]:
+            # Handle hybrid search results - group by source table
+            grouped_results = {}
+            for result in results:
+                source_table = result.get("source_table", "unknown")
+                if source_table not in grouped_results:
+                    grouped_results[source_table] = []
+                grouped_results[source_table].append(result)
+
+            # Format each group appropriately
+            for table, table_results in grouped_results.items():
+                if table == "api_reference":
+                    formatted = format_api_reference(table_results)
+                    response["results_by_source"]["api_reference"] = formatted
+                elif table in ["crawled_docs", "crawled_pages", "crawled_code"]:
+                    formatted = format_crawled_pages(table_results)
+                    response["results_by_source"]["examples_and_docs"] = formatted
+                elif table in ["pulseq_sequences", "sequence_chunks"]:
+                    formatted = format_official_sequence_examples(table_results)
+                    response["results_by_source"]["tutorials"] = formatted
+                else:
+                    # Generic formatting for unknown sources
+                    formatted = table_results
+                    response["results_by_source"][table] = formatted
+
+            response["synthesis_hints"].append(
+                "Results from hybrid search combining keyword and semantic relevance",
+            )
+
     # Add citation guidance
     response["citation_map"] = generate_citation_map(response["results_by_source"])
 
