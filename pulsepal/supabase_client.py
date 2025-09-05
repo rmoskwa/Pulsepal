@@ -317,6 +317,60 @@ class SupabaseRAGClient:
             logger.error(f"Error searching API reference: {e}")
             return []
 
+    def search_bm25(
+        self,
+        query: str,
+        table_name: Optional[str] = None,
+        match_count: int = 10,
+        rank_threshold: float = 0.01,
+    ) -> List[Dict[str, Any]]:
+        """
+        Search using BM25 full-text search on keyword_for_search columns.
+
+        Args:
+            query: Query text for BM25 search
+            table_name: Optional specific table to search (None for all tables)
+            match_count: Maximum number of results to return (1-100)
+            rank_threshold: Minimum rank score threshold (default 0.01)
+
+        Returns:
+            List of matching documents with BM25 ranking
+        """
+        try:
+            # Call the BM25 RPC function
+            params = {
+                "query_text": query,
+                "match_count": match_count,
+                "rank_threshold": rank_threshold,
+            }
+
+            # Add table name if specified
+            if table_name:
+                params["table_name"] = table_name
+
+            result = self.client.rpc("search_bm25", params).execute()
+            results = result.data if result.data else []
+
+            logger.info(f"BM25 search for '{query}' returned {len(results)} results")
+
+            # Transform results to match expected format
+            formatted_results = []
+            for item in results:
+                formatted_item = {
+                    "source_table": item.get("source_table"),
+                    "id": item.get("record_id"),
+                    "content": item.get("content_preview"),
+                    "rank": item.get("rank"),
+                    "metadata": item.get("metadata", {}),
+                }
+                formatted_results.append(formatted_item)
+
+            return formatted_results
+
+        except Exception as e:
+            logger.error(f"Error performing BM25 search: {e}")
+            return []
+
     def search_code_examples(
         self,
         query: str,

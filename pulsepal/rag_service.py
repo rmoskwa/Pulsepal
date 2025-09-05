@@ -648,6 +648,115 @@ class ModernPulseqRAG:
 
         return results
 
+    async def _search_bm25(
+        self,
+        query: str,
+        table_name: Optional[str] = None,
+        limit: int = 10,
+    ) -> List[Dict]:
+        """
+        Perform BM25 full-text search on keyword_for_search columns.
+
+        Args:
+            query: Query text for BM25 search
+            table_name: Optional specific table to search (None for all tables)
+            limit: Maximum number of results
+
+        Returns:
+            List of BM25 search results
+        """
+        try:
+            results = self.supabase_client.search_bm25(
+                query=query,
+                table_name=table_name,
+                match_count=limit,
+            )
+
+            # Add source tracking to results
+            for result in results:
+                result["_source"] = "bm25_search"
+                result["_search_type"] = "keyword"
+
+            return results
+
+        except Exception as e:
+            logger.error(f"BM25 search failed: {e}")
+            return []
+
+    async def _search_hybrid(
+        self,
+        query: str,
+        limit: int = 10,
+        vector_weight: float = 0.5,
+    ) -> List[Dict]:
+        """
+        Perform hybrid search combining vector similarity and BM25.
+
+        Args:
+            query: Query text
+            limit: Maximum number of results
+            vector_weight: Weight for vector results (0-1), BM25 gets 1-vector_weight
+
+        Returns:
+            List of combined and re-ranked results
+        """
+        try:
+            # Get results from both search methods
+            vector_results = await self._vector_search(query, limit=limit * 2)
+            bm25_results = await self._search_bm25(query, limit=limit * 2)
+
+            # Create combined result set with weighted scores
+            combined = {}
+
+            # Process vector results
+            for result in vector_results:
+                key = f"{result.get('source_table', 'unknown')}_{result.get('id', '')}"
+                combined[key] = {
+                    **result,
+                    "vector_score": result.get("similarity", 0),
+                    "bm25_score": 0,
+                    "combined_score": result.get("similarity", 0) * vector_weight,
+                }
+
+            # Process BM25 results
+            bm25_weight = 1 - vector_weight
+            for result in bm25_results:
+                key = f"{result.get('source_table', 'unknown')}_{result.get('id', '')}"
+                if key in combined:
+                    # Update existing entry
+                    combined[key]["bm25_score"] = result.get("rank", 0)
+                    combined[key]["combined_score"] = (
+                        combined[key]["vector_score"] * vector_weight
+                        + result.get("rank", 0) * bm25_weight
+                    )
+                else:
+                    # Add new entry
+                    combined[key] = {
+                        **result,
+                        "vector_score": 0,
+                        "bm25_score": result.get("rank", 0),
+                        "combined_score": result.get("rank", 0) * bm25_weight,
+                    }
+
+            # Sort by combined score and return top results
+            sorted_results = sorted(
+                combined.values(),
+                key=lambda x: x.get("combined_score", 0),
+                reverse=True,
+            )[:limit]
+
+            # Add metadata
+            for result in sorted_results:
+                result["_source"] = "hybrid_search"
+                result["_search_type"] = "hybrid"
+
+            logger.info(f"Hybrid search returned {len(sorted_results)} results")
+            return sorted_results
+
+        except Exception as e:
+            logger.error(f"Hybrid search failed: {e}")
+            return []
+
     async def _direct_function_lookup(
         self, detected_functions: List[Dict]
     ) -> List[Dict]:
