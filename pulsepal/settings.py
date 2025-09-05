@@ -88,6 +88,11 @@ class Settings(BaseSettings):
         default=False,
         description="Use contextual embeddings for document chunks",
     )
+    hybrid_rrf_k: int = Field(
+        default=60,
+        description="RRF k parameter for combining BM25 and vector search results",
+        alias="HYBRID_RRF_K",
+    )
 
     # Language Configuration
     default_language: str = Field(

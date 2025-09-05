@@ -13,6 +13,8 @@ import time
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
+from .rag_fusion import merge_search_results, select_top_results
+
 from .rag_formatters import format_unified_response
 from .settings import get_settings
 from .source_profiles import MULTI_CHUNK_DOCUMENTS
@@ -929,16 +931,16 @@ class ModernPulseqRAG:
         vector_weight: float = 0.5,
     ) -> List[Dict]:
         """
-        Perform hybrid search using parallel BM25 and vector searches.
-        Now uses the optimized _parallel_search for better performance.
+        Perform hybrid search using parallel BM25 and vector searches with RRF fusion.
+        Uses Reciprocal Rank Fusion for improved result merging.
 
         Args:
             query: Query text
             limit: Maximum number of results
-            vector_weight: Weight for vector results (0-1), BM25 gets 1-vector_weight
+            vector_weight: Weight for vector results (kept for compatibility but not used with RRF)
 
         Returns:
-            List of combined and re-ranked results
+            List of combined and re-ranked results using RRF
         """
         try:
             # Use the new parallel search implementation
@@ -958,45 +960,20 @@ class ModernPulseqRAG:
                     f"Efficiency: {perf.get('parallel_efficiency', 0)}%"
                 )
 
-            # Create combined result set with weighted scores
-            combined = {}
+            # Get RRF k parameter from settings
+            settings = get_settings()
+            k = settings.hybrid_rrf_k
 
-            # Process vector results
-            for result in vector_results:
-                key = f"{result.get('source_table', 'unknown')}_{result.get('id', '')}"
-                combined[key] = {
-                    **result,
-                    "vector_score": result.get("similarity", 0),
-                    "bm25_score": 0,
-                    "combined_score": result.get("similarity", 0) * vector_weight,
-                }
+            # Apply RRF fusion to merge results
+            fused_results = merge_search_results(
+                bm25_results=bm25_results, vector_results=vector_results, k=k
+            )
 
-            # Process BM25 results
-            bm25_weight = 1 - vector_weight
-            for result in bm25_results:
-                key = f"{result.get('source_table', 'unknown')}_{result.get('id', '')}"
-                if key in combined:
-                    # Update existing entry
-                    combined[key]["bm25_score"] = result.get("rank", 0)
-                    combined[key]["combined_score"] = (
-                        combined[key]["vector_score"] * vector_weight
-                        + result.get("rank", 0) * bm25_weight
-                    )
-                else:
-                    # Add new entry
-                    combined[key] = {
-                        **result,
-                        "vector_score": 0,
-                        "bm25_score": result.get("rank", 0),
-                        "combined_score": result.get("rank", 0) * bm25_weight,
-                    }
+            # Select top results for reranking
+            top_results = select_top_results(fused_results, top_n=15)
 
-            # Sort by combined score and return top results
-            sorted_results = sorted(
-                combined.values(),
-                key=lambda x: x.get("combined_score", 0),
-                reverse=True,
-            )[:limit]
+            # Return requested limit (may be less than 15)
+            sorted_results = top_results[:limit]
 
             # Add metadata including performance info
             for result in sorted_results:
