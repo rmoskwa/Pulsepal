@@ -145,9 +145,6 @@ embedding-strategy.md
 *.db-journal
 *.db-wal
 
-# Database schema documentation (sensitive information)
-docs/architecture/supabase-knowledge-base.md
-
 # Data directories
 data/
 huggingface_models/
@@ -168,6 +165,7 @@ site/
 _build/
 docs/_build/
 api-docs-deploy/
+docs/
 
 # Jupyter
 .ipynb_checkpoints/
@@ -250,8 +248,7 @@ CURRENT-STATE-DOCUMENTATION.md
 prpPrompt.md
 README_TEMPLATE.md
 READMEarchive.md
-docs/architecture/
-docs/mdDocs/
+docs-pulsepal/mdDocs/
 
 # Generated test files
 test_precommit.py
