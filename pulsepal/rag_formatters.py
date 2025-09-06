@@ -3,11 +3,14 @@ Data formatting module for source-aware RAG system.
 Formats results from different data sources for optimal LLM consumption.
 """
 
+import logging
 import os
 import re
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 from urllib.parse import urlparse
+
+logger = logging.getLogger(__name__)
 
 # Constants for formatting limits and defaults
 CONTENT_PREVIEW_LENGTH = 200  # Characters for content preview
@@ -130,9 +133,9 @@ def format_api_reference(results: List[Dict]) -> List[Dict]:
     return formatted_results
 
 
-def format_parameters(params_json: Any) -> str:
+def format_parameters(params_json: Union[Dict[str, Any], List[Any], str, None]) -> str:
     """
-    Format parameters for clear presentation.
+    Format parameters for clear presentation with input validation.
 
     Args:
         params_json: Parameters in JSON format
@@ -149,13 +152,46 @@ def format_parameters(params_json: Any) -> str:
             import json
 
             params_json = json.loads(params_json)
-        except (json.JSONDecodeError, ValueError):
+            logger.debug(
+                "Successfully parsed parameters JSON string",
+                extra={"input_length": len(params_json)},
+            )
+        except (json.JSONDecodeError, ValueError) as e:
+            logger.warning(
+                "Failed to parse parameters JSON, returning as-is",
+                extra={
+                    "error": str(e),
+                    "input_sample": params_json[:100] if params_json else "",
+                },
+            )
             return params_json
+
+    # Validate expected types
+    if not isinstance(params_json, (dict, list)):
+        logger.warning(
+            "Unexpected parameter type, converting to string",
+            extra={
+                "type": type(params_json).__name__,
+                "value_sample": str(params_json)[:100] if params_json else "",
+            },
+        )
+        return str(params_json)
 
     # If it's a dictionary, format each parameter
     if isinstance(params_json, dict):
         formatted_params = []
         for param_name, param_info in params_json.items():
+            # Validate param_name is string
+            if not isinstance(param_name, str):
+                logger.warning(
+                    "Non-string parameter name encountered",
+                    extra={
+                        "name_type": type(param_name).__name__,
+                        "value": str(param_name),
+                    },
+                )
+                param_name = str(param_name)
+
             param_str = f"• {param_name}"
 
             if isinstance(param_info, dict):
@@ -180,12 +216,10 @@ def format_parameters(params_json: Any) -> str:
     if isinstance(params_json, list):
         return "\n".join(f"• {param}" for param in params_json)
 
-    return str(params_json)
 
-
-def format_returns(returns_json: Any) -> str:
+def format_returns(returns_json: Union[Dict[str, Any], str, None]) -> str:
     """
-    Format return values for clarity.
+    Format return values for clarity with input validation.
 
     Args:
         returns_json: Return value specification in JSON format
@@ -202,21 +236,51 @@ def format_returns(returns_json: Any) -> str:
             import json
 
             returns_json = json.loads(returns_json)
-        except (json.JSONDecodeError, ValueError):
+            logger.debug(
+                "Successfully parsed returns JSON string",
+                extra={"input_length": len(str(returns_json))},
+            )
+        except (json.JSONDecodeError, ValueError) as e:
+            logger.warning(
+                "Failed to parse returns JSON, returning as-is",
+                extra={
+                    "error": str(e),
+                    "input_sample": returns_json[:100] if returns_json else "",
+                },
+            )
             return returns_json
 
-    if isinstance(returns_json, dict):
-        return_str = returns_json.get("type", "unknown")
-        if returns_json.get("description"):
-            return_str += f" - {returns_json['description']}"
-        return return_str
+    # Validate expected type
+    if not isinstance(returns_json, dict):
+        logger.warning(
+            "Unexpected returns type, converting to string",
+            extra={
+                "type": type(returns_json).__name__,
+                "value_sample": str(returns_json)[:100] if returns_json else "",
+            },
+        )
+        return str(returns_json)
 
-    return str(returns_json)
+    # Format dict returns with validation
+    return_str = returns_json.get("type", "unknown")
+    if returns_json.get("description"):
+        description = returns_json.get("description")
+        if not isinstance(description, str):
+            logger.warning(
+                "Non-string return description",
+                extra={"desc_type": type(description).__name__},
+            )
+            description = str(description)
+        return_str += f" - {description}"
+
+    return return_str
 
 
-def format_examples(examples_json: Any) -> List[Dict]:
+def format_examples(
+    examples_json: Union[List[Dict[str, Any]], Dict[str, Any], str, None],
+) -> List[Dict[str, str]]:
     """
-    Format usage examples with language tags.
+    Format usage examples with language tags and input validation.
 
     Args:
         examples_json: Examples in JSON format
@@ -233,24 +297,78 @@ def format_examples(examples_json: Any) -> List[Dict]:
             import json
 
             examples_json = json.loads(examples_json)
-        except (json.JSONDecodeError, ValueError):
-            return [{"code": examples_json, "language": "matlab"}]
-
-    if not isinstance(examples_json, list):
-        examples_json = [examples_json]
-
-    formatted_examples = []
-    for example in examples_json:
-        if isinstance(example, dict):
-            formatted_examples.append(
-                {
-                    "code": example.get("code", ""),
-                    "description": example.get("description", ""),
-                    "language": example.get("language", "matlab"),
+            logger.debug(
+                "Successfully parsed examples JSON string",
+                extra={"result_type": type(examples_json).__name__},
+            )
+        except (json.JSONDecodeError, ValueError) as e:
+            logger.warning(
+                "Failed to parse examples JSON, treating as code string",
+                extra={
+                    "error": str(e),
+                    "input_sample": examples_json[:100] if examples_json else "",
                 },
             )
+            return [{"code": examples_json, "language": DEFAULT_LANGUAGE}]
+
+    # Ensure we have a list
+    if not isinstance(examples_json, list):
+        if isinstance(examples_json, dict):
+            logger.debug("Converting single example dict to list")
+            examples_json = [examples_json]
         else:
-            formatted_examples.append({"code": str(example), "language": "matlab"})
+            logger.warning(
+                "Unexpected examples type, converting to single example",
+                extra={
+                    "type": type(examples_json).__name__,
+                    "value_sample": str(examples_json)[:100] if examples_json else "",
+                },
+            )
+            examples_json = [{"code": str(examples_json), "language": DEFAULT_LANGUAGE}]
+
+    formatted_examples = []
+    for idx, example in enumerate(examples_json):
+        if isinstance(example, dict):
+            # Validate and extract fields with type checking
+            code = example.get("code", "")
+            if not isinstance(code, str):
+                logger.warning(
+                    f"Non-string code in example {idx}",
+                    extra={"code_type": type(code).__name__},
+                )
+                code = str(code)
+
+            description = example.get("description", "")
+            if description and not isinstance(description, str):
+                logger.warning(
+                    f"Non-string description in example {idx}",
+                    extra={"desc_type": type(description).__name__},
+                )
+                description = str(description)
+
+            language = example.get("language", DEFAULT_LANGUAGE)
+            if not isinstance(language, str):
+                logger.warning(
+                    f"Non-string language in example {idx}",
+                    extra={"lang_type": type(language).__name__},
+                )
+                language = DEFAULT_LANGUAGE
+
+            formatted_examples.append(
+                {
+                    "code": code,
+                    "description": description,
+                    "language": language,
+                }
+            )
+        else:
+            logger.debug(
+                f"Converting non-dict example {idx} to string",
+                extra={"type": type(example).__name__},
+            )
+            formatted_examples.append(
+                {"code": str(example), "language": DEFAULT_LANGUAGE}
+            )
 
     return formatted_examples
 
@@ -428,7 +546,7 @@ def is_code(chunk: Dict) -> bool:
 
 def extract_title_from_url(url: str) -> str:
     """
-    Extract a readable title from URL.
+    Extract a readable title from URL with input validation.
 
     Args:
         url: URL string
@@ -436,7 +554,18 @@ def extract_title_from_url(url: str) -> str:
     Returns:
         Readable title
     """
-    if not url or url.startswith("unknown"):
+    if not url:
+        return "Untitled"
+
+    # Validate input type
+    if not isinstance(url, str):
+        logger.warning(
+            "Non-string URL passed to extract_title_from_url",
+            extra={"type": type(url).__name__, "value": str(url)[:100]},
+        )
+        url = str(url)
+
+    if url.startswith("unknown"):
         return "Untitled"
 
     # Special handling for known patterns
@@ -464,7 +593,7 @@ def extract_title_from_url(url: str) -> str:
     return parsed.netloc or "Document"
 
 
-def get_document_type(url: str, metadata: Dict) -> str:
+def get_document_type(url: str, metadata: Dict[str, Any]) -> str:
     """
     Determine document type from URL and metadata.
 
@@ -583,9 +712,9 @@ def format_official_sequence_examples(results: List[Dict]) -> List[Dict]:
     return formatted_results
 
 
-def parse_ai_summary(summary: str) -> Dict[str, Any]:
+def parse_ai_summary(summary: str) -> Dict[str, Union[str, List[str]]]:
     """
-    Parse AI summary into structured sections.
+    Parse AI summary into structured sections with input validation.
 
     Args:
         summary: AI-generated summary text
@@ -604,6 +733,17 @@ def parse_ai_summary(summary: str) -> Dict[str, Any]:
 
     if not summary:
         return sections
+
+    # Validate input type
+    if not isinstance(summary, str):
+        logger.warning(
+            "Non-string AI summary, converting to string",
+            extra={
+                "type": type(summary).__name__,
+                "value_sample": str(summary)[:100] if summary else "",
+            },
+        )
+        summary = str(summary)
 
     # Extract overview (usually first paragraph)
     paragraphs = summary.split("\n\n")
@@ -667,7 +807,7 @@ def extract_technical_terms(text: str) -> List[str]:
 
 def determine_complexity(result: Dict) -> str:
     """
-    Determine complexity level based on various factors.
+    Determine complexity level based on various factors with input validation.
 
     Args:
         result: Sequence result dictionary
@@ -675,8 +815,31 @@ def determine_complexity(result: Dict) -> str:
     Returns:
         Complexity level string
     """
-    content_length = len(result.get("content", ""))
+    # Validate input
+    if not isinstance(result, dict):
+        logger.warning(
+            "Non-dict result passed to determine_complexity",
+            extra={"type": type(result).__name__},
+        )
+        return "unknown"
+
+    content = result.get("content", "")
+    if not isinstance(content, str):
+        logger.warning(
+            "Non-string content in complexity determination",
+            extra={"content_type": type(content).__name__},
+        )
+        content = str(content) if content else ""
+
+    content_length = len(content)
     sequence_type = result.get("sequence_type", "")
+
+    if not isinstance(sequence_type, str):
+        logger.warning(
+            "Non-string sequence_type in complexity determination",
+            extra={"type": type(sequence_type).__name__},
+        )
+        sequence_type = str(sequence_type) if sequence_type else ""
 
     # Simple heuristic based on length and type
     if content_length < DEFAULT_COMPLEXITY_BEGINNER_THRESHOLD:

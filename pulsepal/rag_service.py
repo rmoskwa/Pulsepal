@@ -465,7 +465,14 @@ class ModernPulseqRAG:
                 return results
             except Exception as e:
                 bm25_end = time.perf_counter()
-                logger.error(f"BM25 search failed in parallel execution: {e}")
+                logger.error(
+                    "BM25 search failed in parallel execution",
+                    extra={
+                        "error": str(e),
+                        "error_type": type(e).__name__,
+                        "query": query[:100] if query else None,
+                    },
+                )
                 return []
 
         async def timed_vector_search():
@@ -479,7 +486,14 @@ class ModernPulseqRAG:
                 return results
             except Exception as e:
                 vector_end = time.perf_counter()
-                logger.error(f"Vector search failed in parallel execution: {e}")
+                logger.error(
+                    "Vector search failed in parallel execution",
+                    extra={
+                        "error": str(e),
+                        "error_type": type(e).__name__,
+                        "query": query[:100] if query else None,
+                    },
+                )
                 return []
 
         # Execute both searches in parallel with error handling
@@ -663,7 +677,15 @@ class ModernPulseqRAG:
             return results
 
         except Exception as e:
-            logger.error(f"Async vector search failed: {e}")
+            logger.error(
+                "Async vector search failed",
+                extra={
+                    "error": str(e),
+                    "error_type": type(e).__name__,
+                    "query": query[:100] if query else None,
+                    "limit": limit,
+                },
+            )
             return []
 
     async def _search_api_reference(self, query: str, limit: int = 10) -> List[Dict]:
@@ -1029,7 +1051,16 @@ class ModernPulseqRAG:
             return sorted_results
 
         except Exception as e:
-            logger.error(f"Hybrid search failed: {e}")
+            logger.error(
+                "Hybrid search failed",
+                extra={
+                    "error": str(e),
+                    "error_type": type(e).__name__,
+                    "query": query[:100] if query else None,
+                    "table": table,
+                    "limit": limit,
+                },
+            )
             return []
 
     async def _direct_function_lookup(
@@ -1406,6 +1437,74 @@ class ModernPulseqRAG:
             logger.error(f"Vector search failed for table {table}: {e}")
             return []
 
+    def _get_table_formatting_strategy(self, table: str) -> Dict[str, Any]:
+        """
+        Get the formatting strategy for a specific table.
+
+        Returns a dict with formatter method name and hint generation logic.
+        """
+        strategies = {
+            "api_reference": {
+                "formatter": self._format_api_reference_results,
+                "hint": lambda r: "CRITICAL: Use this information when generating Pulseq code to prevent hallucinations",
+                "relationships": lambda r: {},
+            },
+            "pulseq_sequences": {
+                "formatter": self._format_pulseq_sequences_results,
+                "hint": lambda r: "Found dependencies. Search 'crawled_code' for helper implementations."
+                if r and any(x.get("dependencies") for x in r)
+                else "",
+                "relationships": lambda r: {"local_dependencies": True}
+                if r and any(x.get("dependencies") for x in r)
+                else {},
+            },
+            "sequence_chunks": {
+                "formatter": self._format_sequence_chunks_results,
+                "hint": lambda r: f"Found {len(r)} chunks. Use sequence_id to retrieve full sequences from pulseq_sequences table."
+                if r
+                else "",
+                "relationships": lambda r: {"parent_sequence": True} if r else {},
+            },
+            "crawled_code": {
+                "formatter": self._format_crawled_code_results,
+                "hint": lambda r: self._generate_crawled_code_hint(r),
+                "relationships": lambda r: {"parent_sequences": True}
+                if r and any(x.get("parent_sequences") for x in r)
+                else {},
+            },
+            "crawled_docs": {
+                "formatter": self._format_crawled_docs_results,
+                "hint": lambda r: "Documentation found. Search 'pulseq_sequences' for related sequence implementations.",
+                "relationships": lambda r: {
+                    "parent_sequences": any(x.get("parent_sequences") for x in r)
+                }
+                if r
+                else {},
+            },
+        }
+        return strategies.get(
+            table,
+            {
+                "formatter": lambda x: x,  # Default: return raw results
+                "hint": lambda r: "",
+                "relationships": lambda r: {},
+            },
+        )
+
+    def _generate_crawled_code_hint(self, results: List[Dict]) -> str:
+        """Generate hint for crawled_code results."""
+        if not results or not any(r.get("parent_sequences") for r in results):
+            return ""
+
+        parent_ids = []
+        for r in results:
+            if r.get("parent_sequences"):
+                parent_ids.extend(r["parent_sequences"])
+
+        if parent_ids:
+            return f"This helper is used by sequences. Search 'pulseq_sequences' with IDs {parent_ids[:3]} to see usage examples."
+        return ""
+
     def _format_table_response(
         self,
         table: str,
@@ -1415,7 +1514,7 @@ class ModernPulseqRAG:
         search_type: str = "targeted",
     ) -> Dict:
         """
-        Format results according to the standardized table return format.
+        Format results according to the standardized table return format using strategy pattern.
 
         Args:
             table: Table name
@@ -1427,45 +1526,13 @@ class ModernPulseqRAG:
         Returns:
             Standardized response format
         """
-        # This is a placeholder - in production, each table would have
-        # its own specific formatting logic based on the plan
-        formatted_results = []
-        relationships_available = {}
-        hint = ""
+        # Get the formatting strategy for this table
+        strategy = self._get_table_formatting_strategy(table)
 
-        if table == "api_reference":
-            formatted_results = self._format_api_reference_results(results)
-            hint = "CRITICAL: Use this information when generating Pulseq code to prevent hallucinations"
-
-        elif table == "pulseq_sequences":
-            formatted_results = self._format_pulseq_sequences_results(results)
-            if results and any(r.get("dependencies") for r in results):
-                relationships_available["local_dependencies"] = True
-                hint = "Found dependencies. Search 'crawled_code' for helper implementations."
-
-        elif table == "sequence_chunks":
-            formatted_results = self._format_sequence_chunks_results(results)
-            if results:
-                relationships_available["parent_sequence"] = True
-                hint = f"Found {len(results)} chunks. Use sequence_id to retrieve full sequences from pulseq_sequences table."
-
-        elif table == "crawled_code":
-            formatted_results = self._format_crawled_code_results(results)
-            if results and any(r.get("parent_sequences") for r in results):
-                relationships_available["parent_sequences"] = True
-                parent_ids = []
-                for r in results:
-                    if r.get("parent_sequences"):
-                        parent_ids.extend(r["parent_sequences"])
-                if parent_ids:
-                    hint = f"This helper is used by sequences. Search 'pulseq_sequences' with IDs {parent_ids[:3]} to see usage examples."
-
-        elif table == "crawled_docs":
-            formatted_results = self._format_crawled_docs_results(results)
-            relationships_available["parent_sequences"] = any(
-                r.get("parent_sequences") for r in results
-            )
-            hint = "Documentation found. Search 'pulseq_sequences' for related sequence implementations."
+        # Apply formatting
+        formatted_results = strategy["formatter"](results)
+        relationships_available = strategy["relationships"](results)
+        hint = strategy["hint"](results)
 
         return {
             "source_table": table,
