@@ -621,32 +621,52 @@ class ModernPulseqRAG:
             loop = asyncio.get_event_loop()
             query_embedding = await loop.run_in_executor(None, create_embedding, query)
 
-            # Execute vector searches in parallel
+            # Execute vector searches in parallel with retry for Windows connection issues
             async def search_crawled_pages():
-                return await loop.run_in_executor(
-                    None,
-                    lambda: self.supabase_client.rpc(
-                        "match_crawled_pages",
-                        {
-                            "query_embedding": query_embedding,
-                            "match_threshold": similarity_threshold,
-                            "match_count": limit // 2,  # Split between sources
-                        },
-                    ).execute(),
-                )
+                max_retries = 3
+                for attempt in range(max_retries):
+                    try:
+                        return await loop.run_in_executor(
+                            None,
+                            lambda: self.supabase_client.rpc(
+                                "match_crawled_pages",
+                                {
+                                    "query_embedding": query_embedding,
+                                    "match_threshold": similarity_threshold,
+                                    "match_count": limit // 2,  # Split between sources
+                                },
+                            ).execute(),
+                        )
+                    except OSError as e:
+                        if "[WinError 10035]" in str(e) and attempt < max_retries - 1:
+                            await asyncio.sleep(
+                                0.1 * (attempt + 1)
+                            )  # Exponential backoff
+                            continue
+                        raise
 
             async def search_api_reference():
-                return await loop.run_in_executor(
-                    None,
-                    lambda: self.supabase_client.rpc(
-                        "match_api_reference",
-                        {
-                            "query_embedding": query_embedding,
-                            "match_threshold": 0.5,  # Higher threshold for API reference
-                            "match_count": limit // 2,
-                        },
-                    ).execute(),
-                )
+                max_retries = 3
+                for attempt in range(max_retries):
+                    try:
+                        return await loop.run_in_executor(
+                            None,
+                            lambda: self.supabase_client.rpc(
+                                "match_api_reference",
+                                {
+                                    "query_embedding": query_embedding,
+                                    "match_threshold": 0.5,  # Higher threshold for API reference
+                                    "match_count": limit // 2,
+                                },
+                            ).execute(),
+                        )
+                    except OSError as e:
+                        if "[WinError 10035]" in str(e) and attempt < max_retries - 1:
+                            await asyncio.sleep(
+                                0.1 * (attempt + 1)
+                            )  # Exponential backoff
+                            continue
+                        raise
 
             # Execute both searches in parallel
             crawled_response, api_response = await asyncio.gather(
@@ -950,6 +970,33 @@ class ModernPulseqRAG:
 
         return results
 
+    def _preprocess_bm25_query(self, query: str) -> str:
+        """
+        Minimal preprocessing for BM25 search.
+
+        The improved search_bm25_improved function in the database now handles:
+        - Lowercase conversion
+        - OR logic for better recall
+        - Stop word handling
+
+        We just do minimal cleanup here.
+
+        Args:
+            query: Raw query string
+
+        Returns:
+            Lightly preprocessed query string
+        """
+        # Just normalize whitespace and return
+        # The database function handles the rest
+        processed = " ".join(query.split())
+
+        # Log if there was any change
+        if query != processed:
+            logger.debug(f"BM25 query normalized: '{query}' -> '{processed}'")
+
+        return processed
+
     async def _search_bm25_async(
         self,
         query: str,
@@ -972,10 +1019,17 @@ class ModernPulseqRAG:
         try:
             # Run the synchronous BM25 search in an executor for true async
             loop = asyncio.get_event_loop()
+
+            # Preprocess query following BM25 best practices
+            processed_query = self._preprocess_bm25_query(query)
+
+            # Search with processed query
+            # The improved search_bm25_improved function now handles OR logic
+            # and fallback mechanisms in the database
             results = await loop.run_in_executor(
                 None,
                 self.supabase_client.search_bm25,
-                query,
+                processed_query,
                 table_name,
                 limit,
                 rank_threshold,

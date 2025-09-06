@@ -6,13 +6,13 @@ and secure environment variable management.
 """
 
 import logging
+from typing import Optional
 
 from dotenv import load_dotenv
 from pydantic import ConfigDict, Field
 from pydantic_settings import BaseSettings
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
+# Configure logging - will be reconfigured based on settings
 logger = logging.getLogger(__name__)
 
 
@@ -128,6 +128,13 @@ class Settings(BaseSettings):
         alias="DEFAULT_LANGUAGE",
     )
 
+    # Logging Configuration
+    log_level: str = Field(
+        default="INFO",
+        description="Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)",
+        alias="LOG_LEVEL",
+    )
+
     # Alpha Testing Configuration (migrated from alpha_keys.json)
     alpha_api_keys: str = Field(
         default="",
@@ -173,9 +180,9 @@ class Settings(BaseSettings):
     )
 
     # Reranker Configuration
-    reranker_model_path: str = Field(
-        default="/tmp/models",  # Use /tmp for local testing, /app/models for Railway
-        description="Path to store/load reranker model files (Railway volume)",
+    reranker_model_path: Optional[str] = Field(
+        default=None,  # Will be auto-determined based on platform
+        description="Path to store/load reranker model files (defaults to platform-specific)",
         alias="RERANKER_MODEL_PATH",
     )
     reranker_model_name: str = Field(

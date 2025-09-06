@@ -17,19 +17,47 @@ logger = logging.getLogger(__name__)
 def load_api_keys() -> Dict[str, dict]:
     """Load API keys from environment variable or file."""
     logger.info("Loading API keys...")
-    api_keys_json = os.getenv("ALPHA_API_KEYS")
+    api_keys_str = os.getenv("ALPHA_API_KEYS")
 
-    if api_keys_json:
+    if api_keys_str:
         logger.info(
-            f"Found ALPHA_API_KEYS environment variable (length: {len(api_keys_json)})"
+            f"Found ALPHA_API_KEYS environment variable (length: {len(api_keys_str)})"
         )
+
+        # Remove quotes if present
+        api_keys_str = api_keys_str.strip('"').strip("'")
+
+        # First try to parse as JSON
         try:
-            keys = json.loads(api_keys_json)
-            logger.info(f"Successfully parsed {len(keys)} API keys from environment")
+            keys = json.loads(api_keys_str)
+            logger.info(f"Successfully parsed {len(keys)} API keys from JSON format")
             return keys
-        except json.JSONDecodeError as e:
-            logger.error(f"Failed to parse ALPHA_API_KEYS JSON: {e}")
-            logger.error(f"Raw value: {api_keys_json[:100]}...")  # Log first 100 chars
+        except json.JSONDecodeError:
+            # If not JSON, treat as comma-separated list
+            logger.info("Parsing as comma-separated list of API keys")
+            keys = {}
+            for i, key in enumerate(api_keys_str.split(",")):
+                key = key.strip()
+                if key:
+                    keys[key] = {
+                        "name": f"Alpha User {i+1}",
+                        "email": f"user{i+1}@alpha.pulsepal.ai",
+                        "limit": 100,
+                        "created": "2025-01-01",
+                    }
+            logger.info(f"Parsed {len(keys)} API keys from comma-separated format")
+            return (
+                keys
+                if keys
+                else {
+                    "test-key": {
+                        "name": "Test User",
+                        "email": "test@example.com",
+                        "limit": 1000,
+                        "created": "2025-01-01",
+                    }
+                }
+            )
     else:
         logger.info(
             "No ALPHA_API_KEYS environment variable found, using default test key"

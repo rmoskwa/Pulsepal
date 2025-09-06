@@ -168,14 +168,56 @@ def _get_document_id(doc: Dict[str, Any]) -> str:
     """
     Generate unique identifier for a document based on its content.
 
+    Improved to handle different document types and avoid over-aggressive deduplication.
+
     Args:
         doc: Document dictionary
 
     Returns:
         Unique hash identifier for the document
     """
-    # Use combination of title and content for uniqueness
-    content_key = f"{doc.get('title', '')}-{doc.get('content', '')[:200]}"
+    # Build a unique key based on available fields
+    # Use more content to distinguish between similar chunks
+    components = []
+
+    # Add source table if available (different tables might have similar content)
+    if "source_table" in doc:
+        components.append(f"table:{doc['source_table']}")
+
+    # Add ID if available (most specific identifier)
+    if "id" in doc:
+        components.append(f"id:{doc['id']}")
+    elif "record_id" in doc:
+        components.append(f"id:{doc['record_id']}")
+
+    # Add URL if available (for web content)
+    if "url" in doc:
+        components.append(f"url:{doc['url']}")
+
+    # Add title if available
+    if "title" in doc:
+        components.append(f"title:{doc['title']}")
+
+    # Add more content for better differentiation (500 chars instead of 200)
+    # This helps distinguish between different chunks of the same document
+    content = doc.get("content", "")
+    if content:
+        # Use more content and include the middle part too (not just the beginning)
+        content_sample = (
+            content[:250] + content[len(content) // 2 : len(content) // 2 + 250]
+            if len(content) > 500
+            else content
+        )
+        components.append(f"content:{content_sample}")
+
+    # Add chunk-specific identifiers if present
+    if "chunk_id" in doc:
+        components.append(f"chunk:{doc['chunk_id']}")
+    if "chunk_type" in doc:
+        components.append(f"type:{doc['chunk_type']}")
+
+    # Create a unique key from all components
+    content_key = "|".join(components) if components else str(doc)
     return hashlib.md5(content_key.encode()).hexdigest()
 
 
@@ -218,7 +260,7 @@ def _log_fusion_statistics(
 
     logger.info(
         f"RRF Fusion Statistics: "
-        f"fusion_time={fusion_time*1000:.2f}ms, "
+        f"fusion_time={fusion_time * 1000:.2f}ms, "
         f"bm25_count={len(bm25_results)}, "
         f"vector_count={len(vector_results)}, "
         f"overlap={overlap_count}, "

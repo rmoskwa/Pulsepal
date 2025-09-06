@@ -337,18 +337,34 @@ class SupabaseRAGClient:
             List of matching documents with BM25 ranking
         """
         try:
-            # Call the BM25 RPC function
-            params = {
-                "query_text": query,
-                "match_count": match_count,
-                "rank_threshold": rank_threshold,
-            }
+            # Try the improved BM25 function first (with OR logic)
+            try:
+                params = {
+                    "query_text": query,
+                    "match_count": match_count,
+                    "rank_threshold": rank_threshold,
+                    "use_or_logic": True,  # Use OR logic for better recall
+                }
 
-            # Add table name if specified
-            if table_name:
-                params["table_name"] = table_name
+                # Add table name if specified
+                if table_name:
+                    params["table_name"] = table_name
 
-            result = self.client.rpc("search_bm25", params).execute()
+                result = self.client.rpc("search_bm25_improved", params).execute()
+            except Exception as e:
+                # Fall back to original function if improved version doesn't exist
+                logger.debug(f"Falling back to original search_bm25: {e}")
+                params = {
+                    "query_text": query,
+                    "match_count": match_count,
+                    "rank_threshold": rank_threshold,
+                }
+
+                # Add table name if specified
+                if table_name:
+                    params["table_name"] = table_name
+
+                result = self.client.rpc("search_bm25", params).execute()
             results = result.data if result.data else []
 
             logger.info(f"BM25 search for '{query}' returned {len(results)} results")

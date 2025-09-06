@@ -103,6 +103,7 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 TEST_RESULTS.md
+dev_server.py
 
 # Type checking
 .mypy_cache/
@@ -268,3 +269,4 @@ welcome_*.txt
 # ====================================
 .pre-commit-config.yaml
 .secrets.baseline
+models/
