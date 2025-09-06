@@ -369,16 +369,58 @@ class SupabaseRAGClient:
 
             logger.info(f"BM25 search for '{query}' returned {len(results)} results")
 
-            # Transform results to match expected format
+            # Transform results to match expected format and ensure compatibility with vector search
             formatted_results = []
             for item in results:
+                # Parse metadata if it's a string (JSON)
+                metadata = item.get("metadata", {})
+                if isinstance(metadata, str):
+                    try:
+                        import json
+
+                        metadata = json.loads(metadata)
+                    except (json.JSONDecodeError, ValueError):
+                        metadata = {}
+
                 formatted_item = {
                     "source_table": item.get("source_table"),
-                    "id": item.get("record_id"),
-                    "content": item.get("content_preview"),
-                    "rank": item.get("rank"),
-                    "metadata": item.get("metadata", {}),
+                    "id": item.get("record_id"),  # Unified ID field
+                    "record_id": item.get(
+                        "record_id"
+                    ),  # Keep original for compatibility
+                    "content": item.get(
+                        "content_preview", ""
+                    ),  # Full content field name
+                    "rank": item.get("rank", 0),  # BM25 rank score
+                    "score": item.get("rank", 0),  # Unified score field for fusion
+                    "metadata": metadata,
+                    "_source": "bm25_search",  # Mark source for tracking
+                    "_search_type": "keyword",
                 }
+
+                # Add table-specific fields based on source_table
+                source_table = item.get("source_table", "")
+                if source_table == "api_reference":
+                    formatted_item["function_name"] = metadata.get("function_name", "")
+                    formatted_item["signature"] = metadata.get("signature", "")
+                    formatted_item["parameters"] = metadata.get("parameters", {})
+                    formatted_item["returns"] = metadata.get("returns", {})
+                elif source_table == "pulseq_sequences":
+                    formatted_item["file_name"] = metadata.get("file_name", "")
+                    formatted_item["repository"] = metadata.get("repository", "")
+                    formatted_item["dependencies"] = metadata.get("dependencies", {})
+                elif source_table == "sequence_chunks":
+                    formatted_item["sequence_id"] = metadata.get("sequence_id")
+                    formatted_item["chunk_type"] = metadata.get("chunk_type", "")
+                elif source_table == "crawled_code":
+                    formatted_item["file_name"] = metadata.get("file_name", "")
+                    formatted_item["parent_sequences"] = metadata.get(
+                        "parent_sequences", []
+                    )
+                elif source_table == "crawled_docs":
+                    formatted_item["resource_uri"] = metadata.get("resource_uri", "")
+                    formatted_item["doc_type"] = metadata.get("doc_type", "")
+
                 formatted_results.append(formatted_item)
 
             return formatted_results

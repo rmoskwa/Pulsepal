@@ -39,7 +39,21 @@ def extract_result_metadata(
     # Extract metadata field if it exists, otherwise use result itself
     metadata = result.get("metadata", {})
 
-    # Common metadata extraction patterns
+    # Handle JSON string metadata (from BM25 results)
+    if isinstance(metadata, str):
+        try:
+            import json
+
+            metadata = json.loads(metadata)
+        except (json.JSONDecodeError, ValueError):
+            logger.debug("Could not parse metadata JSON string")
+            metadata = {}
+
+    # Ensure metadata is a dict
+    if not isinstance(metadata, dict):
+        metadata = {}
+
+    # Common metadata extraction patterns - check both result and metadata
     return {
         "source_id": result.get("source_id") or metadata.get("source_id", ""),
         "language": result.get("language")
@@ -55,6 +69,16 @@ def extract_result_metadata(
         "all_functions": metadata.get("all_functions", []),
         "dependencies": metadata.get("dependencies", []),
         "truncated": metadata.get("truncated", False),
+        # Add more fields commonly found in metadata
+        "file_name": result.get("file_name") or metadata.get("file_name", ""),
+        "sequence_type": result.get("sequence_type")
+        or metadata.get("sequence_type", ""),
+        "trajectory_type": result.get("trajectory_type")
+        or metadata.get("trajectory_type", ""),
+        "repository": result.get("repository") or metadata.get("repository", ""),
+        "sequence_family": metadata.get("sequence_family", ""),
+        "acceleration": metadata.get("acceleration", ""),
+        "ai_summary": metadata.get("ai_summary", ""),
     }
 
 

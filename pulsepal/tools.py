@@ -59,51 +59,81 @@ async def search_pulseq_knowledge(
     ctx: RunContext[PulsePalDependencies],
     query: str,
     table: str = "auto",
-    limit: int = 10,
+    limit: int = 3,
 ) -> str:
     """
-    Search specific table in Pulseq knowledge base.
+    Search Pulseq knowledge base with intelligent table selection.
 
-    Tables available:
+    Choose the most appropriate table(s) based on the search intent:
 
-    - "api_reference": Pulseq function signatures, parameters, returns, calling patterns
-      Best for: Pulseq function syntax, parameter types, calling patterns
-      Returns: Complete function specifications with all parameters (required, optional, varargin)
+    **TABLE SELECTION GUIDE:**
 
-    - "pulseq_sequences": Complete sequence implementations
-      Best for: Full examples, sequence architecture, educational code
-      Returns: Complete code with list of associated helper files and docs
+    1. "pulseq_sequences" - COMPLETE SEQUENCE IMPLEMENTATIONS
+       - Use for: "show me examples", "spiral trajectory", "EPI sequence", specific sequence types
+       - Contains: Full MRI sequences with classification metadata (family, trajectory, complexity)
+       - Returns: Complete code, dependencies, vendor compatibility, educational value
+       - Example queries: "spiral trajectory examples", "TSE sequence", "diffusion imaging"
 
-    - "sequence_chunks": Granular code sections
-      Best for: Specific patterns, techniques, algorithm implementations
-      Returns: Code chunk with parent_sequence_id for full context
+    2. "api_reference" - PULSEQ FUNCTION DOCUMENTATION
+       - Use for: Function syntax, parameters, "how to use makeBlockPulse", API details
+       - Contains: Function signatures, parameter specs, return values, usage patterns
+       - Returns: Complete API documentation with required/optional parameters
+       - Example queries: "makeBlockPulse parameters", "calcDuration usage", "mr.addBlock syntax"
 
-    - "crawled_code": Helper functions and utilities
-      Best for: Supporting functions, shared utilities
-      Returns: Helper code with parent_sequences[] showing usage
+    3. "sequence_chunks" - LOGICAL CODE SECTIONS
+       - Use for: Specific implementation patterns, timing calculations, sequence assembly
+       - Contains: Categorized code chunks (parameter_definition, rf_gradient_creation, timing_calculations)
+       - Returns: Code segment with context, chunk type, MRI concepts demonstrated
+       - Example queries: "calculate TE", "gradient spoiling", "sequence assembly loops"
 
-    - "crawled_docs": Documentation and data files
-      Best for: READMEs, configuration, supplementary materials
-      Returns: Document content with parent_sequence_id
+    4. "crawled_code" - AUXILIARY CODE FILES
+       - Use for: Helper functions, reconstruction code, vendor conversion tools
+       - Contains: Supporting functions, utilities, vendor tools (seq2ceq, TOPPE), reconstruction algorithms
+       - Returns: Code content, parent sequences, tool metadata, vendor compatibility
+       - Example queries: "GRAPPA reconstruction", "vendor conversion", "helper utilities"
 
-    - "auto": Automatic table selection based on query analysis
+    5. "crawled_docs" - DOCUMENTATION & DATA FILES
+       - Use for: Tutorials, guides, data files, vendor documentation, troubleshooting
+       - Contains: READMEs, tutorials, CSV/MAT data, vendor guides, configuration files
+       - Returns: Document content, metadata, related sequences
+       - Example queries: "installation guide", "GE scanner setup", "trajectory data", "vendor troubleshooting"
 
-    After receiving results, you'll see relationship indicators.
-    You can make additional searches to follow these relationships.
+    **SEARCH STRATEGY:**
+    - For sequence examples: Search "pulseq_sequences" first
+    - For function help: Search "api_reference" first
+    - For implementation details: Search "sequence_chunks" or "pulseq_sequences"
+    - For unclear queries: Use "auto" to search across all tables
+
+    **RELEVANCE SCORING:**
+    - Results include relevance scores (0-1 scale)
+    - If all scores < 0.5, consider broader search or different table
+    - Top 3 most relevant results are returned by default
 
     Special patterns:
     - ID:42 - Direct ID lookup in specified table
-    - ID:42,43,44 - Multiple ID lookup
-    - FILE:calcTiming.m - Filename-based lookup
+    - FILE:writeSpiral.m - Filename-based search
 
     Args:
-        query: Search query (can include special patterns)
-        table: Specific table to search or "auto" for automatic selection
-        limit: Maximum results per table (default 10)
+        query: User's search query
+        table: Table name from above list OR "auto" for automatic selection
+        limit: Maximum results (default 3, max 10)
 
     Returns:
-        JSON-formatted results with relationships and search hints
+        JSON with results, relevance scores, and search metadata
     """
+    import json
+
+    # Input validation
+    if not query or not isinstance(query, str):
+        return json.dumps(
+            {"error": "Invalid query", "message": "Query must be a non-empty string"}
+        )
+
+    # Log very long queries but don't reject them
+    # Gemini might generate comprehensive queries
+    if len(query) > 1000:
+        logger.info(f"Long query received: {len(query)} characters")
+
     # Get or create RAG service
     if not hasattr(ctx.deps, "rag_v2"):
         ctx.deps.rag_v2 = ModernPulseqRAG()
@@ -149,108 +179,55 @@ async def search_pulseq_knowledge(
             detected_functions=detected_functions,
         )
 
-    # Format results for display
-    # Handle table-specific search format
-    if "source_table" in results:
-        # This is a table-specific search result
-        if results.get("error"):
-            return f"Error: {results.get('message', 'Unknown error')}"
+    # Log search event if we have context and conversation_context
+    if (
+        ctx.deps
+        and hasattr(ctx.deps, "conversation_context")
+        and ctx.deps.conversation_context
+    ):
+        # Log for table-specific searches
+        if "source_table" in results:
+            metadata = {
+                "table": results.get("source_table", "unknown"),
+                "total_results": results.get("total_results", 0),
+                "search_type": results.get("search_metadata", {}).get(
+                    "search_type", "unknown"
+                ),
+            }
+            if detected_functions:
+                metadata["detected_functions"] = [f["name"] for f in detected_functions]
 
-        if results.get("total_results", 0) == 0:
-            return f"No results found in {results.get('source_table', 'table')}"
+            conversation_logger.log_search_event(
+                ctx.deps.conversation_context.session_id,
+                "table_specific_rag",
+                query,
+                results.get("total_results", 0),
+                metadata,
+            )
+        # Log for source-aware searches
+        elif "results_by_source" in results:
+            metadata = {
+                "sources_searched": results.get("search_metadata", {}).get(
+                    "sources_searched", []
+                ),
+                "total_results": results.get("search_metadata", {}).get(
+                    "total_results", 0
+                ),
+            }
+            if detected_functions:
+                metadata["detected_functions"] = [f["name"] for f in detected_functions]
 
-        # Format table-specific results
-        formatted = []
-        formatted.append(f"**Table:** {results['source_table']}")
-        formatted.append(f"**Total results:** {results['total_results']}\n")
+            conversation_logger.log_search_event(
+                ctx.deps.conversation_context.session_id,
+                "source_aware_rag",
+                query,
+                results.get("search_metadata", {}).get("total_results", 0),
+                metadata,
+            )
 
-        # Add hint if available
-        if results.get("search_metadata", {}).get("hint"):
-            formatted.append(f"**Hint:** {results['search_metadata']['hint']}\n")
-
-        # Format each result
-        for idx, result in enumerate(results.get("results", [])[:10], 1):
-            formatted.append(f"### Result {idx}")
-            # Format based on table type
-            if results["source_table"] == "api_reference":
-                formatted.append(format_api_result(result))
-            elif results["source_table"] == "pulseq_sequences":
-                formatted.append(format_sequence_result(result))
-            elif results["source_table"] == "sequence_chunks":
-                formatted.append(format_chunk_result(result))
-            elif results["source_table"] == "crawled_code":
-                formatted.append(format_code_result(result))
-            elif results["source_table"] == "crawled_docs":
-                formatted.append(format_doc_result(result))
-            else:
-                formatted.append(str(result))
-
-        return "\n".join(formatted)
-
-    # Handle source-aware search format (original logic)
-    if not results.get("results_by_source"):
-        return "No relevant documentation found in the knowledge base."
-
-    # Build formatted response
-    formatted = []
-
-    # Add search metadata
-    formatted.append(
-        f"**Sources searched:** {', '.join(results['search_metadata']['sources_searched'])}",
-    )
-    formatted.append(
-        f"**Total results:** {results['search_metadata']['total_results']}\n",
-    )
-
-    # Add synthesis hints
-    if results.get("synthesis_hints"):
-        formatted.append("**Key insights:**")
-        for hint in results["synthesis_hints"]:
-            formatted.append(f"• {hint}")
-        formatted.append("")
-
-    # Format results by source
-    for source_type, source_results in results.get("results_by_source", {}).items():
-        formatted.append(f"\n### {source_type.replace('_', ' ').title()}\n")
-
-        for idx, result in enumerate(source_results[:5], 1):  # Limit to 5 per source
-            if (
-                source_type == "api_reference"
-            ):  # Fixed: Changed from "api_documentation"
-                formatted.append(format_api_result(result))
-            elif (
-                source_type == "direct_function_lookup"
-            ):  # Handle direct function lookups
-                formatted.append(format_direct_lookup_result(result))
-            elif source_type == "examples_and_docs":
-                formatted.append(format_example_result(result))
-            elif source_type == "tutorials":
-                formatted.append(format_tutorial_result(result))
-
-    # Add synthesis recommendations
-    if results.get("synthesis_recommendations"):
-        formatted.append("\n**Recommendations:**")
-        for rec in results["synthesis_recommendations"]:
-            formatted.append(f"• {rec}")
-
-    # Log search event
-    if ctx.deps and hasattr(ctx.deps, "conversation_context"):
-        metadata = {
-            "sources_searched": results["search_metadata"]["sources_searched"],
-            "total_results": results["search_metadata"]["total_results"],
-        }
-        if detected_functions:
-            metadata["detected_functions"] = [f["name"] for f in detected_functions]
-
-        conversation_logger.log_search_event(
-            ctx.deps.conversation_context.session_id,
-            "source_aware_rag",
-            query,
-            results["search_metadata"]["total_results"],
-            metadata,
-        )
-
-    return "\n".join(formatted)
+    # Return raw JSON results for Gemini to process
+    # This follows the specification in docs/RAG-search-plan.md
+    return json.dumps(results, indent=2)
 
 
 def format_sequence_result(result: Dict) -> str:

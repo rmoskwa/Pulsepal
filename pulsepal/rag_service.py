@@ -65,10 +65,11 @@ class ModernPulseqRAG:
     ) -> Dict:
         """
         Perform source-aware search across Supabase tables.
+
         Now uses hybrid search (BM25 + vector) with RRF fusion and reranking by default.
 
         Args:
-            query: User's search query
+            query: Search query (extracted by Gemini, not raw user input)
             sources: Specific sources to search (LLM-specified or None for all)
             forced: Whether this search was forced by semantic routing
             source_hints: Additional hints about which sources to prioritize
@@ -78,6 +79,24 @@ class ModernPulseqRAG:
         Returns:
             Formatted results organized by source with synthesis hints
         """
+        # Input validation for search queries (not user messages)
+        if not query or not isinstance(query, str):
+            return {
+                "error": "Invalid search query",
+                "message": "Search query must be a non-empty string",
+                "results_by_source": {},
+                "search_metadata": {"error": "invalid_input"},
+            }
+
+        query = query.strip()
+        if len(query) == 0:
+            return {
+                "error": "Empty search query",
+                "message": "Search query cannot be empty",
+                "results_by_source": {},
+                "search_metadata": {"error": "empty_query"},
+            }
+
         # Get settings for hybrid search configuration
         settings = get_settings()
 
@@ -102,12 +121,47 @@ class ModernPulseqRAG:
             # Use hybrid search as the primary approach
             logger.info("Using hybrid search with RRF fusion and reranking")
 
-            # Execute parallel BM25 and vector searches
-            parallel_results = await self._parallel_search(
-                query,
-                table=None,
-                limit=max(settings.hybrid_bm25_k, settings.hybrid_vector_k),
-            )
+            # If no specific sources, search all tables comprehensively
+            if not sources:
+                # Search all 5 tables for comprehensive results
+                logger.info(
+                    "Auto mode: Searching all 5 tables for comprehensive results"
+                )
+
+                # Get vector results from all tables
+                vector_results = await self._search_all_tables_vector(
+                    query=query,
+                    limit_per_table=4,  # 4 per table = up to 20 total
+                    similarity_threshold=0.3,
+                )
+
+                # Get BM25 results across all tables
+                bm25_results = await self._search_bm25_async(
+                    query=query,
+                    table_name=None,  # Search all tables
+                    limit=20,
+                    rank_threshold=0.01,
+                )
+
+                # Create parallel results structure for compatibility
+                parallel_results = {
+                    "bm25_results": bm25_results,
+                    "vector_results": vector_results,
+                    "metadata": {
+                        "query": query,
+                        "total_results": len(bm25_results) + len(vector_results),
+                        "bm25_count": len(bm25_results),
+                        "vector_count": len(vector_results),
+                        "performance": {"search_mode": "all_tables_comprehensive"},
+                    },
+                }
+            else:
+                # Execute parallel BM25 and vector searches for specific sources
+                parallel_results = await self._parallel_search(
+                    query,
+                    table=None,  # Will use default tables
+                    limit=max(settings.hybrid_bm25_k, settings.hybrid_vector_k),
+                )
 
             # Extract results from parallel search
             bm25_results = parallel_results.get("bm25_results", [])
@@ -154,6 +208,13 @@ class ModernPulseqRAG:
                     result["_search_type"] = "hybrid_reranked"
                     result["_rerank_score"] = (
                         relevance_scores[i] if i < len(relevance_scores) else 0.0
+                    )
+
+                # Check if relevance scores are too low (< 0.5)
+                if relevance_scores and max(relevance_scores) < 0.5:
+                    logger.warning(
+                        f"Low relevance scores detected (max: {max(relevance_scores):.3f}). "
+                        "Consider broader search or different query."
                     )
 
             except Exception as e:
@@ -567,13 +628,20 @@ class ModernPulseqRAG:
 
         Args:
             query: Query text for vector search
-            table: Optional specific table to search
+            table: Optional specific table to search (if None, searches default tables)
             limit: Maximum number of results (default 20)
             similarity_threshold: Minimum similarity threshold
 
         Returns:
             List of vector search results with source attribution
         """
+        # If a specific table is requested, use the single table search
+        if table:
+            return await self._search_vector_single_table(
+                query=query, table=table, limit=limit
+            )
+
+        # Otherwise, search the default tables (crawled_pages and api_reference)
         results = []
 
         try:
@@ -686,6 +754,101 @@ class ModernPulseqRAG:
                     "limit": limit,
                 },
             )
+            return []
+
+    async def _search_all_tables_vector(
+        self,
+        query: str,
+        limit_per_table: int = 3,
+        similarity_threshold: float = 0.3,
+    ) -> List[Dict[str, Any]]:
+        """
+        Search all 5 tables in parallel for comprehensive results.
+
+        Args:
+            query: Query text for vector search
+            limit_per_table: Maximum results per table (default 3)
+            similarity_threshold: Minimum similarity threshold
+
+        Returns:
+            Combined results from all tables with source attribution
+        """
+        try:
+            # Get embedding for query
+            from .embeddings import create_embedding
+
+            loop = asyncio.get_event_loop()
+            query_embedding = await loop.run_in_executor(None, create_embedding, query)
+
+            # Define all tables and their RPC functions
+            table_configs = [
+                (
+                    "pulseq_sequences",
+                    "match_pulseq_sequences",
+                    0.4,
+                ),  # Lower threshold for sequences
+                (
+                    "api_reference",
+                    "match_api_reference",
+                    0.5,
+                ),  # Higher threshold for API
+                ("sequence_chunks", "match_sequence_chunks", 0.3),
+                ("crawled_code", "match_crawled_code", 0.3),
+                ("crawled_docs", "match_crawled_docs", 0.3),
+            ]
+
+            # Create semaphore to limit concurrent searches (max 3 at a time)
+            semaphore = asyncio.Semaphore(3)
+
+            # Create search tasks for all tables with resource limiting
+            async def search_table(table_name: str, rpc_func: str, threshold: float):
+                async with semaphore:  # Limit concurrent searches
+                    try:
+                        response = await loop.run_in_executor(
+                            None,
+                            lambda: self.supabase_client.client.rpc(
+                                rpc_func,
+                                {
+                                    "query_embedding": query_embedding,
+                                    "match_threshold": threshold,
+                                    "match_count": limit_per_table,
+                                },
+                            ).execute(),
+                        )
+
+                        results = []
+                        if hasattr(response, "data") and response.data:
+                            for item in response.data:
+                                # Add common fields
+                                item["_source"] = table_name
+                                item["_search_type"] = "vector"
+                                item["source_table"] = table_name
+                                results.append(item)
+
+                        return results
+
+                    except Exception as e:
+                        logger.warning(f"Search failed for {table_name}: {e}")
+                        return []
+
+            # Execute all searches in parallel with resource limits
+            tasks = [
+                search_table(name, rpc, thresh) for name, rpc, thresh in table_configs
+            ]
+            all_results = await asyncio.gather(*tasks)
+
+            # Flatten results
+            combined_results = []
+            for table_results in all_results:
+                combined_results.extend(table_results)
+
+            # Sort by similarity score
+            combined_results.sort(key=lambda x: x.get("similarity", 0), reverse=True)
+
+            return combined_results
+
+        except Exception as e:
+            logger.error(f"All-tables vector search failed: {e}")
             return []
 
     async def _search_api_reference(self, query: str, limit: int = 10) -> List[Dict]:
@@ -850,28 +1013,50 @@ class ModernPulseqRAG:
 
     def _preprocess_bm25_query(self, query: str) -> str:
         """
-        Minimal preprocessing for BM25 search.
+        Preprocess search query for BM25 database search.
+
+        IMPORTANT: This receives search queries extracted by Gemini, NOT raw user input.
+        User input (including code) is handled by Gemini before search queries are generated.
 
         The improved search_bm25_improved function in the database now handles:
         - Lowercase conversion
         - OR logic for better recall
         - Stop word handling
 
-        We just do minimal cleanup here.
+        We handle query sanitization for database safety here.
 
         Args:
-            query: Raw query string
+            query: Search query string (already extracted/generated by Gemini)
 
         Returns:
-            Lightly preprocessed query string
+            Sanitized and preprocessed query string
         """
-        # Just normalize whitespace and return
-        # The database function handles the rest
-        processed = " ".join(query.split())
+        # Input validation
+        if not query or not isinstance(query, str):
+            return ""
 
-        # Log if there was any change
-        if query != processed:
-            logger.debug(f"BM25 query normalized: '{query}' -> '{processed}'")
+        # Safety truncation for edge cases
+        if len(query) > 1000:
+            query = query[:1000]
+            # Try to preserve complete words at the boundary
+            last_space = query.rfind(" ")
+            if last_space > 950:
+                query = query[:last_space]
+            logger.debug(f"Truncated query to {len(query)} chars")
+
+        # Remove potentially dangerous SQL characters while preserving search operators
+        # Keep: alphanumeric, spaces, hyphens, plus, parentheses, quotes, ampersand, pipe
+        # Remove: semicolons, backslashes, null bytes, etc.
+        import re
+
+        sanitized = re.sub(r'[^\w\s\-\+\(\)"\'\'&|]', " ", query)
+
+        # Normalize whitespace
+        processed = " ".join(sanitized.split())
+
+        # Ensure non-empty result
+        if not processed.strip():
+            processed = "*"  # Wildcard search if everything was stripped
 
         return processed
 
@@ -1198,6 +1383,34 @@ class ModernPulseqRAG:
         """
         start_time = time.time()
 
+        # Input validation
+        if not query or not isinstance(query, str):
+            return {
+                "error": "Invalid query",
+                "message": "Query must be a non-empty string",
+                "suggestion": "Please provide a valid search query.",
+            }
+
+        query = query.strip()
+        if len(query) == 0:
+            return {
+                "error": "Empty query",
+                "message": "Query cannot be empty or only whitespace",
+                "suggestion": "Please provide a valid search query.",
+            }
+
+        # Search queries (not user messages) should be reasonably short
+        # If Gemini sends a very long search query, something is wrong
+        if len(query) > 1000:
+            query = query[:1000]
+            logger.debug("Truncated query to 1000 chars")
+
+        # Validate limit
+        if not isinstance(limit, int) or limit < 1:
+            limit = 10
+        elif limit > 100:
+            limit = 100  # Cap at reasonable maximum
+
         # Validate table name
         valid_tables = [
             "api_reference",
@@ -1451,18 +1664,14 @@ class ModernPulseqRAG:
             },
             "pulseq_sequences": {
                 "formatter": self._format_pulseq_sequences_results,
-                "hint": lambda r: "Found dependencies. Search 'crawled_code' for helper implementations."
-                if r and any(x.get("dependencies") for x in r)
-                else "",
+                "hint": lambda r: self._generate_sequences_hint(r),
                 "relationships": lambda r: {"local_dependencies": True}
                 if r and any(x.get("dependencies") for x in r)
                 else {},
             },
             "sequence_chunks": {
                 "formatter": self._format_sequence_chunks_results,
-                "hint": lambda r: f"Found {len(r)} chunks. Use sequence_id to retrieve full sequences from pulseq_sequences table."
-                if r
-                else "",
+                "hint": lambda r: self._generate_chunks_hint(r),
                 "relationships": lambda r: {"parent_sequence": True} if r else {},
             },
             "crawled_code": {
@@ -1474,7 +1683,7 @@ class ModernPulseqRAG:
             },
             "crawled_docs": {
                 "formatter": self._format_crawled_docs_results,
-                "hint": lambda r: "Documentation found. Search 'pulseq_sequences' for related sequence implementations.",
+                "hint": lambda r: self._generate_docs_hint(r),
                 "relationships": lambda r: {
                     "parent_sequences": any(x.get("parent_sequences") for x in r)
                 }
@@ -1492,18 +1701,102 @@ class ModernPulseqRAG:
         )
 
     def _generate_crawled_code_hint(self, results: List[Dict]) -> str:
-        """Generate hint for crawled_code results."""
-        if not results or not any(r.get("parent_sequences") for r in results):
+        """Generate specific hint for crawled_code results with IDs."""
+        if not results:
             return ""
 
-        parent_ids = []
+        parent_ids = set()
         for r in results:
             if r.get("parent_sequences"):
-                parent_ids.extend(r["parent_sequences"])
+                parent_ids.update(r["parent_sequences"])
 
         if parent_ids:
-            return f"This helper is used by sequences. Search 'pulseq_sequences' with IDs {parent_ids[:3]} to see usage examples."
+            id_list = sorted(list(parent_ids))[:5]  # Show up to 5 IDs
+            return f"This helper is used by {len(parent_ids)} sequences. Search 'pulseq_sequences' with IDs {id_list} to see usage examples."
         return ""
+
+    def _generate_sequences_hint(self, results: List[Dict]) -> str:
+        """Generate specific hint for pulseq_sequences results with dependency counts."""
+        if not results:
+            return ""
+
+        total_deps = 0
+        sequence_ids = []
+        for r in results:
+            if r.get("id"):
+                sequence_ids.append(r["id"])
+            deps = r.get("dependencies", {})
+            if isinstance(deps, dict):
+                local_deps = deps.get("local_dependencies", deps.get("local", []))
+                if local_deps:
+                    total_deps += len(local_deps)
+
+        if total_deps > 0:
+            return f"Found {len(results)} sequences with {total_deps} local helper functions. Search 'crawled_code' WHERE parent_sequences contains {sequence_ids[0] if sequence_ids else 'sequence_id'} to retrieve their implementations."
+        elif len(results) > 0:
+            return f"Found {len(results)} sequences. Use their IDs to search for related chunks, code, or documentation."
+        return ""
+
+    def _generate_chunks_hint(self, results: List[Dict]) -> str:
+        """Generate specific hint for sequence_chunks results with parent IDs."""
+        if not results:
+            return ""
+
+        # Collect unique sequence IDs
+        sequence_ids = set()
+        for r in results:
+            if r.get("sequence_id"):
+                sequence_ids.add(r["sequence_id"])
+
+        if sequence_ids:
+            id_list = sorted(list(sequence_ids))[:3]  # Show up to 3 parent IDs
+            chunk_count = len(results)
+            parent_count = len(sequence_ids)
+
+            if parent_count == 1:
+                return f"Found {chunk_count} chunks from sequence ID {id_list[0]}. Search 'pulseq_sequences' with ID:{id_list[0]} to retrieve the full sequence."
+            else:
+                return f"Found {chunk_count} chunks from {parent_count} different sequences. Use sequence_id values {id_list} to retrieve full sequences from pulseq_sequences table."
+        return f"Found {len(results)} chunks. Check sequence_id field to retrieve parent sequences."
+
+    def _generate_docs_hint(self, results: List[Dict]) -> str:
+        """Generate specific hint for crawled_docs results."""
+        if not results:
+            return ""
+
+        # Check for parent sequences
+        parent_ids = set()
+        for r in results:
+            if r.get("parent_sequences"):
+                if isinstance(r["parent_sequences"], list):
+                    parent_ids.update(r["parent_sequences"])
+                elif r["parent_sequences"]:  # Single ID
+                    parent_ids.add(r["parent_sequences"])
+
+        doc_types = set()
+        for r in results:
+            if r.get("doc_type"):
+                doc_types.add(r["doc_type"])
+
+        hint_parts = []
+        if doc_types:
+            hint_parts.append(
+                f"Found {len(results)} documents of types: {', '.join(sorted(doc_types))}"
+            )
+        else:
+            hint_parts.append(f"Found {len(results)} documents")
+
+        if parent_ids:
+            id_list = sorted(list(parent_ids))[:3]
+            hint_parts.append(
+                f"Related to sequences: {id_list}. Search 'pulseq_sequences' for implementations."
+            )
+        else:
+            hint_parts.append(
+                "Search 'pulseq_sequences' for related sequence implementations."
+            )
+
+        return ". ".join(hint_parts)
 
     def _format_table_response(
         self,
@@ -1686,20 +1979,60 @@ class ModernPulseqRAG:
         return formatted
 
     def _parse_parameters(self, params_data: Any) -> Dict[str, Any]:
-        """Parse parameters into required/optional structure with input validation."""
+        """Parse parameters into required/optional structure matching specification format."""
         if not params_data:
-            return {"required": [], "optional": [], "varargin_style": False}
+            return {
+                "required": [],
+                "optional": [],
+                "varargin_style": False,
+                "varargin_description": "",
+            }
 
-        # If it's already structured correctly, validate and return
+        # If it's already structured correctly with required/optional, use it
         if isinstance(params_data, dict) and "required" in params_data:
-            # Validate structure
-            if not isinstance(params_data.get("required"), list):
-                params_data["required"] = []
-            if not isinstance(params_data.get("optional"), list):
-                params_data["optional"] = []
-            return params_data
+            # Ensure all fields are present and correctly formatted
+            result = {
+                "required": [],
+                "optional": [],
+                "varargin_style": params_data.get("varargin_style", False),
+                "varargin_description": params_data.get("varargin_description", ""),
+            }
 
-        # Otherwise, try to parse it safely
+            # Process required parameters
+            for param in params_data.get("required", []):
+                if isinstance(param, dict):
+                    result["required"].append(
+                        {
+                            "name": str(param.get("name", ""))[:100],
+                            "type": str(param.get("type", "unknown"))[:50],
+                            "description": str(param.get("description", ""))[:500],
+                        }
+                    )
+                elif isinstance(param, str):
+                    result["required"].append(
+                        {"name": param, "type": "unknown", "description": ""}
+                    )
+
+            # Process optional parameters with defaults
+            for param in params_data.get("optional", []):
+                if isinstance(param, dict):
+                    opt_param = {
+                        "name": str(param.get("name", ""))[:100],
+                        "type": str(param.get("type", "unknown"))[:50],
+                        "description": str(param.get("description", ""))[:500],
+                    }
+                    # Include default value if present
+                    if "default" in param:
+                        opt_param["default"] = str(param["default"])[:100]
+                    result["optional"].append(opt_param)
+                elif isinstance(param, str):
+                    result["optional"].append(
+                        {"name": param, "type": "unknown", "description": ""}
+                    )
+
+            return result
+
+        # Parse from raw parameter data (backward compatibility)
         result = {
             "required": [],
             "optional": [],
@@ -1707,47 +2040,65 @@ class ModernPulseqRAG:
             "varargin_description": "",
         }
 
-        # Validate input type
         if not isinstance(params_data, dict):
             logger.warning(f"Expected dict for params_data, got {type(params_data)}")
             return result
 
-        # Parse with validation
+        # Check for varargin pattern indicators
+        if any(
+            key.lower() in ["varargin", "key-value", "kwargs"]
+            for key in params_data.keys()
+        ):
+            result["varargin_style"] = True
+            result["varargin_description"] = "Key-value pairs for optional parameters"
+
+        # Parse parameters
         try:
             for key, value in params_data.items():
-                # Validate key is string
                 if not isinstance(key, str):
-                    logger.warning(f"Skipping non-string parameter key: {key}")
                     continue
 
-                # Safely extract parameter info
-                param_info = {
-                    "name": str(key)[:100],  # Limit length for safety
+                # Skip meta keys
+                if key in [
+                    "varargin_style",
+                    "varargin_description",
+                    "required",
+                    "optional",
+                ]:
+                    continue
+
+                # Build parameter object matching specification
+                param_obj = {
+                    "name": str(key)[:100],
                     "type": "unknown",
                     "description": "",
                 }
 
                 if isinstance(value, dict):
-                    # Safely extract type and description
-                    param_type = value.get("type", "unknown")
-                    param_info["type"] = (
-                        str(param_type)[:50] if param_type else "unknown"
+                    # Extract all available fields
+                    param_obj["type"] = str(value.get("type", "unknown"))[:50]
+                    param_obj["description"] = str(value.get("description", ""))[:500]
+
+                    # Check if it's required
+                    is_required = value.get("required", False) or value.get(
+                        "is_required", False
                     )
 
-                    param_desc = value.get("description", "")
-                    param_info["description"] = (
-                        str(param_desc)[:500] if param_desc else ""
-                    )
-
-                    # Check if required
-                    if value.get("required") is True:
-                        result["required"].append(param_info)
+                    if is_required:
+                        result["required"].append(param_obj)
                     else:
-                        result["optional"].append(param_info)
+                        # Add default value for optional parameters
+                        if "default" in value:
+                            param_obj["default"] = str(value["default"])[:100]
+                        result["optional"].append(param_obj)
+                elif isinstance(value, str):
+                    # Simple string value - treat as description
+                    param_obj["description"] = str(value)[:500]
+                    result["optional"].append(param_obj)
                 else:
-                    # Handle non-dict values
-                    param_info["description"] = str(value)[:500] if value else ""
-                    result["optional"].append(param_info)
+                    # Other types - convert to string
+                    param_obj["description"] = str(value)[:500]
+                    result["optional"].append(param_obj)
 
         except Exception as e:
             logger.error(f"Error parsing parameters: {e}")
