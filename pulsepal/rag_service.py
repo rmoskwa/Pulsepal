@@ -10,7 +10,6 @@ import asyncio
 import logging
 import re
 import time
-from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
 from .rag_fusion import merge_search_results, select_top_results
@@ -21,15 +20,6 @@ from .source_profiles import MULTI_CHUNK_DOCUMENTS
 from .supabase_client import SupabaseRAGClient, get_supabase_client
 
 logger = logging.getLogger(__name__)
-
-
-@dataclass
-class RetrievalHint:
-    """Simple hints from LLM about what might be useful."""
-
-    functions_mentioned: List[str] = field(default_factory=list)
-    code_provided: bool = False
-    search_terms: Optional[List[str]] = None
 
 
 class ModernPulseqRAG:
@@ -292,60 +282,6 @@ class ModernPulseqRAG:
             )
 
         return format_unified_response(source_results, query_context)
-
-    async def retrieve(
-        self,
-        query: str,
-        hint: Optional[RetrievalHint] = None,
-        limit: int = 30,
-    ) -> Dict[str, Any]:
-        """
-        Simple retrieval based on query and optional hints.
-        Returns documents with metadata, no filtering or classification.
-
-        Args:
-            query: Search query string
-            hint: Optional hints about functions or search terms
-            limit: Maximum number of results to return
-
-        Returns:
-            Dictionary containing:
-            - documents: List of retrieved documents with content and metadata
-            - metadata: Overall metadata about the retrieval
-        """
-        results = {
-            "documents": [],
-            "metadata": {
-                "query": query,
-                "total_results": 0,
-                "has_function_docs": False,
-                "sources": [],
-            },
-        }
-
-        if hint and hint.functions_mentioned:
-            function_docs = await self._get_function_docs(hint.functions_mentioned)
-            if function_docs:
-                results["documents"].extend(function_docs)
-                results["metadata"]["has_function_docs"] = True
-                results["metadata"]["sources"].append("function_calling_patterns")
-
-        vector_results = await self._vector_search(query, limit=limit)
-        if vector_results:
-            results["documents"].extend(vector_results)
-            results["metadata"]["sources"].append("vector_search")
-
-        if hint and hint.search_terms:
-            for term in hint.search_terms[:3]:
-                additional_results = await self._vector_search(term, limit=10)
-                if additional_results:
-                    results["documents"].extend(additional_results)
-
-        results["documents"].sort(key=lambda x: x.get("similarity", 0), reverse=True)
-        results["documents"] = results["documents"][:limit]
-        results["metadata"]["total_results"] = len(results["documents"])
-
-        return results
 
     def check_function_namespace(self, function_call: str) -> Dict[str, Any]:
         """Deterministic check for function namespace correctness."""
@@ -730,99 +666,6 @@ class ModernPulseqRAG:
             logger.error(f"Async vector search failed: {e}")
             return []
 
-    async def _vector_search(self, query: str, limit: int = 30) -> List[Dict[str, Any]]:
-        """
-        Perform vector similarity search.
-        Legacy method kept for backward compatibility.
-        """
-        # Use the new async method with adjusted limit
-        return await self._search_vector_async(query, limit)
-
-    async def _get_function_docs(
-        self,
-        function_names: List[str],
-    ) -> List[Dict[str, Any]]:
-        """Get exact function documentation from function_calling_patterns view."""
-        docs = []
-
-        for func_name in function_names:
-            # Handle different namespace patterns
-            # Extract just the function name without namespace
-            func_match = re.search(
-                r"(?:mr|seq|tra|eve|opt)(?:\.aux)?(?:\.quat)?\.(\w+)",
-                func_name,
-            )
-            if func_match:
-                clean_func_name = func_match.group(1)
-            else:
-                clean_func_name = func_name
-
-            response = (
-                self.supabase_client.client.table("function_calling_patterns")
-                .select(
-                    "name, description, correct_usage, usage_instruction, class_name, is_class_method",
-                )
-                .eq("name", clean_func_name)
-                .execute()
-            )
-
-            if response.data:
-                for item in response.data:
-                    # Check if namespace matches if full function call provided
-                    namespace_mismatch = False
-                    if func_match:
-                        provided_namespace = func_name.split(".")[0]
-                        # Extract namespace from correct_usage
-                        correct_usage = item.get("correct_usage", "")
-                        if correct_usage:
-                            ns_match = re.match(r"(mr|seq|tra|eve|opt)", correct_usage)
-                            if ns_match and provided_namespace != ns_match.group(1):
-                                namespace_mismatch = True
-
-                    doc = {
-                        "content": self._format_function_doc(item),
-                        "function_name": item.get("name", ""),
-                        "correct_usage": item.get("correct_usage", ""),
-                        "class_name": item.get("class_name", ""),
-                        "similarity": 0.95,  # High score for exact matches
-                        "_source": "function_calling_patterns",
-                        "_type": "function_doc",
-                        "_namespace_mismatch": namespace_mismatch,
-                    }
-                    docs.append(doc)
-
-        return docs
-
-    def _format_function_doc(self, item: Dict) -> str:
-        """Format function documentation for display."""
-        parts = []
-
-        if item.get("name"):
-            correct_usage = item.get("correct_usage", "")
-            if correct_usage:
-                # Extract namespace from correct_usage
-                ns_match = re.match(
-                    r"(mr|seq|tra|eve|opt)(?:\.aux)?(?:\.quat)?",
-                    correct_usage,
-                )
-                if ns_match:
-                    parts.append(f"Function: {ns_match.group(0)}.{item['name']}")
-                else:
-                    parts.append(f"Function: {item['name']}")
-            else:
-                parts.append(f"Function: {item['name']}")
-
-        if item.get("description"):
-            parts.append(f"Description: {item['description']}")
-
-        if item.get("correct_usage"):
-            parts.append(f"Usage: {item['correct_usage']}")
-
-        if item.get("usage_instruction"):
-            parts.append(f"Instructions: {item['usage_instruction']}")
-
-        return "\n".join(parts)
-
     async def _search_api_reference(self, query: str, limit: int = 10) -> List[Dict]:
         """
         Search API reference with higher precision threshold.
@@ -1091,7 +934,6 @@ class ModernPulseqRAG:
         query: str,
         table: Optional[str] = None,
         limit: int = 10,
-        vector_weight: float = 0.5,
     ) -> List[Dict]:
         """
         Perform hybrid search using parallel BM25 and vector searches with RRF fusion.
@@ -1101,7 +943,6 @@ class ModernPulseqRAG:
             query: Query text
             table: Optional specific table to search
             limit: Maximum number of results
-            vector_weight: Weight for vector results (kept for compatibility but not used with RRF)
 
         Returns:
             List of combined and re-ranked results using RRF

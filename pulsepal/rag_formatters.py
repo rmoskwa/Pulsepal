@@ -11,9 +11,7 @@ from urllib.parse import urlparse
 
 # Constants for formatting limits and defaults
 CONTENT_PREVIEW_LENGTH = 200  # Characters for content preview
-CONTENT_SAMPLE_LENGTH = 250  # Characters for content sampling in deduplication
 MAX_FUNCTION_HINTS = 10  # Maximum number of function hints to display
-MAX_SEARCH_HINTS = 5  # Maximum number of search hints
 DEFAULT_COMPLEXITY_BEGINNER_THRESHOLD = 7000  # Code length threshold for beginner
 DEFAULT_COMPLEXITY_INTERMEDIATE_THRESHOLD = (
     15000  # Code length threshold for intermediate
