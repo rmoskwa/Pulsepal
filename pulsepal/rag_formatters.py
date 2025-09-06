@@ -9,6 +9,73 @@ from datetime import datetime
 from typing import Any, Dict, List
 from urllib.parse import urlparse
 
+# Constants for formatting limits and defaults
+CONTENT_PREVIEW_LENGTH = 200  # Characters for content preview
+CONTENT_SAMPLE_LENGTH = 250  # Characters for content sampling in deduplication
+MAX_FUNCTION_HINTS = 10  # Maximum number of function hints to display
+MAX_SEARCH_HINTS = 5  # Maximum number of search hints
+DEFAULT_COMPLEXITY_BEGINNER_THRESHOLD = 7000  # Code length threshold for beginner
+DEFAULT_COMPLEXITY_INTERMEDIATE_THRESHOLD = (
+    15000  # Code length threshold for intermediate
+)
+DEFAULT_LANGUAGE = "matlab"  # Default programming language
+DEFAULT_FUNCTION_TYPE = "main"  # Default function type
+
+
+def extract_result_metadata(
+    result: Dict, source_type: str = "unknown"
+) -> Dict[str, Any]:
+    """
+    Helper function to extract common metadata from various result types.
+
+    Args:
+        result: Raw result dictionary
+        source_type: Type of source (api_reference, crawled_pages, etc.)
+
+    Returns:
+        Dictionary with extracted metadata
+    """
+    # Extract metadata field if it exists, otherwise use result itself
+    metadata = result.get("metadata", {})
+
+    # Common metadata extraction patterns
+    return {
+        "source_id": result.get("source_id") or metadata.get("source_id", ""),
+        "language": result.get("language")
+        or metadata.get("language", DEFAULT_LANGUAGE),
+        "category": result.get("category") or metadata.get("category", ""),
+        "last_updated": result.get("last_updated") or metadata.get("last_updated", ""),
+        "repo_name": metadata.get("repo_name", ""),
+        "file_path": metadata.get("file_path", ""),
+        "source": metadata.get("source", ""),
+        "file_extension": metadata.get("file_extension", ""),
+        "file_category": metadata.get("file_category", ""),
+        "word_count": metadata.get("word_count", 0),
+        "all_functions": metadata.get("all_functions", []),
+        "dependencies": metadata.get("dependencies", []),
+        "truncated": metadata.get("truncated", False),
+    }
+
+
+def extract_relevance_score(result: Dict) -> float:
+    """
+    Extract relevance score from various result formats.
+
+    Args:
+        result: Result dictionary
+
+    Returns:
+        Relevance score as float
+    """
+    # Try multiple fields in order of preference
+    score_fields = ["_rerank_score", "similarity", "rank", "rrf_score"]
+
+    for field in score_fields:
+        if field in result and result[field] is not None:
+            return float(result[field])
+
+    return 0.0
+
 
 def format_api_reference(results: List[Dict]) -> List[Dict]:
     """
@@ -24,9 +91,12 @@ def format_api_reference(results: List[Dict]) -> List[Dict]:
     formatted_results = []
 
     for result in results:
+        # Use helper to extract metadata
+        metadata = extract_result_metadata(result, "api_reference")
+
         formatted_entry = {
             "source_type": "API_DOCUMENTATION",
-            "relevance_score": result.get("similarity", 0),
+            "relevance_score": extract_relevance_score(result),
             # Primary Information (what users usually need)
             "function": {
                 "name": result.get("function_name", result.get("name", "")),
@@ -41,20 +111,20 @@ def format_api_reference(results: List[Dict]) -> List[Dict]:
                 "signature": result.get("signature", ""),
                 "parameters": format_parameters(result.get("parameters", {})),
                 "returns": format_returns(result.get("returns", {})),
-                "function_type": result.get("function_type", "main"),
+                "function_type": result.get("function_type", DEFAULT_FUNCTION_TYPE),
                 "class_name": result.get("class_name", ""),
                 "is_class_method": result.get("is_class_method", False),
             },
             # Practical Context
             "examples": format_examples(result.get("usage_examples", [])),
             "related_functions": result.get("related_functions", []),
-            # Metadata for filtering/context
+            # Metadata for filtering/context - use extracted metadata
             "metadata": {
-                "language": result.get("language", "matlab"),
-                "category": result.get("category", ""),
+                "language": metadata["language"],
+                "category": metadata["category"],
                 "has_examples": bool(result.get("usage_examples")),
-                "last_updated": result.get("last_updated", ""),
-                "source_id": result.get("source_id", ""),
+                "last_updated": metadata["last_updated"],
+                "source_id": metadata["source_id"],
             },
         }
         formatted_results.append(formatted_entry)
@@ -254,13 +324,13 @@ def format_multi_chunk_document(url: str, chunks: List[Dict]) -> Dict:
             combined_content.append(f"[Part {chunk_num + 1}/{total_chunks}]")
         combined_content.append(content)
 
-    # Extract common metadata from first chunk
+    # Extract common metadata from first chunk using helper
     first_chunk = chunks[0]
-    metadata = first_chunk.get("metadata", {})
+    metadata = extract_result_metadata(first_chunk, "crawled_pages")
 
     return {
         "source_type": "DOCUMENTATION_MULTI_PART",
-        "relevance_score": max(chunk.get("similarity", 0) for chunk in chunks),
+        "relevance_score": max(extract_relevance_score(chunk) for chunk in chunks),
         "document": {
             "url": url,
             "title": extract_title_from_url(url) if url != "unknown" else "Document",
@@ -269,16 +339,16 @@ def format_multi_chunk_document(url: str, chunks: List[Dict]) -> Dict:
             "content_length": sum(len(chunk.get("content", "")) for chunk in chunks),
         },
         "context": {
-            "source": metadata.get("source", ""),
-            "file_path": metadata.get("file_path", ""),
-            "language": metadata.get("language", ""),
+            "source": metadata["source"],
+            "file_path": metadata["file_path"],
+            "language": metadata["language"],
             "document_type": get_document_type(url, metadata),
         },
         "metadata": {
-            "source_id": first_chunk.get("source_id"),
-            "repo_name": metadata.get("repo_name", ""),
-            "functions_mentioned": metadata.get("all_functions", []),
-            "dependencies": metadata.get("dependencies", []),
+            "source_id": metadata["source_id"],
+            "repo_name": metadata["repo_name"],
+            "functions_mentioned": metadata["all_functions"],
+            "dependencies": metadata["dependencies"],
             "is_official": "pulseq.github.io" in url if url else False,
         },
         "retrieval_note": f"Retrieved all {total_chunks} parts for document coherence",
@@ -295,12 +365,13 @@ def format_single_chunk(chunk: Dict) -> Dict:
     Returns:
         Formatted single chunk document
     """
-    metadata = chunk.get("metadata", {})
+    # Use helper to extract metadata
+    metadata = extract_result_metadata(chunk, "crawled_pages")
     url = chunk.get("url", "")
 
     return {
         "source_type": "CODE_EXAMPLE" if is_code(chunk) else "DOCUMENTATION",
-        "relevance_score": chunk.get("similarity", 0),
+        "relevance_score": extract_relevance_score(chunk),
         "content": {
             "text": chunk.get("content", ""),
             "url": url,
@@ -309,20 +380,20 @@ def format_single_chunk(chunk: Dict) -> Dict:
             else chunk.get("title", "Untitled"),
         },
         "context": {
-            "source": metadata.get("source", ""),
-            "file_path": metadata.get("file_path", ""),
-            "language": metadata.get("language", ""),
-            "file_type": metadata.get("file_extension", ""),
+            "source": metadata["source"],
+            "file_path": metadata["file_path"],
+            "language": metadata["language"],
+            "file_type": metadata["file_extension"],
         },
         "code_info": {
-            "functions_used": metadata.get("all_functions", []),
-            "dependencies": metadata.get("dependencies", []),
-            "is_complete": not metadata.get("truncated", False),
+            "functions_used": metadata["all_functions"],
+            "dependencies": metadata["dependencies"],
+            "is_complete": not metadata["truncated"],
         },
         "metadata": {
-            "source_id": chunk.get("source_id"),
-            "repo_name": metadata.get("repo_name", ""),
-            "word_count": metadata.get("word_count", 0),
+            "source_id": metadata["source_id"],
+            "repo_name": metadata["repo_name"],
+            "word_count": metadata["word_count"],
             "is_official": "pulseq.github.io" in url if url else False,
         },
     }
@@ -338,15 +409,16 @@ def is_code(chunk: Dict) -> bool:
     Returns:
         True if chunk is primarily code
     """
-    metadata = chunk.get("metadata", {})
+    # Use helper to extract metadata
+    metadata = extract_result_metadata(chunk, "crawled_pages")
     content = chunk.get("content", "")
 
     # Check file extension
-    if metadata.get("file_extension") in [".m", ".py", ".cpp", ".c", ".h"]:
+    if metadata["file_extension"] in [".m", ".py", ".cpp", ".c", ".h"]:
         return True
 
     # Check file category
-    if metadata.get("file_category") == "repository_file":
+    if metadata["file_category"] == "repository_file":
         return True
 
     # Check content patterns (simple heuristic)
@@ -447,31 +519,49 @@ def format_official_sequence_examples(results: List[Dict]) -> List[Dict]:
     formatted_results = []
 
     for result in results:
+        # Use helper to extract common metadata
+        metadata = extract_result_metadata(result, "official_sequences")
+
+        # Extract sequence-specific fields
+        file_name = result.get("file_name") or metadata.get("file_name", "")
+        sequence_type = result.get("sequence_type") or metadata.get("sequence_type", "")
+        trajectory_type = result.get("trajectory_type") or metadata.get(
+            "trajectory_type", ""
+        )
+        acceleration = result.get("acceleration") or metadata.get("acceleration", "")
+        repository = result.get("repository") or metadata.get("repository", "")
+        sequence_family = metadata.get("sequence_family", "")
+
         # Parse the AI summary for key insights
-        summary_sections = parse_ai_summary(result.get("ai_summary", ""))
+        summary_sections = parse_ai_summary(
+            result.get("ai_summary", metadata.get("ai_summary", ""))
+        )
 
         formatted_entry = {
             "source_type": "EDUCATIONAL_SEQUENCE",
-            "relevance_score": result.get("similarity", 0),
+            "relevance_score": extract_relevance_score(result),
             # Educational Context (PRIMARY)
             "tutorial_info": {
-                "title": extract_sequence_title(result.get("file_name", "")),
-                "sequence_type": result.get("sequence_type", "Unknown"),
+                "title": extract_sequence_title(file_name),
+                "sequence_type": sequence_type or sequence_family or "Unknown",
                 "complexity": determine_complexity(result),
-                "summary": summary_sections.get("overview", ""),
+                "summary": summary_sections.get("overview", "")
+                or result.get("content", "")[:CONTENT_PREVIEW_LENGTH],
                 "key_techniques": summary_sections.get("techniques", []),
                 "learning_points": summary_sections.get("learning_points", []),
             },
             # Complete Implementation
             "implementation": {
-                "full_code": result.get("content", ""),
-                "code_length": len(result.get("content", "")),
+                "full_code": result.get("content", "") or result.get("full_code", ""),
+                "code_length": len(
+                    result.get("content", "") or result.get("full_code", "")
+                ),
                 "language": "MATLAB",  # All official examples are MATLAB
             },
             # Technical Specifications
             "technical_details": {
-                "trajectory_type": result.get("trajectory_type", ""),
-                "acceleration": result.get("acceleration", "none"),
+                "trajectory_type": trajectory_type,
+                "acceleration": acceleration or "none",
                 "performance_notes": summary_sections.get("performance", ""),
                 "warnings": summary_sections.get("warnings", []),
             },
@@ -483,8 +573,9 @@ def format_official_sequence_examples(results: List[Dict]) -> List[Dict]:
             },
             # Metadata
             "metadata": {
-                "file_name": result.get("file_name", ""),
-                "is_demo": "demo" in result.get("file_name", "").lower(),
+                "file_name": file_name,
+                "repository": repository,
+                "is_demo": "demo" in file_name.lower(),
                 "validation_status": "official_tested",
                 "suitable_for_learning": True,
             },
@@ -590,9 +681,9 @@ def determine_complexity(result: Dict) -> str:
     sequence_type = result.get("sequence_type", "")
 
     # Simple heuristic based on length and type
-    if content_length < 7000:
+    if content_length < DEFAULT_COMPLEXITY_BEGINNER_THRESHOLD:
         complexity = "beginner"
-    elif content_length < 15000:
+    elif content_length < DEFAULT_COMPLEXITY_INTERMEDIATE_THRESHOLD:
         complexity = "intermediate"
     else:
         complexity = "advanced"
@@ -728,9 +819,13 @@ def format_unified_response(
     detected_functions = query_context.get("detected_functions", None)
     if detected_functions:
         # Only include a summary to avoid overwhelming context
-        func_names = [f["name"] for f in detected_functions[:10]]  # Limit to first 10
-        if len(detected_functions) > 10:
-            func_names.append(f"... and {len(detected_functions) - 10} more")
+        func_names = [
+            f["name"] for f in detected_functions[:MAX_FUNCTION_HINTS]
+        ]  # Limit to first MAX_FUNCTION_HINTS
+        if len(detected_functions) > MAX_FUNCTION_HINTS:
+            func_names.append(
+                f"... and {len(detected_functions) - MAX_FUNCTION_HINTS} more"
+            )
 
         response["search_metadata"]["function_context"] = {
             "detected_count": len(detected_functions),

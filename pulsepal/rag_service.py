@@ -114,7 +114,9 @@ class ModernPulseqRAG:
 
             # Execute parallel BM25 and vector searches
             parallel_results = await self._parallel_search(
-                query, limit=max(settings.hybrid_bm25_k, settings.hybrid_vector_k)
+                query,
+                table=None,
+                limit=max(settings.hybrid_bm25_k, settings.hybrid_vector_k),
             )
 
             # Extract results from parallel search
@@ -496,6 +498,7 @@ class ModernPulseqRAG:
     async def _parallel_search(
         self,
         query: str,
+        table: Optional[str] = None,
         limit: int = 20,
     ) -> Dict[str, Any]:
         """
@@ -503,6 +506,7 @@ class ModernPulseqRAG:
 
         Args:
             query: Search query text
+            table: Optional specific table to search
             limit: Maximum results per search method (default 20)
 
         Returns:
@@ -518,7 +522,9 @@ class ModernPulseqRAG:
             nonlocal bm25_start, bm25_end
             bm25_start = time.perf_counter()
             try:
-                results = await self._search_bm25_async(query=query, limit=limit)
+                results = await self._search_bm25_async(
+                    query=query, table_name=table, limit=limit
+                )
                 bm25_end = time.perf_counter()
                 return results
             except Exception as e:
@@ -530,7 +536,9 @@ class ModernPulseqRAG:
             nonlocal vector_start, vector_end
             vector_start = time.perf_counter()
             try:
-                results = await self._search_vector_async(query=query, limit=limit)
+                results = await self._search_vector_async(
+                    query=query, table=table, limit=limit
+                )
                 vector_end = time.perf_counter()
                 return results
             except Exception as e:
@@ -598,13 +606,18 @@ class ModernPulseqRAG:
         return combined_results
 
     async def _search_vector_async(
-        self, query: str, limit: int = 20, similarity_threshold: float = 0.3
+        self,
+        query: str,
+        table: Optional[str] = None,
+        limit: int = 20,
+        similarity_threshold: float = 0.3,
     ) -> List[Dict[str, Any]]:
         """
         Perform async vector similarity search with proper async pattern.
 
         Args:
             query: Query text for vector search
+            table: Optional specific table to search
             limit: Maximum number of results (default 20)
             similarity_threshold: Minimum similarity threshold
 
@@ -1076,6 +1089,7 @@ class ModernPulseqRAG:
     async def _search_hybrid(
         self,
         query: str,
+        table: Optional[str] = None,
         limit: int = 10,
         vector_weight: float = 0.5,
     ) -> List[Dict]:
@@ -1085,6 +1099,7 @@ class ModernPulseqRAG:
 
         Args:
             query: Query text
+            table: Optional specific table to search
             limit: Maximum number of results
             vector_weight: Weight for vector results (kept for compatibility but not used with RRF)
 
@@ -1093,7 +1108,9 @@ class ModernPulseqRAG:
         """
         try:
             # Use the new parallel search implementation
-            parallel_results = await self._parallel_search(query, limit=limit * 2)
+            parallel_results = await self._parallel_search(
+                query, table=table, limit=limit * 2
+            )
 
             # Extract results from parallel search
             vector_results = parallel_results.get("vector_results", [])
@@ -1287,3 +1304,544 @@ class ModernPulseqRAG:
         if url_lower.endswith(".html"):
             return "html_doc"
         return "documentation"
+
+    async def search_table(
+        self,
+        table: str,
+        query: str,
+        limit: int = 10,
+        detected_functions: Optional[List[Dict]] = None,
+    ) -> Dict:
+        """
+        Search a specific table with standardized return format.
+
+        Args:
+            table: Table name to search
+            query: Search query
+            limit: Maximum results
+            detected_functions: Optional function hints
+
+        Returns:
+            Standardized JSON response with relationships
+        """
+        start_time = time.time()
+
+        # Validate table name
+        valid_tables = [
+            "api_reference",
+            "pulseq_sequences",
+            "sequence_chunks",
+            "crawled_code",
+            "crawled_docs",
+        ]
+        if table not in valid_tables:
+            return {
+                "error": "Invalid table name",
+                "message": f"Table '{table}' does not exist",
+                "available_tables": valid_tables,
+                "suggestion": "Please specify one of the available tables or use 'auto' for automatic selection.",
+            }
+
+        try:
+            # Use hybrid search for the specific table
+            if self.settings.hybrid_search_enabled:
+                results = await self._search_hybrid(
+                    query=query, table=table, limit=limit
+                )
+            else:
+                # Fallback to vector search
+                results = await self._search_vector_single_table(
+                    query=query, table=table, limit=limit
+                )
+
+            # Format results based on table type
+            formatted_response = self._format_table_response(
+                table=table,
+                results=results,
+                query=query,
+                execution_time=int((time.time() - start_time) * 1000),
+            )
+
+            return formatted_response
+
+        except Exception as e:
+            logger.error(f"Error searching table {table}: {e}")
+            return {
+                "error": "Search failed",
+                "message": str(e),
+                "table": table,
+                "query": query,
+            }
+
+    async def search_by_ids(self, table: str, ids: List[str]) -> Dict:
+        """
+        Search for specific records by ID.
+
+        Args:
+            table: Table to search
+            ids: List of IDs to retrieve
+
+        Returns:
+            Records matching the IDs with relationships
+        """
+        start_time = time.time()
+
+        try:
+            # Convert IDs to integers and filter out invalid ones
+            int_ids = []
+            for id_str in ids:
+                try:
+                    int_ids.append(int(id_str))
+                except ValueError:
+                    logger.warning(f"Invalid ID format: {id_str}")
+
+            if not int_ids:
+                return {
+                    "source_table": table,
+                    "query": f"ID:{','.join(ids)}",
+                    "total_results": 0,
+                    "results": [],
+                    "search_metadata": {
+                        "search_type": "id_lookup",
+                        "message": "No valid IDs provided",
+                        "suggestion": "Ensure IDs are numeric values",
+                    },
+                }
+
+            # Single query using IN clause for efficiency
+            response = (
+                self.supabase_client.client.table(table)
+                .select("*")
+                .in_("id", int_ids)
+                .execute()
+            )
+            results = response.data if response.data else []
+
+            if not results:
+                return {
+                    "source_table": table,
+                    "query": f"ID:{','.join(ids)}",
+                    "total_results": 0,
+                    "results": [],
+                    "search_metadata": {
+                        "search_type": "id_lookup",
+                        "message": f"No records found with IDs {ids}",
+                        "suggestion": "The referenced IDs may have been removed or updated. Try a text-based search instead.",
+                    },
+                }
+
+            # Format with relationships
+            formatted_response = self._format_table_response(
+                table=table,
+                results=results,
+                query=f"ID:{','.join(ids)}",
+                execution_time=int((time.time() - start_time) * 1000),
+                search_type="id_lookup",
+            )
+
+            return formatted_response
+
+        except Exception as e:
+            logger.error(f"Error searching by IDs in {table}: {e}")
+            return {
+                "error": "ID lookup failed",
+                "message": str(e),
+                "table": table,
+                "ids": ids,
+            }
+
+    async def search_by_filename(self, table: str, filename: str) -> Dict:
+        """
+        Search for records by filename.
+
+        Args:
+            table: Table to search
+            filename: Filename to search for
+
+        Returns:
+            Records matching the filename
+        """
+        start_time = time.time()
+
+        try:
+            # Determine the filename column based on table
+            filename_columns = {
+                "pulseq_sequences": "file_name",
+                "crawled_code": "file_name",
+                "crawled_docs": "resource_uri",
+            }
+
+            if table not in filename_columns:
+                return {
+                    "error": "Filename search not supported",
+                    "message": f"Table '{table}' does not support filename search",
+                    "suggestion": "Use text-based search instead",
+                }
+
+            column = filename_columns[table]
+
+            # Support wildcards
+            if "*" in filename:
+                # Use ILIKE for pattern matching
+                pattern = filename.replace("*", "%")
+                response = (
+                    self.supabase_client.client.table(table)
+                    .select("*")
+                    .ilike(column, pattern)
+                    .execute()
+                )
+            else:
+                # Exact match
+                response = (
+                    self.supabase_client.client.table(table)
+                    .select("*")
+                    .eq(column, filename)
+                    .execute()
+                )
+
+            results = response.data if response.data else []
+
+            # Format response
+            formatted_response = self._format_table_response(
+                table=table,
+                results=results,
+                query=f"FILE:{filename}",
+                execution_time=int((time.time() - start_time) * 1000),
+                search_type="filename_lookup",
+            )
+
+            return formatted_response
+
+        except Exception as e:
+            logger.error(f"Error searching by filename in {table}: {e}")
+            return {
+                "error": "Filename search failed",
+                "message": str(e),
+                "table": table,
+                "filename": filename,
+            }
+
+    async def _search_vector_single_table(
+        self, query: str, table: str, limit: int = 10
+    ) -> List[Dict]:
+        """Vector search on a single table."""
+        try:
+            # Use existing embedding pattern
+            from .embeddings import create_embedding
+
+            loop = asyncio.get_event_loop()
+            embedding = await loop.run_in_executor(None, create_embedding, query)
+
+            # Map table names to RPC functions (based on actual database functions)
+            rpc_functions = {
+                "api_reference": "match_api_reference",
+                "pulseq_sequences": "match_pulseq_sequences",
+                "sequence_chunks": "match_sequence_chunks",
+                "crawled_code": "match_crawled_code",
+                "crawled_docs": "match_crawled_docs",
+                "crawled_pages": "match_crawled_pages",
+            }
+
+            if table in rpc_functions:
+                # Use existing RPC functions for other tables
+                response = await loop.run_in_executor(
+                    None,
+                    lambda: self.supabase_client.client.rpc(
+                        rpc_functions[table],
+                        {
+                            "query_embedding": embedding,
+                            "match_threshold": 0.3,
+                            "match_count": limit,
+                        },
+                    ).execute(),
+                )
+            else:
+                logger.error(f"No search method available for table {table}")
+                return []
+
+            return response.data if response.data else []
+
+        except Exception as e:
+            logger.error(f"Vector search failed for table {table}: {e}")
+            return []
+
+    def _format_table_response(
+        self,
+        table: str,
+        results: List[Dict],
+        query: str,
+        execution_time: int,
+        search_type: str = "targeted",
+    ) -> Dict:
+        """
+        Format results according to the standardized table return format.
+
+        Args:
+            table: Table name
+            results: Raw results from database
+            query: Original query
+            execution_time: Time in milliseconds
+            search_type: Type of search performed
+
+        Returns:
+            Standardized response format
+        """
+        # This is a placeholder - in production, each table would have
+        # its own specific formatting logic based on the plan
+        formatted_results = []
+        relationships_available = {}
+        hint = ""
+
+        if table == "api_reference":
+            formatted_results = self._format_api_reference_results(results)
+            hint = "CRITICAL: Use this information when generating Pulseq code to prevent hallucinations"
+
+        elif table == "pulseq_sequences":
+            formatted_results = self._format_pulseq_sequences_results(results)
+            if results and any(r.get("dependencies") for r in results):
+                relationships_available["local_dependencies"] = True
+                hint = "Found dependencies. Search 'crawled_code' for helper implementations."
+
+        elif table == "sequence_chunks":
+            formatted_results = self._format_sequence_chunks_results(results)
+            if results:
+                relationships_available["parent_sequence"] = True
+                hint = f"Found {len(results)} chunks. Use sequence_id to retrieve full sequences from pulseq_sequences table."
+
+        elif table == "crawled_code":
+            formatted_results = self._format_crawled_code_results(results)
+            if results and any(r.get("parent_sequences") for r in results):
+                relationships_available["parent_sequences"] = True
+                parent_ids = []
+                for r in results:
+                    if r.get("parent_sequences"):
+                        parent_ids.extend(r["parent_sequences"])
+                if parent_ids:
+                    hint = f"This helper is used by sequences. Search 'pulseq_sequences' with IDs {parent_ids[:3]} to see usage examples."
+
+        elif table == "crawled_docs":
+            formatted_results = self._format_crawled_docs_results(results)
+            relationships_available["parent_sequences"] = any(
+                r.get("parent_sequences") for r in results
+            )
+            hint = "Documentation found. Search 'pulseq_sequences' for related sequence implementations."
+
+        return {
+            "source_table": table,
+            "query": query,
+            "total_results": len(formatted_results),
+            "results": formatted_results,
+            "search_metadata": {
+                "search_type": search_type,
+                "execution_time_ms": execution_time,
+                "relationships_available": relationships_available,
+                "hint": hint,
+            },
+        }
+
+    def _format_api_reference_results(
+        self, results: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
+        """Format api_reference table results."""
+        formatted = []
+        for r in results:
+            formatted.append(
+                {
+                    "function_name": r.get("function_name", ""),
+                    "language": r.get("language", "matlab"),
+                    "signature": r.get("signature", ""),
+                    "description": r.get("description", ""),
+                    "calling_pattern": r.get("calling_pattern", ""),
+                    "parameters": self._parse_parameters(r.get("parameters", {})),
+                    "returns": r.get("returns", {}),
+                    "usage_examples": r.get("usage_examples", []),
+                    "has_nargin_pattern": r.get("has_nargin_pattern", False),
+                    "similarity_score": r.get("similarity", 0.0),
+                }
+            )
+        return formatted
+
+    def _format_pulseq_sequences_results(
+        self, results: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
+        """Format pulseq_sequences table results."""
+        formatted = []
+        for r in results:
+            formatted.append(
+                {
+                    "id": r.get("id"),
+                    "file_name": r.get("file_name", ""),
+                    "repository": r.get("repository", ""),
+                    "full_code": r.get("full_code", ""),
+                    "line_count": r.get("line_count", 0),
+                    "language": r.get("language", "matlab"),
+                    "content_summary": r.get("content_summary", ""),
+                    "sequence_family": r.get("sequence_family", ""),
+                    "contrast_mechanism": r.get("contrast_mechanism", ""),
+                    "trajectory_type": r.get("trajectory_type", ""),
+                    "dimensionality": r.get("dimensionality", ""),
+                    "architecture_type": r.get("architecture_type", ""),
+                    "complexity_level": r.get("complexity_level", 0),
+                    "dependencies": r.get("dependencies", {}),
+                    "external_requirements": r.get("external_requirements", []),
+                    "preparation_techniques": r.get("preparation_techniques", []),
+                    "acceleration_methods": r.get("acceleration_methods", []),
+                    "advanced_features": r.get("advanced_features", []),
+                    "vendor_features": r.get("vendor_features", []),
+                    "vendor_compatibility": r.get("vendor_compatibility", {}),
+                    "educational_value": r.get("educational_value", ""),
+                    "has_reconstruction_code": r.get("has_reconstruction_code", False),
+                    "reconstruction_type": r.get("reconstruction_type", ""),
+                    "typical_applications": r.get("typical_applications", []),
+                    "typical_scan_time": r.get("typical_scan_time", ""),
+                    "tested_vendors": r.get("tested_vendors", []),
+                    "all_features": r.get("all_features", []),
+                    "similarity_score": r.get("similarity", 0.0),
+                }
+            )
+        return formatted
+
+    def _format_sequence_chunks_results(
+        self, results: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
+        """Format sequence_chunks table results."""
+        formatted = []
+        for r in results:
+            formatted.append(
+                {
+                    "id": r.get("id"),
+                    "sequence_id": r.get("sequence_id"),
+                    "chunk_type": r.get("chunk_type", ""),
+                    "chunk_order": r.get("chunk_order", 0),
+                    "code_content": r.get("code_content", ""),
+                    "start_line": r.get("start_line", 0),
+                    "end_line": r.get("end_line", 0),
+                    "percentage_of_sequence": r.get("percentage_of_sequence", 0),
+                    "mri_concept": r.get("mri_concept", ""),
+                    "key_concepts": r.get("key_concepts", []),
+                    "pulseq_functions": r.get("pulseq_functions", []),
+                    "complexity_level": r.get("complexity_level", 0),
+                    "description": r.get("description", ""),
+                    "parent_context": r.get("parent_context", ""),
+                    "similarity_score": r.get("similarity", 0.0),
+                }
+            )
+        return formatted
+
+    def _format_crawled_code_results(
+        self, results: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
+        """Format crawled_code table results."""
+        formatted = []
+        for r in results:
+            formatted.append(
+                {
+                    "id": r.get("id"),
+                    "file_name": r.get("file_name", ""),
+                    "source_id": r.get("source_id", ""),
+                    "content": r.get("content", ""),
+                    "content_type": r.get("content_type", ""),
+                    "file_extension": r.get("file_extension", ""),
+                    "file_size_bytes": r.get("file_size_bytes", 0),
+                    "line_count": r.get("line_count", 0),
+                    "parent_sequences": r.get("parent_sequences", []),
+                    "dependency_type": r.get("dependency_type", ""),
+                    "pulseq_functions_used": r.get("pulseq_functions_used", []),
+                    "imports_files": r.get("imports_files", []),
+                    "content_summary": r.get("content_summary", ""),
+                    "metadata": r.get("metadata", {}),
+                    "similarity_score": r.get("similarity", 0.0),
+                }
+            )
+        return formatted
+
+    def _format_crawled_docs_results(
+        self, results: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
+        """Format crawled_docs table results."""
+        formatted = []
+        for r in results:
+            formatted.append(
+                {
+                    "id": r.get("id"),
+                    "resource_uri": r.get("resource_uri", ""),
+                    "chunk_number": r.get("chunk_number", 0),
+                    "source_id": r.get("source_id", ""),
+                    "content": r.get("content", ""),
+                    "doc_type": r.get("doc_type", ""),
+                    "parent_sequences": r.get("parent_sequences"),
+                    "content_summary": r.get("content_summary", ""),
+                    "metadata": r.get("metadata", {}),
+                    "similarity_score": r.get("similarity", 0.0),
+                }
+            )
+        return formatted
+
+    def _parse_parameters(self, params_data: Any) -> Dict[str, Any]:
+        """Parse parameters into required/optional structure with input validation."""
+        if not params_data:
+            return {"required": [], "optional": [], "varargin_style": False}
+
+        # If it's already structured correctly, validate and return
+        if isinstance(params_data, dict) and "required" in params_data:
+            # Validate structure
+            if not isinstance(params_data.get("required"), list):
+                params_data["required"] = []
+            if not isinstance(params_data.get("optional"), list):
+                params_data["optional"] = []
+            return params_data
+
+        # Otherwise, try to parse it safely
+        result = {
+            "required": [],
+            "optional": [],
+            "varargin_style": False,
+            "varargin_description": "",
+        }
+
+        # Validate input type
+        if not isinstance(params_data, dict):
+            logger.warning(f"Expected dict for params_data, got {type(params_data)}")
+            return result
+
+        # Parse with validation
+        try:
+            for key, value in params_data.items():
+                # Validate key is string
+                if not isinstance(key, str):
+                    logger.warning(f"Skipping non-string parameter key: {key}")
+                    continue
+
+                # Safely extract parameter info
+                param_info = {
+                    "name": str(key)[:100],  # Limit length for safety
+                    "type": "unknown",
+                    "description": "",
+                }
+
+                if isinstance(value, dict):
+                    # Safely extract type and description
+                    param_type = value.get("type", "unknown")
+                    param_info["type"] = (
+                        str(param_type)[:50] if param_type else "unknown"
+                    )
+
+                    param_desc = value.get("description", "")
+                    param_info["description"] = (
+                        str(param_desc)[:500] if param_desc else ""
+                    )
+
+                    # Check if required
+                    if value.get("required") is True:
+                        result["required"].append(param_info)
+                    else:
+                        result["optional"].append(param_info)
+                else:
+                    # Handle non-dict values
+                    param_info["description"] = str(value)[:500] if value else ""
+                    result["optional"].append(param_info)
+
+        except Exception as e:
+            logger.error(f"Error parsing parameters: {e}")
+
+        return result

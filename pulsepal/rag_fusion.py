@@ -14,9 +14,16 @@ import statistics
 
 logger = logging.getLogger(__name__)
 
+# Constants for RRF and deduplication
+RRF_K_DEFAULT = 60  # Default RRF k parameter (higher = less impact from top ranks)
+DEFAULT_TOP_N_RESULTS = 15  # Default number of top results to select
+CONTENT_SAMPLE_START = 250  # Characters to sample from content start
+CONTENT_SAMPLE_MIDDLE = 250  # Characters to sample from content middle
+CONTENT_MIN_LENGTH_FOR_SAMPLING = 500  # Minimum content length to apply sampling
+
 
 def reciprocal_rank_fusion(
-    rankings: List[List[Dict[str, Any]]], k: int = 60
+    rankings: List[List[Dict[str, Any]]], k: int = RRF_K_DEFAULT
 ) -> List[Tuple[Dict[str, Any], float]]:
     """
     Apply Reciprocal Rank Fusion to merge multiple rankings.
@@ -61,7 +68,7 @@ def reciprocal_rank_fusion(
 def merge_search_results(
     bm25_results: List[Dict[str, Any]],
     vector_results: List[Dict[str, Any]],
-    k: int = 60,
+    k: int = RRF_K_DEFAULT,
 ) -> List[Dict[str, Any]]:
     """
     Merge BM25 and vector search results using RRF, preserving source attribution.
@@ -127,14 +134,14 @@ def merge_search_results(
 
 
 def select_top_results(
-    fused_results: List[Dict[str, Any]], top_n: int = 15
+    fused_results: List[Dict[str, Any]], top_n: int = DEFAULT_TOP_N_RESULTS
 ) -> List[Dict[str, Any]]:
     """
     Select top N results from fused results, maintaining metadata.
 
     Args:
         fused_results: Results after RRF fusion with scores
-        top_n: Number of top results to return (default: 15)
+        top_n: Number of top results to return (default: DEFAULT_TOP_N_RESULTS)
 
     Returns:
         Top N results sorted by RRF score with normalized scores
@@ -198,14 +205,15 @@ def _get_document_id(doc: Dict[str, Any]) -> str:
     if "title" in doc:
         components.append(f"title:{doc['title']}")
 
-    # Add more content for better differentiation (500 chars instead of 200)
+    # Add more content for better differentiation
     # This helps distinguish between different chunks of the same document
     content = doc.get("content", "")
     if content:
         # Use more content and include the middle part too (not just the beginning)
         content_sample = (
-            content[:250] + content[len(content) // 2 : len(content) // 2 + 250]
-            if len(content) > 500
+            content[:CONTENT_SAMPLE_START]
+            + content[len(content) // 2 : len(content) // 2 + CONTENT_SAMPLE_MIDDLE]
+            if len(content) > CONTENT_MIN_LENGTH_FOR_SAMPLING
             else content
         )
         components.append(f"content:{content_sample}")

@@ -7,7 +7,7 @@ leaving all intelligence to the LLM.
 
 import logging
 import re
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 from pydantic_ai import RunContext
 
@@ -58,30 +58,51 @@ def extract_functions_from_text(text: str) -> List[str]:
 async def search_pulseq_knowledge(
     ctx: RunContext[PulsePalDependencies],
     query: str,
-    limit: int = 30,
-    sources: Optional[List[str]] = None,  # Optional source specification
+    table: str = "auto",
+    limit: int = 10,
 ) -> str:
     """
-    Search Pulseq knowledge base.
+    Search specific table in Pulseq knowledge base.
 
-    By default, returns top results from all sources for comprehensive coverage.
-    You can specify sources for targeted searches when you know what you need.
+    Tables available:
 
-    Available sources:
-    - "api_reference": Function signatures, parameters, returns (authoritative)
-    - "official_sequence_examples": Educational sequences, correct implementations
-    - "crawled_pages": Community examples, discussions, debugging
+    - "api_reference": Pulseq function signatures, parameters, returns, calling patterns
+      Best for: Pulseq function syntax, parameter types, calling patterns
+      Returns: Complete function specifications with all parameters (required, optional, varargin)
 
-    Can be called multiple times with different strategies.
-    Results include source attribution to help assess relevance.
+    - "pulseq_sequences": Complete sequence implementations
+      Best for: Full examples, sequence architecture, educational code
+      Returns: Complete code with list of associated helper files and docs
+
+    - "sequence_chunks": Granular code sections
+      Best for: Specific patterns, techniques, algorithm implementations
+      Returns: Code chunk with parent_sequence_id for full context
+
+    - "crawled_code": Helper functions and utilities
+      Best for: Supporting functions, shared utilities
+      Returns: Helper code with parent_sequences[] showing usage
+
+    - "crawled_docs": Documentation and data files
+      Best for: READMEs, configuration, supplementary materials
+      Returns: Document content with parent_sequence_id
+
+    - "auto": Automatic table selection based on query analysis
+
+    After receiving results, you'll see relationship indicators.
+    You can make additional searches to follow these relationships.
+
+    Special patterns:
+    - ID:42 - Direct ID lookup in specified table
+    - ID:42,43,44 - Multiple ID lookup
+    - FILE:calcTiming.m - Filename-based lookup
 
     Args:
-        query: Search query
-        limit: Maximum results (default 30)
-        sources: Optional list of specific sources to search
+        query: Search query (can include special patterns)
+        table: Specific table to search or "auto" for automatic selection
+        limit: Maximum results per table (default 10)
 
     Returns:
-        Formatted results with source attribution
+        JSON-formatted results with relationships and search hints
     """
     # Get or create RAG service
     if not hasattr(ctx.deps, "rag_v2"):
@@ -95,16 +116,78 @@ async def search_pulseq_knowledge(
             f"Using detected functions for enhanced search: {[f['name'] for f in detected_functions]}"
         )
 
-    # Use new source-aware search with detected functions
-    results = await ctx.deps.rag_v2.search_with_source_awareness(
-        query=query,
-        sources=sources,
-        forced=False,  # No longer forcing based on routing
-        source_hints=None,  # No longer using forced search hints
-        detected_functions=detected_functions,
-    )
+    # Check for special patterns in query
+    id_match = re.match(r"^ID:(.+)$", query.strip())
+    file_match = re.match(r"^FILE:(.+)$", query.strip())
+
+    # Route to appropriate search method
+    if table == "auto":
+        # Let the existing source-aware search handle it
+        results = await ctx.deps.rag_v2.search_with_source_awareness(
+            query=query,
+            sources=None,  # Will use all sources
+            forced=False,
+            source_hints=None,
+            detected_functions=detected_functions,
+        )
+    elif id_match:
+        # Handle ID-based lookup
+        ids = [id.strip() for id in id_match.group(1).split(",")]
+        results = await ctx.deps.rag_v2.search_by_ids(table=table, ids=ids)
+    elif file_match:
+        # Handle filename-based lookup
+        filename = file_match.group(1)
+        results = await ctx.deps.rag_v2.search_by_filename(
+            table=table, filename=filename
+        )
+    else:
+        # Table-specific search
+        results = await ctx.deps.rag_v2.search_table(
+            table=table,
+            query=query,
+            limit=limit,
+            detected_functions=detected_functions,
+        )
 
     # Format results for display
+    # Handle table-specific search format
+    if "source_table" in results:
+        # This is a table-specific search result
+        if results.get("error"):
+            return f"Error: {results.get('message', 'Unknown error')}"
+
+        if results.get("total_results", 0) == 0:
+            return f"No results found in {results.get('source_table', 'table')}"
+
+        # Format table-specific results
+        formatted = []
+        formatted.append(f"**Table:** {results['source_table']}")
+        formatted.append(f"**Total results:** {results['total_results']}\n")
+
+        # Add hint if available
+        if results.get("search_metadata", {}).get("hint"):
+            formatted.append(f"**Hint:** {results['search_metadata']['hint']}\n")
+
+        # Format each result
+        for idx, result in enumerate(results.get("results", [])[:10], 1):
+            formatted.append(f"### Result {idx}")
+            # Format based on table type
+            if results["source_table"] == "api_reference":
+                formatted.append(format_api_result(result))
+            elif results["source_table"] == "pulseq_sequences":
+                formatted.append(format_sequence_result(result))
+            elif results["source_table"] == "sequence_chunks":
+                formatted.append(format_chunk_result(result))
+            elif results["source_table"] == "crawled_code":
+                formatted.append(format_code_result(result))
+            elif results["source_table"] == "crawled_docs":
+                formatted.append(format_doc_result(result))
+            else:
+                formatted.append(str(result))
+
+        return "\n".join(formatted)
+
+    # Handle source-aware search format (original logic)
     if not results.get("results_by_source"):
         return "No relevant documentation found in the knowledge base."
 
@@ -170,25 +253,145 @@ async def search_pulseq_knowledge(
     return "\n".join(formatted)
 
 
+def format_sequence_result(result: Dict) -> str:
+    """Format pulseq_sequences result for display."""
+    parts = []
+    parts.append(f"**File:** {result.get('file_name', 'Unknown')}")
+    parts.append(f"**Repository:** {result.get('repository', 'Unknown')}")
+
+    if result.get("sequence_family"):
+        parts.append(f"**Family:** {result['sequence_family']}")
+
+    if result.get("dependencies"):
+        deps = result["dependencies"]
+        if deps.get("local"):
+            parts.append(f"**Local dependencies:** {', '.join(deps['local'])}")
+        if deps.get("pulseq"):
+            parts.append(f"**Pulseq functions:** {', '.join(deps['pulseq'])}")
+
+    if result.get("full_code"):
+        code = result["full_code"]
+        if len(code) > 500:
+            code = code[:500] + "\n... (truncated)"
+        parts.append(f"```matlab\n{code}\n```")
+
+    return "\n".join(parts) + "\n"
+
+
+def format_chunk_result(result: Dict) -> str:
+    """Format sequence_chunks result for display."""
+    parts = []
+    parts.append(f"**Chunk Type:** {result.get('chunk_type', 'Unknown')}")
+    parts.append(f"**Parent Sequence ID:** {result.get('sequence_id', 'Unknown')}")
+
+    if result.get("mri_concept"):
+        parts.append(f"**MRI Concept:** {result['mri_concept']}")
+
+    if result.get("pulseq_functions"):
+        parts.append(f"**Functions used:** {', '.join(result['pulseq_functions'])}")
+
+    if result.get("code_content"):
+        code = result["code_content"]
+        if len(code) > 400:
+            code = code[:400] + "\n... (truncated)"
+        parts.append(f"```matlab\n{code}\n```")
+
+    return "\n".join(parts) + "\n"
+
+
+def format_code_result(result: Dict) -> str:
+    """Format crawled_code result for display."""
+    parts = []
+    parts.append(f"**File:** {result.get('file_name', 'Unknown')}")
+
+    if result.get("parent_sequences"):
+        parts.append(f"**Used by sequences:** {result['parent_sequences']}")
+
+    if result.get("content"):
+        code = result["content"]
+        if len(code) > 500:
+            code = code[:500] + "\n... (truncated)"
+        parts.append(f"```matlab\n{code}\n```")
+
+    return "\n".join(parts) + "\n"
+
+
+def format_doc_result(result: Dict) -> str:
+    """Format crawled_docs result for display."""
+    parts = []
+    parts.append(f"**Document:** {result.get('resource_uri', 'Unknown')}")
+
+    if result.get("doc_type"):
+        parts.append(f"**Type:** {result['doc_type']}")
+
+    if result.get("content"):
+        content = result["content"]
+        if len(content) > 600:
+            content = content[:600] + "\n... (truncated)"
+        parts.append(f"Content:\n{content}")
+
+    return "\n".join(parts) + "\n"
+
+
 def format_api_result(result: Dict) -> str:
     """Format API documentation result for display."""
     parts = []
-    func_info = result.get("function", {})
-    tech_details = result.get("technical_details", {})
 
-    parts.append(f"**{func_info.get('name', 'Unknown Function')}**")
+    # Handle both formats (source-aware and table-specific)
+    if "function" in result:
+        # Source-aware format
+        func_info = result.get("function", {})
+        tech_details = result.get("technical_details", {})
 
-    if func_info.get("purpose"):
-        parts.append(f"Purpose: {func_info['purpose']}")
+        parts.append(f"**{func_info.get('name', 'Unknown Function')}**")
 
-    if func_info.get("usage"):
-        parts.append(f"Usage: `{func_info['usage']}`")
+        if func_info.get("purpose"):
+            parts.append(f"Purpose: {func_info['purpose']}")
 
-    if tech_details.get("parameters"):
-        parts.append(f"Parameters:\n{tech_details['parameters']}")
+        if func_info.get("usage"):
+            parts.append(f"Usage: `{func_info['usage']}`")
 
-    if tech_details.get("returns"):
-        parts.append(f"Returns: {tech_details['returns']}")
+        if tech_details.get("parameters"):
+            parts.append(f"Parameters:\n{tech_details['parameters']}")
+
+        if tech_details.get("returns"):
+            parts.append(f"Returns: {tech_details['returns']}")
+    else:
+        # Table-specific format
+        parts.append(f"**{result.get('function_name', 'Unknown Function')}**")
+
+        if result.get("signature"):
+            parts.append(f"Signature: `{result['signature']}`")
+
+        if result.get("description"):
+            parts.append(f"Description: {result['description']}")
+
+        if result.get("parameters"):
+            params = result["parameters"]
+            if isinstance(params, dict):
+                if params.get("required"):
+                    parts.append("Required parameters:")
+                    for p in params["required"]:
+                        if isinstance(p, dict):
+                            parts.append(
+                                f"  - {p.get('name', '')}: {p.get('description', '')}"
+                            )
+                        else:
+                            parts.append(f"  - {p}")
+                if params.get("optional"):
+                    parts.append("Optional parameters:")
+                    for p in params["optional"]:
+                        if isinstance(p, dict):
+                            parts.append(
+                                f"  - {p.get('name', '')}: {p.get('description', '')}"
+                            )
+                        else:
+                            parts.append(f"  - {p}")
+            else:
+                parts.append(f"Parameters: {params}")
+
+        if result.get("returns"):
+            parts.append(f"Returns: {result['returns']}")
 
     return "\n".join(parts) + "\n"
 
