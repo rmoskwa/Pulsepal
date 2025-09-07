@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pulseq Sequence Library - PulsePal</title>
+    <style>
+        :root {
+            --primary-color: #0066cc;
+            --secondary-color: #4a90e2;
+            --background: #f5f7fa;
+            --card-background: white;
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --border: #e1e8ed;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--background);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .header a {
+            color: var(--primary-color);
+            text-decoration: none;
+            margin-right: 20px;
+        }
+
+        .header a:hover {
+            text-decoration: underline;
+        }
+
+        .nav-links {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .controls-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .search-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .search-icon {
+            color: var(--text-secondary);
+            font-size: 20px;
+        }
+
+        .search-box {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .filters-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filter-select {
+            padding: 10px 16px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background: white;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: border-color 0.3s;
+            min-width: 180px;
+        }
+
+        .filter-select:hover {
+            border-color: var(--primary-color);
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .sequences-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .sequence-card {
+            background: var(--card-background);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sequence-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        }
+
+        .sequence-title {
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-family: 'Courier New', Courier, monospace;
+            word-wrap: break-word;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+        }
+
+        .sequence-repository {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .sequence-summary {
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 15px;
+            flex-grow: 1;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+        }
+
+        .sequence-tags-container {
+            margin-top: auto;
+        }
+
+        .sequence-tag-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .sequence-tag-label {
+            font-weight: bold;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            min-width: 70px;
+        }
+
+        .sequence-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .tag-contrast {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .tag-trajectory {
+            background: #f3e5f5;
+            color: #6a1b9a;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s;
+        }
+
+        .modal.active {
+            display: block;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 50px auto;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideIn 0.3s;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .modal-title {
+            color: var(--text-primary);
+            font-size: 1.8rem;
+            font-weight: 600;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.3s;
+        }
+
+        .close-modal:hover {
+            color: var(--text-primary);
+        }
+
+        .modal-section {
+            margin-bottom: 25px;
+        }
+
+        .modal-section h3 {
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal-section-content {
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding-left: 20px;
+        }
+
+        .modal-repository-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 500;
+            transition: opacity 0.3s;
+        }
+
+        .modal-repository-link:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .no-results-icon {
+            font-size: 48px;
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+        }
+
+        .no-results-title {
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .no-results-message {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sequences-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filters-row {
+                flex-direction: column;
+            }
+
+            .filter-select {
+                width: 100%;
+            }
+
+            .stats-bar {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Pulseq Sequence Library</h1>
+        <p>Browse and explore MRI sequences from the Pulseq community</p>
+        <div class="nav-links">
+            <a href="https://rmoskwa.github.io/Pulsepal/">← Back to Documentation</a>
+            <a href="https://rmoskwa.github.io/Pulsepal/matlab_api/">API Reference</a>
+        </div>
+        <div class="stats-bar">
+            <div class="stat-item">
+                <span class="stat-number" id="totalSequences">0</span>
+                <span class="stat-label">Total Sequences</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" id="totalRepositories">0</span>
+                <span class="stat-label">Repositories</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" id="visibleSequences">0</span>
+                <span class="stat-label">Showing</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls-section">
+        <div class="search-container">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchBox" class="search-box" placeholder="Search sequences by name, description, or features...">
+        </div>
+        <div class="filters-row">
+            <select id="familyFilter" class="filter-select">
+                <option value="">All Sequence Families</option>
+            </select>
+            <select id="trajectoryFilter" class="filter-select">
+                <option value="">All Trajectories</option>
+            </select>
+            <select id="repositoryFilter" class="filter-select">
+                <option value="">All Repositories</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="sequencesGrid" class="sequences-grid">
+        <!-- Sequences will be loaded here -->
+    </div>
+
+    <div id="noResults" class="no-results" style="display: none;">
+        <div class="no-results-icon">🔍</div>
+        <h2 class="no-results-title">No sequences found</h2>
+        <p class="no-results-message">Try adjusting your search or filters</p>
+    </div>
+
+    <!-- Modal -->
+    <div id="sequenceModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle"></h2>
+                <button class="close-modal" onclick="closeModal()">&times;</button>
+            </div>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+    let sequences = [];
+    let filteredSequences = [];
+
+    // Load sequences - using absolute URL
+    async function loadSequences() {
+        try {
+            const response = await fetch('https://rmoskwa.github.io/Pulsepal/sequences/sequence_catalog.json');
+            const data = await response.json();
+            sequences = data.sequences || data;
+            filteredSequences = [...sequences];
+            initializeFilters();
+            displaySequences();
+            updateStats();
+        } catch (error) {
+            console.error('Error loading sequences:', error);
+            document.getElementById('sequencesGrid').innerHTML =
+                '<div class="no-results"><p>Error loading sequence data: ' + error.message + '</p></div>';
+        }
+    }
+
+    // Initialize filter options
+    function initializeFilters() {
+        // Get unique values for each filter
+        const families = [...new Set(sequences.map(s => s.sequence_family).filter(Boolean))].sort();
+        const trajectories = [...new Set(sequences.map(s => s.trajectory_type).filter(Boolean))].sort();
+        const repositories = [...new Set(sequences.map(s => s.repository || s.repository_source).filter(Boolean))].sort();
+
+        // Populate family filter
+        const familyFilter = document.getElementById('familyFilter');
+        families.forEach(family => {
+            const option = document.createElement('option');
+            option.value = family;
+            option.textContent = family;
+            familyFilter.appendChild(option);
+        });
+
+        // Populate trajectory filter
+        const trajectoryFilter = document.getElementById('trajectoryFilter');
+        trajectories.forEach(trajectory => {
+            const option = document.createElement('option');
+            option.value = trajectory;
+            option.textContent = trajectory;
+            trajectoryFilter.appendChild(option);
+        });
+
+        // Populate repository filter
+        const repositoryFilter = document.getElementById('repositoryFilter');
+        repositories.forEach(repo => {
+            const option = document.createElement('option');
+            option.value = repo;
+            option.textContent = repo.replace('github.com/', '');
+            repositoryFilter.appendChild(option);
+        });
+    }
+
+    // Display sequences in grid
+    function displaySequences() {
+        const grid = document.getElementById('sequencesGrid');
+        const noResults = document.getElementById('noResults');
+
+        if (filteredSequences.length === 0) {
+            grid.style.display = 'none';
+            noResults.style.display = 'block';
+            return;
+        }
+
+        grid.style.display = 'grid';
+        noResults.style.display = 'none';
+
+        grid.innerHTML = filteredSequences.map(seq => `
+            <div class="sequence-card" onclick="showSequenceDetails(${sequences.indexOf(seq)})">
+                <h3 class="sequence-title">${seq.filename}</h3>
+                <div class="sequence-repository">
+                    <span>📁</span>
+                    <span>${(seq.repository || seq.repository_source || '').replace('github.com/', '')}</span>
+                </div>
+                <p class="sequence-summary">${seq.description || seq.content_summary || 'No description available'}</p>
+                <div class="sequence-tags-container">
+                    ${seq.contrast_mechanism ? `
+                        <div class="sequence-tag-row">
+                            <span class="sequence-tag-label">Contrast:</span>
+                            <div class="sequence-tags">
+                                <span class="tag tag-contrast">${seq.contrast_mechanism}</span>
+                            </div>
+                        </div>
+                    ` : ''}
+                    ${seq.trajectory_type ? `
+                        <div class="sequence-tag-row">
+                            <span class="sequence-tag-label">Trajectory:</span>
+                            <div class="sequence-tags">
+                                <span class="tag tag-trajectory">${seq.trajectory_type}</span>
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        `).join('');
+
+        updateStats();
+    }
+
+    // Show sequence details in modal
+    function showSequenceDetails(index) {
+        const seq = sequences[index];
+        const modal = document.getElementById('sequenceModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalBody = document.getElementById('modalBody');
+
+        modalTitle.textContent = seq.filename;
+
+        let detailsHTML = `
+            <div class="modal-section">
+                <h3>📁 Repository</h3>
+                <div class="modal-section-content">
+                    <a href="https://${seq.repository || seq.repository_source}" target="_blank" class="modal-repository-link">
+                        ${seq.repository || seq.repository_source}
+                    </a>
+                </div>
+            </div>
+        `;
+
+        if (seq.description || seq.content_summary) {
+            detailsHTML += `
+                <div class="modal-section">
+                    <h3>📝 Summary</h3>
+                    <div class="modal-section-content">${seq.description || seq.content_summary}</div>
+                </div>
+            `;
+        }
+
+        const features = [];
+        if (seq.sequence_family) features.push(`<strong>Family:</strong> ${seq.sequence_family}`);
+        if (seq.contrast_mechanism) features.push(`<strong>Contrast:</strong> ${seq.contrast_mechanism}`);
+        if (seq.trajectory_type) features.push(`<strong>Trajectory:</strong> ${seq.trajectory_type}`);
+        if (seq.external_requirements) features.push(`<strong>External Requirements:</strong> ${seq.external_requirements}`);
+        if (seq.preparation_technique) features.push(`<strong>Preparation:</strong> ${seq.preparation_technique}`);
+        if (seq.acceleration_method) features.push(`<strong>Acceleration:</strong> ${seq.acceleration_method}`);
+        if (seq.advanced_feature) features.push(`<strong>Advanced Features:</strong> ${seq.advanced_feature}`);
+        if (seq.vendor_feature) features.push(`<strong>Vendor Features:</strong> ${seq.vendor_feature}`);
+
+        if (features.length > 0) {
+            detailsHTML += `
+                <div class="modal-section">
+                    <h3>🔧 Features</h3>
+                    <div class="modal-section-content">
+                        ${features.join('<br>')}
+                    </div>
+                </div>
+            `;
+        }
+
+        if (seq.dependencies && seq.dependencies.length > 0) {
+            detailsHTML += `
+                <div class="modal-section">
+                    <h3>📦 Dependencies</h3>
+                    <div class="modal-section-content">
+                        ${seq.dependencies.map(dep => `• ${dep}`).join('<br>')}
+                    </div>
+                </div>
+            `;
+        }
+
+        modalBody.innerHTML = detailsHTML;
+        modal.classList.add('active');
+    }
+
+    // Close modal
+    function closeModal() {
+        const modal = document.getElementById('sequenceModal');
+        modal.classList.remove('active');
+    }
+
+    // Filter sequences
+    function filterSequences() {
+        const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+        const familyFilter = document.getElementById('familyFilter').value;
+        const trajectoryFilter = document.getElementById('trajectoryFilter').value;
+        const repositoryFilter = document.getElementById('repositoryFilter').value;
+
+        filteredSequences = sequences.filter(seq => {
+            // Search filter
+            if (searchTerm) {
+                const searchableText = [
+                    seq.filename,
+                    seq.description,
+                    seq.content_summary,
+                    seq.sequence_family,
+                    seq.contrast_mechanism,
+                    seq.trajectory_type,
+                    seq.external_requirements,
+                    seq.preparation_technique,
+                    seq.preparation_techniques,
+                    seq.acceleration_method,
+                    seq.acceleration_methods,
+                    seq.advanced_feature,
+                    seq.advanced_features,
+                    seq.vendor_feature,
+                    seq.vendor_features,
+                    seq.repository,
+                    seq.repository_source
+                ].filter(Boolean).join(' ').toLowerCase();
+
+                if (!searchableText.includes(searchTerm)) {
+                    return false;
+                }
+            }
+
+            // Family filter
+            if (familyFilter && seq.sequence_family !== familyFilter) {
+                return false;
+            }
+
+            // Trajectory filter
+            if (trajectoryFilter && seq.trajectory_type !== trajectoryFilter) {
+                return false;
+            }
+
+            // Repository filter
+            if (repositoryFilter && seq.repository !== repositoryFilter && seq.repository_source !== repositoryFilter) {
+                return false;
+            }
+
+            return true;
+        });
+
+        displaySequences();
+    }
+
+    // Update statistics
+    function updateStats() {
+        document.getElementById('totalSequences').textContent = sequences.length;
+        document.getElementById('totalRepositories').textContent =
+            [...new Set(sequences.map(s => s.repository || s.repository_source))].length;
+        document.getElementById('visibleSequences').textContent = filteredSequences.length;
+    }
+
+    // Event listeners
+    document.getElementById('searchBox').addEventListener('input', filterSequences);
+    document.getElementById('familyFilter').addEventListener('change', filterSequences);
+    document.getElementById('trajectoryFilter').addEventListener('change', filterSequences);
+    document.getElementById('repositoryFilter').addEventListener('change', filterSequences);
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('sequenceModal');
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+
+    // Load sequences when page loads
+    loadSequences();
+    </script>
+</body>
+</html>

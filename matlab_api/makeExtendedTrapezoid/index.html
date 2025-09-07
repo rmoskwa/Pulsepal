@@ -10,22 +10,28 @@
       
       
       
+        <link rel="canonical" href="https://rmoskwa.github.io/Pulsepal/matlab_api/makeExtendedTrapezoid/">
       
       
+        <link rel="prev" href="../makeDigitalOutputPulse/">
       
-      <link rel="icon" href="/Pulsepal/assets/images/favicon.png">
+      
+        <link rel="next" href="../makeExtendedTrapezoidArea/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.16">
     
     
       
-        <title>Pulseq MATLAB API Documentation</title>
+        <title>makeExtendedTrapezoid - Pulseq MATLAB API Documentation</title>
       
     
     
-      <link rel="stylesheet" href="/Pulsepal/assets/stylesheets/main.7e37652d.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.7e37652d.min.css">
       
         
-        <link rel="stylesheet" href="/Pulsepal/assets/stylesheets/palette.06af60db.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
       
       
 
@@ -44,7 +50,7 @@
       
     
     
-    <script>__md_scope=new URL("/Pulsepal/",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -67,6 +73,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#makeextendedtrapezoid" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -77,7 +88,7 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="/Pulsepal/." title="Pulseq MATLAB API Documentation" class="md-header__button md-logo" aria-label="Pulseq MATLAB API Documentation" data-md-component="logo">
+    <a href="../.." title="Pulseq MATLAB API Documentation" class="md-header__button md-logo" aria-label="Pulseq MATLAB API Documentation" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -97,7 +108,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              
+              makeExtendedTrapezoid
             
           </span>
         </div>
@@ -172,7 +183,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="/Pulsepal/." class="md-tabs__link">
+      <a href="../.." class="md-tabs__link">
         
   
   
@@ -208,11 +219,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="/Pulsepal/matlab_api/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
           
   
   
@@ -246,7 +259,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="/Pulsepal/." title="Pulseq MATLAB API Documentation" class="md-nav__button md-logo" aria-label="Pulseq MATLAB API Documentation" data-md-component="logo">
+    <a href="../.." title="Pulseq MATLAB API Documentation" class="md-nav__button md-logo" aria-label="Pulseq MATLAB API Documentation" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -264,7 +277,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/." class="md-nav__link">
+      <a href="../.." class="md-nav__link">
         
   
   
@@ -305,28 +318,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
         
           
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
-        
-          
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
             
   
   
@@ -339,7 +355,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             API Reference
@@ -353,7 +369,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/" class="md-nav__link">
+      <a href="../" class="md-nav__link">
         
   
   
@@ -373,28 +389,31 @@
                 
   
   
+    
   
   
+  
     
     
     
     
       
       
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
         
           
+          
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_2" >
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" checked>
         
           
-          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="">
             
   
   
@@ -407,7 +426,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_3_2">
             <span class="md-nav__icon md-icon"></span>
             Functions
@@ -421,7 +440,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/EventLibrary/" class="md-nav__link">
+      <a href="../EventLibrary/" class="md-nav__link">
         
   
   
@@ -444,7 +463,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/SeqPlot/" class="md-nav__link">
+      <a href="../SeqPlot/" class="md-nav__link">
         
   
   
@@ -467,7 +486,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/Sequence/" class="md-nav__link">
+      <a href="../Sequence/" class="md-nav__link">
         
   
   
@@ -490,7 +509,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/TransformFOV/" class="md-nav__link">
+      <a href="../TransformFOV/" class="md-nav__link">
         
   
   
@@ -513,7 +532,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/addBlock/" class="md-nav__link">
+      <a href="../addBlock/" class="md-nav__link">
         
   
   
@@ -536,7 +555,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/addGradients/" class="md-nav__link">
+      <a href="../addGradients/" class="md-nav__link">
         
   
   
@@ -559,7 +578,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/addRamps/" class="md-nav__link">
+      <a href="../addRamps/" class="md-nav__link">
         
   
   
@@ -582,7 +601,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/align/" class="md-nav__link">
+      <a href="../align/" class="md-nav__link">
         
   
   
@@ -605,7 +624,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/applySoftDelay/" class="md-nav__link">
+      <a href="../applySoftDelay/" class="md-nav__link">
         
   
   
@@ -628,7 +647,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/applyToBlock/" class="md-nav__link">
+      <a href="../applyToBlock/" class="md-nav__link">
         
   
   
@@ -651,7 +670,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/applyToSeq/" class="md-nav__link">
+      <a href="../applyToSeq/" class="md-nav__link">
         
   
   
@@ -674,7 +693,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/calcAdcSeg/" class="md-nav__link">
+      <a href="../calcAdcSeg/" class="md-nav__link">
         
   
   
@@ -697,7 +716,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/calcDuration/" class="md-nav__link">
+      <a href="../calcDuration/" class="md-nav__link">
         
   
   
@@ -720,7 +739,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/calcMomentsBtensor/" class="md-nav__link">
+      <a href="../calcMomentsBtensor/" class="md-nav__link">
         
   
   
@@ -743,7 +762,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/calcPNS/" class="md-nav__link">
+      <a href="../calcPNS/" class="md-nav__link">
         
   
   
@@ -766,7 +785,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/calcRamp/" class="md-nav__link">
+      <a href="../calcRamp/" class="md-nav__link">
         
   
   
@@ -789,7 +808,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/calcRfBandwidth/" class="md-nav__link">
+      <a href="../calcRfBandwidth/" class="md-nav__link">
         
   
   
@@ -812,7 +831,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/calcRfCenter/" class="md-nav__link">
+      <a href="../calcRfCenter/" class="md-nav__link">
         
   
   
@@ -835,7 +854,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/calcRfPower/" class="md-nav__link">
+      <a href="../calcRfPower/" class="md-nav__link">
         
   
   
@@ -858,7 +877,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/calculateKspacePP/" class="md-nav__link">
+      <a href="../calculateKspacePP/" class="md-nav__link">
         
   
   
@@ -881,7 +900,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/checkTiming/" class="md-nav__link">
+      <a href="../checkTiming/" class="md-nav__link">
         
   
   
@@ -904,7 +923,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/compressShape/" class="md-nav__link">
+      <a href="../compressShape/" class="md-nav__link">
         
   
   
@@ -927,7 +946,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/compressShape_mat/" class="md-nav__link">
+      <a href="../compressShape_mat/" class="md-nav__link">
         
   
   
@@ -950,7 +969,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/conjugate/" class="md-nav__link">
+      <a href="../conjugate/" class="md-nav__link">
         
   
   
@@ -973,7 +992,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/convert/" class="md-nav__link">
+      <a href="../convert/" class="md-nav__link">
         
   
   
@@ -996,7 +1015,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/decompressShape/" class="md-nav__link">
+      <a href="../decompressShape/" class="md-nav__link">
         
   
   
@@ -1019,7 +1038,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/duration/" class="md-nav__link">
+      <a href="../duration/" class="md-nav__link">
         
   
   
@@ -1042,7 +1061,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/evalLabels/" class="md-nav__link">
+      <a href="../evalLabels/" class="md-nav__link">
         
   
   
@@ -1065,7 +1084,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/findBlockByTime/" class="md-nav__link">
+      <a href="../findBlockByTime/" class="md-nav__link">
         
   
   
@@ -1088,7 +1107,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/findFlank/" class="md-nav__link">
+      <a href="../findFlank/" class="md-nav__link">
         
   
   
@@ -1111,7 +1130,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/flipGradAxis/" class="md-nav__link">
+      <a href="../flipGradAxis/" class="md-nav__link">
         
   
   
@@ -1134,7 +1153,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/fromRotMat/" class="md-nav__link">
+      <a href="../fromRotMat/" class="md-nav__link">
         
   
   
@@ -1157,7 +1176,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/getBlock/" class="md-nav__link">
+      <a href="../getBlock/" class="md-nav__link">
         
   
   
@@ -1180,7 +1199,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/getDefinition/" class="md-nav__link">
+      <a href="../getDefinition/" class="md-nav__link">
         
   
   
@@ -1203,7 +1222,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/getSupportedLabels/" class="md-nav__link">
+      <a href="../getSupportedLabels/" class="md-nav__link">
         
   
   
@@ -1226,7 +1245,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/getSupportedRfUse/" class="md-nav__link">
+      <a href="../getSupportedRfUse/" class="md-nav__link">
         
   
   
@@ -1249,7 +1268,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/install/" class="md-nav__link">
+      <a href="../install/" class="md-nav__link">
         
   
   
@@ -1272,7 +1291,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/isOctave/" class="md-nav__link">
+      <a href="../isOctave/" class="md-nav__link">
         
   
   
@@ -1295,7 +1314,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/makeAdc/" class="md-nav__link">
+      <a href="../makeAdc/" class="md-nav__link">
         
   
   
@@ -1318,7 +1337,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/makeAdiabaticPulse/" class="md-nav__link">
+      <a href="../makeAdiabaticPulse/" class="md-nav__link">
         
   
   
@@ -1341,7 +1360,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/makeArbitraryGrad/" class="md-nav__link">
+      <a href="../makeArbitraryGrad/" class="md-nav__link">
         
   
   
@@ -1364,7 +1383,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/makeArbitraryRf/" class="md-nav__link">
+      <a href="../makeArbitraryRf/" class="md-nav__link">
         
   
   
@@ -1387,7 +1406,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/makeBlockPulse/" class="md-nav__link">
+      <a href="../makeBlockPulse/" class="md-nav__link">
         
   
   
@@ -1410,7 +1429,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/makeDelay/" class="md-nav__link">
+      <a href="../makeDelay/" class="md-nav__link">
         
   
   
@@ -1433,7 +1452,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/makeDigitalOutputPulse/" class="md-nav__link">
+      <a href="../makeDigitalOutputPulse/" class="md-nav__link">
         
   
   
@@ -1453,10 +1472,32 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/makeExtendedTrapezoid/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    makeExtendedTrapezoid
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1467,6 +1508,104 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#syntax" class="md-nav__link">
+    <span class="md-ellipsis">
+      Syntax
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#calling-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      Calling Pattern
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parameters
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#required-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Required Parameters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#optional-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Optional Parameters
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#returns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Returns
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Examples
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#see-also" class="md-nav__link">
+    <span class="md-ellipsis">
+      See Also
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1479,7 +1618,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/makeExtendedTrapezoidArea/" class="md-nav__link">
+      <a href="../makeExtendedTrapezoidArea/" class="md-nav__link">
         
   
   
@@ -1502,7 +1641,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/makeGaussPulse/" class="md-nav__link">
+      <a href="../makeGaussPulse/" class="md-nav__link">
         
   
   
@@ -1525,7 +1664,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/makeLabel/" class="md-nav__link">
+      <a href="../makeLabel/" class="md-nav__link">
         
   
   
@@ -1548,7 +1687,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/makeSLRpulse/" class="md-nav__link">
+      <a href="../makeSLRpulse/" class="md-nav__link">
         
   
   
@@ -1571,7 +1710,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/makeSincPulse/" class="md-nav__link">
+      <a href="../makeSincPulse/" class="md-nav__link">
         
   
   
@@ -1594,7 +1733,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/makeSoftDelay/" class="md-nav__link">
+      <a href="../makeSoftDelay/" class="md-nav__link">
         
   
   
@@ -1617,7 +1756,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/makeTrapezoid/" class="md-nav__link">
+      <a href="../makeTrapezoid/" class="md-nav__link">
         
   
   
@@ -1640,7 +1779,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/makeTrigger/" class="md-nav__link">
+      <a href="../makeTrigger/" class="md-nav__link">
         
   
   
@@ -1663,7 +1802,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/modGradAxis/" class="md-nav__link">
+      <a href="../modGradAxis/" class="md-nav__link">
         
   
   
@@ -1686,7 +1825,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/multiply/" class="md-nav__link">
+      <a href="../multiply/" class="md-nav__link">
         
   
   
@@ -1709,7 +1848,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/normalize/" class="md-nav__link">
+      <a href="../normalize/" class="md-nav__link">
         
   
   
@@ -1732,7 +1871,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/opts/" class="md-nav__link">
+      <a href="../opts/" class="md-nav__link">
         
   
   
@@ -1755,7 +1894,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/paperPlot/" class="md-nav__link">
+      <a href="../paperPlot/" class="md-nav__link">
         
   
   
@@ -1778,7 +1917,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/plot/" class="md-nav__link">
+      <a href="../plot/" class="md-nav__link">
         
   
   
@@ -1801,7 +1940,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/pts2waveform/" class="md-nav__link">
+      <a href="../pts2waveform/" class="md-nav__link">
         
   
   
@@ -1824,7 +1963,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/read/" class="md-nav__link">
+      <a href="../read/" class="md-nav__link">
         
   
   
@@ -1847,7 +1986,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/readBinary/" class="md-nav__link">
+      <a href="../readBinary/" class="md-nav__link">
         
   
   
@@ -1870,7 +2009,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/readasc/" class="md-nav__link">
+      <a href="../readasc/" class="md-nav__link">
         
   
   
@@ -1893,7 +2032,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/registerGradEvent/" class="md-nav__link">
+      <a href="../registerGradEvent/" class="md-nav__link">
         
   
   
@@ -1916,7 +2055,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/registerLabelEvent/" class="md-nav__link">
+      <a href="../registerLabelEvent/" class="md-nav__link">
         
   
   
@@ -1939,7 +2078,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/registerRfEvent/" class="md-nav__link">
+      <a href="../registerRfEvent/" class="md-nav__link">
         
   
   
@@ -1962,7 +2101,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/restoreAdditionalShapeSamples/" class="md-nav__link">
+      <a href="../restoreAdditionalShapeSamples/" class="md-nav__link">
         
   
   
@@ -1985,7 +2124,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/rotate/" class="md-nav__link">
+      <a href="../rotate/" class="md-nav__link">
         
   
   
@@ -2008,7 +2147,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/rotate3D/" class="md-nav__link">
+      <a href="../rotate3D/" class="md-nav__link">
         
   
   
@@ -2031,7 +2170,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/scaleGrad/" class="md-nav__link">
+      <a href="../scaleGrad/" class="md-nav__link">
         
   
   
@@ -2054,7 +2193,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/setBlock/" class="md-nav__link">
+      <a href="../setBlock/" class="md-nav__link">
         
   
   
@@ -2077,7 +2216,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/setDefinition/" class="md-nav__link">
+      <a href="../setDefinition/" class="md-nav__link">
         
   
   
@@ -2100,7 +2239,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/simRf/" class="md-nav__link">
+      <a href="../simRf/" class="md-nav__link">
         
   
   
@@ -2123,7 +2262,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/sound/" class="md-nav__link">
+      <a href="../sound/" class="md-nav__link">
         
   
   
@@ -2146,7 +2285,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/splitGradient/" class="md-nav__link">
+      <a href="../splitGradient/" class="md-nav__link">
         
   
   
@@ -2169,7 +2308,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/splitGradientAt/" class="md-nav__link">
+      <a href="../splitGradientAt/" class="md-nav__link">
         
   
   
@@ -2192,7 +2331,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/testReport/" class="md-nav__link">
+      <a href="../testReport/" class="md-nav__link">
         
   
   
@@ -2215,7 +2354,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/toRotMat/" class="md-nav__link">
+      <a href="../toRotMat/" class="md-nav__link">
         
   
   
@@ -2238,7 +2377,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/traj2grad/" class="md-nav__link">
+      <a href="../traj2grad/" class="md-nav__link">
         
   
   
@@ -2261,7 +2400,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/transform/" class="md-nav__link">
+      <a href="../transform/" class="md-nav__link">
         
   
   
@@ -2284,7 +2423,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/version/" class="md-nav__link">
+      <a href="../version/" class="md-nav__link">
         
   
   
@@ -2307,7 +2446,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/waveforms_and_times/" class="md-nav__link">
+      <a href="../waveforms_and_times/" class="md-nav__link">
         
   
   
@@ -2330,7 +2469,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/write/" class="md-nav__link">
+      <a href="../write/" class="md-nav__link">
         
   
   
@@ -2353,7 +2492,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/writeBinary/" class="md-nav__link">
+      <a href="../writeBinary/" class="md-nav__link">
         
   
   
@@ -2376,7 +2515,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Pulsepal/matlab_api/write_v141/" class="md-nav__link">
+      <a href="../write_v141/" class="md-nav__link">
         
   
   
@@ -2424,6 +2563,94 @@
   
   
   
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#syntax" class="md-nav__link">
+    <span class="md-ellipsis">
+      Syntax
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#calling-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      Calling Pattern
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parameters
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#required-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Required Parameters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#optional-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Optional Parameters
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#returns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Returns
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Examples
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#see-also" class="md-nav__link">
+    <span class="md-ellipsis">
+      See Also
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -2435,8 +2662,151 @@
             <div class="md-content" data-md-component="content">
               <article class="md-content__inner md-typeset">
                 
-  <h1>404 - Not found</h1>
+                  
 
+
+
+<h1 id="makeextendedtrapezoid">makeExtendedTrapezoid<a class="headerlink" href="#makeextendedtrapezoid" title="Permanent link">&para;</a></h1>
+<p>Creates an extended trapezoid gradient waveform.  This function allows the definition of a gradient by specifying amplitude values at specific time points. It handles system limits (maxGrad, maxSlew) and ensures that the resulting waveform adheres to the gradient raster of the specified system.  The function can either return an arbitrary gradient object (if <code>convert2arbitrary</code> is true), representing the waveform on a regularly sampled grid, or it can return a gradient with potentially irregular sampling (if <code>convert2arbitrary</code> is false).</p>
+<h2 id="syntax">Syntax<a class="headerlink" href="#syntax" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="k">function</span><span class="w"> </span>grad<span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nf">makeExtendedTrapezoid</span><span class="p">(</span>channel, varargin<span class="p">)</span>
+</code></pre></div>
+<h2 id="calling-pattern">Calling Pattern<a class="headerlink" href="#calling-pattern" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="n">mr</span><span class="p">.</span><span class="n">makeExtendedTrapezoid</span><span class="p">(</span><span class="k">...</span><span class="c">)</span>
+</code></pre></div>
+<h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
+<h3 id="required-parameters">Required Parameters<a class="headerlink" href="#required-parameters" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Example</th>
+<th>Units</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>channel</code></td>
+<td>char</td>
+<td>The gradient channel ('x', 'y', or 'z') for the waveform.</td>
+<td><code>'x'</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="optional-parameters">Optional Parameters<a class="headerlink" href="#optional-parameters" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>times</code></td>
+<td>double</td>
+<td><code>0</code></td>
+<td>A vector of time points specifying the instants at which the gradient amplitudes are defined. Valid values: Must be in ascending order, and all values must be distinct. The last time point must be on a gradient raster. (Units: seconds)</td>
+<td><code>[0, 0.001, 0.002, 0.003]</code></td>
+</tr>
+<tr>
+<td><code>amplitudes</code></td>
+<td>double</td>
+<td><code>0</code></td>
+<td>A vector of gradient amplitudes corresponding to the time points in 'times'. Valid values: Must have the same length as 'times'. (Units: Hz/m)</td>
+<td><code>[0, 1000, 1000, 0]</code></td>
+</tr>
+<tr>
+<td><code>system</code></td>
+<td>struct</td>
+<td><code>[]</code></td>
+<td>A structure containing system parameters (e.g., from mr.opts()). If empty, default system parameters are used.</td>
+<td><code>mr.opts()</code></td>
+</tr>
+<tr>
+<td><code>maxGrad</code></td>
+<td>double</td>
+<td><code>0</code></td>
+<td>Maximum gradient amplitude. If 0, the system's maxGrad is used. (Units: Hz/m)</td>
+<td><code>2000</code></td>
+</tr>
+<tr>
+<td><code>maxSlew</code></td>
+<td>double</td>
+<td><code>0</code></td>
+<td>Maximum gradient slew rate. If 0, the system's maxSlew is used. (Units: Hz/m/s)</td>
+<td><code>1000000</code></td>
+</tr>
+<tr>
+<td><code>skip_check</code></td>
+<td>logical</td>
+<td><code>false</code></td>
+<td>If true, skips checks for consistency between the first amplitude and the preceding block. Use with caution!</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>convert2arbitrary</code></td>
+<td>logical</td>
+<td><code>false</code></td>
+<td>If true, converts the gradient to an arbitrary gradient object, resampling it onto a regular grid based on the system's gradient raster time. If false, the gradient is defined with the specified possibly irregular sampling of <code>times</code>.</td>
+<td><code>true</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="returns">Returns<a class="headerlink" href="#returns" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Output</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>grad</code></td>
+<td>struct</td>
+<td>An arbitrary gradient object representing the extended trapezoid waveform.  The structure of this object depends on whether <code>convert2arbitrary</code> is true or false.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="c">% Example 1: Create complex gradient waveform for slice selection</span>
+<span class="n">GS1times</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="w"> </span><span class="n">GSex</span><span class="p">.</span><span class="n">riseTime</span><span class="p">];</span>
+<span class="n">GS1amp</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="w"> </span><span class="n">GSex</span><span class="p">.</span><span class="n">amplitude</span><span class="p">];</span>
+<span class="n">GS1</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">mr</span><span class="p">.</span><span class="n">makeExtendedTrapezoid</span><span class="p">(</span><span class="s">&#39;z&#39;</span><span class="p">,</span><span class="w"> </span><span class="s">&#39;times&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">GS1times</span><span class="p">,</span><span class="w"> </span><span class="s">&#39;amplitudes&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">GS1amp</span><span class="p">);</span>
+
+<span class="c">% Example 2: Create readout gradient with multiple segments</span>
+<span class="n">GR5times</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="w"> </span><span class="n">GRspr</span><span class="p">.</span><span class="n">riseTime</span><span class="w"> </span><span class="n">GRspr</span><span class="p">.</span><span class="n">riseTime</span><span class="o">+</span><span class="n">GRspr</span><span class="p">.</span><span class="n">flatTime</span><span class="w"> </span><span class="n">GRspr</span><span class="p">.</span><span class="n">riseTime</span><span class="o">+</span><span class="n">GRspr</span><span class="p">.</span><span class="n">flatTime</span><span class="o">+</span><span class="n">GRspr</span><span class="p">.</span><span class="n">fallTime</span><span class="p">];</span>
+<span class="n">GR5amp</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="w"> </span><span class="n">GRspr</span><span class="p">.</span><span class="n">amplitude</span><span class="w"> </span><span class="n">GRspr</span><span class="p">.</span><span class="n">amplitude</span><span class="w"> </span><span class="n">GRacq</span><span class="p">.</span><span class="n">amplitude</span><span class="p">];</span>
+<span class="n">GR5</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">mr</span><span class="p">.</span><span class="n">makeExtendedTrapezoid</span><span class="p">(</span><span class="s">&#39;x&#39;</span><span class="p">,</span><span class="w"> </span><span class="s">&#39;times&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">GR5times</span><span class="p">,</span><span class="w"> </span><span class="s">&#39;amplitudes&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">GR5amp</span><span class="p">);</span>
+
+<span class="c">% Example 3: Create composite gradient combining multiple parts</span>
+<span class="n">g_refC</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">mr</span><span class="p">.</span><span class="n">makeExtendedTrapezoid</span><span class="p">(</span><span class="n">g_ref_pre</span><span class="p">.</span><span class="n">channel</span><span class="p">,</span><span class="w"> </span><span class="k">...</span>
+<span class="w">    </span><span class="s">&#39;times&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="n">g_ref_pre</span><span class="p">.</span><span class="n">tt</span><span class="w"> </span><span class="n">g_ref_post</span><span class="p">.</span><span class="n">tt</span><span class="o">+</span><span class="n">g_ref_pre</span><span class="p">.</span><span class="n">shape_dur</span><span class="o">+</span><span class="n">g_ref</span><span class="p">.</span><span class="n">flatTime</span><span class="p">],</span><span class="w"> </span><span class="k">...</span>
+<span class="w">    </span><span class="s">&#39;amplitudes&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="n">g_ref_pre</span><span class="p">.</span><span class="n">waveform</span><span class="w"> </span><span class="n">g_ref_post</span><span class="p">.</span><span class="n">waveform</span><span class="p">],</span><span class="w"> </span><span class="s">&#39;system&#39;</span><span class="p">,</span><span class="w"> </span><span class="nb">system</span><span class="p">);</span>
+</code></pre></div>
+<h2 id="see-also">See Also<a class="headerlink" href="#see-also" title="Permanent link">&para;</a></h2>
+<p><a href="../addBlock/">Sequence.addBlock</a>, <a href="../opts/">mr.opts</a>, <a href="../makeTrapezoid/">makeTrapezoid</a>, <a href="../pts2waveform/">mr.pts2waveform</a>, <a href="../makeArbitraryGrad/">mr.makeArbitraryGrad</a></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
               </article>
             </div>
           
@@ -2493,10 +2863,10 @@
     
     
       
-      <script id="__config" type="application/json">{"base": "/Pulsepal/", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "/Pulsepal/assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="/Pulsepal/assets/javascripts/bundle.50899def.min.js"></script>
+      <script src="../../assets/javascripts/bundle.50899def.min.js"></script>
       
     
   </body>
