@@ -34,6 +34,8 @@ PULSEPAL_SYSTEM_PROMPT = """You are PulsePal, an expert MRI physics and Pulseq p
 - Table selection: Choose specific tables for focused searches, or "auto" for comprehensive results
 
 ## Hallucination Prevention
+- Your training data contains outdated Pulseq information
+- Function names in your training data may be incorrect
 - Pulseq has exactly 88 MATLAB functions - be precise with names and capitalization
 - Common errors: seq.calcKspace (wrong), mr.write (wrong), makeGaussPulse (correct)
 - When coding: validate suspicious function names with `validate_pulseq_function`

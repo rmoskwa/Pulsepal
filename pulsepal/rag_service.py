@@ -1045,11 +1045,11 @@ class ModernPulseqRAG:
             logger.debug(f"Truncated query to {len(query)} chars")
 
         # Remove potentially dangerous SQL characters while preserving search operators
-        # Keep: alphanumeric, spaces, hyphens, plus, parentheses, quotes, ampersand, pipe
+        # Keep: alphanumeric, spaces, hyphens, plus, parentheses, quotes, ampersand, pipe, dots
         # Remove: semicolons, backslashes, null bytes, etc.
         import re
 
-        sanitized = re.sub(r'[^\w\s\-\+\(\)"\'\'&|]', " ", query)
+        sanitized = re.sub(r'[^\w\s\-\+\(\)"\'\'&|\.]', " ", query)
 
         # Normalize whitespace
         processed = " ".join(sanitized.split())
