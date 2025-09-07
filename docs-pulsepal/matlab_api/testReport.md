@@ -32,6 +32,14 @@ seq.testReport(...)
 ## Examples
 
 ```matlab
-report = seq.testReport();
-report = seq.testReport('system', systemParams);
+% Generate sequence analysis report
+rep = seq.testReport;
+fprintf([rep{:}]);
+
+% Simple test report generation
+rep = seq.testReport();
+
+% Generate report for development testing
+rep = seq.testReport;
+disp(rep);
 ```

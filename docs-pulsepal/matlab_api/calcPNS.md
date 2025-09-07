@@ -41,7 +41,11 @@ seq.calcPNS(...)
 ## Examples
 
 ```matlab
-[ok, pns_norm, pns_comp, t_axis] = seq.calcPNS(myPulseqObj, 'path/to/hardware.asc', false);
+% Basic PNS calculation for Prisma scanner
+[pns, tpns] = seq.calcPNS('idea/asc/MP_GPA_K2309_2250V_951A_AS82.asc');
+
+% PNS check for TERRA-XR scanner
+[pns_ok, pns_n, pns_c, tpns] = seq.calcPNS('/rfanfs/pnl-zorro/home/ql087/qiang_gSlider_data/MP_GGA_K2309_2250V_951A_AS82.asc');
 ```
 
 ## See Also

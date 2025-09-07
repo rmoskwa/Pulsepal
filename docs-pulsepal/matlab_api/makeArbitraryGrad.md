@@ -44,8 +44,17 @@ mr.makeArbitraryGrad(...)
 ## Examples
 
 ```matlab
-g = mr.makeArbitraryGrad('x', [0 1 0], 'maxGrad', 2000, 'maxSlew', 200000);
-g = mr.makeArbitraryGrad('y', [0:0.1:1 1:-0.1:0], mr.opts(), true);
+% Create spiral gradient waveforms with oversampling
+gx = mr.makeArbitraryGrad('x', spiral_grad_shape(1,:), 'Delay', mr.calcDuration(gzReph), ...
+    'first', 0, 'last', spiral_grad_shape(1,end), 'system', sys, 'oversampling', gradOversampling);
+gy = mr.makeArbitraryGrad('y', spiral_grad_shape(2,:), 'Delay', mr.calcDuration(gzReph), ...
+    'first', 0, 'last', spiral_grad_shape(2,end), 'system', sys, 'oversampling', gradOversampling);
+
+% Create selective RF gradient waveforms from k-space trajectory
+gxRf = mr.makeArbitraryGrad('x', mr.traj2grad(kx, 'RasterTime', dTG), ...
+    'first', 0, 'last', 0, 'oversampling', gradOversampling);
+gyRf = mr.makeArbitraryGrad('y', mr.traj2grad(ky, 'RasterTime', dTG), ...
+    'first', 0, 'last', 0, 'oversampling', gradOversampling);
 ```
 
 ## See Also

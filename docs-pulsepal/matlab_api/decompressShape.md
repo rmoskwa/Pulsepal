@@ -37,7 +37,16 @@ mr.decompressShape(...)
 ## Examples
 
 ```matlab
-w = mr.decompressShape(shape);
+% Decompress RF magnitude from compressed shape data
+shapeData = obj.shapeLibrary.data(magShape).array;
+compressed.num_samples = shapeData(1);
+compressed.data = shapeData(2:end);
+mag = mr.decompressShape(compressed);
+
+% Decompress phase data for RF pulse reconstruction
+phase = mr.decompressShape(compressed);
+
+% Force decompression of waveform data
 w = mr.decompressShape(shape, true);
 ```
 

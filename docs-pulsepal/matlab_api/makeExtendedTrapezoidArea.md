@@ -37,7 +37,15 @@ mr.makeExtendedTrapezoidArea(...)
 ## Examples
 
 ```matlab
-[grad, times, amplitudes] = mr.makeExtendedTrapezoidArea('x', 100, 100, 0.1, mr.opts())
+% Create refocusing gradient with spoiler areas
+g_ref_pre = mr.makeExtendedTrapezoidArea(g_ref.channel, 0, g_ref.amplitude, spAz+gzr.area, system);
+g_ref_post = mr.makeExtendedTrapezoidArea(g_ref.channel, g_ref.amplitude, 0, spAz, system);
+
+% Slice spoiling gradient starting from zero
+gzSpoil = mr.makeExtendedTrapezoidArea('z', 0, gz.amplitude, sp_area_needed, sys);
+
+% Readout spoiling gradient with amplitude transition
+groSp = mr.makeExtendedTrapezoidArea(gro.channel, gro.amplitude, 0, deltak(ax.n1)/2*N(ax.n1)*ro_spoil, sys);
 ```
 
 ## See Also

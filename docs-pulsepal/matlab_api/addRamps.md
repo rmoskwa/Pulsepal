@@ -41,12 +41,24 @@ mr.addRamps(...)
 ## Examples
 
 ```matlab
-k_space = [1;2;3];
+% Example 1: Adding ramps to spiral k-space trajectory with RF pulse
+% Define spiral k-space trajectory
+kMax = (2*n)/foe/2;       % Units of 1/m (not rad/m)
+tk = 0:dTG:T-dTG;
+kx = kMax*(1-tk/T).*cos(2*pi*n*tk/T);
+ky = kMax*(1-tk/T).*sin(2*pi*n*tk/T);
+
+% Add gradient ramps with RF signal
+[kx, ky, signal] = mr.addRamps({kx, ky}, 'rf', signal, 'system', lims, 'gradOversampling', gradOversampling);
+
+% Example 2: Adding ramps with system limits
+k_space = [1; 2; 3];
 [k_space_with_ramps] = mr.addRamps(k_space, 'maxGrad', 30e6, 'maxSlew', 100e6);
-k_space = {[1;2;3],[4;5;6]};
-[k_space_with_ramps1, k_space_with_ramps2] = mr.addRamps(k_space, 'maxGrad', 30e6, 'maxSlew', 100e6);
-k_space = [1;2;3]; rf_pulse = [0.5 0.5 0.5];
-[k_space_with_ramps, rf_with_zeros] = mr.addRamps(k_space, 'rf', rf_pulse, 'maxGrad', 30e6, 'maxSlew', 100e6);
+
+% Example 3: Multiple trajectories with RF pulse extension
+k_space = {[1; 2; 3], [4; 5; 6]};
+rf_pulse = [0.5 0.5 0.5];
+[k_space_with_ramps1, k_space_with_ramps2, rf_with_zeros] = mr.addRamps(k_space, 'rf', rf_pulse, 'maxGrad', 30e6, 'maxSlew', 100e6);
 ```
 
 ## See Also

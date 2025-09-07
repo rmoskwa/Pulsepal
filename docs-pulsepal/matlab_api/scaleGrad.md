@@ -38,8 +38,14 @@ mr.scaleGrad(...)
 ## Examples
 
 ```matlab
-[grad_scaled] = mr.scaleGrad(grad, 2);
-[grad_scaled] = mr.scaleGrad(grad, 0.5, system);
+% Reverse gradient polarity for EPI readout alternation
+gx = mr.scaleGrad(gx, -1);
+
+% Scale phase encoding gradient for different k-space steps
+seq.addBlock(gxPre, mr.scaleGrad(gyPre, peScales(i)), gzReph);
+
+% Create rewinding gradient with opposite polarity
+gpe2jr = mr.scaleGrad(gpe2, -pe2Steps(count));
 ```
 
 ## See Also

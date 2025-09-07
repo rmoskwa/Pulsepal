@@ -37,8 +37,15 @@ seq.getBlock(...)
 ## Examples
 
 ```matlab
+% Retrieve block for timing calculations
+b = seq.getBlock(iB);
+duration = mr.calcDuration(b);
+
+% Get specific blocks for TR verification
+assert(TR==(mr.calcDuration(seq.getBlock(5))+mr.calcDuration(seq.getBlock(6))));
+
+% Retrieve block with ID information included
 block = seq.getBlock(2, true);
-block = seq.getBlock(5);
 ```
 
 ## See Also

@@ -33,5 +33,9 @@ mr.aux.findFlank(...)
 ## Examples
 
 ```matlab
+% RF profile analysis for slice thickness calculation
+sl_th_90 = mr.aux.findFlank(F2_90(end:-1:1)/gz.amplitude, abs(M_xy90(end:-1:1)), 0.5) - mr.aux.findFlank(F2_90/gz.amplitude, abs(M_xy90), 0.5);
+
+% Find flank of RF waveform for profile analysis
 xf = mr.aux.findFlank([0:0.01:1], sin(2*pi*[0:0.01:1]), 0.5);
 ```

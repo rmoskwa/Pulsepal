@@ -55,7 +55,18 @@ mr.makeGaussPulse(...)
 ## Examples
 
 ```matlab
-[rf, gz] = mr.makeGaussPulse(pi/2, 'duration', 0.004, 'sliceThickness', 0.005, 'maxGrad', 300, 'maxSlew', 100000);
+% Create excitation pulse for ZTE/UTE sequences
+rf = mr.makeGaussPulse(alpha*pi/180, 'Duration', rf_duration, 'timeBwProduct', 3, 'system', sys, 'use', 'excitation');
+
+% Create fat saturation pulse with frequency offset
+rf_fs = mr.makeGaussPulse(110*pi/180, 'system', lims, 'Duration', 8e-3, ...
+    'bandwidth', abs(sat_freq), 'freqPPM', sat_ppm, 'use', 'saturation');
+
+% Create water suppression pulses with different flip angles
+for i=1:3
+    rf_ws(i) = mr.makeGaussPulse(ws_fa(i) * pi / 180, 'system', system, ...
+        'duration', ws_rf_dur, 'bandwidth', ws_rf_bw, 'use', 'saturation');
+end
 ```
 
 ## See Also

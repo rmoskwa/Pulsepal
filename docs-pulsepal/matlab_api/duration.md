@@ -29,7 +29,18 @@ seq.duration(...)
 ## Examples
 
 ```matlab
-[totalDuration, numberOfBlocks] = seq.duration();
+% Get total sequence duration and block count
+[total_duration, total_numBlocks] = seq.duration();
+
+% Check TR per slice after adding blocks
+if s==1
+    TR_1slice = seq.duration; % note the actual TR per slice
+end
+
+% Calculate TR timing in sequence loop
+if TR<=0
+    TR = seq.duration;
+end
 ```
 
 ## See Also

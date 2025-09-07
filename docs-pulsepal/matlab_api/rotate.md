@@ -32,6 +32,12 @@ mr.rotate(...)
 ## Examples
 
 ```matlab
-r = mr.rotate([1 0 0 0], [1; 0; 0]); % No rotation
- r = mr.rotate([0 1 0 0], [1; 0; 0]); % Rotation by 180 degrees around x-axis
+% Rotate gradient and ADC events for spiral imaging
+seq.addBlock(mr.rotate('z', phi, gzReph, gx, gy, adc));
+
+% Rotate spoiler gradients by angle phi around z-axis
+seq.addBlock(mr.rotate('z', phi, gx_spoil, gy_spoil, gz_spoil));
+
+% Rotate diffusion gradient for 3-axis encoding
+Gr = mr.rotate('z', azimuth, mr.rotate('y', polar, gDiff));
 ```

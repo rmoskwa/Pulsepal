@@ -37,8 +37,16 @@ seq.getDefinition(...)
 ## Examples
 
 ```matlab
-value = seq.getDefinition('FOV');
-myValue = seq.getDefinition('myCustomParam');
+% Retrieve field of view from sequence definition
+fov = seq.getDefinition('FOV');
+
+% Check sequence name for conditional reconstruction
+if strcmp('petra',seq.getDefinition('Name'))
+    SamplesPerShell = seq.getDefinition('SamplesPerShell');
+end
+
+% Get sequence name for processing pipeline decisions
+seqName = seq.getDefinition('Name');
 ```
 
 ## See Also

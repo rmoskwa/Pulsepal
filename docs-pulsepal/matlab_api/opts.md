@@ -51,9 +51,14 @@ mr.opts(...)
 ## Examples
 
 ```matlab
-mr.opts('maxGrad',30,'gradUnit','mT/m')
-mr.opts()
-myOpts = mr.opts('maxSlew', 200, 'slewUnit', 'T/m/s');
+% Standard system limits for clinical scanners
+sys = mr.opts('MaxGrad', 28, 'GradUnit', 'mT/m', 'MaxSlew', 150, 'SlewUnit', 'T/m/s', 'riseTime', 0.0001);
+
+% High-performance gradients for research systems
+sys = mr.opts('MaxGrad', 32, 'GradUnit', 'mT/m', 'MaxSlew', 130, 'SlewUnit', 'T/m/s', 'riseTime', 250e-6);
+
+% System limits for spectroscopy sequences
+system = mr.opts('MaxGrad', 15, 'GradUnit', 'mT/m', 'MaxSlew', 100, 'SlewUnit', 'T/m/s', 'riseTime', 0.0001);
 ```
 
 ## See Also

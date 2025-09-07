@@ -21,7 +21,7 @@ seq.checkTiming(...)
 
 | Name | Type | Default | Description | Example |
 |------|------|---------|-------------|---------|
-| `trajectory_delay` | double | `0` | Optional parameter that seems to be unused in the provided code excerpt.  It might be related to trajectory delays but its usage is not apparent here. Valid values: >= 0 (Units: seconds) | `0.001` |
+| `trajectory_delay` | double | `0` | Valid values: >= 0 (Units: seconds) | `0.001` |
 
 ## Returns
 
@@ -33,7 +33,23 @@ seq.checkTiming(...)
 ## Examples
 
 ```matlab
+% Check timing after sequence construction
+[ok, error_report] = seq.checkTiming;
+if (ok)
+    fprintf('Timing check passed successfully\n');
+else
+    fprintf('Timing check failed! Error listing follows:\n');
+    error_report
+end
+
+% Validate timing before writing sequence file
 [is_ok, errorReport] = seq.checkTiming();
+
+% Timing check with error handling for complex sequences
+[ok, error_report] = seq.checkTiming;
+if ~ok
+    error('Sequence timing validation failed');
+end
 ```
 
 ## See Also

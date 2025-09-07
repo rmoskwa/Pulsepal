@@ -37,9 +37,15 @@ seq.setBlock(...)
 ## Examples
 
 ```matlab
-seq.setBlock(1, rf_event1, grad_event1); % Adds a block with an RF and a gradient event at index 1
-seq.setBlock(2, block_struct); % Replaces block at index 2 with a given block structure
-seq.setBlock(3, 0.01, rf_event2, grad_event2); % Creates a block with duration 0.01 seconds at index 3
+% Replace existing block with modified version
+b1.rf = rf2;
+seq2.setBlock(1, b1);
+
+% Set block with specific events
+seq.setBlock(1, rf_event, grad_x, grad_y, grad_z);
+
+% Create block with specified duration and events
+seq.setBlock(3, 0.01, rf_event, grad_event);
 ```
 
 ## See Also

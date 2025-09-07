@@ -37,5 +37,20 @@ mr.restoreAdditionalShapeSamples(...)
 ## Examples
 
 ```matlab
-[tt_chg, waveform_chg] = mr.restoreAdditionalShapeSamples([0 1e-3 2e-3], [0 100 0], 0, 0, 1e-6, 1);
+% Basic shape restoration
+tt = [0, 1e-3, 2e-3, 3e-3];
+waveform = [0, 100, 100, 0];
+[tt_chg, waveform_chg] = mr.restoreAdditionalShapeSamples(tt, waveform, 0, 0, 1e-6, 1);
+
+% Restore gradient shape samples
+[tt_restored, waveform_restored] = mr.restoreAdditionalShapeSamples(grad.tt, grad.waveform, ...
+                                                                   grad.first, grad.last, ...
+                                                                   gradRasterTime, blockIndex);
+
+% Process arbitrary gradient waveform
+if ~isempty(grad.tt)
+    [tt_chg, waveform_chg] = mr.restoreAdditionalShapeSamples(grad.tt, grad.waveform, ...
+                                                             grad.first, grad.last, ...
+                                                             obj.gradRasterTime, iBc);
+end
 ```

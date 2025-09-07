@@ -43,7 +43,20 @@ mr.makeExtendedTrapezoid(...)
 ## Examples
 
 ```matlab
-grad = mr.makeExtendedTrapezoid('x', [0 0.002 0.004], 'times', [0 0.001 0.003], 'amplitudes', [0 2000 0], 'system', mr.opts(), 'maxSlew', 2000000);
+% Example 1: Create complex gradient waveform for slice selection
+GS1times = [0 GSex.riseTime];
+GS1amp = [0 GSex.amplitude];
+GS1 = mr.makeExtendedTrapezoid('z', 'times', GS1times, 'amplitudes', GS1amp);
+
+% Example 2: Create readout gradient with multiple segments
+GR5times = [0 GRspr.riseTime GRspr.riseTime+GRspr.flatTime GRspr.riseTime+GRspr.flatTime+GRspr.fallTime];
+GR5amp = [0 GRspr.amplitude GRspr.amplitude GRacq.amplitude];
+GR5 = mr.makeExtendedTrapezoid('x', 'times', GR5times, 'amplitudes', GR5amp);
+
+% Example 3: Create composite gradient combining multiple parts
+g_refC = mr.makeExtendedTrapezoid(g_ref_pre.channel, ...
+    'times', [g_ref_pre.tt g_ref_post.tt+g_ref_pre.shape_dur+g_ref.flatTime], ...
+    'amplitudes', [g_ref_pre.waveform g_ref_post.waveform], 'system', system);
 ```
 
 ## See Also

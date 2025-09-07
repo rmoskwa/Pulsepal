@@ -26,8 +26,14 @@ seq.setDefinition(...)
 ## Examples
 
 ```matlab
-seq.setDefinition('FOV', [0.2, 0.2, 0.2]); % Sets the FOV definition
-seq.setDefinition('PatientName', 'John Doe'); % Sets the patient name definition
+% Set field of view for 3D imaging sequence
+seq.setDefinition('FOV', [fov fov sliceThickness]);
+
+% Define sequence name for scanner identification
+seq.setDefinition('Name', 'gre');
+
+% Configure readout oversampling for EPI sequences
+seq.setDefinition('ReadoutOversamplingFactor', ro_os);
 ```
 
 ## See Also

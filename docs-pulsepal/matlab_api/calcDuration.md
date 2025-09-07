@@ -36,6 +36,14 @@ mr.calcDuration(...)
 ## Examples
 
 ```matlab
-duration = mr.calcDuration({type: 'delay', delay: 0.002}, {type: 'rf', delay: 0.001, shape_dur: 0.0005, ringdownTime: 0.0001});
-duration = mr.calcDuration(block); % where 'block' is a Pulseq block structure
+% Calculate TE delay accounting for gradient and RF timings
+delayTE = ceil((TE - mr.calcDuration(gxPre) - gz.fallTime - gz.flatTime/2 ...
+    - mr.calcDuration(gx)/2)/seq.gradRasterTime)*seq.gradRasterTime;
+
+% Calculate TR delay accounting for all sequence events
+delayTR = ceil((TR - mr.calcDuration(gz) - mr.calcDuration(gxPre) ...
+    - mr.calcDuration(gx) - delayTE)/seq.gradRasterTime)*seq.gradRasterTime;
+
+% Create spoiler gradient with duration based on RF pulse
+gz_fs = mr.makeTrapezoid('z', sys, 'delay', mr.calcDuration(rf_fs), 'Area', 1/1e-4);
 ```

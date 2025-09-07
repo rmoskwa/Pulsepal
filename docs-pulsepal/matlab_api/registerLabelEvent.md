@@ -39,45 +39,34 @@ id = seq.registerLabelEvent(labelEvent)
 ## Examples
 
 ```matlab
-% From MPRAGE with GRAPPA: pre-register label events
-lblIncPar = mr.makeLabel('INC', 'PAR', 1);
-lblResetPar = mr.makeLabel('SET', 'PAR', 0);
+% GRAPPA reference and image scan labels
+lblSetRefScan = mr.makeLabel('SET','REF', true);
+lblSetRefAndImaScan = mr.makeLabel('SET','IMA', true);
+lblResetRefScan = mr.makeLabel('SET','REF', false);
+lblResetRefAndImaScan = mr.makeLabel('SET','IMA', false);
 
-% Set PAT scan flags for GRAPPA
-lblSetRefScan = mr.makeLabel('SET', 'REF', true);
-lblSetRefAndImaScan = mr.makeLabel('SET', 'IMA', true);
-lblResetRefScan = mr.makeLabel('SET', 'REF', false);
-lblResetRefAndImaScan = mr.makeLabel('SET', 'IMA', false);
-
-% Pre-register all label events
 lblSetRefScan.id = seq.registerLabelEvent(lblSetRefScan);
 lblSetRefAndImaScan.id = seq.registerLabelEvent(lblSetRefAndImaScan);
 lblResetRefScan.id = seq.registerLabelEvent(lblResetRefScan);
 lblResetRefAndImaScan.id = seq.registerLabelEvent(lblResetRefAndImaScan);
 
-% Use in GRAPPA acquisition loop
-for count = 1:nPEsamp  % outer loop for phase encoding
-    % Set PAT labels for every PE line
-    if ismember(PEsamp(count), PEsamp_ACS)
-        if ismember(PEsamp(count), PEsamp_u)
-            seq.addBlock(lblSetRefAndImaScan, lblSetRefScan);
-        else
-            seq.addBlock(lblResetRefAndImaScan, lblSetRefScan);
-        end
-    else
-        seq.addBlock(lblResetRefAndImaScan, lblResetRefScan);
-    end
+% Performance optimization: pre-register all label events
+lblIncLin = mr.makeLabel('INC','LIN', 1);
+lblIncPar = mr.makeLabel('INC','PAR', 1);
+lblResetPar = mr.makeLabel('SET','PAR', 0);
 
-    % Inner loop with partition encoding counter
-    for i = 1:N(ax.n2)
-        seq.addBlock(rf, groSp, gpe1, gpe2, lblIncPar);  % Increment PAR after ADC
-        seq.addBlock(adc, gro1);
-    end
-    seq.addBlock(lblResetPar);  % Reset partition counter
-end
+lblIncLin.id = seq.registerLabelEvent(lblIncLin);
+lblIncPar.id = seq.registerLabelEvent(lblIncPar);
+lblResetPar.id = seq.registerLabelEvent(lblResetPar);
 
-% Set initial line label
-seq.addBlock(mr.makeLabel('SET', 'LIN', PEsamp(1)-1));
+% Multi-slice EPI labels
+lblResetSLC = mr.makeLabel('SET', 'SLC', 0);
+lblSetNAV = mr.makeLabel('SET','NAV', 1);
+lblIncREP = mr.makeLabel('INC', 'REP', 1);
+
+lblResetSLC.id = seq.registerLabelEvent(lblResetSLC);
+lblSetNAV.id = seq.registerLabelEvent(lblSetNAV);
+lblIncREP.id = seq.registerLabelEvent(lblIncREP);
 ```
 
 ## See Also

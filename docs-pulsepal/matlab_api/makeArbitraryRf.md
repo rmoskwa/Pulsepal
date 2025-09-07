@@ -54,8 +54,11 @@ mr.makeArbitraryRf(...)
 ## Examples
 
 ```matlab
-rf = mr.makeArbitraryRf([1+1i, 0, -1-1i], pi/2, 'bandwidth', 10000, 'sliceThickness', 0.005);
-rf = mr.makeArbitraryRf(sinc_pulse, pi/2, 'freqOffset', 100, 'phaseOffset', pi/4);
+% Create arbitrary RF pulse from predefined signal shape
+rf = mr.makeArbitraryRf(ex.signal, alpha/180*pi, 'system', sys);
+
+% Create selective RF pulse with k-space trajectory
+rf = mr.makeArbitraryRf(signal, 20*pi/180, 'system', lims, 'use', 'excitation');
 ```
 
 ## See Also

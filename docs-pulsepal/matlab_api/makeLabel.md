@@ -33,9 +33,14 @@ mr.makeLabel(...)
 ## Examples
 
 ```matlab
-label1 = mr.makeLabel('SET', 'REP', 10);
-label2 = mr.makeLabel('INC', 'SLC', -1);
-label3 = mr.makeLabel('SET', 'NAV', true);
+% Initialize slice counter at start of multi-slice sequence
+seq.addBlock(mr.makeLabel('SET','SLC', 0));
+
+% Increment line counter for k-space encoding
+seq.addBlock(mr.makeLabel('INC','LIN', 1));
+
+% Set navigation echo flag for reference scan
+seq.addBlock(mr.makeLabel('SET','NAV',1), mr.makeLabel('SET','LIN', floor(Ny/2)));
 ```
 
 ## See Also

@@ -31,7 +31,14 @@ mr.makeDelay(...)
 ## Examples
 
 ```matlab
-delayEvent = mr.makeDelay(0.01); % Creates a 10ms delay
+% TE delay in gradient echo sequence
+seq.addBlock(mr.makeDelay(delayTE));
+
+% Preparation delay for steady-state sequences
+prepDelay = mr.makeDelay(round((TR/2 - mr.calcDuration(gz_1))/sys.gradRasterTime)*sys.gradRasterTime);
+
+% Inversion recovery delay
+seq.addBlock(mr.makeDelay(TIdelay), gslSp);
 ```
 
 ## See Also

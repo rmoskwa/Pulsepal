@@ -39,9 +39,14 @@ mr.makeDigitalOutputPulse(...)
 ## Examples
 
 ```matlab
-trig = mr.makeDigitalOutputPulse('osc0', 'delay', 0.001, 'duration', 0.002);
-trig = mr.makeDigitalOutputPulse('ext1', 'delay', 0.01);
-mySys = mr.opts('gradRasterTime', 0.0001); trig = mr.makeDigitalOutputPulse('osc1', 'system', mySys);
+% Standard trigger pulse for EPI sequences
+trig = mr.makeDigitalOutputPulse('osc0','duration', 100e-6);
+
+% External trigger with delay for cardiac gating
+trig_out = mr.makeDigitalOutputPulse('ext1','duration', 100e-6,'delay',500e-6);
+
+% Multiple trigger channels available: 'osc0','osc1','ext1'
+trig = mr.makeDigitalOutputPulse('osc1','duration', 200e-6);
 ```
 
 ## See Also

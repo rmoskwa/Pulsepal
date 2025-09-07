@@ -45,9 +45,16 @@ mr.makeAdc(...)
 ## Examples
 
 ```matlab
-adc = mr.makeAdc(1024, 'dwell', 0.000004);
-adc = mr.makeAdc(2048, 'duration', 0.008);
-adc = mr.makeAdc(1024, mr.opts(), 'delay', 0.001, 'phaseModulation', linspace(0, 2*pi, 1024));
+% Basic ADC with specified duration
+adc = mr.makeAdc(512, 'Duration', 512e-3, 'system', system, 'delay', system.adcDeadTime);
+
+% ADC synchronized with readout gradient
+gx = mr.makeTrapezoid('x', sys, 'FlatArea', Nx*deltak, 'FlatTime', roDuration);
+adc = mr.makeAdc(Nx, sys, 'Duration', gx.flatTime, 'Delay', gx.riseTime);
+
+% ADC with oversampling
+ro_os = 2; % oversampling factor
+adc = mr.makeAdc(Nx*ro_os, 'Duration', ro_dur, 'Delay', gro.riseTime, 'system', sys);
 ```
 
 ## See Also

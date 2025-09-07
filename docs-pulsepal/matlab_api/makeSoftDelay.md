@@ -39,8 +39,14 @@ mr.makeSoftDelay(...)
 ## Examples
 
 ```matlab
-sd = mr.makeSoftDelay(1, 'TE_adjust', 'offset', 0.002, 'factor', 0.5);
-sd = mr.makeSoftDelay(2, 'TR_adjust');
+% TE soft delay with offset
+seq.addBlock(delayTE1, mr.makeSoftDelay(0,'TE','offset',delayTE1-TE/2, 'factor', 2));
+
+% TR soft delay for slice timing
+seq.addBlock(delayTR_1slice, mr.makeSoftDelay(1,'TR','offset',-durPerSlc,'factor',Nslices));
+
+% TE soft delay with negative factor for dependency resolution
+seq.addBlock(max_TE-min_TE-10e-6, mr.makeSoftDelay(0,'TE','factor',-1,'offset',max_TE));
 ```
 
 ## See Also

@@ -57,8 +57,14 @@ mr.makeAdiabaticPulse(...)
 ## Examples
 
 ```matlab
-[rf, gz, gzr, delay] = mr.makeAdiabaticPulse('hypsec', 'duration', 0.01, 'beta', 1000, 'mu', 5);
-[rf, gz, gzr, delay] = mr.makeAdiabaticPulse('wurst', 'duration', 0.005, 'bandwidth', 20000, 'n_fac', 30);
+% Example 1: Create hyperbolic secant adiabatic inversion pulse
+rf180 = mr.makeAdiabaticPulse('hypsec', sys, 'Duration', 10.24e-3, 'dwell', 1e-5, 'use', 'inversion');
+
+% Example 2: Create WURST refocusing pulse with custom parameters
+rf_180_1 = mr.makeAdiabaticPulse('wurst', 'duration', rf_180_duration, 'bandwidth', 6000, 'dwell', rf_180_duration/500, 'n_fac', 20, 'use', 'refocusing', 'system', system);
+
+% Example 3: Create adiabatic pulse with system parameters
+rf180 = mr.makeAdiabaticPulse('hypsec', sys, 'Duration', 10.24e-3, 'dwell', 1e-5, 'use', 'inversion');
 ```
 
 ## See Also

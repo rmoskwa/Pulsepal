@@ -26,8 +26,14 @@ seq.write(...)
 ## Examples
 
 ```matlab
-seq.write('my_sequences/gre.seq')
-seq.write('my_sequences/gre.seq', false)
+% Write EPI sequence to file
+seq.write('epi_rs.seq');
+
+% Write spiral sequence for scanner
+seq.write('spiral.seq');
+
+% Write 3D GRE sequence without signature
+seq.write('gre3d.seq', false);
 ```
 
 ## See Also

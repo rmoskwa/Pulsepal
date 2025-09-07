@@ -43,7 +43,16 @@ mr.simRf(...)
 ## Examples
 
 ```matlab
-[Mz_z,Mz_xy,F,ref_eff,Mx_xy,My_xy] = mr.simRf(rf_pulse_struct);
+% RF profile validation for excitation pulse
+[M_z90, M_xy90, F2_90] = mr.simRf(rf_ex);
+sl_th_90 = mr.aux.findFlank(F2_90(end:-1:1)/gz.amplitude, abs(M_xy90(end:-1:1)), 0.5) - mr.aux.findFlank(F2_90/gz.amplitude, abs(M_xy90), 0.5);
+
+% RF profile validation for refocusing pulse
+[M_z180, M_xy180, F2_180, ref_eff] = mr.simRf(rf_ref);
+sl_th_180 = mr.aux.findFlank(F2_180(end:-1:1)/g_ref.amplitude, abs(ref_eff(end:-1:1)), 0.5) - mr.aux.findFlank(F2_180/g_ref.amplitude, abs(ref_eff), 0.5);
+
+% Basic RF simulation
+[Mz_z, Mz_xy, F, ref_eff, Mx_xy, My_xy] = mr.simRf(rf_pulse_struct);
 ```
 
 ## See Also

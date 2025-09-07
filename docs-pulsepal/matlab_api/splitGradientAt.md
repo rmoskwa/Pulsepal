@@ -38,8 +38,19 @@ mr.splitGradientAt(...)
 ## Examples
 
 ```matlab
-[grad1, grad2] = mr.splitGradientAt(myGradient, 0.001, mr.opts());
-[grads] = mr.splitGradientAt(myGradient, 0.001);
+% Example 1: Split gradient for slice selection timing
+gz_parts = mr.splitGradientAt(gz, rf.delay + rf.t(end));
+gz_parts(1).delay = mr.calcDuration(gzReph);
+gz_1 = mr.addGradients({gzReph, gz_parts(1)}, 'system', sys);
+
+% Example 2: Split readout gradient at ADC end for optimal timing
+gx_parts = mr.splitGradientAt(gx, ceil((adc.dwell*adc.numSamples+adc.delay+adc.deadTime)/sys.gradRasterTime)*sys.gradRasterTime);
+gx_parts(1).delay = mr.calcDuration(gxPre);
+gx_1 = mr.addGradients({gxPre, gx_parts(1)}, 'system', sys);
+
+% Example 3: Split blip gradient for EPI sequence
+gyBlip_parts = mr.splitGradientAt(gyBlip, blip_dur/2, sys);
+[gyBlip_up, gyBlip_down, ~] = mr.align('right', gyBlip_parts(1), 'left', gyBlip_parts(2), gx);
 ```
 
 ## See Also

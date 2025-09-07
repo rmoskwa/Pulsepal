@@ -35,10 +35,15 @@ seq.addBlock(...)
 ## Examples
 
 ```matlab
-seq.addBlock(struct('type', 'adc', 'duration', 0.001));
-seq.addBlock(makeTrapezoid('x', 100, 0.001));
-seq.addBlock(0.01, makeTrapezoid('x', 100, 0.001), makeAdc(0.005))
-seq.addBlock(makeTrapezoid('x', 100, 0.001), trajectory_delay = 0.002)
+% Add RF pulse with slice selection gradient
+seq.addBlock(rf, gz);
+
+% Add readout with prephasing gradients
+seq.addBlock(gxPre, gyPre);
+seq.addBlock(gx, adc);
+
+% Add multiple events in a single block
+seq.addBlock(gx, gy_blip, adc);
 ```
 
 ## See Also

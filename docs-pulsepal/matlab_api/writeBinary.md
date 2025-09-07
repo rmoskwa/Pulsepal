@@ -25,7 +25,16 @@ seq.writeBinary(...)
 ## Examples
 
 ```matlab
-seq.writeBinary('sequences/gre.bin')
+% Write sequence to binary format for testing
+seq.writeBinary('zte_petra.bin');
+
+% Read back binary sequence and verify
+seq_bin = mr.Sequence();
+seq_bin.readBinary('zte_petra.bin');
+seq_bin.write('zte_petra_bin.seq');
+
+% Basic binary file writing
+seq.writeBinary('sequences/gre.bin');
 ```
 
 ## See Also

@@ -32,9 +32,14 @@ seq = mr.Sequence(...)
 ## Examples
 
 ```matlab
-seq = mr.Sequence(); % Creates a sequence object with default settings
-seq = mr.Sequence(mr.opts()); % Creates a sequence object using custom system options from mr.opts()
-seq = mr.Sequence('trajectory_delay',0.002); % Creates a sequence object with a 2ms trajectory delay
+% Create sequence object with system limits for clinical scanner
+seq = mr.Sequence(sys);
+
+% Create sequence object with default parameters
+seq = mr.Sequence();
+
+% Create sequence object for SAR testing with separate system limits
+seq_sar = mr.Sequence(sys);
 ```
 
 ## See Also

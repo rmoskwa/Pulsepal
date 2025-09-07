@@ -35,8 +35,14 @@ seq.read(...)
 ## Examples
 
 ```matlab
-seq.read('my_sequences/gre.seq')
-seq.read('my_sequences/gre.seq', 'detectRFuse')
+% Load sequence for reconstruction processing
+seq.read(seq_file_path,'detectRFuse');
+
+% Simple sequence loading
+seq2.read(seq_name);
+
+% Load sequence with RF use detection for analysis
+seq.read(seq_file_path,'detectRFuse');
 ```
 
 ## See Also

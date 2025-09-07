@@ -54,7 +54,20 @@ mr.makeSincPulse(...)
 ## Examples
 
 ```matlab
-[rf, gz] = mr.makeSincPulse(pi/2, 'duration', 0.005, 'sliceThickness', 0.003, 'maxGrad', 40e6, 'maxSlew', 100e6);
+% Standard excitation pulse with slice selection
+[rf, gz] = mr.makeSincPulse(alpha*pi/180, 'Duration', 3e-3, ...
+    'SliceThickness', sliceThickness, 'apodization', 0.42, 'timeBwProduct', 4, ...
+    'use', 'excitation');
+
+% 90-degree pulse for spin echo
+[rf, gz] = mr.makeSincPulse(pi/2, 'system', lims, 'Duration', 3e-3, ...
+    'SliceThickness', thickness, 'apodization', 0.5, 'timeBwProduct', 4, ...
+    'use', 'excitation');
+
+% Refocusing pulse with custom parameters
+[rf180, gz180] = mr.makeSincPulse(pi, 'system', sys, 'Duration', 5e-3, ...
+    'SliceThickness', sliceThickness, 'apodization', 0.5, 'timeBwProduct', 4, ...
+    'use', 'refocusing');
 ```
 
 ## See Also

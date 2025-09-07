@@ -58,7 +58,20 @@ mr.makeSLRpulse(...)
 ## Examples
 
 ```matlab
-[rf, gz, gzr, delay] = mr.makeSLRpulse(pi/2, 'duration', 4e-3, 'system', mr.opts(), 'sliceThickness', 0.005)
+% 90-degree excitation pulse with detailed control
+[rf_ex, gz, gzr] = mr.makeSLRpulse(pi/2, 'duration', rfDur1, 'SliceThickness', sliceThickness*sth_ex, ...
+    'timeBwProduct', 5, 'dwell', rfDur1/500, 'passbandRipple', 1, 'stopbandRipple', 1e-2, ...
+    'filterType', 'ms', 'system', system, 'use', 'excitation', 'PhaseOffset', pi/2);
+
+% 180-degree refocusing pulse
+[rf_ref, g_ref] = mr.makeSLRpulse(pi, 'duration', rfDurRef, 'PhaseOffset', pi/2, ...
+    'SliceThickness', voxel(2), 'timeBwProduct', 6, 'passbandRipple', 1, 'stopbandRipple', 1e-2, ...
+    'filterType', 'ms', 'system', system, 'use', 'refocusing');
+
+% Multi-slice excitation
+[rf_ex, g_ex, g_exReph] = mr.makeSLRpulse(pi/2, 'Duration', rfDurEx, ...
+    'SliceThickness', voxel(1), 'timeBwProduct', 6, 'passbandRipple', 1, 'stopbandRipple', 1e-2, ...
+    'filterType', 'ms', 'system', system, 'use', 'excitation');
 ```
 
 ## See Also

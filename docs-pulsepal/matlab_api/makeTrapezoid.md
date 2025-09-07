@@ -47,9 +47,14 @@ mr.makeTrapezoid(...)
 ## Examples
 
 ```matlab
-grad = mr.makeTrapezoid('x', 'duration', 0.005, 'area', 0.01);
-grad = mr.makeTrapezoid('y', 'flatTime', 0.003, 'flatArea', 0.008, 'maxGrad', 2000);
-grad = mr.makeTrapezoid('z', 'amplitude', 1000, 'maxSlew', 150000);
+% Readout gradient with flat area and time
+gx = mr.makeTrapezoid('x', sys, 'FlatArea', Nx*deltak, 'FlatTime', roDuration);
+
+% Pre-phasing gradient with specific area and duration
+gxPre = mr.makeTrapezoid('x', sys, 'Area', -gx.area/2, 'Duration', 1e-3);
+
+% Slice rephasing gradient
+gzReph = mr.makeTrapezoid('z', lims, 'Area', -gz.area/2, 'Duration', preTime);
 ```
 
 ## See Also

@@ -39,9 +39,15 @@ mr.makeTrigger(...)
 ## Examples
 
 ```matlab
-trig = mr.makeTrigger('physio1', 'delay', 0.01, 'duration', 0.02);
-trig = mr.makeTrigger('physio2');
-mySys = mr.opts('MaxGrad', 40); trig = mr.makeTrigger('physio1','system',mySys);
+% Physiological trigger for cardiac gating with extended duration
+trig = mr.makeTrigger('physio1','duration', 2000e-6);
+
+% Simple physiological trigger on channel 1
+trig = mr.makeTrigger('physio1');
+
+% Trigger with custom system parameters
+sys = mr.opts('gradRasterTime', 10e-6);
+trig = mr.makeTrigger('physio2','system', sys);
 ```
 
 ## See Also

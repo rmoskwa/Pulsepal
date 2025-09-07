@@ -39,7 +39,19 @@ mr.addGradients(...)
 ## Examples
 
 ```matlab
-[grad] = mr.addGradients({g1, g2}, mr.opts(), 'maxGrad', 500, 'maxSlew', 30000)
+% Example 1: Combining gradient parts with prewinder
+gx_parts = mr.splitGradientAt(gx, ceil((adc.dwell*adc.numSamples+adc.delay+adc.deadTime)/sys.gradRasterTime)*sys.gradRasterTime);
+gx_parts(1).delay = mr.calcDuration(gxPre);
+gx_1 = mr.addGradients({gxPre, gx_parts(1)}, 'system', sys);
+
+% Example 2: Combining rephasing gradient with slice selection
+gz_parts = mr.splitGradientAt(gz, rf.delay+rf.t(end));
+gz_parts(1).delay = mr.calcDuration(gzReph);
+gz_1 = mr.addGradients({gzReph, gz_parts(1)}, 'system', sys);
+
+% Example 3: Adding spoiler gradients with readout components
+gro1 = mr.addGradients({gro1, groPre, groSp}, 'system', sys);
+gpe1c = mr.addGradients({gpe1, mr.makeTrapezoid(ax.d2, 'Area', -gpe1.area, 'duration', groSp.shape_dur, 'delay', groSp.delay, 'system', sys)});
 ```
 
 ## See Also

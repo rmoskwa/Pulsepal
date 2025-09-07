@@ -39,9 +39,14 @@ mr.compressShape(...)
 ## Examples
 
 ```matlab
-s = mr.compressShape([1 1 1 2 2 3 3 3 3]);
-% Compress a sample waveform
-s = mr.compressShape([1 2 3 4], true);
+% Compress gradient waveform for storage efficiency
+compressed = mr.compressShape(gradientWaveform);
+
+% Force compression of short waveforms
+compressed = mr.compressShape(shortWaveform, true);
+
+% Compress RF magnitude data for sequence storage
+mag_compressed = mr.compressShape(rfMagnitude);
 ```
 
 ## See Also

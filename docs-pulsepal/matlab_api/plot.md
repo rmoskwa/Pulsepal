@@ -45,9 +45,14 @@ seq.plot(...)
 ## Examples
 
 ```matlab
-seq.plot()
-seq.plot('timeRange', [0.01 0.05], 'showBlocks', 1)
-f = seq.plot('stacked', true, 'label', 'LIN,REP')
+% Plot sequence waveforms with default settings
+seq.plot();
+
+% Plot specific time range with block boundaries and labels
+seq.plot('timeRange', [0 5*TR], 'showBlocks', 1, 'timeDisp', 'ms', 'Label', 'LIN,SLC');
+
+% Detailed view with stacked layout and microsecond timing
+seq.plot('timeDisp', 'us', 'showBlocks', 1, 'timeRange', [0 25e-3]);
 ```
 
 ## See Also

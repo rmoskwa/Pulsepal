@@ -35,10 +35,14 @@ mr.align(...)
 ## Examples
 
 ```matlab
-mr.align('left', obj1, obj2);
-mr.align('center', obj1, obj2, obj3);
-mr.align('right', obj1, 0.02, obj2);
-alignedObjects = mr.align('left', obj1, obj2);
+% Align EPI blip gradients with readout gradient timing
+[gy_blipup, gy_blipdown, ~] = mr.align('right', gy_parts(1), 'left', gy_parts(2), gx);
+
+% Right-align prephasing gradients before readout
+[gxPre, gyPre, gzReph] = mr.align('right', gxPre, 'left', gyPre, gzReph);
+
+% Align RF pulse with slice-select gradient
+[rf, ~] = mr.align('right', rf, gz_1);
 ```
 
 ## See Also

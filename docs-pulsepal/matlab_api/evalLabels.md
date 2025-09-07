@@ -34,9 +34,22 @@ seq.evalLabels(...)
 ## Examples
 
 ```matlab
+% Evaluate label evolution during ADC events for debugging
+lbls = seq.evalLabels('evolution', 'adc');
+lbl_names = fieldnames(lbls);
+figure; hold on;
+for n = 1:length(lbl_names)
+    plot(lbls.(lbl_names{n}));
+end
+legend(lbl_names(:));
+title('evolution of labels/counters/flags');
+xlabel('adc number');
+
+% Basic label evaluation at sequence end
 labels = seq.evalLabels();
+
+% Evaluate labels over specific block range
 labels = seq.evalLabels('blockRange', [10 20], 'evolution', 'adc');
-labels = seq.evalLabels('init', struct('phase', pi/2));
 ```
 
 ## See Also

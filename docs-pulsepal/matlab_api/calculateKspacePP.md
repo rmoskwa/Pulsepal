@@ -44,7 +44,21 @@ seq.calculateKspacePP(...)
 ## Examples
 
 ```matlab
-[ktraj_adc, t_adc] = seq.calculateKspacePP('trajectory_delay', 1e-6);
+% Example 1: Basic k-space trajectory calculation with plotting
+[ktraj_adc, t_adc, ktraj, t_ktraj, t_excitation, t_refocusing] = seq.calculateKspacePP();
+
+% Plot k-space trajectory
+figure; plot(t_ktraj, ktraj'); title('k-space components as functions of time');
+figure; plot(ktraj(1,:), ktraj(2,:), 'b', ktraj_adc(1,:), ktraj_adc(2,:), 'r.');
+axis('equal'); title('2D k-space');
+
+% Example 2: Calculate trajectory with compensation for timing delays
+[ktraj_adc, t_adc, ktraj, t_ktraj, t_excitation, t_refocusing] = seq.calculateKspacePP('trajectory_delay', [0 0 0]*1e-6);
+
+% Example 3: Calculate trajectory for 3D visualization
+[kfa, ta, kf] = seq.calculateKspacePP();
+figure; plot3(kf(1,:), kf(2,:), kf(3,:));
+hold on; plot3(kfa(1,:), kfa(2,:), kfa(3,:), 'r.');
 ```
 
 ## See Also

@@ -50,8 +50,14 @@ mr.makeBlockPulse(...)
 ## Examples
 
 ```matlab
-rf = mr.makeBlockPulse(pi/2, 'duration', 0.001);
-[rf, delay] = mr.makeBlockPulse(pi/4, 'bandwidth', 1000, 'freqOffset', 100, 'system', mr.opts());
+% Create 90-degree hard pulse for FID sequence
+rf = mr.makeBlockPulse(pi/2, 'Duration', 0.3e-3, 'system', system, 'use', 'excitation');
+
+% Create short excitation pulse for 3D GRE
+[rf, rfDelay] = mr.makeBlockPulse(8*pi/180, sys, 'Duration', 0.2e-3, 'use', 'excitation');
+
+% Create 180-degree refocusing pulse for spin echo
+rf180 = mr.makeBlockPulse(pi, lims, 'Duration', 500e-6, 'use', 'refocusing');
 ```
 
 ## See Also
