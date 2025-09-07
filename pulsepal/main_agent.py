@@ -90,8 +90,19 @@ def _register_tools():
     logger.info("Modern tools registered with Pulsepal agent")
 
 
-# Register tools on module import
+def _register_validators():
+    """Register output validators with the pulsepal agent."""
+    from .output_validator import validate_pulseq_output
+
+    # Register the Pulseq function validator
+    pulsepal_agent.output_validator(validate_pulseq_output)
+
+    logger.info("Output validators registered with Pulsepal agent")
+
+
+# Register tools and validators on module import
 _register_tools()
+_register_validators()
 
 # Cached semantic router instance (singleton pattern)
 _semantic_router_instance = None
@@ -143,6 +154,10 @@ async def create_pulsepal_session(
     # Generate or reuse session ID
     if not session_id:
         session_id = str(uuid.uuid4())
+        # Reset validation retry counter for new sessions
+        from .output_validator import reset_validation_retries
+
+        await reset_validation_retries(session_id)
 
     # Get session manager
     session_manager = get_session_manager()
