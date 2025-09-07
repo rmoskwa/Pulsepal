@@ -5,9 +5,11 @@ Provides tools that use the simplified retrieval-only RAG service,
 leaving all intelligence to the LLM.
 """
 
+import json
 import logging
 import re
-from typing import Dict, List
+from datetime import datetime, timedelta
+from typing import Dict, List, Optional, Tuple
 
 from pydantic_ai import RunContext
 
@@ -20,6 +22,98 @@ pulsepal_agent = None
 
 logger = logging.getLogger(__name__)
 conversation_logger = get_conversation_logger()
+
+# Cache for table metadata with TTL
+_table_metadata_cache: Optional[Tuple[datetime, List[Dict]]] = None
+_TABLE_METADATA_TTL = timedelta(hours=1)
+
+
+async def get_rag_service(ctx: RunContext[PulsePalDependencies]) -> ModernPulseqRAG:
+    """
+    Get or initialize RAG service with proper error handling.
+
+    This centralizes RAG initialization to avoid code duplication and
+    ensures proper error handling.
+
+    Args:
+        ctx: PydanticAI run context with dependencies
+
+    Returns:
+        Initialized ModernPulseqRAG instance
+
+    Raises:
+        RuntimeError: If RAG service initialization fails
+    """
+    if not hasattr(ctx.deps, "rag_v2"):
+        try:
+            ctx.deps.rag_v2 = ModernPulseqRAG()
+            logger.info("RAG service initialized successfully")
+        except Exception as e:
+            logger.error(f"Failed to initialize RAG service: {e}")
+            raise RuntimeError(f"RAG service initialization failed: {e}")
+
+    return ctx.deps.rag_v2
+
+
+def validate_database_identifier(
+    identifier: str, identifier_type: str = "column"
+) -> bool:
+    """
+    Validate database identifiers (table/column names) to prevent SQL injection.
+
+    Uses a strict allowlist of characters and patterns that are safe for
+    database identifiers.
+
+    Args:
+        identifier: The identifier to validate
+        identifier_type: Type of identifier ("table" or "column")
+
+    Returns:
+        True if identifier is safe, False otherwise
+    """
+    # Maximum length check
+    if len(identifier) > 63:  # PostgreSQL identifier limit
+        return False
+
+    # Check for empty or None
+    if not identifier:
+        return False
+
+    # Strict pattern: only alphanumeric, underscore, and doesn't start with digit
+    # This is more restrictive than PostgreSQL allows but safer
+    pattern = r"^[a-zA-Z_][a-zA-Z0-9_]*$"
+
+    if not re.match(pattern, identifier):
+        return False
+
+    # Check against SQL keywords that could be dangerous
+    dangerous_keywords = {
+        "select",
+        "insert",
+        "update",
+        "delete",
+        "drop",
+        "create",
+        "alter",
+        "grant",
+        "revoke",
+        "union",
+        "where",
+        "from",
+        "join",
+        "exec",
+        "execute",
+        "script",
+        "javascript",
+        "eval",
+        "function",
+        "procedure",
+    }
+
+    if identifier.lower() in dangerous_keywords:
+        return False
+
+    return True
 
 
 def extract_functions_from_text(text: str) -> List[str]:
@@ -765,3 +859,408 @@ async def validate_code_block(
         response.append("```")
 
     return "\n".join(response)
+
+
+async def find_relevant_tables(
+    ctx: RunContext[PulsePalDependencies],
+    query: str,
+) -> str:
+    """
+    Find database tables relevant to a natural language query using semantic search.
+
+    This is the first step in database exploration - identifies which tables
+    might contain the information needed to answer the query using embedding similarity.
+
+    Args:
+        query: Natural language query describing what information is needed
+
+    Returns:
+        JSON list of relevant tables with descriptions and similarity scores
+
+    Examples:
+        - "list all trajectory types" → ['pulseq_sequences']
+        - "function documentation" → ['api_reference']
+        - "helper functions" → ['crawled_code']
+    """
+    import numpy as np
+    from pulsepal.embeddings import get_embedding_service
+
+    if not query or not isinstance(query, str):
+        return json.dumps(
+            {"error": "Invalid query", "message": "Query must be a non-empty string"}
+        )
+
+    try:
+        # Get RAG service with proper error handling
+        rag_service = await get_rag_service(ctx)
+        supabase = rag_service.supabase_client.client
+
+        # Get embedding service for query
+        embedding_service = get_embedding_service()
+
+        # Create embedding for the query
+        logger.debug(f"Creating embedding for query: {query}")
+        query_embedding = embedding_service.create_embedding(query)
+
+        # Fetch all table_metadata with embeddings
+        try:
+            # Test connection first
+            supabase.table("table_metadata").select("table_name").limit(1).execute()
+
+            # Get all table metadata with embeddings
+            result = (
+                supabase.table("table_metadata")
+                .select("table_name, description, embedding")
+                .execute()
+            )
+
+            if not result.data:
+                return json.dumps(
+                    {
+                        "error": "No table metadata found",
+                        "message": "Table metadata not initialized",
+                    }
+                )
+
+        except Exception as conn_error:
+            if (
+                "connection" in str(conn_error).lower()
+                or "timeout" in str(conn_error).lower()
+            ):
+                return json.dumps(
+                    {
+                        "error": "Database connection failed",
+                        "message": "Unable to connect to knowledge base. Please try again later.",
+                        "retry_after": 5,
+                    }
+                )
+            raise
+
+        # Calculate cosine similarity for each table
+        scored_tables = []
+        query_embedding_np = np.array(query_embedding)
+
+        for table_info in result.data:
+            if not table_info.get("embedding"):
+                logger.warning(f"No embedding for table {table_info['table_name']}")
+                continue
+
+            # Calculate cosine similarity
+            # Parse embedding if it's a string (Supabase returns vector as string)
+            embedding_data = table_info["embedding"]
+            if isinstance(embedding_data, str):
+                # Parse the string representation of the vector
+                import ast
+
+                embedding_data = ast.literal_eval(embedding_data)
+            table_embedding_np = np.array(embedding_data, dtype=np.float32)
+
+            # Cosine similarity = dot product / (norm1 * norm2)
+            dot_product = np.dot(query_embedding_np, table_embedding_np)
+            norm_query = np.linalg.norm(query_embedding_np)
+            norm_table = np.linalg.norm(table_embedding_np)
+
+            if norm_query > 0 and norm_table > 0:
+                similarity = dot_product / (norm_query * norm_table)
+            else:
+                similarity = 0.0
+
+            # Only include tables with meaningful similarity (threshold: 0.3)
+            if similarity > 0.3:
+                scored_tables.append(
+                    {
+                        "table_name": table_info["table_name"],
+                        "description": table_info["description"],
+                        "similarity_score": float(
+                            similarity
+                        ),  # Convert numpy float to Python float
+                    }
+                )
+
+        # Sort by similarity score
+        scored_tables.sort(key=lambda x: x["similarity_score"], reverse=True)
+
+        # Return top 2 relevant tables with simplified format
+        top_tables = scored_tables[:2]  # Only top 2
+
+        # Format response with just table name and description
+        results = []
+        for table in top_tables:
+            results.append(
+                {"table": table["table_name"], "description": table["description"]}
+            )
+
+        return json.dumps(results, indent=2)
+
+    except Exception as e:
+        logger.error(f"Error finding relevant tables: {e}")
+        return json.dumps({"error": "Database error", "message": str(e)})
+
+
+async def get_table_schemas(
+    ctx: RunContext[PulsePalDependencies],
+    tables: List[str],
+) -> str:
+    """
+    Get detailed schema information for specific tables.
+
+    This is the second step - after identifying relevant tables, get their
+    complete schema including columns, data types, and constraints.
+
+    Args:
+        tables: List of table names to get schemas for
+
+    Returns:
+        JSON with detailed schema information for each table
+
+    Examples:
+        - ['api_reference'] → columns, types, constraints for api_reference
+        - ['pulseq_sequences', 'sequence_chunks'] → schemas for both tables
+    """
+    import json
+
+    if not tables or not isinstance(tables, list):
+        return json.dumps(
+            {"error": "Invalid input", "message": "Tables must be a non-empty list"}
+        )
+
+    # Validate table names to prevent SQL injection
+    valid_tables = [
+        "api_reference",
+        "pulseq_sequences",
+        "sequence_chunks",
+        "crawled_code",
+        "crawled_docs",
+        "sources",
+        "crawled_pages",
+    ]
+
+    invalid_tables = [t for t in tables if t not in valid_tables]
+    if invalid_tables:
+        return json.dumps(
+            {
+                "error": "Invalid table names",
+                "message": f"Unknown tables: {invalid_tables}",
+                "valid_tables": valid_tables,
+            }
+        )
+
+    try:
+        schemas = {}
+
+        # Get RAG service with proper error handling
+        rag_service = await get_rag_service(ctx)
+
+        try:
+            supabase = rag_service.supabase_client.client
+
+            # Test connection first
+            supabase.table("table_metadata").select("table_name").limit(1).execute()
+        except Exception as conn_error:
+            if (
+                "connection" in str(conn_error).lower()
+                or "timeout" in str(conn_error).lower()
+            ):
+                return json.dumps(
+                    {
+                        "error": "Database connection failed",
+                        "message": "Unable to connect to knowledge base. Please try again later.",
+                        "retry_after": 5,
+                    }
+                )
+            raise
+
+        for table_name in tables:
+            # Get metadata description
+            metadata_result = (
+                supabase.table("table_metadata")
+                .select("column_summary, description")
+                .eq("table_name", table_name)
+                .execute()
+            )
+
+            table_description = ""
+            column_summary = ""
+            if metadata_result.data and len(metadata_result.data) > 0:
+                table_description = metadata_result.data[0].get("description", "")
+                column_summary = metadata_result.data[0].get("column_summary", "")
+
+            # Parse column summary into structured format
+            columns = []
+            if column_summary:
+                for col_info in column_summary.split(", "):
+                    if col_info:
+                        columns.append(
+                            {
+                                "column_name": col_info.strip(),
+                                "description": f"Column: {col_info.strip()}",
+                            }
+                        )
+
+            schemas[table_name] = {
+                "table_name": table_name,
+                "description": table_description,
+                "columns": columns,
+                "column_count": len(columns),
+            }
+
+        return json.dumps({"tables_requested": tables, "schemas": schemas}, indent=2)
+
+    except Exception as e:
+        logger.error(f"Error getting table schemas: {e}")
+        return json.dumps({"error": "Database error", "message": str(e)})
+
+
+async def get_distinct_values(
+    ctx: RunContext[PulsePalDependencies],
+    table: str,
+    column: str,
+    limit: int = 100,
+) -> str:
+    """
+    Get all distinct values from a specific column in a table.
+
+    This tool enables complete enumeration of categorical data, solving the
+    "list all X" problem that text search cannot handle effectively.
+
+    Args:
+        table: Table name to query
+        column: Column name to get distinct values from
+        limit: Maximum number of distinct values to return (default 100)
+
+    Returns:
+        JSON with complete list of distinct values and count
+
+    Examples:
+        - table='pulseq_sequences', column='trajectory_type' → all trajectory types
+        - table='api_reference', column='class_name' → all class names
+        - table='pulseq_sequences', column='sequence_family' → all sequence families
+    """
+    import json
+
+    # Input validation
+    if not table or not isinstance(table, str):
+        return json.dumps(
+            {"error": "Invalid table", "message": "Table must be a non-empty string"}
+        )
+
+    if not column or not isinstance(column, str):
+        return json.dumps(
+            {"error": "Invalid column", "message": "Column must be a non-empty string"}
+        )
+
+    # Validate table name to prevent SQL injection
+    valid_tables = [
+        "api_reference",
+        "pulseq_sequences",
+        "sequence_chunks",
+        "crawled_code",
+        "crawled_docs",
+        "sources",
+        "crawled_pages",
+    ]
+
+    if table not in valid_tables:
+        return json.dumps(
+            {
+                "error": "Invalid table name",
+                "message": f"Table '{table}' is not valid",
+                "valid_tables": valid_tables,
+            }
+        )
+
+    # Validate column name using our secure validator
+    if not validate_database_identifier(column, "column"):
+        return json.dumps(
+            {
+                "error": "Invalid column name",
+                "message": "Column name contains invalid characters or is a reserved keyword",
+            }
+        )
+
+    # Validate limit
+    if not isinstance(limit, int) or limit < 1:
+        limit = 100
+    elif limit > 1000:
+        limit = 1000  # Cap at reasonable maximum
+
+    try:
+        # Get RAG service with proper error handling
+        rag_service = await get_rag_service(ctx)
+
+        try:
+            supabase = rag_service.supabase_client.client
+
+            # Test connection first
+            supabase.table("table_metadata").select("table_name").limit(1).execute()
+        except Exception as conn_error:
+            if (
+                "connection" in str(conn_error).lower()
+                or "timeout" in str(conn_error).lower()
+            ):
+                return json.dumps(
+                    {
+                        "error": "Database connection failed",
+                        "message": "Unable to connect to knowledge base. Please try again later.",
+                        "retry_after": 5,
+                    }
+                )
+            raise
+
+        # Use the new server-side RPC function for efficient DISTINCT query
+        result = supabase.rpc(
+            "get_distinct_column_values",
+            {"p_table_name": table, "p_column_name": column, "p_limit": limit},
+        ).execute()
+
+        if not result.data:
+            return json.dumps(
+                {
+                    "table": table,
+                    "column": column,
+                    "distinct_values": [],
+                    "count": 0,
+                    "message": "No data found",
+                }
+            )
+
+        # Parse the RPC function result
+        rpc_result = result.data
+
+        # Check if there was an error in the RPC function
+        if isinstance(rpc_result, dict) and rpc_result.get("error"):
+            return json.dumps(
+                {
+                    "error": "Database error",
+                    "message": rpc_result.get("message", "Unknown error"),
+                    "table": table,
+                    "column": column,
+                }
+            )
+
+        # Extract values from the RPC result
+        distinct_values = rpc_result.get("values", [])
+        total_count = rpc_result.get("count", 0)
+        was_limited = rpc_result.get("limited", False)
+
+        return json.dumps(
+            {
+                "table": table,
+                "column": column,
+                "distinct_values": distinct_values,
+                "count": total_count,
+                "limited_to": limit if was_limited else None,
+            },
+            indent=2,
+        )
+
+    except Exception as e:
+        logger.error(f"Error getting distinct values from {table}.{column}: {e}")
+        return json.dumps(
+            {
+                "error": "Database error",
+                "message": str(e),
+                "table": table,
+                "column": column,
+            }
+        )
