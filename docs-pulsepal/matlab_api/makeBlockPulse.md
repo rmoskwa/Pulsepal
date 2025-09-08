@@ -12,19 +12,21 @@ function [rf, delay] = makeBlockPulse(flip,varargin)
 
 ```matlab
 mr.makeBlockPulse(...)
+mr.makeBlockPulse('ParameterName', value, ...)
 ```
 
 ## Parameters
 
+This function accepts both positional parameters and name-value pairs.
+
 ### Required Parameters
 
-| Name | Type | Description | Example | Units |
+| Parameter Name | Value Type | Description | Example | Units |
 |------|------|-------------|---------|-------|
 | `flip` | double | The flip angle of the RF pulse. | `pi/2` | radians |
 
-### Optional Parameters
-
-| Name | Type | Default | Description | Example |
+### Name-Value Pair Arguments
+| Parameter Name (string) | Value Type | Default | Description | Example |
 |------|------|---------|-------------|---------|
 | `system` | struct | `[]` | System parameters structure (e.g., mr.opts()).  Provides parameters like rfRasterTime, rfDeadTime, rfRingdownTime needed for pulse generation. If empty, default system parameters are used. | `mr.opts()` |
 | `duration` | double | `0` | Duration of the RF pulse. If 0, it will be calculated from bandwidth or timeBwProduct. (Units: seconds) | `0.004` |
@@ -42,7 +44,7 @@ mr.makeBlockPulse(...)
 
 ## Returns
 
-| Output | Type | Description |
+| Output | Value Type | Description |
 |--------|------|-------------|
 | `rf` | struct | Pulseq RF pulse object containing the generated RF pulse parameters. |
 | `delay` | struct | Pulseq delay object accounting for RF ringdown time. |

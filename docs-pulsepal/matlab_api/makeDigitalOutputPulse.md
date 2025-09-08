@@ -12,19 +12,21 @@ function trig = makeDigitalOutputPulse(channel, varargin)
 
 ```matlab
 mr.makeDigitalOutputPulse(...)
+mr.makeDigitalOutputPulse('ParameterName', value, ...)
 ```
 
 ## Parameters
 
+This function accepts both positional parameters and name-value pairs.
+
 ### Required Parameters
 
-| Name | Type | Description | Example | Units |
+| Parameter Name | Value Type | Description | Example | Units |
 |------|------|-------------|---------|-------|
 | `channel` | char | Specifies the output channel for the trigger.  Valid values are 'osc0', 'osc1', and 'ext1'. | `'osc0'` |  |
 
-### Optional Parameters
-
-| Name | Type | Default | Description | Example |
+### Name-Value Pair Arguments
+| Parameter Name (string) | Value Type | Default | Description | Example |
 |------|------|---------|-------------|---------|
 | `delay` | double | `0` | Specifies the delay before the trigger starts, in seconds. (Units: seconds) | `0.001` |
 | `duration` | double | `0` | Specifies the duration of the trigger pulse, in seconds. If smaller than the system's gradRasterTime, it is set to gradRasterTime. (Units: seconds) | `0.002` |
@@ -32,7 +34,7 @@ mr.makeDigitalOutputPulse(...)
 
 ## Returns
 
-| Output | Type | Description |
+| Output | Value Type | Description |
 |--------|------|-------------|
 | `trig` | struct | A structure containing the trigger parameters: type ('output'), channel, delay, and duration. |
 

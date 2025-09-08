@@ -12,19 +12,21 @@ function [rf, gz, gzr, delay] = makeSincPulse(flip,varargin)
 
 ```matlab
 mr.makeSincPulse(...)
+mr.makeSincPulse('ParameterName', value, ...)
 ```
 
 ## Parameters
 
+This function accepts both positional parameters and name-value pairs.
+
 ### Required Parameters
 
-| Name | Type | Description | Example | Units |
+| Parameter Name | Value Type | Description | Example | Units |
 |------|------|-------------|---------|-------|
 | `flip` | double | Desired flip angle of the RF pulse. | `pi/2` | radians |
 
-### Optional Parameters
-
-| Name | Type | Default | Description | Example |
+### Name-Value Pair Arguments
+| Parameter Name (string) | Value Type | Default | Description | Example |
 |------|------|---------|-------------|---------|
 | `system` | struct | `[]` | System limits struct (e.g., from mr.opts()). If empty, uses default system parameters. | `mr.opts()` |
 | `duration` | double | `0` | Duration of the sinc pulse. (Units: seconds) | `0.004` |
@@ -44,7 +46,7 @@ mr.makeSincPulse(...)
 
 ## Returns
 
-| Output | Type | Description |
+| Output | Value Type | Description |
 |--------|------|-------------|
 | `rf` | struct | Structure containing the RF pulse waveform. |
 | `gz` | struct | Structure containing the slice-selection gradient waveform (optional). |

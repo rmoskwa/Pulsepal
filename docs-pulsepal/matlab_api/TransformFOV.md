@@ -12,25 +12,26 @@ function obj = TransformFOV(varargin)
 
 ```matlab
 tra = mr.TransformFOV(...)
+tra = mr.TransformFOV('ParameterName', value, ...)
 ```
 
 ## Parameters
 
+This function accepts both positional parameters and name-value pairs.
 
-### Optional Parameters
-
-| Name | Type | Default | Description | Example |
+### Name-Value Pair Arguments
+| Parameter Name (string) | Value Type | Default | Description | Example |
 |------|------|---------|-------------|---------|
-| `rotation` | double | `[]` | A 3x3 rotation matrix defining the rotation of the FOV.  An empty matrix indicates no rotation. (Units: radians) | `[1 0 0; 0 1 0; 0 0 1]` |
-| `translation` | double | `[]` | A 1x3 vector representing the translation of the FOV. An empty matrix indicates no translation. (Units: meters) | `[0.01 0 0]` |
+| `'rotation'` | double | `[]` | A 3x3 rotation matrix defining the rotation of the FOV.  An empty matrix indicates no rotation. (Units: radians) | `[1 0 0; 0 1 0; 0 0 1]` |
+| `'translation'` | double | `[]` | A 1x3 vector representing the translation of the FOV. An empty matrix indicates no translation. (Units: meters) | `[0.01 0 0]` |
 | `scale` | double | `[]` | A 1x3 vector defining scaling factors along each axis. An empty matrix indicates no scaling. | `[1 1 1]` |
-| `prior_phase_cycle` | double | `0` | An integer representing a prior phase cycle to be applied before the transformation. Typically used for k-space trajectory calculations. | `0` |
+| `'prior_phase_cycle'` | double | `0` | An integer representing a prior phase cycle to be applied before the transformation. Typically used for k-space trajectory calculations. | `0` |
 | `high_accuracy` | logical | `false` | A logical flag indicating whether to use a high-accuracy transformation algorithm (currently commented out). | `true` |
-| `system` | struct | `[]` | A structure containing system parameters (e.g., gradient limits, slew rates). If empty, default system parameters are used. | `mr.opts()` |
+| `'system'` | struct | `[]` | A structure containing system parameters (e.g., gradient limits, slew rates). If empty, default system parameters are used. | `mr.opts()` |
 
 ## Returns
 
-| Output | Type | Description |
+| Output | Value Type | Description |
 |--------|------|-------------|
 | `obj` | struct | A structure containing the transformation parameters and possibly the transformed sequence data. |
 

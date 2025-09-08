@@ -12,22 +12,23 @@ function soundData=sound(varargin)
 
 ```matlab
 seq.sound(...)
+seq.sound('ParameterName', value, ...)
 ```
 
 ## Parameters
 
+This function accepts both positional parameters and name-value pairs.
 
-### Optional Parameters
-
-| Name | Type | Default | Description | Example |
+### Name-Value Pair Arguments
+| Parameter Name (string) | Value Type | Default | Description | Example |
 |------|------|---------|-------------|---------|
-| `blockRange` | double | `[1 inf]` | Specifies the range of blocks in the sequence to play.  Defaults to playing all blocks. Valid values: A two-element numeric vector [start_block end_block].  end_block can be Inf to indicate the end of the sequence. | `[5, 10]` |
-| `channelWeights` | double | `[1 1 1]` | Specifies the weights for the three channels (x, y, z). These weights scale the amplitudes of the corresponding channel waveforms before combining them for playback. Valid values: A three-element numeric vector [weight_x weight_y weight_z]. | `[0.8, 1.2, 0.5]` |
-| `onlyProduceSoundData` | logical | `false` | If true, the function only produces the sound data without actually playing it. This is useful if you want to process or save the sound data before playback. Valid values: true or false | `true` |
+| `'blockRange'` | double | `[1 inf]` | Specifies the range of blocks in the sequence to play.  Defaults to playing all blocks. Valid values: A two-element numeric vector [start_block end_block].  end_block can be Inf to indicate the end of the sequence. | `[5, 10]` |
+| `'channelWeights'` | double | `[1 1 1]` | Specifies the weights for the three channels (x, y, z). These weights scale the amplitudes of the corresponding channel waveforms before combining them for playback. Valid values: A three-element numeric vector [weight_x weight_y weight_z]. | `[0.8, 1.2, 0.5]` |
+| `'onlyProduceSoundData'` | logical | `false` | If true, the function only produces the sound data without actually playing it. This is useful if you want to process or save the sound data before playback. Valid values: true or false | `true` |
 
 ## Returns
 
-| Output | Type | Description |
+| Output | Value Type | Description |
 |--------|------|-------------|
 | `soundData` | double | A 2xN matrix containing the processed sound data for two channels.  Each column represents a sample.  If onlyProduceSoundData is true, this is the only output. |
 

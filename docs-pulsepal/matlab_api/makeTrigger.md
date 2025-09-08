@@ -12,19 +12,21 @@ function trig = makeTrigger(channel, varargin)
 
 ```matlab
 mr.makeTrigger(...)
+mr.makeTrigger('ParameterName', value, ...)
 ```
 
 ## Parameters
 
+This function accepts both positional parameters and name-value pairs.
+
 ### Required Parameters
 
-| Name | Type | Description | Example | Units |
+| Parameter Name | Value Type | Description | Example | Units |
 |------|------|-------------|---------|-------|
 | `channel` | char | The channel to use for the trigger.  Valid values are 'physio1' and 'physio2' (Siemens-specific). | `'physio1'` |  |
 
-### Optional Parameters
-
-| Name | Type | Default | Description | Example |
+### Name-Value Pair Arguments
+| Parameter Name (string) | Value Type | Default | Description | Example |
 |------|------|---------|-------------|---------|
 | `delay` | double | `0` | The delay (in seconds) before the trigger event starts. (Units: seconds) | `0.001` |
 | `duration` | double | `0` | The duration (in seconds) of the trigger event.  If shorter than the system's gradient raster time, it is automatically adjusted to match the raster time. (Units: seconds) | `0.005` |
@@ -32,7 +34,7 @@ mr.makeTrigger(...)
 
 ## Returns
 
-| Output | Type | Description |
+| Output | Value Type | Description |
 |--------|------|-------------|
 | `trig` | struct | A structure defining the trigger event. Contains fields: type ('trigger'), channel (the selected channel), delay (delay before trigger), and duration (duration of trigger). |
 

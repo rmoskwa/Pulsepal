@@ -12,26 +12,26 @@ function [varargout] = splitGradientAt(grad, timepoint, varargin)
 
 ```matlab
 mr.splitGradientAt(...)
+mr.splitGradientAt('ParameterName', value, ...)
 ```
 
 ## Parameters
 
 ### Required Parameters
 
-| Name | Type | Description | Example | Units |
+| Parameter Name | Value Type | Description | Example | Units |
 |------|------|-------------|---------|-------|
 | `grad` | struct | Structure representing the gradient waveform to be split.  This structure contains fields like 'type' ('grad' or 'trap'), 'tt' (time points), 'waveform' (amplitude values), 'channel', and 'delay'. | `{type:'trap', tt:[0 1 2 3], waveform:[0 100 100 0], channel:'x', delay:0}` |  |
 | `timepoint` | double | Time point (in seconds) at which to split the gradient waveform. | `0.002` | seconds |
 
-### Optional Parameters
-
-| Name | Type | Default | Description | Example |
+### Name-Value Pair Arguments
+| Parameter Name (string) | Value Type | Default | Description | Example |
 |------|------|---------|-------------|---------|
 | `system` | struct | `[]` | Structure containing system parameters, such as `gradRasterTime`. If not provided, default system parameters are used (via `mr.opts()`). Valid values: A structure with fields such as `gradRasterTime`. | `mr.opts()` |
 
 ## Returns
 
-| Output | Type | Description |
+| Output | Value Type | Description |
 |--------|------|-------------|
 | `grads` | cell | Cell array containing the two resulting gradient structures. If nargout == 1, it returns a single cell array with both gradients. If nargout > 1, it returns each gradient separately. |
 

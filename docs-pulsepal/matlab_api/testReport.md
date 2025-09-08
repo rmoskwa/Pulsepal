@@ -12,20 +12,19 @@ function [ report ] = testReport(varargin )
 
 ```matlab
 seq.testReport(...)
+seq.testReport('ParameterName', value, ...)
 ```
 
 ## Parameters
 
-
-### Optional Parameters
-
-| Name | Type | Default | Description | Example |
+### Name-Value Pair Arguments
+| Parameter Name (string) | Value Type | Default | Description | Example |
 |------|------|---------|-------------|---------|
 | `system` | struct | `struct([])` | A structure containing MR system specifications to compare against. If omitted, no system-specific checks are performed. Valid values: A structure with fields representing system limits (e.g., gradient limits, slew rate limits, etc.). The exact fields depend on the specific tests performed by the function. | `{ 'maxGrad': 40, 'maxSlew': 120 }` |
 
 ## Returns
 
-| Output | Type | Description |
+| Output | Value Type | Description |
 |--------|------|-------------|
 | `report` | string | A text string containing the analysis report of the input Pulseq sequence. |
 

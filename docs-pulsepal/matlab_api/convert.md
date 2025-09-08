@@ -12,27 +12,29 @@ function out=convert(in,varargin)
 
 ```matlab
 mr.convert(...)
+mr.convert('ParameterName', value, ...)
 ```
 
 ## Parameters
 
+This function accepts both positional parameters and name-value pairs.
+
 ### Required Parameters
 
-| Name | Type | Description | Example | Units |
+| Parameter Name | Value Type | Description | Example | Units |
 |------|------|-------------|---------|-------|
 | `in` | double | The numerical data to be converted. The units of this data are specified by the 'fromUnit' parameter. | `1000` | varies |
 | `fromUnit` | char | A string specifying the units of the input data 'in'. | `'mT/m'` |  |
 
-### Optional Parameters
-
-| Name | Type | Default | Description | Example |
+### Name-Value Pair Arguments
+| Parameter Name (string) | Value Type | Default | Description | Example |
 |------|------|---------|-------------|---------|
 | `toUnit` | char | `[]` | A string specifying the desired units for the output data. If omitted, a default unit is chosen based on 'fromUnit'. Valid values: 'Hz', 'T', 'mT', 'uT', 'Hz/m', 'mT/m', 'rad/ms/mm', 'Hz/m/s', 'mT/m/ms', 'T/m/s', 'rad/ms/mm/ms' | `'Hz/m'` |
-| `gamma` | double | `42.576e6` | The gyromagnetic ratio, used for conversions involving magnetic field strength. Defaults to 42.576 MHz/T (for protons). (Units: Hz/T) | `42.577e6` |
+| `'gamma'` | double | `42.576e6` | The gyromagnetic ratio, used for conversions involving magnetic field strength. Defaults to 42.576 MHz/T (for protons). (Units: Hz/T) | `42.577e6` |
 
 ## Returns
 
-| Output | Type | Description |
+| Output | Value Type | Description |
 |--------|------|-------------|
 | `out` | double | The converted numerical data in the specified 'toUnit' units. |
 

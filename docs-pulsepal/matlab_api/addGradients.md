@@ -12,27 +12,29 @@ function grad = addGradients(grads, varargin)
 
 ```matlab
 mr.addGradients(...)
+mr.addGradients('ParameterName', value, ...)
 ```
 
 ## Parameters
 
+This function accepts both positional parameters and name-value pairs.
+
 ### Required Parameters
 
-| Name | Type | Description | Example | Units |
+| Parameter Name | Value Type | Description | Example | Units |
 |------|------|-------------|---------|-------|
 | `grads` | cell | A cell array containing multiple gradient waveforms. Each element of the cell array should be a structure representing a single gradient waveform (e.g., as created by `makeTrapezoid`).  These structures must have at least 'channel', 'delay', and 'type' fields. | `{g1, g2, g3}` |  |
 
-### Optional Parameters
-
-| Name | Type | Default | Description | Example |
+### Name-Value Pair Arguments
+| Parameter Name (string) | Value Type | Default | Description | Example |
 |------|------|---------|-------------|---------|
 | `system` | struct | `[]` | A structure containing system parameters, typically obtained from `mr.opts()`.  If not provided, `mr.opts()` is used to get default system parameters.  Relevant fields include `maxSlew` and `maxGrad`. | `mr.opts()` |
-| `maxGrad` | double | `0` | Maximum gradient amplitude. If set to a value greater than 0, it overrides the `maxGrad` value from the `system` parameter. (Units: Hz/m) | `400` |
-| `maxSlew` | double | `0` | Maximum gradient slew rate. If set to a value greater than 0, it overrides the `maxSlew` value from the `system` parameter. (Units: Hz/m/s) | `20000` |
+| `'maxGrad'` | double | `0` | Maximum gradient amplitude. If set to a value greater than 0, it overrides the `maxGrad` value from the `system` parameter. (Units: Hz/m) | `400` |
+| `'maxSlew'` | double | `0` | Maximum gradient slew rate. If set to a value greater than 0, it overrides the `maxSlew` value from the `system` parameter. (Units: Hz/m/s) | `20000` |
 
 ## Returns
 
-| Output | Type | Description |
+| Output | Value Type | Description |
 |--------|------|-------------|
 | `grad` | struct | A structure representing the resulting superimposed gradient waveform. |
 

@@ -12,19 +12,21 @@ function [rf, gz, gzr, delay] = makeGaussPulse(flip,varargin)
 
 ```matlab
 mr.makeGaussPulse(...)
+mr.makeGaussPulse('ParameterName', value, ...)
 ```
 
 ## Parameters
 
+This function accepts both positional parameters and name-value pairs.
+
 ### Required Parameters
 
-| Name | Type | Description | Example | Units |
+| Parameter Name | Value Type | Description | Example | Units |
 |------|------|-------------|---------|-------|
 | `flip` | double | Desired flip angle of the RF pulse. | `pi/2` | radians |
 
-### Optional Parameters
-
-| Name | Type | Default | Description | Example |
+### Name-Value Pair Arguments
+| Parameter Name (string) | Value Type | Default | Description | Example |
 |------|------|---------|-------------|---------|
 | `system` | struct | `[]` | Pulseq system structure containing hardware parameters (e.g., from mr.opts()). If empty, uses default system parameters. | `mr.opts()` |
 | `duration` | double | `0` | Duration of the RF pulse. (Units: seconds) | `0.004` |
@@ -45,7 +47,7 @@ mr.makeGaussPulse(...)
 
 ## Returns
 
-| Output | Type | Description |
+| Output | Value Type | Description |
 |--------|------|-------------|
 | `rf` | struct | Pulseq RF pulse definition. |
 | `gz` | struct | Pulseq slice selection gradient definition. |

@@ -12,19 +12,21 @@ function [rf, gz, gzr, delay] = makeAdiabaticPulse(type,varargin)
 
 ```matlab
 mr.makeAdiabaticPulse(...)
+mr.makeAdiabaticPulse('ParameterName', value, ...)
 ```
 
 ## Parameters
 
+This function accepts both positional parameters and name-value pairs.
+
 ### Required Parameters
 
-| Name | Type | Description | Example | Units |
+| Parameter Name | Value Type | Description | Example | Units |
 |------|------|-------------|---------|-------|
 | `type` | string | Specifies the type of adiabatic pulse to generate.  Must be either 'hypsec' or 'wurst'. | `'hypsec'` |  |
 
-### Optional Parameters
-
-| Name | Type | Default | Description | Example |
+### Name-Value Pair Arguments
+| Parameter Name (string) | Value Type | Default | Description | Example |
 |------|------|---------|-------------|---------|
 | `system` | struct | `[]` | System parameters (e.g., from mr.opts()).  Provides system limits for gradient waveforms (if maxGrad and maxSlew are not specified). | `mr.opts()` |
 | `duration` | double | `10e-3` | Total duration of the pulse. (Units: seconds) | `0.01` |
@@ -47,7 +49,7 @@ mr.makeAdiabaticPulse(...)
 
 ## Returns
 
-| Output | Type | Description |
+| Output | Value Type | Description |
 |--------|------|-------------|
 | `rf` | struct | Pulseq RF waveform structure. |
 | `gz` | struct | Pulseq slice-select gradient waveform structure. |

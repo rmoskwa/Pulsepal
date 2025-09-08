@@ -12,29 +12,31 @@ function varargout=addRamps(k,varargin)
 
 ```matlab
 mr.addRamps(...)
+mr.addRamps('ParameterName', value, ...)
 ```
 
 ## Parameters
 
+This function accepts both positional parameters and name-value pairs.
+
 ### Required Parameters
 
-| Name | Type | Description | Example | Units |
+| Parameter Name | Value Type | Description | Example | Units |
 |------|------|-------------|---------|-------|
 | `k` | double|cell | The k-space trajectory.  Can be a numeric array (single trajectory) or a cell array of numeric arrays (multiple trajectories). Each column represents a time point. | `[1;2;3]` | 1/m |
 
-### Optional Parameters
-
-| Name | Type | Default | Description | Example |
+### Name-Value Pair Arguments
+| Parameter Name (string) | Value Type | Default | Description | Example |
 |------|------|---------|-------------|---------|
 | `system` | struct | `[]` | A structure containing system limits (e.g., maxGrad, maxSlew). If empty, defaults to mr.opts(). | `mr.opts()` |
-| `rf` | double | `[]` | An RF pulse shape. If provided, segments of zeros are added to match the duration of the added ramps. | `[0.5 0.5 0.5]` |
-| `maxGrad` | double | `0` | Maximum gradient amplitude. Overrides the value in the 'system' structure if greater than 0. (Units: Hz/m) | `30e6` |
-| `maxSlew` | double | `0` | Maximum gradient slew rate. Overrides the value in the 'system' structure if greater than 0. (Units: Hz/m/s) | `100e6` |
-| `gradOversampling` | logical | `false` | Logical flag indicating whether gradient oversampling is used during ramp calculation. | `true` |
+| `'rf'` | double | `[]` | An RF pulse shape. If provided, segments of zeros are added to match the duration of the added ramps. | `[0.5 0.5 0.5]` |
+| `'maxGrad'` | double | `0` | Maximum gradient amplitude. Overrides the value in the 'system' structure if greater than 0. (Units: Hz/m) | `30e6` |
+| `'maxSlew'` | double | `0` | Maximum gradient slew rate. Overrides the value in the 'system' structure if greater than 0. (Units: Hz/m/s) | `100e6` |
+| `'gradOversampling'` | logical | `false` | Logical flag indicating whether gradient oversampling is used during ramp calculation. | `true` |
 
 ## Returns
 
-| Output | Type | Description |
+| Output | Value Type | Description |
 |--------|------|-------------|
 | `varargout` | double|cell | The k-space trajectory with added ramps.  Returns a numeric array if input k was numeric; returns a cell array if input k was a cell array.  If 'rf' is provided, it also returns the extended RF pulse. |
 

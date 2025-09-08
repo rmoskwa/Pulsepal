@@ -12,27 +12,29 @@ function sd = makeSoftDelay(varargin)
 
 ```matlab
 mr.makeSoftDelay(...)
+mr.makeSoftDelay('ParameterName', value, ...)
 ```
 
 ## Parameters
 
+This function accepts both positional parameters and name-value pairs.
+
 ### Required Parameters
 
-| Name | Type | Description | Example | Units |
+| Parameter Name | Value Type | Description | Example | Units |
 |------|------|-------------|---------|-------|
 | `numID` | double | A numeric ID that uniquely identifies this soft delay event.  It's used to link this event to specific blocks within the sequence. | `1` |  |
 | `hint` | char | A string hint associated with the soft delay event. This hint should be unique for each numID to distinguish between different types of delays. | `TE_adjust` |  |
 
-### Optional Parameters
-
-| Name | Type | Default | Description | Example |
+### Name-Value Pair Arguments
+| Parameter Name (string) | Value Type | Default | Description | Example |
 |------|------|---------|-------------|---------|
 | `offset` | double | `0` | A constant offset added to the calculated delay duration.  This can be used to fine-tune the delay. Valid values: Any numeric value (positive or negative) (Units: seconds) | `0.001` |
 | `factor` | double | `1` | A scaling factor applied to the input value before adding the offset.  This allows for scaling of the delay. Valid values: Any numeric value (positive or negative) | `2` |
 
 ## Returns
 
-| Output | Type | Description |
+| Output | Value Type | Description |
 |--------|------|-------------|
 | `sd` | struct | A structure containing the parameters of the created soft delay event. This structure is then used with `Sequence.applySoftDelay()` to apply the delay to the sequence. |
 

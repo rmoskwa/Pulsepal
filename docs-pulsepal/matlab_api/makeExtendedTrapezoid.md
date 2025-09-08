@@ -12,31 +12,33 @@ function grad = makeExtendedTrapezoid(channel, varargin)
 
 ```matlab
 mr.makeExtendedTrapezoid(...)
+mr.makeExtendedTrapezoid('ParameterName', value, ...)
 ```
 
 ## Parameters
 
+This function accepts both positional parameters and name-value pairs.
+
 ### Required Parameters
 
-| Name | Type | Description | Example | Units |
+| Parameter Name | Value Type | Description | Example | Units |
 |------|------|-------------|---------|-------|
 | `channel` | char | The gradient channel ('x', 'y', or 'z') for the waveform. | `'x'` |  |
 
-### Optional Parameters
-
-| Name | Type | Default | Description | Example |
+### Name-Value Pair Arguments
+| Parameter Name (string) | Value Type | Default | Description | Example |
 |------|------|---------|-------------|---------|
-| `times` | double | `0` | A vector of time points specifying the instants at which the gradient amplitudes are defined. Valid values: Must be in ascending order, and all values must be distinct. The last time point must be on a gradient raster. (Units: seconds) | `[0, 0.001, 0.002, 0.003]` |
-| `amplitudes` | double | `0` | A vector of gradient amplitudes corresponding to the time points in 'times'. Valid values: Must have the same length as 'times'. (Units: Hz/m) | `[0, 1000, 1000, 0]` |
-| `system` | struct | `[]` | A structure containing system parameters (e.g., from mr.opts()). If empty, default system parameters are used. | `mr.opts()` |
-| `maxGrad` | double | `0` | Maximum gradient amplitude. If 0, the system's maxGrad is used. (Units: Hz/m) | `2000` |
-| `maxSlew` | double | `0` | Maximum gradient slew rate. If 0, the system's maxSlew is used. (Units: Hz/m/s) | `1000000` |
-| `skip_check` | logical | `false` | If true, skips checks for consistency between the first amplitude and the preceding block. Use with caution! | `true` |
-| `convert2arbitrary` | logical | `false` | If true, converts the gradient to an arbitrary gradient object, resampling it onto a regular grid based on the system's gradient raster time. If false, the gradient is defined with the specified possibly irregular sampling of `times`. | `true` |
+| `'times'` | double | `0` | A vector of time points specifying the instants at which the gradient amplitudes are defined. Valid values: Must be in ascending order, and all values must be distinct. The last time point must be on a gradient raster. (Units: seconds) | `[0, 0.001, 0.002, 0.003]` |
+| `'amplitudes'` | double | `0` | A vector of gradient amplitudes corresponding to the time points in 'times'. Valid values: Must have the same length as 'times'. (Units: Hz/m) | `[0, 1000, 1000, 0]` |
+| `'system'` | struct | `[]` | A structure containing system parameters (e.g., from mr.opts()). If empty, default system parameters are used. | `mr.opts()` |
+| `'maxGrad'` | double | `0` | Maximum gradient amplitude. If 0, the system's maxGrad is used. (Units: Hz/m) | `2000` |
+| `'maxSlew'` | double | `0` | Maximum gradient slew rate. If 0, the system's maxSlew is used. (Units: Hz/m/s) | `1000000` |
+| `'skip_check'` | logical | `false` | If true, skips checks for consistency between the first amplitude and the preceding block. Use with caution! | `true` |
+| `'convert2arbitrary'` | logical | `false` | If true, converts the gradient to an arbitrary gradient object, resampling it onto a regular grid based on the system's gradient raster time. If false, the gradient is defined with the specified possibly irregular sampling of `times`. | `true` |
 
 ## Returns
 
-| Output | Type | Description |
+| Output | Value Type | Description |
 |--------|------|-------------|
 | `grad` | struct | An arbitrary gradient object representing the extended trapezoid waveform.  The structure of this object depends on whether `convert2arbitrary` is true or false. |
 

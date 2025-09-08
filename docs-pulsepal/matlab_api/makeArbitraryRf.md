@@ -12,20 +12,22 @@ function [rf, gz, gzr, delay] = makeArbitraryRf(signal,flip,varargin)
 
 ```matlab
 mr.makeArbitraryRf(...)
+mr.makeArbitraryRf('ParameterName', value, ...)
 ```
 
 ## Parameters
 
+This function accepts both positional parameters and name-value pairs.
+
 ### Required Parameters
 
-| Name | Type | Description | Example | Units |
+| Parameter Name | Value Type | Description | Example | Units |
 |------|------|-------------|---------|-------|
 | `signal` | double | A complex-valued vector representing the desired RF pulse shape.  The amplitude of each element corresponds to the RF amplitude at a specific time point. The length of the vector determines the number of time points. | `[1+1i, 0.5+0.5i, 0, -0.5-0.5i, -1-1i]` |  |
 | `flip` | double | The desired flip angle of the RF pulse in radians. | `pi/2` | radians |
 
-### Optional Parameters
-
-| Name | Type | Default | Description | Example |
+### Name-Value Pair Arguments
+| Parameter Name (string) | Value Type | Default | Description | Example |
 |------|------|---------|-------------|---------|
 | `system` | struct | `[]` | A structure containing system parameters (e.g., from mr.opts()). If empty, default system parameters are used. | `mr.opts()` |
 | `freqOffset` | double | `0` | Frequency offset of the RF pulse in Hz. (Units: Hz) | `100` |
@@ -44,7 +46,7 @@ mr.makeArbitraryRf(...)
 
 ## Returns
 
-| Output | Type | Description |
+| Output | Value Type | Description |
 |--------|------|-------------|
 | `rf` | struct | A structure containing the RF pulse parameters (signal, timing, frequency/phase offsets, deadtime, ringdownTime, delay, and use). |
 | `gz` | struct | A structure containing the slice-selective gradient waveform (if bandwidth and sliceThickness are specified). |

@@ -12,25 +12,25 @@ function [grads] = splitGradient(grad, varargin)
 
 ```matlab
 mr.splitGradient(...)
+mr.splitGradient('ParameterName', value, ...)
 ```
 
 ## Parameters
 
 ### Required Parameters
 
-| Name | Type | Description | Example | Units |
+| Parameter Name | Value Type | Description | Example | Units |
 |------|------|-------------|---------|-------|
 | `grad` | struct | A structure representing a trapezoidal gradient.  This structure must contain fields defining the gradient's amplitude, rise time, flat time, fall time, delay, and channel ('x','y','z').  It should be created using functions such as `mr.makeTrapezoid`. | `mr.makeTrapezoid('x', 10, 0.001, 0.002, 0.001, 0)` |  |
 
-### Optional Parameters
-
-| Name | Type | Default | Description | Example |
+### Name-Value Pair Arguments
+| Parameter Name (string) | Value Type | Default | Description | Example |
 |------|------|---------|-------------|---------|
 | `system` | struct | `[]` | A structure containing system parameters (e.g., gradient raster time). If omitted, default system parameters are used from `mr.opts()`. Valid values: A valid mr.opts structure | `mr.opts()` |
 
 ## Returns
 
-| Output | Type | Description |
+| Output | Value Type | Description |
 |--------|------|-------------|
 | `grads` | struct | An array of three extended trapezoid gradient structures: slew-up, flat-top, and slew-down gradients. |
 

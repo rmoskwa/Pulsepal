@@ -12,19 +12,21 @@ function adc=makeAdc(num,varargin)
 
 ```matlab
 mr.makeAdc(...)
+mr.makeAdc('ParameterName', value, ...)
 ```
 
 ## Parameters
 
+This function accepts both positional parameters and name-value pairs.
+
 ### Required Parameters
 
-| Name | Type | Description | Example | Units |
+| Parameter Name | Value Type | Description | Example | Units |
 |------|------|-------------|---------|-------|
 | `num` | double | The number of samples to be acquired by the ADC. | `1024` |  |
 
-### Optional Parameters
-
-| Name | Type | Default | Description | Example |
+### Name-Value Pair Arguments
+| Parameter Name (string) | Value Type | Default | Description | Example |
 |------|------|---------|-------------|---------|
 | `system` | struct | `[]` | A structure containing system parameters.  If not provided, default system parameters are used.  Should contain the field `adcDeadTime` (in seconds). | `mr.opts()` |
 | `dwell` | double | `0` | The dwell time (sampling interval) in seconds.  Must be specified if `duration` is not. Valid values: dwell > 0 (Units: seconds) | `0.000004` |
@@ -38,7 +40,7 @@ mr.makeAdc(...)
 
 ## Returns
 
-| Output | Type | Description |
+| Output | Value Type | Description |
 |--------|------|-------------|
 | `adc` | struct | A structure containing the ADC readout parameters.  Fields include: `type`, `numSamples`, `dwell`, `delay`, `freqOffset`, `phaseOffset`, `freqPPM`, `phasePPM`, `deadTime`, `duration`, and `phaseModulation`. |
 

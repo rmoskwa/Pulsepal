@@ -12,19 +12,21 @@ function [rf, gz, gzr, delay] = makeSLRpulse(flip,varargin)
 
 ```matlab
 mr.makeSLRpulse(...)
+mr.makeSLRpulse('ParameterName', value, ...)
 ```
 
 ## Parameters
 
+This function accepts both positional parameters and name-value pairs.
+
 ### Required Parameters
 
-| Name | Type | Description | Example | Units |
+| Parameter Name | Value Type | Description | Example | Units |
 |------|------|-------------|---------|-------|
 | `flip` | double | The desired flip angle of the RF pulse. | `pi/2` | radians |
 
-### Optional Parameters
-
-| Name | Type | Default | Description | Example |
+### Name-Value Pair Arguments
+| Parameter Name (string) | Value Type | Default | Description | Example |
 |------|------|---------|-------------|---------|
 | `system` | struct | `[]` | A structure containing system parameters (e.g., from mr.opts()).  If empty, default parameters will be used. | `mr.opts()` |
 | `duration` | double | `1e-3` | The duration of the RF pulse. (Units: seconds) | `0.004` |
@@ -48,7 +50,7 @@ mr.makeSLRpulse(...)
 
 ## Returns
 
-| Output | Type | Description |
+| Output | Value Type | Description |
 |--------|------|-------------|
 | `rf` | struct | The designed RF pulse (Pulseq sequence). |
 | `gz` | struct | The slice-selective gradient (Pulseq sequence). |
