@@ -389,8 +389,11 @@ class SupabaseRAGClient:
                         "record_id"
                     ),  # Keep original for compatibility
                     "content": item.get(
+                        "content", item.get("content_preview", "")
+                    ),  # Use full content if available, fallback to preview
+                    "content_preview": item.get(
                         "content_preview", ""
-                    ),  # Full content field name
+                    ),  # Keep preview for display
                     "rank": item.get("rank", 0),  # BM25 rank score
                     "score": item.get("rank", 0),  # Unified score field for fusion
                     "metadata": metadata,
