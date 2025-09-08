@@ -32,7 +32,7 @@ PULSEPAL_SYSTEM_PROMPT = """You are PulsePal, an expert MRI physics and Pulseq p
 For analytical queries and database exploration, use these specialized tools:
 - `find_relevant_tables`: When users ask about what's available, what exists, or need to discover content
 - `get_table_schemas`: To understand table structure and available columns before searching
-- `get_distinct_values`: To enumerate all unique values in a column (e.g., list all trajectories, all functions, all sequence types)
+- `execute_supabase_query`: Flexible Supabase query builder for complex database queries with validation
 
 ## Search Strategy
 - Use built-in knowledge for: MRI physics concepts, general programming patterns
@@ -82,7 +82,7 @@ def _register_tools():
     # Register new SQL assistance tools
     pulsepal_agent.tool(tools.find_relevant_tables)  # Find relevant database tables
     pulsepal_agent.tool(tools.get_table_schemas)  # Get detailed schema information
-    pulsepal_agent.tool(tools.get_distinct_values)  # Get distinct values from columns
+    pulsepal_agent.tool(tools.execute_supabase_query)  # Flexible Supabase query builder
 
     # Set the agent reference in tools module
     tools.pulsepal_agent = pulsepal_agent

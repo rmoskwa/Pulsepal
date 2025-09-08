@@ -9,7 +9,7 @@ import json
 import logging
 import re
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from pydantic_ai import RunContext
 
@@ -1111,30 +1111,358 @@ async def get_table_schemas(
         return json.dumps({"error": "Database error", "message": str(e)})
 
 
-async def get_distinct_values(
+async def execute_supabase_query(
+    ctx: RunContext[PulsePalDependencies],
+    query: Dict[str, Any],
+) -> str:
+    """
+    Execute a flexible Supabase query with validation and error guidance.
+
+    This tool allows constructing any Supabase client query pattern with intelligent
+    error handling and correction guidance.
+
+    **Query Structure:**
+    ```python
+    {
+        "table": "api_reference",  # Required: table name
+        "select": "*",             # Optional: columns to select (default: "*")
+        "filters": [               # Optional: filter conditions
+            {"column": "name", "operator": "eq", "value": "makeAdc"},
+            {"column": "id", "operator": "gt", "value": 100}
+        ],
+        "order": {"column": "id", "ascending": true},  # Optional: ordering
+        "limit": 10,               # Optional: limit results
+        "offset": 0,               # Optional: pagination offset
+        "count": false,            # Optional: return count instead of data
+        "single": false            # Optional: expect single result
+    }
+    ```
+
+    **Supported Operators:**
+    - `eq`: equals
+    - `neq`: not equals
+    - `gt`: greater than
+    - `gte`: greater than or equal
+    - `lt`: less than
+    - `lte`: less than or equal
+    - `like`: pattern matching (use % for wildcards)
+    - `ilike`: case-insensitive pattern matching
+    - `in`: value in list
+    - `is`: for NULL checks (value should be "null" or "not null")
+    - `contains`: for JSONB/array contains
+    - `contained_by`: for JSONB/array contained by
+
+    **Examples:**
+    ```python
+    # Get all functions starting with 'make'
+    {
+        "table": "api_reference",
+        "select": "name, description",
+        "filters": [{"column": "name", "operator": "like", "value": "make%"}],
+        "limit": 5
+    }
+
+    # Get distinct trajectory types
+    {
+        "table": "pulseq_sequences",
+        "select": "trajectory_type",
+        "filters": [],
+        "order": {"column": "trajectory_type", "ascending": true}
+    }
+    # Note: For truly distinct values, you may need to process results
+
+    # Count sequences by type
+    {
+        "table": "pulseq_sequences",
+        "select": "sequence_type",
+        "count": true
+    }
+    ```
+
+    **Error Handling:**
+    The tool will catch common errors and provide guidance:
+    - Table not found → suggests valid tables
+    - Column not found → suggests valid columns
+    - Type mismatches → explains correct types
+    - NULL comparisons → shows correct syntax
+
+    Args:
+        query: Supabase query configuration as a dictionary
+
+    Returns:
+        JSON string with query results or error with guidance
+    """
+    import json
+    from pydantic_ai import ModelRetry
+    from .sql_validator import (
+        SupabaseQueryValidator,
+        get_table_columns,
+        find_similar_columns,
+        VALID_TABLES,
+    )
+
+    # Validate query structure
+    if not isinstance(query, dict):
+        raise ModelRetry(
+            "Query must be a dictionary. Example:\n"
+            '{"table": "api_reference", "select": "*", "limit": 10}'
+        )
+
+    if "table" not in query:
+        raise ModelRetry(
+            "Query must include 'table' field.\n"
+            f"Valid tables: {', '.join(VALID_TABLES)}\n"
+            "Use find_relevant_tables() to discover appropriate tables."
+        )
+
+    table = query["table"]
+
+    # Validate table name
+    if table not in VALID_TABLES:
+        similar_tables = [t for t in VALID_TABLES if table.lower() in t.lower()]
+        raise ModelRetry(
+            f"Table '{table}' not found.\n"
+            f"Valid tables: {', '.join(VALID_TABLES)}\n"
+            + (f"Did you mean: {', '.join(similar_tables)}?" if similar_tables else "")
+            + "\nUse find_relevant_tables() to discover appropriate tables."
+        )
+
+    try:
+        # Get RAG service for Supabase client
+        rag_service = await get_rag_service(ctx)
+        supabase = rag_service.supabase_client.client
+
+        # Start building query
+        query_builder = supabase.table(table)
+
+        # Add select clause with validation
+        select_clause = query.get("select", "*")
+
+        # Validate select clause to prevent injection
+        if select_clause != "*":
+            # Parse comma-separated columns
+            columns = [col.strip() for col in select_clause.split(",")]
+            for col in columns:
+                if not validate_database_identifier(col, "column"):
+                    raise ModelRetry(
+                        f"Invalid column name in select: '{col}'\n"
+                        "Column names must contain only alphanumeric characters and underscores."
+                    )
+
+        query_builder = query_builder.select(select_clause)
+
+        # Add filters
+        filters = query.get("filters", [])
+        for filter_config in filters:
+            if not isinstance(filter_config, dict):
+                raise ModelRetry(
+                    "Each filter must be a dictionary with 'column', 'operator', and 'value'.\n"
+                    'Example: {"column": "name", "operator": "eq", "value": "makeAdc"}'
+                )
+
+            column = filter_config.get("column")
+            operator = filter_config.get("operator", "eq")
+            value = filter_config.get("value")
+
+            if not column:
+                raise ModelRetry("Filter missing 'column' field")
+
+            # Validate column name to prevent injection
+            if not validate_database_identifier(column, "column"):
+                raise ModelRetry(
+                    f"Invalid column name in filter: '{column}'\n"
+                    "Column names must contain only alphanumeric characters and underscores."
+                )
+
+            # Apply filter based on operator
+            if operator == "eq":
+                query_builder = query_builder.eq(column, value)
+            elif operator == "neq":
+                query_builder = query_builder.neq(column, value)
+            elif operator == "gt":
+                query_builder = query_builder.gt(column, value)
+            elif operator == "gte":
+                query_builder = query_builder.gte(column, value)
+            elif operator == "lt":
+                query_builder = query_builder.lt(column, value)
+            elif operator == "lte":
+                query_builder = query_builder.lte(column, value)
+            elif operator == "like":
+                query_builder = query_builder.like(column, value)
+            elif operator == "ilike":
+                query_builder = query_builder.ilike(column, value)
+            elif operator == "in":
+                query_builder = query_builder.in_(column, value)
+            elif operator == "is":
+                # Handle NULL checks
+                if value == "null":
+                    query_builder = query_builder.is_(column, "null")
+                elif value == "not null":
+                    query_builder = query_builder.is_(column, "not null")
+                else:
+                    raise ModelRetry(
+                        f"For 'is' operator, value must be 'null' or 'not null', got '{value}'"
+                    )
+            elif operator == "contains":
+                query_builder = query_builder.contains(column, value)
+            elif operator == "contained_by":
+                query_builder = query_builder.contained_by(column, value)
+            else:
+                raise ModelRetry(
+                    f"Unknown operator '{operator}'.\n"
+                    "Valid operators: eq, neq, gt, gte, lt, lte, like, ilike, in, is, contains, contained_by"
+                )
+
+        # Add ordering with validation
+        if "order" in query:
+            order_config = query["order"]
+            order_column = order_config.get("column")
+            ascending = order_config.get("ascending", True)
+            if order_column:
+                # Validate order column to prevent injection
+                if not validate_database_identifier(order_column, "column"):
+                    raise ModelRetry(
+                        f"Invalid column name in order: '{order_column}'\n"
+                        "Column names must contain only alphanumeric characters and underscores."
+                    )
+                query_builder = query_builder.order(order_column, desc=not ascending)
+
+        # Add limit
+        if "limit" in query:
+            limit = query["limit"]
+            if not isinstance(limit, int) or limit < 1:
+                raise ModelRetry("Limit must be a positive integer")
+            query_builder = query_builder.limit(limit)
+
+        # Add offset
+        if "offset" in query:
+            offset = query["offset"]
+            if not isinstance(offset, int) or offset < 0:
+                raise ModelRetry("Offset must be a non-negative integer")
+            query_builder = query_builder.offset(offset)
+
+        # Handle count queries
+        if query.get("count", False):
+            query_builder = query_builder.count()
+
+        # Handle single result expectation
+        if query.get("single", False):
+            query_builder = query_builder.single()
+
+        # Execute query
+        result = query_builder.execute()
+
+        # Format successful response
+        if result.data is not None:
+            response = {
+                "success": True,
+                "data": result.data,
+                "count": result.count if hasattr(result, "count") else None,
+                "query_executed": {
+                    "table": table,
+                    "select": select_clause,
+                    "filters": filters,
+                    "limit": query.get("limit"),
+                    "offset": query.get("offset"),
+                },
+            }
+
+            # Add helpful metadata
+            if isinstance(result.data, list):
+                response["row_count"] = len(result.data)
+
+                # If this looks like a distinct values query, extract unique values
+                if (
+                    select_clause != "*"
+                    and "," not in select_clause
+                    and len(filters) == 0
+                ):
+                    # Single column selected with no filters - might be for distinct values
+                    # Handle both simple values and arrays
+                    values = []
+                    for row in result.data:
+                        value = row.get(select_clause)
+                        if value is not None:
+                            # If it's a list/array, add each element
+                            if isinstance(value, list):
+                                values.extend(value)
+                            else:
+                                values.append(value)
+
+                    # Try to get unique values (skip if unhashable types)
+                    try:
+                        unique_values = list(set(values))
+                        if len(unique_values) < len(result.data):
+                            response["unique_values"] = sorted(unique_values)
+                            response["unique_count"] = len(unique_values)
+                    except TypeError:
+                        # Can't create set from unhashable types, just count raw values
+                        response["total_values"] = len(values)
+                        response["note"] = "Values contain complex types"
+
+            return json.dumps(response, indent=2, default=str)
+        else:
+            return json.dumps(
+                {
+                    "success": True,
+                    "data": [],
+                    "row_count": 0,
+                    "message": "Query executed successfully but returned no results",
+                }
+            )
+
+    except Exception as e:
+        error_msg = str(e)
+
+        # Parse the error
+        validator = SupabaseQueryValidator()
+        parsed_error = validator.parse_postgresql_error(error_msg)
+
+        # Add context for better guidance
+        context = {"table": table}
+
+        # If column error, try to get valid columns
+        if parsed_error["error_type"] == "column_not_found":
+            try:
+                valid_columns = await get_table_columns(supabase, table)
+                if valid_columns:
+                    context["valid_columns"] = valid_columns
+
+                    # Find similar column names
+                    missing_col = parsed_error["details"].get("missing_column")
+                    if missing_col:
+                        similar = find_similar_columns(missing_col, valid_columns)
+                        if similar:
+                            parsed_error["details"]["similar_columns"] = similar
+            except Exception:
+                pass  # Continue without column hints
+
+        # Generate guidance
+        guidance = validator.generate_error_guidance(parsed_error, context)
+
+        # Raise ModelRetry with guidance
+        raise ModelRetry(guidance)
+
+
+# DEPRECATED: Use execute_supabase_query instead for more flexibility
+# Example to get distinct values with the new tool:
+# {
+#     "table": "pulseq_sequences",
+#     "select": "trajectory_type",
+#     "order": {"column": "trajectory_type", "ascending": true}
+# }
+# Then extract unique values from the results
+async def _deprecated_get_distinct_values(
     ctx: RunContext[PulsePalDependencies],
     table: str,
     column: str,
     limit: int = 100,
 ) -> str:
     """
-    Get all distinct values from a specific column in a table.
+    DEPRECATED: Use execute_supabase_query instead.
 
-    This tool enables complete enumeration of categorical data, solving the
-    "list all X" problem that text search cannot handle effectively.
-
-    Args:
-        table: Table name to query
-        column: Column name to get distinct values from
-        limit: Maximum number of distinct values to return (default 100)
-
-    Returns:
-        JSON with complete list of distinct values and count
-
-    Examples:
-        - table='pulseq_sequences', column='trajectory_type' → all trajectory types
-        - table='api_reference', column='class_name' → all class names
-        - table='pulseq_sequences', column='sequence_family' → all sequence families
+    This tool is kept for backward compatibility but should not be used.
+    Use execute_supabase_query for more flexible database queries.
     """
     import json
 
