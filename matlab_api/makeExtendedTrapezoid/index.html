@@ -1562,9 +1562,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#optional-parameters" class="md-nav__link">
+  <a href="#name-value-pair-arguments" class="md-nav__link">
     <span class="md-ellipsis">
-      Optional Parameters
+      Name-Value Pair Arguments
     </span>
   </a>
   
@@ -2610,9 +2610,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#optional-parameters" class="md-nav__link">
+  <a href="#name-value-pair-arguments" class="md-nav__link">
     <span class="md-ellipsis">
-      Optional Parameters
+      Name-Value Pair Arguments
     </span>
   </a>
   
@@ -2673,14 +2673,16 @@
 </code></pre></div>
 <h2 id="calling-pattern">Calling Pattern<a class="headerlink" href="#calling-pattern" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="n">mr</span><span class="p">.</span><span class="n">makeExtendedTrapezoid</span><span class="p">(</span><span class="k">...</span><span class="c">)</span>
+<span class="n">mr</span><span class="p">.</span><span class="n">makeExtendedTrapezoid</span><span class="p">(</span><span class="s">&#39;ParameterName&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">,</span><span class="w"> </span><span class="k">...</span><span class="c">)</span>
 </code></pre></div>
 <h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
+<p>This function accepts both positional parameters and name-value pairs.</p>
 <h3 id="required-parameters">Required Parameters<a class="headerlink" href="#required-parameters" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
-<th>Name</th>
-<th>Type</th>
+<th>Parameter Name</th>
+<th>Value Type</th>
 <th>Description</th>
 <th>Example</th>
 <th>Units</th>
@@ -2696,12 +2698,12 @@
 </tr>
 </tbody>
 </table>
-<h3 id="optional-parameters">Optional Parameters<a class="headerlink" href="#optional-parameters" title="Permanent link">&para;</a></h3>
+<h3 id="name-value-pair-arguments">Name-Value Pair Arguments<a class="headerlink" href="#name-value-pair-arguments" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
-<th>Name</th>
-<th>Type</th>
+<th>Parameter Name (string)</th>
+<th>Value Type</th>
 <th>Default</th>
 <th>Description</th>
 <th>Example</th>
@@ -2709,49 +2711,49 @@
 </thead>
 <tbody>
 <tr>
-<td><code>times</code></td>
+<td><code>'times'</code></td>
 <td>double</td>
 <td><code>0</code></td>
 <td>A vector of time points specifying the instants at which the gradient amplitudes are defined. Valid values: Must be in ascending order, and all values must be distinct. The last time point must be on a gradient raster. (Units: seconds)</td>
 <td><code>[0, 0.001, 0.002, 0.003]</code></td>
 </tr>
 <tr>
-<td><code>amplitudes</code></td>
+<td><code>'amplitudes'</code></td>
 <td>double</td>
 <td><code>0</code></td>
 <td>A vector of gradient amplitudes corresponding to the time points in 'times'. Valid values: Must have the same length as 'times'. (Units: Hz/m)</td>
 <td><code>[0, 1000, 1000, 0]</code></td>
 </tr>
 <tr>
-<td><code>system</code></td>
+<td><code>'system'</code></td>
 <td>struct</td>
 <td><code>[]</code></td>
 <td>A structure containing system parameters (e.g., from mr.opts()). If empty, default system parameters are used.</td>
 <td><code>mr.opts()</code></td>
 </tr>
 <tr>
-<td><code>maxGrad</code></td>
+<td><code>'maxGrad'</code></td>
 <td>double</td>
 <td><code>0</code></td>
 <td>Maximum gradient amplitude. If 0, the system's maxGrad is used. (Units: Hz/m)</td>
 <td><code>2000</code></td>
 </tr>
 <tr>
-<td><code>maxSlew</code></td>
+<td><code>'maxSlew'</code></td>
 <td>double</td>
 <td><code>0</code></td>
 <td>Maximum gradient slew rate. If 0, the system's maxSlew is used. (Units: Hz/m/s)</td>
 <td><code>1000000</code></td>
 </tr>
 <tr>
-<td><code>skip_check</code></td>
+<td><code>'skip_check'</code></td>
 <td>logical</td>
 <td><code>false</code></td>
 <td>If true, skips checks for consistency between the first amplitude and the preceding block. Use with caution!</td>
 <td><code>true</code></td>
 </tr>
 <tr>
-<td><code>convert2arbitrary</code></td>
+<td><code>'convert2arbitrary'</code></td>
 <td>logical</td>
 <td><code>false</code></td>
 <td>If true, converts the gradient to an arbitrary gradient object, resampling it onto a regular grid based on the system's gradient raster time. If false, the gradient is defined with the specified possibly irregular sampling of <code>times</code>.</td>
@@ -2764,7 +2766,7 @@
 <thead>
 <tr>
 <th>Output</th>
-<th>Type</th>
+<th>Value Type</th>
 <th>Description</th>
 </tr>
 </thead>

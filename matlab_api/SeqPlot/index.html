@@ -541,9 +541,9 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#optional-parameters" class="md-nav__link">
+  <a href="#name-value-pair-arguments" class="md-nav__link">
     <span class="md-ellipsis">
-      Optional Parameters
+      Name-Value Pair Arguments
     </span>
   </a>
   
@@ -2592,9 +2592,9 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#optional-parameters" class="md-nav__link">
+  <a href="#name-value-pair-arguments" class="md-nav__link">
     <span class="md-ellipsis">
-      Optional Parameters
+      Name-Value Pair Arguments
     </span>
   </a>
   
@@ -2655,14 +2655,16 @@
 </code></pre></div>
 <h2 id="calling-pattern">Calling Pattern<a class="headerlink" href="#calling-pattern" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="n">seqplot</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">mr</span><span class="p">.</span><span class="n">aux</span><span class="p">.</span><span class="n">SeqPlot</span><span class="p">(</span><span class="k">...</span><span class="c">)</span>
+<span class="n">seqplot</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">mr</span><span class="p">.</span><span class="n">aux</span><span class="p">.</span><span class="n">SeqPlot</span><span class="p">(</span><span class="s">&#39;ParameterName&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">,</span><span class="w"> </span><span class="k">...</span><span class="c">)</span>
 </code></pre></div>
 <h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
-<h3 id="optional-parameters">Optional Parameters<a class="headerlink" href="#optional-parameters" title="Permanent link">&para;</a></h3>
+<p>This function accepts both positional parameters and name-value pairs.</p>
+<h3 id="name-value-pair-arguments">Name-Value Pair Arguments<a class="headerlink" href="#name-value-pair-arguments" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
-<th>Name</th>
-<th>Type</th>
+<th>Parameter Name (string)</th>
+<th>Value Type</th>
 <th>Default</th>
 <th>Description</th>
 <th>Example</th>
@@ -2670,56 +2672,56 @@
 </thead>
 <tbody>
 <tr>
-<td><code>showBlocks</code></td>
+<td><code>'showBlocks'</code></td>
 <td>logical</td>
 <td><code>false</code></td>
 <td>Specifies whether to show block boundaries on the plot.  Accepts logical true/false or numeric 1/0. Valid values: true/false or 1/0</td>
 <td><code>true</code></td>
 </tr>
 <tr>
-<td><code>timeRange</code></td>
+<td><code>'timeRange'</code></td>
 <td>double</td>
 <td><code>[0 inf]</code></td>
 <td>Defines the time range to display on the plot.  Must be a 2-element vector [start_time end_time]. Valid values: 2-element numeric vector (Units: seconds)</td>
 <td><code>[0 0.1]</code></td>
 </tr>
 <tr>
-<td><code>blockRange</code></td>
+<td><code>'blockRange'</code></td>
 <td>double</td>
 <td><code>[1 inf]</code></td>
 <td>Defines the range of blocks from the sequence to include in the plot. Must be a 2-element vector [start_block end_block]. Valid values: 2-element numeric vector</td>
 <td><code>[1 10]</code></td>
 </tr>
 <tr>
-<td><code>timeDisp</code></td>
+<td><code>'timeDisp'</code></td>
 <td>char</td>
 <td><code>validTimeUnits{1}</code></td>
 <td>Specifies the units for the time axis of the plot. Valid values: 's', 'ms', 'us'</td>
 <td><code>'ms'</code></td>
 </tr>
 <tr>
-<td><code>label</code></td>
+<td><code>'label'</code></td>
 <td>char</td>
 <td><code>[]</code></td>
 <td>Specifies which labels to display on the plot.  Accepts a string or array of strings. Valid values: mr.getSupportedLabels()</td>
 <td><code>'excitation'</code></td>
 </tr>
 <tr>
-<td><code>hide</code></td>
+<td><code>'hide'</code></td>
 <td>logical</td>
 <td><code>false</code></td>
 <td>Specifies whether to hide the generated figure. Accepts logical true/false or numeric 1/0. Valid values: true/false or 1/0</td>
 <td><code>false</code></td>
 </tr>
 <tr>
-<td><code>stacked</code></td>
+<td><code>'stacked'</code></td>
 <td>logical</td>
 <td><code>false</code></td>
 <td>Specifies whether to stack the plots vertically. Only works in MATLAB, not Octave. Valid values: true/false or 1/0</td>
 <td><code>true</code></td>
 </tr>
 <tr>
-<td><code>showGuides</code></td>
+<td><code>'showGuides'</code></td>
 <td>logical</td>
 <td><code>true</code></td>
 <td>Specifies whether to show guides on the plot. Valid values: true/false or 1/0</td>
@@ -2732,7 +2734,7 @@
 <thead>
 <tr>
 <th>Output</th>
-<th>Type</th>
+<th>Value Type</th>
 <th>Description</th>
 </tr>
 </thead>

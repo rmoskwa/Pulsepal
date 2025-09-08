@@ -955,9 +955,9 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#optional-parameters" class="md-nav__link">
+  <a href="#name-value-pair-arguments" class="md-nav__link">
     <span class="md-ellipsis">
-      Optional Parameters
+      Name-Value Pair Arguments
     </span>
   </a>
   
@@ -2592,9 +2592,9 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#optional-parameters" class="md-nav__link">
+  <a href="#name-value-pair-arguments" class="md-nav__link">
     <span class="md-ellipsis">
-      Optional Parameters
+      Name-Value Pair Arguments
     </span>
   </a>
   
@@ -2655,14 +2655,16 @@
 </code></pre></div>
 <h2 id="calling-pattern">Calling Pattern<a class="headerlink" href="#calling-pattern" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="n">seq</span><span class="p">.</span><span class="n">calculateKspacePP</span><span class="p">(</span><span class="k">...</span><span class="c">)</span>
+<span class="n">seq</span><span class="p">.</span><span class="n">calculateKspacePP</span><span class="p">(</span><span class="s">&#39;ParameterName&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">,</span><span class="w"> </span><span class="k">...</span><span class="c">)</span>
 </code></pre></div>
 <h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
-<h3 id="optional-parameters">Optional Parameters<a class="headerlink" href="#optional-parameters" title="Permanent link">&para;</a></h3>
+<p>This function accepts both positional parameters and name-value pairs.</p>
+<h3 id="name-value-pair-arguments">Name-Value Pair Arguments<a class="headerlink" href="#name-value-pair-arguments" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
-<th>Name</th>
-<th>Type</th>
+<th>Parameter Name (string)</th>
+<th>Value Type</th>
 <th>Default</th>
 <th>Description</th>
 <th>Example</th>
@@ -2670,28 +2672,28 @@
 </thead>
 <tbody>
 <tr>
-<td><code>trajectory_delay</code></td>
+<td><code>'trajectory_delay'</code></td>
 <td>double</td>
 <td><code>0</code></td>
 <td>A compensation factor to align the ADC and gradient timings in k-space reconstruction.  Positive values delay the gradient relative to the ADC. Valid values: Any numeric value (Units: seconds)</td>
 <td><code>0.000001</code></td>
 </tr>
 <tr>
-<td><code>gradient_offset</code></td>
+<td><code>'gradient_offset'</code></td>
 <td>double</td>
 <td><code>0</code></td>
 <td>Simulates background gradients or helps verify spin-echo conditions by adding a constant offset to the gradient waveforms. Valid values: Any numeric value (Units: Hz/m)</td>
 <td><code>10</code></td>
 </tr>
 <tr>
-<td><code>blockRange</code></td>
+<td><code>'blockRange'</code></td>
 <td>double</td>
 <td><code>[1 inf]</code></td>
 <td>Specifies a range of blocks within the sequence to consider for k-space trajectory calculation. Valid values: A two-element numeric array [start_block end_block], where end_block can be Inf to include all blocks from start_block to the end of the sequence.  start_block must be &gt;=1</td>
 <td><code>[5,10]</code></td>
 </tr>
 <tr>
-<td><code>externalWaveformsAndTimes</code></td>
+<td><code>'externalWaveformsAndTimes'</code></td>
 <td>struct</td>
 <td><code>struct([])</code></td>
 <td>Allows supplying external gradient waveforms and timing information instead of using those from the Pulseq sequence object.  The struct should contain fields 'gw_data', 'tfp_excitation', 'tfp_refocusing', and 't_adc'.  It may optionally include 'pm_adc'. Valid values: A struct with fields: gw_data (gradient waveforms), tfp_excitation (excitation pulse timings), tfp_refocusing (refocusing pulse timings), t_adc (ADC timings), optionally pm_adc (phase modulation for ADC).</td>
@@ -2704,7 +2706,7 @@
 <thead>
 <tr>
 <th>Output</th>
-<th>Type</th>
+<th>Value Type</th>
 <th>Description</th>
 </tr>
 </thead>

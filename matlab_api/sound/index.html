@@ -2220,9 +2220,9 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#optional-parameters" class="md-nav__link">
+  <a href="#name-value-pair-arguments" class="md-nav__link">
     <span class="md-ellipsis">
-      Optional Parameters
+      Name-Value Pair Arguments
     </span>
   </a>
   
@@ -2592,9 +2592,9 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#optional-parameters" class="md-nav__link">
+  <a href="#name-value-pair-arguments" class="md-nav__link">
     <span class="md-ellipsis">
-      Optional Parameters
+      Name-Value Pair Arguments
     </span>
   </a>
   
@@ -2655,14 +2655,16 @@
 </code></pre></div>
 <h2 id="calling-pattern">Calling Pattern<a class="headerlink" href="#calling-pattern" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="n">seq</span><span class="p">.</span><span class="n">sound</span><span class="p">(</span><span class="k">...</span><span class="c">)</span>
+<span class="n">seq</span><span class="p">.</span><span class="n">sound</span><span class="p">(</span><span class="s">&#39;ParameterName&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">,</span><span class="w"> </span><span class="k">...</span><span class="c">)</span>
 </code></pre></div>
 <h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
-<h3 id="optional-parameters">Optional Parameters<a class="headerlink" href="#optional-parameters" title="Permanent link">&para;</a></h3>
+<p>This function accepts both positional parameters and name-value pairs.</p>
+<h3 id="name-value-pair-arguments">Name-Value Pair Arguments<a class="headerlink" href="#name-value-pair-arguments" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
-<th>Name</th>
-<th>Type</th>
+<th>Parameter Name (string)</th>
+<th>Value Type</th>
 <th>Default</th>
 <th>Description</th>
 <th>Example</th>
@@ -2670,21 +2672,21 @@
 </thead>
 <tbody>
 <tr>
-<td><code>blockRange</code></td>
+<td><code>'blockRange'</code></td>
 <td>double</td>
 <td><code>[1 inf]</code></td>
 <td>Specifies the range of blocks in the sequence to play.  Defaults to playing all blocks. Valid values: A two-element numeric vector [start_block end_block].  end_block can be Inf to indicate the end of the sequence.</td>
 <td><code>[5, 10]</code></td>
 </tr>
 <tr>
-<td><code>channelWeights</code></td>
+<td><code>'channelWeights'</code></td>
 <td>double</td>
 <td><code>[1 1 1]</code></td>
 <td>Specifies the weights for the three channels (x, y, z). These weights scale the amplitudes of the corresponding channel waveforms before combining them for playback. Valid values: A three-element numeric vector [weight_x weight_y weight_z].</td>
 <td><code>[0.8, 1.2, 0.5]</code></td>
 </tr>
 <tr>
-<td><code>onlyProduceSoundData</code></td>
+<td><code>'onlyProduceSoundData'</code></td>
 <td>logical</td>
 <td><code>false</code></td>
 <td>If true, the function only produces the sound data without actually playing it. This is useful if you want to process or save the sound data before playback. Valid values: true or false</td>
@@ -2697,7 +2699,7 @@
 <thead>
 <tr>
 <th>Output</th>
-<th>Type</th>
+<th>Value Type</th>
 <th>Description</th>
 </tr>
 </thead>

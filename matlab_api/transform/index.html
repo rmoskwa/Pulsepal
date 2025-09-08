@@ -2367,9 +2367,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#optional-parameters" class="md-nav__link">
+  <a href="#name-value-pair-arguments" class="md-nav__link">
     <span class="md-ellipsis">
-      Optional Parameters
+      Name-Value Pair Arguments
     </span>
   </a>
   
@@ -2610,9 +2610,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#optional-parameters" class="md-nav__link">
+  <a href="#name-value-pair-arguments" class="md-nav__link">
     <span class="md-ellipsis">
-      Optional Parameters
+      Name-Value Pair Arguments
     </span>
   </a>
   
@@ -2673,14 +2673,16 @@
 </code></pre></div>
 <h2 id="calling-pattern">Calling Pattern<a class="headerlink" href="#calling-pattern" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="n">mr</span><span class="p">.</span><span class="n">transform</span><span class="p">(</span><span class="k">...</span><span class="c">)</span>
+<span class="n">mr</span><span class="p">.</span><span class="n">transform</span><span class="p">(</span><span class="s">&#39;ParameterName&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">,</span><span class="w"> </span><span class="k">...</span><span class="c">)</span>
 </code></pre></div>
 <h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
+<p>This function accepts both positional parameters and name-value pairs.</p>
 <h3 id="required-parameters">Required Parameters<a class="headerlink" href="#required-parameters" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
-<th>Name</th>
-<th>Type</th>
+<th>Parameter Name</th>
+<th>Value Type</th>
 <th>Description</th>
 <th>Example</th>
 <th>Units</th>
@@ -2696,12 +2698,12 @@
 </tr>
 </tbody>
 </table>
-<h3 id="optional-parameters">Optional Parameters<a class="headerlink" href="#optional-parameters" title="Permanent link">&para;</a></h3>
+<h3 id="name-value-pair-arguments">Name-Value Pair Arguments<a class="headerlink" href="#name-value-pair-arguments" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
-<th>Name</th>
-<th>Type</th>
+<th>Parameter Name (string)</th>
+<th>Value Type</th>
 <th>Default</th>
 <th>Description</th>
 <th>Example</th>
@@ -2709,56 +2711,56 @@
 </thead>
 <tbody>
 <tr>
-<td><code>rotation</code></td>
+<td><code>'rotation'</code></td>
 <td>double</td>
 <td><code>[]</code></td>
 <td>A 3x3 rotation matrix to apply to the sequence.  Cannot be used with 'transform'. Valid values: 3x3 numeric matrix</td>
 <td><code>[1 0 0; 0 1 0; 0 0 1]</code></td>
 </tr>
 <tr>
-<td><code>translation</code></td>
+<td><code>'translation'</code></td>
 <td>double</td>
 <td><code>[]</code></td>
 <td>A 1x3 translation vector in Pulseq logical coordinates [x, y, z]. Cannot be used with 'transform'. Valid values: 1x3 numeric vector (Units: meters)</td>
 <td><code>[0.01 0 0]</code></td>
 </tr>
 <tr>
-<td><code>offset</code></td>
+<td><code>'offset'</code></td>
 <td>double</td>
 <td><code>[]</code></td>
 <td>A translation vector in Pulseq logical coordinates [x, y, z]. Valid values: 1x3 numeric vector (Units: meters)</td>
 <td><code>[0.02, 0, 0]</code></td>
 </tr>
 <tr>
-<td><code>transform</code></td>
+<td><code>'transform'</code></td>
 <td>double</td>
 <td><code>[]</code></td>
 <td>A 4x4 homogeneous transformation matrix containing both rotation and translation (in lab coordinates). Cannot be used with 'rotation' or 'translation'. Valid values: 4x4 numeric matrix</td>
 <td><code>[1 0 0 0.01; 0 1 0 0; 0 0 1 0; 0 0 0 1]</code></td>
 </tr>
 <tr>
-<td><code>system</code></td>
+<td><code>'system'</code></td>
 <td>struct</td>
 <td><code>[]</code></td>
 <td>Optional MR system description. If not provided, system properties from the input sequence are inherited.</td>
 <td><code>mr.opts('maxGrad', 40, 'maxSlew', 130)</code></td>
 </tr>
 <tr>
-<td><code>sameSeq</code></td>
+<td><code>'sameSeq'</code></td>
 <td>logical</td>
 <td><code>false</code></td>
 <td>If true, the output sequence will be a pointer to the input sequence; otherwise, a copy is created.</td>
 <td><code>true</code></td>
 </tr>
 <tr>
-<td><code>blockRange</code></td>
+<td><code>'blockRange'</code></td>
 <td>double</td>
 <td><code>[1 inf]</code></td>
 <td>Specifies the range of blocks in the sequence to process.  The second value can be 'inf' for all blocks. Valid values: 1x2 numeric vector</td>
 <td><code>[10, 20]</code></td>
 </tr>
 <tr>
-<td><code>gw_pp</code></td>
+<td><code>'gw_pp'</code></td>
 <td>cell</td>
 <td><code>{}</code></td>
 <td>Optional pre-calculated gradient piecewise polynomial (k-space) data. If provided, the function will reuse this data instead of recalculating it.</td>
@@ -2771,7 +2773,7 @@
 <thead>
 <tr>
 <th>Output</th>
-<th>Type</th>
+<th>Value Type</th>
 <th>Description</th>
 </tr>
 </thead>
@@ -2782,7 +2784,7 @@
 <td>The transformed Pulseq sequence.</td>
 </tr>
 <tr>
-<td><code>gw_pp</code></td>
+<td><code>'gw_pp'</code></td>
 <td>cell</td>
 <td>Gradient piecewise polynomial (k-space) data for the transformed sequence.</td>
 </tr>

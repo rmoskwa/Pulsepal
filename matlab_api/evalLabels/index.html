@@ -1139,9 +1139,9 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#optional-parameters" class="md-nav__link">
+  <a href="#name-value-pair-arguments" class="md-nav__link">
     <span class="md-ellipsis">
-      Optional Parameters
+      Name-Value Pair Arguments
     </span>
   </a>
   
@@ -2592,9 +2592,9 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#optional-parameters" class="md-nav__link">
+  <a href="#name-value-pair-arguments" class="md-nav__link">
     <span class="md-ellipsis">
-      Optional Parameters
+      Name-Value Pair Arguments
     </span>
   </a>
   
@@ -2655,14 +2655,16 @@
 </code></pre></div>
 <h2 id="calling-pattern">Calling Pattern<a class="headerlink" href="#calling-pattern" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="n">seq</span><span class="p">.</span><span class="n">evalLabels</span><span class="p">(</span><span class="k">...</span><span class="c">)</span>
+<span class="n">seq</span><span class="p">.</span><span class="n">evalLabels</span><span class="p">(</span><span class="s">&#39;ParameterName&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">,</span><span class="w"> </span><span class="k">...</span><span class="c">)</span>
 </code></pre></div>
 <h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
-<h3 id="optional-parameters">Optional Parameters<a class="headerlink" href="#optional-parameters" title="Permanent link">&para;</a></h3>
+<p>This function accepts both positional parameters and name-value pairs.</p>
+<h3 id="name-value-pair-arguments">Name-Value Pair Arguments<a class="headerlink" href="#name-value-pair-arguments" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
-<th>Name</th>
-<th>Type</th>
+<th>Parameter Name (string)</th>
+<th>Value Type</th>
 <th>Default</th>
 <th>Description</th>
 <th>Example</th>
@@ -2670,21 +2672,21 @@
 </thead>
 <tbody>
 <tr>
-<td><code>blockRange</code></td>
+<td><code>'blockRange'</code></td>
 <td>double</td>
 <td><code>[1 inf]</code></td>
 <td>Specifies the range of blocks to evaluate labels for.  The default evaluates all blocks. Valid values: A two-element numeric vector [first last], where 'first' and 'last' are the indices of the starting and ending blocks respectively. 'inf' can be used for the last element to denote the last block.</td>
 <td><code>[5 10]</code></td>
 </tr>
 <tr>
-<td><code>init</code></td>
+<td><code>'init'</code></td>
 <td>struct</td>
 <td><code>struct([])</code></td>
 <td>Provides initial values for labels. Useful for evaluating labels block-by-block, where results from the previous block are used as inputs for the next.</td>
 <td><code>struct('label1',10, 'label2',0)</code></td>
 </tr>
 <tr>
-<td><code>evolution</code></td>
+<td><code>'evolution'</code></td>
 <td>char</td>
 <td><code>'none'</code></td>
 <td>Specifies the level of detail for the label evolution output. Valid values: 'none', 'adc', 'label', 'blocks'</td>
@@ -2697,7 +2699,7 @@
 <thead>
 <tr>
 <th>Output</th>
-<th>Type</th>
+<th>Value Type</th>
 <th>Description</th>
 </tr>
 </thead>

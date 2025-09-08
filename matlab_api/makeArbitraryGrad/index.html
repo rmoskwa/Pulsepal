@@ -1447,9 +1447,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#optional-parameters" class="md-nav__link">
+  <a href="#name-value-pair-arguments" class="md-nav__link">
     <span class="md-ellipsis">
-      Optional Parameters
+      Name-Value Pair Arguments
     </span>
   </a>
   
@@ -2610,9 +2610,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#optional-parameters" class="md-nav__link">
+  <a href="#name-value-pair-arguments" class="md-nav__link">
     <span class="md-ellipsis">
-      Optional Parameters
+      Name-Value Pair Arguments
     </span>
   </a>
   
@@ -2673,14 +2673,16 @@
 </code></pre></div>
 <h2 id="calling-pattern">Calling Pattern<a class="headerlink" href="#calling-pattern" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="n">mr</span><span class="p">.</span><span class="n">makeArbitraryGrad</span><span class="p">(</span><span class="k">...</span><span class="c">)</span>
+<span class="n">mr</span><span class="p">.</span><span class="n">makeArbitraryGrad</span><span class="p">(</span><span class="s">&#39;ParameterName&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">,</span><span class="w"> </span><span class="k">...</span><span class="c">)</span>
 </code></pre></div>
 <h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
+<p>This function accepts both positional parameters and name-value pairs.</p>
 <h3 id="required-parameters">Required Parameters<a class="headerlink" href="#required-parameters" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
-<th>Name</th>
-<th>Type</th>
+<th>Parameter Name</th>
+<th>Value Type</th>
 <th>Description</th>
 <th>Example</th>
 <th>Units</th>
@@ -2703,12 +2705,12 @@
 </tr>
 </tbody>
 </table>
-<h3 id="optional-parameters">Optional Parameters<a class="headerlink" href="#optional-parameters" title="Permanent link">&para;</a></h3>
+<h3 id="name-value-pair-arguments">Name-Value Pair Arguments<a class="headerlink" href="#name-value-pair-arguments" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
-<th>Name</th>
-<th>Type</th>
+<th>Parameter Name (string)</th>
+<th>Value Type</th>
 <th>Default</th>
 <th>Description</th>
 <th>Example</th>
@@ -2723,42 +2725,42 @@
 <td><code>mr.opts()</code></td>
 </tr>
 <tr>
-<td><code>oversampling</code></td>
+<td><code>'oversampling'</code></td>
 <td>logical</td>
 <td><code>false</code></td>
 <td>Specifies whether oversampling is used. If true, the waveform is sampled at twice the resolution.</td>
 <td><code>true</code></td>
 </tr>
 <tr>
-<td><code>maxGrad</code></td>
+<td><code>'maxGrad'</code></td>
 <td>double</td>
 <td><code>0</code></td>
 <td>The maximum allowed gradient amplitude. If 0, the system's maxGrad is used. (Units: Hz/m)</td>
 <td><code>1000</code></td>
 </tr>
 <tr>
-<td><code>maxSlew</code></td>
+<td><code>'maxSlew'</code></td>
 <td>double</td>
 <td><code>0</code></td>
 <td>The maximum allowed gradient slew rate. If 0, the system's maxSlew is used. (Units: Hz/m/s)</td>
 <td><code>100000</code></td>
 </tr>
 <tr>
-<td><code>delay</code></td>
+<td><code>'delay'</code></td>
 <td>double</td>
 <td><code>0</code></td>
 <td>Delay before the gradient waveform starts. (Units: seconds)</td>
 <td><code>0.001</code></td>
 </tr>
 <tr>
-<td><code>first</code></td>
+<td><code>'first'</code></td>
 <td>double</td>
 <td><code>NaN</code></td>
 <td>The gradient amplitude at the very beginning (before the first sample in 'waveform'). If NaN, it's extrapolated. (Units: Hz/m)</td>
 <td><code>0</code></td>
 </tr>
 <tr>
-<td><code>last</code></td>
+<td><code>'last'</code></td>
 <td>double</td>
 <td><code>NaN</code></td>
 <td>The gradient amplitude at the very end (after the last sample in 'waveform'). If NaN, it's extrapolated. (Units: Hz/m)</td>
@@ -2771,7 +2773,7 @@
 <thead>
 <tr>
 <th>Output</th>
-<th>Type</th>
+<th>Value Type</th>
 <th>Description</th>
 </tr>
 </thead>

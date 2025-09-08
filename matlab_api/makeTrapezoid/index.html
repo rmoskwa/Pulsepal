@@ -1723,9 +1723,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#optional-parameters" class="md-nav__link">
+  <a href="#name-value-pair-arguments" class="md-nav__link">
     <span class="md-ellipsis">
-      Optional Parameters
+      Name-Value Pair Arguments
     </span>
   </a>
   
@@ -2610,9 +2610,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#optional-parameters" class="md-nav__link">
+  <a href="#name-value-pair-arguments" class="md-nav__link">
     <span class="md-ellipsis">
-      Optional Parameters
+      Name-Value Pair Arguments
     </span>
   </a>
   
@@ -2673,14 +2673,16 @@
 </code></pre></div>
 <h2 id="calling-pattern">Calling Pattern<a class="headerlink" href="#calling-pattern" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="n">mr</span><span class="p">.</span><span class="n">makeTrapezoid</span><span class="p">(</span><span class="k">...</span><span class="c">)</span>
+<span class="n">mr</span><span class="p">.</span><span class="n">makeTrapezoid</span><span class="p">(</span><span class="s">&#39;ParameterName&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">,</span><span class="w"> </span><span class="k">...</span><span class="c">)</span>
 </code></pre></div>
 <h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
+<p>This function accepts both positional parameters and name-value pairs.</p>
 <h3 id="required-parameters">Required Parameters<a class="headerlink" href="#required-parameters" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
-<th>Name</th>
-<th>Type</th>
+<th>Parameter Name</th>
+<th>Value Type</th>
 <th>Description</th>
 <th>Example</th>
 <th>Units</th>
@@ -2696,12 +2698,12 @@
 </tr>
 </tbody>
 </table>
-<h3 id="optional-parameters">Optional Parameters<a class="headerlink" href="#optional-parameters" title="Permanent link">&para;</a></h3>
+<h3 id="name-value-pair-arguments">Name-Value Pair Arguments<a class="headerlink" href="#name-value-pair-arguments" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
-<th>Name</th>
-<th>Type</th>
+<th>Parameter Name (string)</th>
+<th>Value Type</th>
 <th>Default</th>
 <th>Description</th>
 <th>Example</th>
@@ -2716,70 +2718,70 @@
 <td><code>mr.opts()</code></td>
 </tr>
 <tr>
-<td><code>duration</code></td>
+<td><code>'duration'</code></td>
 <td>double</td>
 <td><code>0</code></td>
 <td>Total duration of the trapezoid, including ramps.  Must be &gt; 0 when used. (Units: seconds)</td>
 <td><code>0.005</code></td>
 </tr>
 <tr>
-<td><code>area</code></td>
+<td><code>'area'</code></td>
 <td>double</td>
 <td><code>[]</code></td>
 <td>Total area of the trapezoid, including ramps. (Units: 1/m)</td>
 <td><code>0.01</code></td>
 </tr>
 <tr>
-<td><code>flatTime</code></td>
+<td><code>'flatTime'</code></td>
 <td>double</td>
 <td><code>[]</code></td>
 <td>Duration of the flat-top portion of the trapezoid. (Units: seconds)</td>
 <td><code>0.003</code></td>
 </tr>
 <tr>
-<td><code>flatArea</code></td>
+<td><code>'flatArea'</code></td>
 <td>double</td>
 <td><code>[]</code></td>
 <td>Area of the flat-top portion of the trapezoid (excluding ramps). (Units: 1/m)</td>
 <td><code>0.008</code></td>
 </tr>
 <tr>
-<td><code>amplitude</code></td>
+<td><code>'amplitude'</code></td>
 <td>double</td>
 <td><code>[]</code></td>
 <td>Amplitude of the flat-top portion of the trapezoid. (Units: Hz/m)</td>
 <td><code>1000</code></td>
 </tr>
 <tr>
-<td><code>maxGrad</code></td>
+<td><code>'maxGrad'</code></td>
 <td>double</td>
 <td><code>0</code></td>
 <td>Maximum gradient amplitude allowed. If not specified, defaults to system.maxGrad. (Units: Hz/m)</td>
 <td><code>2000</code></td>
 </tr>
 <tr>
-<td><code>maxSlew</code></td>
+<td><code>'maxSlew'</code></td>
 <td>double</td>
 <td><code>0</code></td>
 <td>Maximum gradient slew rate allowed. If not specified, defaults to system.maxSlew. (Units: Hz/m/s)</td>
 <td><code>200000</code></td>
 </tr>
 <tr>
-<td><code>riseTime</code></td>
+<td><code>'riseTime'</code></td>
 <td>double</td>
 <td><code>0</code></td>
 <td>Time it takes for the gradient to rise to its amplitude. If not specified, it will be calculated based on maxSlew and amplitude. (Units: seconds)</td>
 <td><code>0.001</code></td>
 </tr>
 <tr>
-<td><code>fallTime</code></td>
+<td><code>'fallTime'</code></td>
 <td>double</td>
 <td><code>0</code></td>
 <td>Time it takes for the gradient to fall from its amplitude to zero. If not specified, it will be equal to riseTime. (Units: seconds)</td>
 <td><code>0.001</code></td>
 </tr>
 <tr>
-<td><code>delay</code></td>
+<td><code>'delay'</code></td>
 <td>double</td>
 <td><code>0</code></td>
 <td>Delay before the trapezoid starts. (Units: seconds)</td>
@@ -2792,7 +2794,7 @@
 <thead>
 <tr>
 <th>Output</th>
-<th>Type</th>
+<th>Value Type</th>
 <th>Description</th>
 </tr>
 </thead>

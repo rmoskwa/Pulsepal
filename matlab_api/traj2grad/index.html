@@ -2344,9 +2344,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#optional-parameters" class="md-nav__link">
+  <a href="#name-value-pair-arguments" class="md-nav__link">
     <span class="md-ellipsis">
-      Optional Parameters
+      Name-Value Pair Arguments
     </span>
   </a>
   
@@ -2610,9 +2610,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#optional-parameters" class="md-nav__link">
+  <a href="#name-value-pair-arguments" class="md-nav__link">
     <span class="md-ellipsis">
-      Optional Parameters
+      Name-Value Pair Arguments
     </span>
   </a>
   
@@ -2673,14 +2673,16 @@
 </code></pre></div>
 <h2 id="calling-pattern">Calling Pattern<a class="headerlink" href="#calling-pattern" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="n">mr</span><span class="p">.</span><span class="n">traj2grad</span><span class="p">(</span><span class="k">...</span><span class="c">)</span>
+<span class="n">mr</span><span class="p">.</span><span class="n">traj2grad</span><span class="p">(</span><span class="s">&#39;ParameterName&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">,</span><span class="w"> </span><span class="k">...</span><span class="c">)</span>
 </code></pre></div>
 <h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
+<p>This function accepts both positional parameters and name-value pairs.</p>
 <h3 id="required-parameters">Required Parameters<a class="headerlink" href="#required-parameters" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
-<th>Name</th>
-<th>Type</th>
+<th>Parameter Name</th>
+<th>Value Type</th>
 <th>Description</th>
 <th>Example</th>
 <th>Units</th>
@@ -2696,12 +2698,12 @@
 </tr>
 </tbody>
 </table>
-<h3 id="optional-parameters">Optional Parameters<a class="headerlink" href="#optional-parameters" title="Permanent link">&para;</a></h3>
+<h3 id="name-value-pair-arguments">Name-Value Pair Arguments<a class="headerlink" href="#name-value-pair-arguments" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
-<th>Name</th>
-<th>Type</th>
+<th>Parameter Name (string)</th>
+<th>Value Type</th>
 <th>Default</th>
 <th>Description</th>
 <th>Example</th>
@@ -2709,35 +2711,35 @@
 </thead>
 <tbody>
 <tr>
-<td><code>first</code></td>
+<td><code>'first'</code></td>
 <td>double</td>
 <td><code>[]</code></td>
 <td>The initial gradient value. If not provided, it defaults to zero. (Units: Hz/m)</td>
 <td><code>[10; 20]</code></td>
 </tr>
 <tr>
-<td><code>firstGradStepHalfRaster</code></td>
+<td><code>'firstGradStepHalfRaster'</code></td>
 <td>logical</td>
 <td><code>true</code></td>
 <td>Specifies whether the first gradient step should be considered half a raster time.  Affects the slew rate calculation.</td>
 <td><code>true</code></td>
 </tr>
 <tr>
-<td><code>conservativeSlewEstimate</code></td>
+<td><code>'conservativeSlewEstimate'</code></td>
 <td>logical</td>
 <td><code>false</code></td>
 <td>If true, uses a conservative estimate for the slew rate, taking the maximum absolute slew rate between adjacent gradient points. If false, uses the average of adjacent slew rates.</td>
 <td><code>false</code></td>
 </tr>
 <tr>
-<td><code>system</code></td>
+<td><code>'system'</code></td>
 <td>struct</td>
 <td><code>[]</code></td>
 <td>A structure containing system parameters. If not provided, it defaults to mr.opts().  Likely contains parameters such as gradRasterTime.</td>
 <td><code>mr.opts()</code></td>
 </tr>
 <tr>
-<td><code>RasterTime</code></td>
+<td><code>'RasterTime'</code></td>
 <td>double</td>
 <td><code>[]</code></td>
 <td>The time duration of one raster time unit.  If not provided, it defaults to the gradRasterTime from the 'system' parameter (or mr.opts().gradRasterTime if 'system' is not provided). (Units: seconds)</td>
@@ -2750,7 +2752,7 @@
 <thead>
 <tr>
 <th>Output</th>
-<th>Type</th>
+<th>Value Type</th>
 <th>Description</th>
 </tr>
 </thead>

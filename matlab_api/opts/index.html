@@ -1829,9 +1829,9 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#optional-parameters" class="md-nav__link">
+  <a href="#name-value-pair-arguments" class="md-nav__link">
     <span class="md-ellipsis">
-      Optional Parameters
+      Name-Value Pair Arguments
     </span>
   </a>
   
@@ -2592,9 +2592,9 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#optional-parameters" class="md-nav__link">
+  <a href="#name-value-pair-arguments" class="md-nav__link">
     <span class="md-ellipsis">
-      Optional Parameters
+      Name-Value Pair Arguments
     </span>
   </a>
   
@@ -2649,164 +2649,166 @@
 
 
 <h1 id="opts">opts<a class="headerlink" href="#opts" title="Permanent link">&para;</a></h1>
-<p>Sets gradient limits and other system properties of the MR system.  It allows users to define or retrieve system parameters such as maximum gradient strength, slew rate, RF pulse parameters, and timing parameters. The function uses an input parser for flexible parameter specification and incorporates default values for system characteristics.</p>
+<p>Sets gradient limits and other system properties of the MR system.  It allows users to define or retrieve system parameters such as maximum gradient strength, slew rate, RF pulse parameters, and timing parameters. The function uses an input parser for flexible parameter specification using name-value pairs and incorporates default values for system characteristics.</p>
 <h2 id="syntax">Syntax<a class="headerlink" href="#syntax" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="k">function</span><span class="w"> </span>out<span class="p">=</span><span class="nf">opts</span><span class="p">(</span>varargin<span class="p">)</span>
 </code></pre></div>
 <h2 id="calling-pattern">Calling Pattern<a class="headerlink" href="#calling-pattern" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="n">mr</span><span class="p">.</span><span class="n">opts</span><span class="p">(</span><span class="k">...</span><span class="c">)</span>
+<span class="n">mr</span><span class="p">.</span><span class="n">opts</span><span class="p">(</span><span class="s">&#39;ParameterName&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">,</span><span class="w"> </span><span class="k">...</span><span class="c">)</span>
 </code></pre></div>
 <h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
-<h3 id="optional-parameters">Optional Parameters<a class="headerlink" href="#optional-parameters" title="Permanent link">&para;</a></h3>
+<p>This function accepts parameters as name-value pairs. Specify the parameter name as a string followed by its corresponding value.</p>
+<h3 id="name-value-pair-arguments">Name-Value Pair Arguments<a class="headerlink" href="#name-value-pair-arguments" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
-<th>Name</th>
-<th>Type</th>
+<th>Parameter Name (string)</th>
+<th>Value Type</th>
 <th>Default</th>
 <th>Description</th>
-<th>Example</th>
+<th>Example Value</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>gradUnit</code></td>
+<td><code>'gradUnit'</code></td>
 <td>string</td>
-<td><code>validGradUnits{1}</code></td>
-<td>Specifies the units for maximum gradient amplitude.  Must be one of the validGradUnits. Valid values: ['Hz/m', 'mT/m', 'rad/ms/mm']</td>
+<td><code>'Hz/m'</code></td>
+<td>Specifies the units for maximum gradient amplitude. Valid values: <code>'Hz/m'</code>, <code>'mT/m'</code>, <code>'rad/ms/mm'</code></td>
 <td><code>'mT/m'</code></td>
 </tr>
 <tr>
-<td><code>slewUnit</code></td>
+<td><code>'slewUnit'</code></td>
 <td>string</td>
-<td><code>validSlewUnits{1}</code></td>
-<td>Specifies the units for maximum slew rate. Must be one of the validSlewUnits. Valid values: ['Hz/m/s', 'mT/m/ms', 'T/m/s', 'rad/ms/mm/ms']</td>
+<td><code>'Hz/m/s'</code></td>
+<td>Specifies the units for maximum slew rate. Valid values: <code>'Hz/m/s'</code>, <code>'mT/m/ms'</code>, <code>'T/m/s'</code>, <code>'rad/ms/mm/ms'</code></td>
 <td><code>'T/m/s'</code></td>
 </tr>
 <tr>
-<td><code>b1Unit</code></td>
+<td><code>'b1Unit'</code></td>
 <td>string</td>
-<td><code>validB1Units{1}</code></td>
-<td>Specifies the units for maximum B1 amplitude. Must be one of the validB1Units. Valid values: ['Hz', 'T', 'mT', 'uT']</td>
+<td><code>'Hz'</code></td>
+<td>Specifies the units for maximum B1 amplitude. Valid values: <code>'Hz'</code>, <code>'T'</code>, <code>'mT'</code>, <code>'uT'</code></td>
 <td><code>'uT'</code></td>
 </tr>
 <tr>
-<td><code>maxGrad</code></td>
+<td><code>'maxGrad'</code></td>
 <td>double</td>
-<td><code>[]</code></td>
-<td>Specifies the maximum gradient amplitude. (Units: Hz/m)</td>
+<td><code>40 mT/m</code> (converted to Hz/m)</td>
+<td>Specifies the maximum gradient amplitude</td>
 <td><code>40</code></td>
 </tr>
 <tr>
-<td><code>maxSlew</code></td>
+<td><code>'maxSlew'</code></td>
 <td>double</td>
-<td><code>[]</code></td>
-<td>Specifies the maximum gradient slew rate. (Units: Hz/m/s)</td>
+<td><code>170 T/m/s</code> (converted to Hz/m/s)</td>
+<td>Specifies the maximum gradient slew rate</td>
 <td><code>170</code></td>
 </tr>
 <tr>
-<td><code>maxB1</code></td>
+<td><code>'maxB1'</code></td>
 <td>double</td>
-<td><code>[]</code></td>
-<td>Specifies the maximum RF amplitude. (Units: Hz)</td>
+<td><code>20 uT</code> (converted to Hz)</td>
+<td>Specifies the maximum RF amplitude</td>
 <td><code>20</code></td>
 </tr>
 <tr>
-<td><code>riseTime</code></td>
+<td><code>'riseTime'</code></td>
 <td>double</td>
 <td><code>[]</code></td>
-<td>Specifies the rise time of the gradient waveforms. (Units: seconds)</td>
+<td>Specifies the rise time of the gradient waveforms (seconds)</td>
 <td><code>0.001</code></td>
 </tr>
 <tr>
-<td><code>rfDeadTime</code></td>
+<td><code>'rfDeadTime'</code></td>
 <td>double</td>
-<td><code>defaultOpts.rfDeadTime</code></td>
-<td>Specifies the dead time after an RF pulse. (Units: seconds)</td>
+<td><code>0</code></td>
+<td>Specifies the dead time after an RF pulse (seconds)</td>
 <td><code>0</code></td>
 </tr>
 <tr>
-<td><code>rfRingdownTime</code></td>
+<td><code>'rfRingdownTime'</code></td>
 <td>double</td>
-<td><code>defaultOpts.rfRingdownTime</code></td>
-<td>Specifies the ringdown time after an RF pulse. (Units: seconds)</td>
+<td><code>0</code></td>
+<td>Specifies the ringdown time after an RF pulse (seconds)</td>
 <td><code>0</code></td>
 </tr>
 <tr>
-<td><code>adcDeadTime</code></td>
+<td><code>'adcDeadTime'</code></td>
 <td>double</td>
-<td><code>defaultOpts.adcDeadTime</code></td>
-<td>Specifies the dead time after ADC sampling. (Units: seconds)</td>
+<td><code>0</code></td>
+<td>Specifies the dead time after ADC sampling (seconds)</td>
 <td><code>0</code></td>
 </tr>
 <tr>
-<td><code>adcRasterTime</code></td>
+<td><code>'adcRasterTime'</code></td>
 <td>double</td>
-<td><code>defaultOpts.adcRasterTime</code></td>
-<td>Specifies the raster time for ADC sampling. (Units: seconds)</td>
+<td><code>100e-9</code></td>
+<td>Specifies the raster time for ADC sampling (seconds)</td>
 <td><code>100e-9</code></td>
 </tr>
 <tr>
-<td><code>rfRasterTime</code></td>
+<td><code>'rfRasterTime'</code></td>
 <td>double</td>
-<td><code>defaultOpts.rfRasterTime</code></td>
-<td>Specifies the raster time for RF pulses. (Units: seconds)</td>
+<td><code>1e-6</code></td>
+<td>Specifies the raster time for RF pulses (seconds)</td>
 <td><code>1e-6</code></td>
 </tr>
 <tr>
-<td><code>gradRasterTime</code></td>
+<td><code>'gradRasterTime'</code></td>
 <td>double</td>
-<td><code>defaultOpts.gradRasterTime</code></td>
-<td>Specifies the raster time for gradient waveforms. (Units: seconds)</td>
+<td><code>10e-6</code></td>
+<td>Specifies the raster time for gradient waveforms (seconds)</td>
 <td><code>10e-6</code></td>
 </tr>
 <tr>
-<td><code>blockDurationRaster</code></td>
+<td><code>'blockDurationRaster'</code></td>
 <td>double</td>
-<td><code>defaultOpts.blockDurationRaster</code></td>
-<td>Specifies the raster time for a block of events. (Units: seconds)</td>
+<td><code>10e-6</code></td>
+<td>Specifies the raster time for a block of events (seconds)</td>
 <td><code>10e-6</code></td>
 </tr>
 <tr>
-<td><code>adcSamplesLimit</code></td>
+<td><code>'adcSamplesLimit'</code></td>
 <td>double</td>
-<td><code>defaultOpts.adcSamplesLimit</code></td>
-<td>Specifies the maximum number of ADC samples.</td>
+<td><code>0</code></td>
+<td>Specifies the maximum number of ADC samples (0 = no limit)</td>
 <td><code>0</code></td>
 </tr>
 <tr>
-<td><code>rfSamplesLimit</code></td>
+<td><code>'rfSamplesLimit'</code></td>
 <td>double</td>
-<td><code>defaultOpts.rfSamplesLimit</code></td>
-<td>Specifies the maximum number of RF samples.</td>
+<td><code>0</code></td>
+<td>Specifies the maximum number of RF samples (0 = no limit)</td>
 <td><code>0</code></td>
 </tr>
 <tr>
-<td><code>adcSamplesDivisor</code></td>
+<td><code>'adcSamplesDivisor'</code></td>
 <td>double</td>
-<td><code>defaultOpts.adcSamplesDivisor</code></td>
-<td>Specifies the divisor for ADC samples. The actual number of samples should be an integer multiple of this divisor.</td>
+<td><code>4</code></td>
+<td>Specifies the divisor for ADC samples. The actual number of samples should be an integer multiple of this divisor</td>
 <td><code>4</code></td>
 </tr>
 <tr>
-<td><code>gamma</code></td>
+<td><code>'gamma'</code></td>
 <td>double</td>
-<td><code>defaultOpts.gamma</code></td>
-<td>Specifies the gyromagnetic ratio. (Units: Hz/T)</td>
+<td><code>42576000</code></td>
+<td>Specifies the gyromagnetic ratio (Hz/T)</td>
 <td><code>42576000</code></td>
 </tr>
 <tr>
-<td><code>B0</code></td>
+<td><code>'B0'</code></td>
 <td>double</td>
-<td><code>defaultOpts.B0</code></td>
-<td>Specifies the main magnetic field strength. (Units: T)</td>
+<td><code>1.5</code></td>
+<td>Specifies the main magnetic field strength (T)</td>
 <td><code>1.5</code></td>
 </tr>
 <tr>
-<td><code>setAsDefault</code></td>
+<td><code>'setAsDefault'</code></td>
 <td>logical</td>
 <td><code>false</code></td>
-<td>If true, sets the specified parameters as the new default options.</td>
+<td>If true, sets the specified parameters as the new default options</td>
 <td><code>true</code></td>
 </tr>
 </tbody>
