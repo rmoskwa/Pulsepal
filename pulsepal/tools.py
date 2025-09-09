@@ -1592,3 +1592,258 @@ async def _deprecated_get_distinct_values(
                 "column": column,
             }
         )
+
+
+async def lookup_pulseq_function(
+    ctx: RunContext[PulsePalDependencies],
+    function_query: str,
+) -> str:
+    """
+    Look up detailed information about Pulseq functions.
+
+    This tool helps verify function names and find the correct function for a task.
+
+    Args:
+        function_query: Function name or description of what you want to do
+                       Examples: "opts", "rotate", "I need to set system parameters"
+
+    Returns:
+        JSON with function details including name, calling pattern, parameters,
+        returns, usage examples, and description
+
+    Examples:
+        - lookup_pulseq_function("rotate") → finds "rotate3D" function
+        - lookup_pulseq_function("makeAdc") → exact match for ADC creation
+        - lookup_pulseq_function("gradient limits") → finds "opts" via semantic search
+
+    Security Note:
+        Input is validated and sanitized to prevent injection attacks.
+    """
+    import json
+    import re
+
+    # Input validation
+    MAX_QUERY_LENGTH = 200
+    INVALID_PATTERNS = [
+        r"[;<>]",  # SQL/HTML injection characters
+        r"--",  # SQL comment
+        r"/\*",  # SQL block comment start
+        r"\*/",  # SQL block comment end
+        r"'",  # Single quote (SQL injection)
+        r'"',  # Double quote
+        r"`",  # Backtick
+        r"\\",  # Backslash
+        r"[\x00-\x1f\x7f]",  # Control characters
+        r"\b(OR|AND|UNION|SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|EXECUTE)\b",  # SQL keywords
+    ]
+
+    if not function_query or not isinstance(function_query, str):
+        return json.dumps(
+            {"error": "Invalid query", "message": "Query must be a non-empty string"}
+        )
+
+    # Length validation
+    if len(function_query) > MAX_QUERY_LENGTH:
+        return json.dumps(
+            {
+                "error": "Query too long",
+                "message": f"Query must be less than {MAX_QUERY_LENGTH} characters",
+            }
+        )
+
+    # Sanitize input - strip whitespace
+    function_query = function_query.strip()
+
+    # Check for malicious patterns
+    for pattern in INVALID_PATTERNS:
+        if re.search(pattern, function_query):
+            return json.dumps(
+                {
+                    "error": "Invalid characters",
+                    "message": "Query contains invalid characters",
+                }
+            )
+
+    try:
+        # Get RAG service
+        rag_service = await get_rag_service(ctx)
+        supabase = rag_service.supabase_client.client
+
+        # Phase 1: Try exact match first using Supabase query
+        # Check for exact matches in name and calling_pattern columns only
+        # Using Supabase's built-in escaping to prevent SQL injection
+
+        # Escape the query for safe use in Supabase filters
+        # Supabase client handles parameterization internally
+
+        # Try exact case-sensitive match first
+        exact_result = (
+            supabase.from_("api_reference")
+            .select(
+                "name, calling_pattern, description, parameters, returns, usage_examples"
+            )
+            .or_(f"name.eq.{function_query},calling_pattern.eq.{function_query}")
+            .limit(1)
+            .execute()
+        )
+
+        # If no exact match, try case-insensitive
+        if not exact_result.data:
+            exact_result = (
+                supabase.from_("api_reference")
+                .select(
+                    "name, calling_pattern, description, parameters, returns, usage_examples"
+                )
+                .or_(
+                    f"name.ilike.{function_query},calling_pattern.ilike.{function_query}"
+                )
+                .limit(1)
+                .execute()
+            )
+
+        if exact_result.data and len(exact_result.data) > 0:
+            func = exact_result.data[0]
+            return json.dumps(
+                {
+                    "query": function_query,
+                    "search_type": "exact_match",
+                    "results_found": 1,
+                    "functions": [
+                        {
+                            "function_name": func.get("name"),
+                            "calling_pattern": func.get("calling_pattern"),
+                            "description": func.get("description"),
+                            "parameters": func.get("parameters"),
+                            "returns": func.get("returns"),
+                            "usage_examples": func.get("usage_examples"),
+                        }
+                    ],
+                    "message": f"Exact match found for function: {func.get('name')}",
+                },
+                indent=2,
+            )
+
+        # Phase 2: Use search_pulseq_knowledge with api_reference table
+        # This leverages the full RAG pipeline with BM25 + vector search, RRF fusion, and reranking
+        search_result = await search_pulseq_knowledge(
+            ctx,
+            query=function_query,
+            table="api_reference",  # Focus on API reference table only
+            limit=2,  # Get top 2 results
+        )
+
+        # Parse the search results - search_pulseq_knowledge returns JSON string
+        api_functions = []
+
+        try:
+            # Try to parse as JSON first
+            search_data = json.loads(search_result)
+
+            if "results" in search_data:
+                # Extract function information from the results
+                for result in search_data["results"][:2]:  # Get top 2
+                    # Try to get function name from various fields
+                    function_name = (
+                        result.get("function_name") or result.get("name") or ""
+                    )
+
+                    # If function_name is empty, try to extract from signature
+                    if not function_name and result.get("signature"):
+                        import re
+
+                        # Extract function name from signature with ReDoS-safe patterns
+                        # Limit input length to prevent excessive processing
+                        sig = result["signature"][:500] if result["signature"] else ""
+
+                        try:
+                            # Use simple, efficient patterns that avoid catastrophic backtracking
+                            # Pattern 1: "function name(" - most common case
+                            simple_match = re.search(r"function\s+(\w+)\s*\(", sig)
+                            if simple_match:
+                                function_name = simple_match.group(1)
+                            else:
+                                # Pattern 2: "function var = name(" or "function [out] = name("
+                                # Using [^=]{1,50} to limit backtracking with explicit bounds
+                                assign_match = re.search(
+                                    r"function\s+[^=]{1,50}=\s*(\w+)\s*\(", sig
+                                )
+                                if assign_match:
+                                    function_name = assign_match.group(1)
+                        except Exception as e:
+                            # If regex fails, skip extraction
+                            logger.warning(
+                                f"Failed to extract function name from signature: {e}"
+                            )
+                            function_name = ""
+
+                    # Build function data
+                    func_data = {
+                        "function_name": function_name,
+                        "calling_pattern": result.get("calling_pattern")
+                        or f"mr.{function_name}"
+                        if function_name
+                        else "",
+                        "description": result.get("description") or "",
+                        "parameters": result.get("parameters"),
+                        "returns": result.get("returns"),
+                        "usage_examples": result.get("usage_examples"),
+                    }
+
+                    # Only add if we have at least the function name
+                    if func_data["function_name"]:
+                        api_functions.append(func_data)
+        except json.JSONDecodeError:
+            # If it's not JSON, check if it contains "No relevant results"
+            if "No relevant results found" not in search_result:
+                # Try to extract some basic info from the text response
+                # This is a fallback in case the format changes
+                pass
+
+        # Check if we found any functions from the search
+        if api_functions:
+            return json.dumps(
+                {
+                    "query": function_query,
+                    "search_type": "hybrid_search",
+                    "results_found": len(api_functions),
+                    "functions": api_functions,
+                    "message": f"Found {len(api_functions)} function(s) matching query: {function_query}",
+                },
+                indent=2,
+            )
+
+        # No results found
+        return json.dumps(
+            {
+                "query": function_query,
+                "search_type": "no_results",
+                "results_found": 0,
+                "functions": [],
+                "message": f"No Pulseq functions found matching '{function_query}'",
+            },
+            indent=2,
+        )
+
+    except Exception as e:
+        # Log detailed error for debugging (not exposed to user)
+        logger.error(f"Error looking up function '{function_query}': {e}")
+
+        # Return sanitized error messages to prevent information disclosure
+        # Check if it's a connection error
+        if "connection" in str(e).lower() or "timeout" in str(e).lower():
+            return json.dumps(
+                {
+                    "error": "Service unavailable",
+                    "message": "Unable to connect to knowledge base. Please try again later.",
+                    "query": function_query,
+                }
+            )
+
+        # Generic error message - don't expose internal details
+        return json.dumps(
+            {
+                "error": "Lookup error",
+                "message": "An error occurred while searching for the function. Please try again.",
+                "query": function_query,
+            }
+        )

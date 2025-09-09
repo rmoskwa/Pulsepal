@@ -367,14 +367,18 @@ class ModernPulseqRAG:
         full_namespace = namespace + sub_namespace
 
         # Query function_calling_patterns view for correct usage
-        response = (
-            self.supabase_client.client.table("function_calling_patterns")
-            .select("name, correct_usage, class_name, is_class_method")
-            .eq("name", method)
-            .execute()
-        )
+        try:
+            query = (
+                self.supabase_client.client.table("function_calling_patterns")
+                .select("name, correct_usage, class_name, is_class_method")
+                .eq("name", method)
+            )
+            response = self.supabase_client.safe_execute(query)
+        except Exception as e:
+            logger.warning(f"Failed to validate function namespace: {e}")
+            return result  # Return original result if validation fails
 
-        if response.data:
+        if response and response.data:
             # Check if the namespace is correct
             correct_data = response.data[0]
             correct_usage = correct_data.get("correct_usage", "")

@@ -43,6 +43,15 @@ def _get_cross_encoder():
 logger = logging.getLogger(__name__)
 
 
+class SupabaseExecutionError(Exception):
+    """Exception raised when Supabase query execution fails."""
+
+    def __init__(self, message: str, error_details: Dict[str, Any] = None):
+        """Initialize with error message and optional details."""
+        super().__init__(message)
+        self.error_details = error_details or {}
+
+
 class SupabaseRAGClient:
     """Client for interacting with Supabase vector database for RAG queries."""
 
@@ -66,6 +75,76 @@ class SupabaseRAGClient:
         self.client: Client = create_client(self.url, self.key)
         self._reranker = None  # Lazy load cross-encoder
         logger.info("Supabase client initialized successfully")
+
+    def safe_execute(self, query_builder):
+        """
+        Safely execute a Supabase query with proper error handling.
+
+        Args:
+            query_builder: Supabase query builder object
+
+        Returns:
+            Response object with data attribute
+
+        Raises:
+            SupabaseExecutionError: If query execution fails with details
+        """
+        try:
+            response = query_builder.execute()
+
+            # Check if response has an error
+            if hasattr(response, "error") and response.error:
+                error_msg = str(response.error)
+                logger.error(f"Supabase query failed: {error_msg}")
+
+                # Parse error for better feedback
+                from .sql_validator import SupabaseQueryValidator
+
+                validator = SupabaseQueryValidator()
+                parsed_error = validator.parse_postgresql_error(error_msg)
+
+                raise SupabaseExecutionError(
+                    f"Database query failed: {parsed_error.get('error_type', 'unknown')}",
+                    parsed_error,
+                )
+
+            # Ensure response has data attribute (even if None)
+            if not hasattr(response, "data"):
+                response.data = None
+
+            return response
+
+        except SupabaseExecutionError:
+            raise  # Re-raise our custom error
+        except Exception as e:
+            # Handle unexpected errors
+            error_msg = str(e)
+            logger.error(f"Unexpected Supabase error: {error_msg}")
+
+            # Check for common HTTP errors
+            if "400" in error_msg or "Bad Request" in error_msg:
+                # Parse the error message for details
+                from .sql_validator import SupabaseQueryValidator
+
+                validator = SupabaseQueryValidator()
+                parsed_error = validator.parse_postgresql_error(error_msg)
+
+                raise SupabaseExecutionError(
+                    f"Bad Request: {parsed_error.get('details', {}).get('missing_column', 'Invalid query')}",
+                    parsed_error,
+                )
+            elif "404" in error_msg:
+                raise SupabaseExecutionError(
+                    "Table or resource not found", {"error_type": "not_found"}
+                )
+            elif "500" in error_msg or "503" in error_msg:
+                raise SupabaseExecutionError(
+                    "Database service unavailable", {"error_type": "service_error"}
+                )
+            else:
+                raise SupabaseExecutionError(
+                    f"Query execution failed: {error_msg}", {"raw_error": error_msg}
+                )
 
     def rpc(self, function_name: str, params: dict):
         """

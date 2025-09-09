@@ -7,6 +7,7 @@ while RAG just retrieves documents.
 
 import logging
 import uuid
+from pathlib import Path
 
 from pydantic_ai import Agent
 
@@ -15,6 +16,24 @@ from .gemini_patch import GeminiRecitationError
 from .providers import get_llm_model
 
 logger = logging.getLogger(__name__)
+
+
+# Load Pulseq function reference at startup
+def load_pulseq_function_reference():
+    """Load the Pulseq function reference markdown file."""
+    ref_path = Path(__file__).parent / "pulseq_function_reference.md"
+    try:
+        with open(ref_path, "r", encoding="utf-8") as f:
+            content = f.read()
+            logger.info(f"Loaded Pulseq function reference ({len(content)} chars)")
+            return "\n\n" + content
+    except FileNotFoundError:
+        logger.warning(f"Pulseq function reference not found at {ref_path}")
+        return ""
+    except Exception as e:
+        logger.error(f"Error loading Pulseq function reference: {e}")
+        return ""
+
 
 PULSEPAL_SYSTEM_PROMPT = """You are PulsePal, an expert MRI physics and Pulseq programming assistant.
 
@@ -28,17 +47,14 @@ PULSEPAL_SYSTEM_PROMPT = """You are PulsePal, an expert MRI physics and Pulseq p
   • crawled_code: Helper functions, reconstruction code, vendor tools
   • crawled_docs: Documentation, tutorials, data files, vendor guides
 
-## SQL Assistance Tools
-For analytical queries and database exploration, use these specialized tools:
-- `find_relevant_tables`: When users ask about what's available, what exists, or need to discover content
-- `get_table_schemas`: To understand table structure and available columns before searching
-- `execute_supabase_query`: Flexible Supabase query builder for complex database queries with validation
+## Available Tools
+You have access to the following tools for assisting users:
 
-## Search Strategy
-- Use built-in knowledge for: MRI physics concepts, general programming patterns
-- Use SQL assistance tools for: Listing/enumerating items, discovering what's available, understanding data structure
-- Search when: user asks about specific sequences, Pulseq functions, or implementation details
-- Table selection: Choose specific tables for focused searches, or "auto" for comprehensive results
+- **search_pulseq_knowledge**: Search the knowledge base across 5 specialized tables
+- **lookup_pulseq_function**: Verify Pulseq function names or find functions by intent
+- **find_relevant_tables**: Discover available data when users ask what exists
+- **get_table_schemas**: Understand table structure before searching
+- **execute_supabase_query**: Execute complex database queries with validation
 
 ## Hallucination Prevention
 - Your training data contains outdated Pulseq information
@@ -48,6 +64,7 @@ For analytical queries and database exploration, use these specialized tools:
 - When coding: validate suspicious function names with `validate_pulseq_function`
 - Trust but verify: You know MRI physics, but always confirm Pulseq-specific syntax
 - When asked to list items: Always use `get_distinct_values` rather than guessing or using incomplete search results
+- If validation fails: Use `lookup_pulseq_function` to find the correct function
 
 ## Response Guidelines
 - Default to MATLAB unless Python/pypulseq explicitly requested
@@ -57,6 +74,9 @@ For analytical queries and database exploration, use these specialized tools:
 - When listing items (functions, trajectories, sequences), use SQL tools for complete enumeration
 
 Remember: You have deep domain knowledge. Use search and validation tools strategically, not reflexively."""
+
+# Append Pulseq function reference to system prompt at startup
+PULSEPAL_SYSTEM_PROMPT += load_pulseq_function_reference()
 
 # Create Pulsepal agent
 pulsepal_agent = Agent(
@@ -78,6 +98,11 @@ def _register_tools():
         tools.validate_pulseq_function,
     )  # Critical for hallucination prevention
     pulsepal_agent.tool(tools.validate_code_block)  # Validate entire code blocks
+
+    # Register the new function lookup tool
+    pulsepal_agent.tool(
+        tools.lookup_pulseq_function
+    )  # Verify and find Pulseq functions
 
     # Register new SQL assistance tools
     pulsepal_agent.tool(tools.find_relevant_tables)  # Find relevant database tables
