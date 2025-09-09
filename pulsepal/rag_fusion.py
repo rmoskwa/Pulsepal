@@ -133,11 +133,418 @@ def merge_search_results(
     return final_results
 
 
+def _get_complexity_description(level: int) -> str:
+    """Convert numeric complexity level to descriptive text."""
+    if level is None:
+        level = 3  # Default to intermediate if None
+    if level <= 2:
+        return "beginner-level"
+    elif level == 3:
+        return "intermediate-level"
+    else:
+        return "advanced"
+
+
+def _create_natural_language_content(result: Dict[str, Any]) -> str:
+    """
+    Create natural language content for BGE reranker from result metadata.
+
+    BGE reranker works best with natural language, not keywords.
+    This function creates descriptive sentences that help the reranker
+    understand complexity and pedagogical context.
+    """
+    # Extract metadata with safe defaults
+    table_name = result.get("table_name", result.get("source_table", ""))
+
+    # For pulseq_sequences table, create rich natural language description
+    if table_name == "pulseq_sequences":
+        complexity_level = result.get("complexity_level", 3)
+        sequence_family = result.get("sequence_family", "")
+        trajectory_type = result.get("trajectory_type", "")
+        content_summary = result.get("content_summary", "")
+        educational_value = result.get("educational_value", "")
+        typical_applications = result.get("typical_applications", [])
+        advanced_features = result.get("advanced_features", [])
+
+        # Build natural language description
+        parts = []
+
+        # Complexity and type
+        parts.append(
+            f"This is a {_get_complexity_description(complexity_level)} {sequence_family} sequence"
+        )
+        if trajectory_type:
+            parts.append(f"that implements {trajectory_type} k-space sampling")
+
+        # Summary if available
+        if content_summary:
+            parts.append(f". {content_summary}")
+
+        # Applications
+        if typical_applications:
+            apps_str = ", ".join(typical_applications[:3])  # Limit to 3 for brevity
+            parts.append(f". It is designed for {apps_str}")
+
+        # Educational value
+        if educational_value:
+            parts.append(f"and has {educational_value} educational value")
+
+        # Features
+        if advanced_features:
+            features_str = ", ".join(advanced_features[:3])  # Limit to 3 for brevity
+            parts.append(f". The sequence includes features like {features_str}")
+
+        return " ".join(parts) + "."
+
+    # For api_reference table
+    elif table_name == "api_reference":
+        function_name = result.get("function_name", result.get("name", ""))
+        description = result.get("description", "")
+        signature = result.get("signature", "")
+        function_type = result.get("function_type", "")
+        class_name = result.get("class_name", "")
+        is_class_method = result.get("is_class_method", False)
+        calling_pattern = result.get("calling_pattern", "")
+        parameters = result.get("parameters", {})
+        returns = result.get("returns", {})
+
+        # Build natural language description
+        parts = []
+
+        # Function context
+        if is_class_method and class_name:
+            parts.append(f"This is a method of the {class_name} class")
+            parts.append(f"named {function_name}")
+        else:
+            parts.append(f"This is the {function_name} function")
+
+        # Function type
+        if function_type and function_type != "main":
+            parts.append(f"({function_type} function)")
+
+        # Description
+        if description:
+            parts.append(f". {description}")
+
+        # Calling pattern if available
+        if calling_pattern:
+            parts.append(f". Usage: {calling_pattern}")
+        elif signature:
+            parts.append(f". Signature: {signature}")
+
+        # Parameter information
+        if parameters and isinstance(parameters, dict):
+            param_count = len(parameters)
+            if param_count > 0:
+                parts.append(
+                    f". Takes {param_count} parameter{'s' if param_count != 1 else ''}"
+                )
+                # List first few important parameters
+                param_names = list(parameters.keys())[:3]
+                if param_names:
+                    parts.append(f"including {', '.join(param_names)}")
+
+        # Return information
+        if returns and isinstance(returns, dict):
+            return_type = returns.get("type", "")
+            return_desc = returns.get("description", "")
+            if return_type:
+                parts.append(f". Returns {return_type}")
+            elif return_desc:
+                parts.append(f". Returns {return_desc}")
+
+        return " ".join(parts) + "."
+
+    # For crawled_code table
+    elif table_name == "crawled_code":
+        file_name = result.get("file_name", "")
+        content_type = result.get("content_type", "")
+        dependency_type = result.get("dependency_type", "")
+        content_summary = result.get("content_summary", "")
+        parent_sequences = result.get("parent_sequences", [])
+        pulseq_functions = result.get("pulseq_functions_used", [])
+        line_count = result.get("line_count", 0)
+        metadata = (
+            result.get("metadata", {})
+            if isinstance(result.get("metadata"), dict)
+            else {}
+        )
+
+        # Build natural language description
+        parts = []
+
+        # File type and purpose - enhanced with metadata
+        if content_type == "helper_function":
+            parts.append(f"This is a helper function file {file_name}")
+            # Add function category from metadata
+            if metadata.get("function_category"):
+                parts.append(f"for {metadata['function_category']}")
+            if metadata.get("purpose"):
+                parts.append(f". Purpose: {metadata['purpose']}")
+
+        elif content_type == "reconstruction":
+            parts.append(f"This is a reconstruction code file {file_name}")
+            # Add reconstruction type from metadata
+            if metadata.get("reconstruction_type"):
+                parts.append(
+                    f"implementing {metadata['reconstruction_type']} reconstruction"
+                )
+            if metadata.get("real_time_capable"):
+                parts.append("with real-time capability")
+
+        elif content_type == "main_sequence":
+            parts.append(f"This is a main sequence file {file_name}")
+            # Add sequence type from metadata
+            if metadata.get("sequence_type"):
+                parts.append(f"implementing a {metadata['sequence_type']} sequence")
+            if metadata.get("generates_seq_file"):
+                parts.append("that generates .seq files")
+
+        elif content_type == "vendor_conversion_tool":
+            parts.append(f"This is a vendor conversion tool {file_name}")
+            # Add vendor and conversion details from metadata
+            if metadata.get("vendor"):
+                parts.append(f"for {metadata['vendor']} scanners")
+            if metadata.get("conversion_direction"):
+                # Handle conversion direction like "pulseq_to_idea" -> "pulseq to idea"
+                direction = metadata["conversion_direction"]
+                if "_to_" in direction:
+                    # Replace only the middle "_to_" with " to "
+                    direction = direction.replace("_to_", " to ")
+                else:
+                    # Otherwise just replace underscores with spaces
+                    direction = direction.replace("_", " ")
+                parts.append(f"that converts {direction}")
+            if metadata.get("tool_category"):
+                parts.append(f"(part of {metadata['tool_category']} framework)")
+
+        elif content_type == "vendor_validation_tool":
+            parts.append(f"This is a vendor validation tool {file_name}")
+            # Add validation capabilities from metadata
+            if metadata.get("vendor"):
+                parts.append(f"for {metadata['vendor']} scanners")
+            if metadata.get("validation_capabilities"):
+                caps = metadata["validation_capabilities"]
+                if isinstance(caps, list) and caps:
+                    caps_str = ", ".join(caps[:3])  # Limit to 3
+                    parts.append(f"that validates {caps_str}")
+
+        elif content_type == "vendor_utility":
+            parts.append(f"This is a vendor utility file {file_name}")
+            if metadata.get("vendor"):
+                parts.append(f"for {metadata['vendor']} systems")
+        else:
+            parts.append(
+                f"This is a {content_type} file {file_name}"
+                if content_type
+                else f"File {file_name}"
+            )
+
+        # Dependency importance
+        if dependency_type == "required":
+            parts.append("that is required for sequence operation")
+        elif dependency_type == "optional":
+            parts.append("that provides optional functionality")
+
+        # Summary (if not already added from purpose)
+        if content_summary and not metadata.get("purpose"):
+            parts.append(f". {content_summary}")
+
+        # Complexity level from metadata
+        if metadata.get("complexity_level"):
+            level = metadata["complexity_level"]
+            if level <= 2:
+                parts.append(". This is a beginner-friendly implementation")
+            elif level == 3:
+                parts.append(". This is an intermediate-level implementation")
+            else:
+                parts.append(". This is an advanced implementation")
+
+        # Usage context
+        if parent_sequences and len(parent_sequences) > 0:
+            num_sequences = len(parent_sequences)
+            if num_sequences == 1:
+                parts.append(". It is used by 1 sequence")
+            else:
+                parts.append(f". It is used by {num_sequences} different sequences")
+
+        # Key functions from metadata (for vendor tools)
+        if metadata.get("key_functions"):
+            funcs = metadata["key_functions"]
+            if isinstance(funcs, list) and funcs:
+                funcs_str = ", ".join(funcs[:3])  # Limit to 3
+                parts.append(f". Provides functions: {funcs_str}")
+        # Or Pulseq functions used
+        elif pulseq_functions and len(pulseq_functions) > 0:
+            funcs_str = ", ".join(pulseq_functions[:3])  # Limit to 3
+            parts.append(f". Uses Pulseq functions: {funcs_str}")
+
+        # External dependencies from metadata
+        if metadata.get("external_dependencies"):
+            deps = metadata["external_dependencies"]
+            if isinstance(deps, list) and deps:
+                deps_str = ", ".join(deps[:2])  # Limit to 2
+                parts.append(f". Requires: {deps_str}")
+
+        # Size indicator (if no complexity level provided)
+        if not metadata.get("complexity_level") and line_count > 0:
+            if line_count < 50:
+                parts.append(". This is a small utility")
+            elif line_count < 200:
+                parts.append(". This is a medium-sized implementation")
+            else:
+                parts.append(". This is a comprehensive implementation")
+
+        return " ".join(parts) + "."
+
+    # For sequence_chunks table
+    elif table_name == "sequence_chunks":
+        chunk_type = result.get("chunk_type", "")
+        description = result.get("description", "")
+        mri_concept = result.get("mri_concept", "")
+        pulseq_functions = result.get("pulseq_functions", [])
+        key_concepts = result.get("key_concepts", [])
+        complexity_level = result.get("complexity_level", 3)
+        chunk_order = result.get("chunk_order", 0)
+        parent_context = result.get("parent_context", "")
+
+        # Build natural language description
+        parts = []
+
+        # Chunk type and context
+        if chunk_type:
+            chunk_type_readable = chunk_type.replace("_", " ")
+            parts.append(f"This is a {chunk_type_readable} code section")
+            if chunk_order:
+                parts.append(f"(section {chunk_order} in the sequence)")
+
+        # Description
+        if description:
+            parts.append(f". {description}")
+
+        # MRI concept being demonstrated
+        if mri_concept:
+            parts.append(f". It demonstrates the MRI physics concept of {mri_concept}")
+
+        # Complexity level
+        if complexity_level:
+            parts.append(f"at a {_get_complexity_description(complexity_level)} level")
+
+        # Key concepts
+        if key_concepts:
+            concepts_str = ", ".join(key_concepts[:3])  # Limit to 3 for brevity
+            parts.append(f". Key concepts include {concepts_str}")
+
+        # Pulseq functions used
+        if pulseq_functions:
+            funcs_str = ", ".join(pulseq_functions[:3])  # Limit to 3 for brevity
+            parts.append(f". It uses Pulseq functions: {funcs_str}")
+
+        # Parent context if available
+        if parent_context:
+            parts.append(f". Context: {parent_context}")
+
+        return " ".join(parts) + "."
+
+    # For crawled_docs table
+    elif table_name == "crawled_docs":
+        doc_type = result.get("doc_type", "")
+        source_id = result.get("source_id", "")
+        resource_uri = result.get("resource_uri", "")
+        content_summary = result.get("content_summary", "")
+        metadata = (
+            result.get("metadata", {})
+            if isinstance(result.get("metadata"), dict)
+            else {}
+        )
+        chunk_number = result.get("chunk_number", 1)
+
+        # Build natural language description
+        parts = []
+
+        # Document type and source
+        if doc_type:
+            doc_type_readable = doc_type.replace("_", " ")
+            parts.append(f"This is a {doc_type_readable} document")
+            if chunk_number > 1:
+                parts.append(f"(chunk {chunk_number})")
+        else:
+            parts.append("This is a documentation resource")
+
+        # Add source_id if available, otherwise fall back to resource URI
+        if source_id:
+            parts.append(f"from {source_id}")
+        elif resource_uri:
+            # Extract filename or last part of URI for readability
+            resource_name = (
+                resource_uri.split("/")[-1] if "/" in resource_uri else resource_uri
+            )
+            parts.append(f"from {resource_name}")
+
+        # Content summary
+        if content_summary:
+            parts.append(f". {content_summary}")
+
+        # Add metadata-specific information based on doc_type
+        if doc_type == "vendor_guide" and metadata:
+            if metadata.get("vendor"):
+                parts.append(f". Specific to {metadata['vendor']} scanners")
+            if metadata.get("deployment_method"):
+                parts.append(f"using {metadata['deployment_method']} deployment")
+
+        elif doc_type == "tutorial" and metadata:
+            if metadata.get("difficulty_level"):
+                parts.append(f". Tutorial difficulty: {metadata['difficulty_level']}")
+            if metadata.get("prerequisites"):
+                prereqs = (
+                    metadata["prerequisites"][:2]
+                    if isinstance(metadata["prerequisites"], list)
+                    else []
+                )
+                if prereqs:
+                    parts.append(f"with prerequisites: {', '.join(prereqs)}")
+
+        elif doc_type == "api_reference" and metadata:
+            if metadata.get("api_version"):
+                parts.append(f". API version: {metadata['api_version']}")
+            if metadata.get("language"):
+                parts.append(f"for {metadata['language']}")
+
+        elif doc_type == "paper" and metadata:
+            if metadata.get("authors"):
+                authors = (
+                    metadata["authors"][:2]
+                    if isinstance(metadata["authors"], list)
+                    else []
+                )
+                if authors:
+                    parts.append(f". By {', '.join(authors)}")
+            if metadata.get("year"):
+                parts.append(f"({metadata['year']})")
+
+        return " ".join(parts) + "."
+
+    # For other tables or fallback
+    else:
+        # Use existing content or searchable_text
+        content = result.get("content", "")
+        if not content:
+            content = result.get("searchable_text", "")
+        if not content:
+            content = result.get("content_summary", "")
+        if not content:
+            # Last resort: build from available fields
+            content = f"{result.get('file_name', '')} {result.get('title', '')}"
+
+        return str(content)
+
+
 def select_top_results(
     fused_results: List[Dict[str, Any]], top_n: int = DEFAULT_TOP_N_RESULTS
 ) -> List[Dict[str, Any]]:
     """
     Select top N results from fused results, maintaining metadata.
+    Enriches content field with natural language for better reranking.
 
     Args:
         fused_results: Results after RRF fusion with scores
@@ -156,13 +563,16 @@ def select_top_results(
             for result in top_results:
                 result["normalized_score"] = result.get("rrf_score", 0) / max_score
 
-    # Ensure all required metadata is present
+    # Ensure all required metadata is present and enrich content for reranker
     for result in top_results:
         # Ensure essential fields exist
         if "title" not in result:
             result["title"] = "Untitled"
-        if "content" not in result:
-            result["content"] = ""
+
+        # Create natural language content for BGE reranker
+        # This is critical for proper reranking with complexity awareness
+        result["content"] = _create_natural_language_content(result)
+
         if "source" not in result:
             result["source"] = "unknown"
         if "table_name" not in result:

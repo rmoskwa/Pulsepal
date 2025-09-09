@@ -321,7 +321,7 @@ async def search_pulseq_knowledge(
     ctx: RunContext[PulsePalDependencies],
     query: str,
     table: str = "auto",
-    limit: int = 3,
+    limit: int = 5,
 ) -> str:
     """
     Search Pulseq knowledge base with intelligent table selection.
@@ -378,7 +378,8 @@ async def search_pulseq_knowledge(
     Args:
         query: User's search query
         table: Table name from above list OR "auto" for automatic selection
-        limit: Maximum results (default 3, max 10)
+        limit: Number of results to return (minimum 5, maximum 10, default 5)
+               Note: Automatically adjusted to minimum of 5 to ensure quality results
 
     Returns:
         JSON with results, relevance scores, and search metadata
@@ -395,6 +396,17 @@ async def search_pulseq_knowledge(
     # Gemini might generate comprehensive queries
     if len(query) > 1000:
         logger.info(f"Long query received: {len(query)} characters")
+
+    # Enforce minimum limit of 5 for better search quality
+    # This ensures users get multiple examples/options to choose from
+    if limit < 5:
+        logger.info(f"Limit {limit} increased to minimum of 5 for better results")
+        limit = 5
+
+    # Cap maximum at 10 to avoid overwhelming responses
+    if limit > 10:
+        logger.info(f"Limit {limit} capped at maximum of 10")
+        limit = 10
 
     # Get or create RAG service
     if not hasattr(ctx.deps, "rag_v2"):
