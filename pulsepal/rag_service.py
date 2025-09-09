@@ -1862,6 +1862,9 @@ class ModernPulseqRAG:
                     "usage_examples": r.get("usage_examples", []),
                     "has_nargin_pattern": r.get("has_nargin_pattern", False),
                     "similarity_score": r.get("similarity", 0.0),
+                    "content": r.get(
+                        "content", ""
+                    ),  # Preserve content field from search
                 }
             )
         return formatted
@@ -1883,6 +1886,9 @@ class ModernPulseqRAG:
                     "content_summary": r.get("content_summary", ""),
                     "sequence_family": r.get("sequence_family", ""),
                     "contrast_mechanism": r.get("contrast_mechanism", ""),
+                    "content": r.get(
+                        "content", ""
+                    ),  # Preserve content field from search
                     "trajectory_type": r.get("trajectory_type", ""),
                     "dimensionality": r.get("dimensionality", ""),
                     "architecture_type": r.get("architecture_type", ""),
@@ -1929,6 +1935,9 @@ class ModernPulseqRAG:
                     "description": r.get("description", ""),
                     "parent_context": r.get("parent_context", ""),
                     "similarity_score": r.get("similarity", 0.0),
+                    "content": r.get(
+                        "content", ""
+                    ),  # Preserve content field from search
                 }
             )
         return formatted

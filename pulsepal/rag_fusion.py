@@ -145,6 +145,75 @@ def _get_complexity_description(level: int) -> str:
         return "advanced"
 
 
+def _enhance_content_for_reranker(result: Dict[str, Any], existing_content: str) -> str:
+    """
+    Enhance existing content with metadata for better reranking.
+    This preserves the actual search content while adding contextual information
+    that helps the BGE reranker understand complexity and relevance.
+
+    Args:
+        result: Search result dictionary with metadata
+        existing_content: The actual content from BM25/vector search
+
+    Returns:
+        Enhanced content string that preserves original content with metadata prefix
+    """
+    # Extract metadata with safe defaults
+    table_name = result.get("table_name", result.get("source_table", ""))
+
+    # Build metadata prefix based on table type
+    metadata_prefix = ""
+
+    if table_name == "pulseq_sequences":
+        complexity_level = result.get("complexity_level", 3)
+        sequence_family = result.get("sequence_family", "")
+        trajectory_type = result.get("trajectory_type", "")
+
+        if sequence_family or trajectory_type:
+            complexity_desc = _get_complexity_description(complexity_level)
+            metadata_prefix = f"[{complexity_desc} {sequence_family} sequence"
+            if trajectory_type:
+                metadata_prefix += f", {trajectory_type} trajectory"
+            metadata_prefix += "] "
+
+    elif table_name == "api_reference":
+        function_name = result.get("function_name", result.get("name", ""))
+        function_type = result.get("function_type", "")
+
+        if function_name:
+            metadata_prefix = f"[{function_type} function: {function_name}] "
+
+    elif table_name == "sequence_chunks":
+        chunk_type = result.get("chunk_type", "")
+        mri_concept = result.get("mri_concept", "")
+
+        if chunk_type:
+            chunk_type_readable = chunk_type.replace("_", " ")
+            metadata_prefix = f"[{chunk_type_readable}"
+            if mri_concept:
+                metadata_prefix += f", {mri_concept}"
+            metadata_prefix += "] "
+
+    elif table_name == "crawled_code":
+        content_type = result.get("content_type", "")
+        dependency_type = result.get("dependency_type", "")
+
+        if content_type:
+            metadata_prefix = f"[{content_type}"
+            if dependency_type:
+                metadata_prefix += f", {dependency_type} dependency"
+            metadata_prefix += "] "
+
+    elif table_name == "crawled_docs":
+        doc_type = result.get("doc_type", "")
+        if doc_type:
+            metadata_prefix = f"[{doc_type} documentation] "
+
+    # Return enhanced content: metadata prefix + original content
+    # This gives the reranker context while preserving the actual content
+    return metadata_prefix + existing_content
+
+
 def _create_natural_language_content(result: Dict[str, Any]) -> str:
     """
     Create natural language content for BGE reranker from result metadata.
@@ -452,6 +521,7 @@ def _create_natural_language_content(result: Dict[str, Any]) -> str:
         source_id = result.get("source_id", "")
         resource_uri = result.get("resource_uri", "")
         content_summary = result.get("content_summary", "")
+        parent_sequences = result.get("parent_sequences", [])
         metadata = (
             result.get("metadata", {})
             if isinstance(result.get("metadata"), dict)
@@ -483,46 +553,114 @@ def _create_natural_language_content(result: Dict[str, Any]) -> str:
 
         # Content summary
         if content_summary:
-            parts.append(f". {content_summary}")
+            # Only add period if we have previous content
+            if len(parts) > 1:
+                parts.append(f". {content_summary}")
+            else:
+                parts.append(content_summary)
 
-        # Add metadata-specific information based on doc_type
-        if doc_type == "vendor_guide" and metadata:
+        # Enhanced metadata utilization based on doc_type
+        # Different doc_types have different metadata structures per storage-schema.md
+
+        if doc_type in ["vendor_guide", "vendor_troubleshooting", "api_reference"]:
+            # Vendor-specific documentation (including api_reference)
             if metadata.get("vendor"):
                 parts.append(f". Specific to {metadata['vendor']} scanners")
-            if metadata.get("deployment_method"):
-                parts.append(f"using {metadata['deployment_method']} deployment")
-
-        elif doc_type == "tutorial" and metadata:
-            if metadata.get("difficulty_level"):
-                parts.append(f". Tutorial difficulty: {metadata['difficulty_level']}")
-            if metadata.get("prerequisites"):
-                prereqs = (
-                    metadata["prerequisites"][:2]
-                    if isinstance(metadata["prerequisites"], list)
+            if metadata.get("interpreter_version"):
+                parts.append(f"for {metadata['interpreter_version']}")
+            if metadata.get("topics_covered"):
+                # Accept ALL topics, no limiting
+                topics = (
+                    metadata["topics_covered"]
+                    if isinstance(metadata["topics_covered"], list)
                     else []
                 )
-                if prereqs:
-                    parts.append(f"with prerequisites: {', '.join(prereqs)}")
+                if topics:
+                    topics_str = ", ".join(str(t).replace("_", " ") for t in topics)
+                    parts.append(f". Covers {topics_str}")
+            if metadata.get("tool_references"):
+                # Accept ALL tool references, no limiting
+                tools = (
+                    metadata["tool_references"]
+                    if isinstance(metadata["tool_references"], list)
+                    else []
+                )
+                if tools:
+                    tools_str = ", ".join(tools)
+                    parts.append(f". References tools: {tools_str}")
+            if doc_type == "vendor_troubleshooting" and metadata.get("error_codes"):
+                parts.append(f". Addresses {len(metadata['error_codes'])} error codes")
 
-        elif doc_type == "api_reference" and metadata:
-            if metadata.get("api_version"):
-                parts.append(f". API version: {metadata['api_version']}")
-            if metadata.get("language"):
-                parts.append(f"for {metadata['language']}")
+        elif doc_type == "configuration":
+            # Config files - only add config_type
+            if metadata.get("config_type"):
+                parts.append(f". Config type: {metadata['config_type']}")
 
-        elif doc_type == "paper" and metadata:
-            if metadata.get("authors"):
+        elif doc_type == "paper":
+            # Academic papers
+            if metadata.get("title"):
+                parts.append(f": {metadata['title']}")
+            if metadata.get("author"):
                 authors = (
-                    metadata["authors"][:2]
-                    if isinstance(metadata["authors"], list)
+                    metadata["author"]
+                    if isinstance(metadata["author"], list)
+                    else [metadata["author"]]
+                )
+                authors_str = ", ".join(authors[:2])  # Keep limit for authors
+                parts.append(f"by {authors_str}")
+            if metadata.get("keywords"):
+                keywords = (
+                    metadata["keywords"][:3]
+                    if isinstance(metadata["keywords"], list)
+                    else []
+                )  # Keep limit for keywords
+                if keywords:
+                    parts.append(f". Keywords: {', '.join(keywords)}")
+
+        elif doc_type == "data_file":
+            # Data files (CSV, MAT, etc.)
+            if metadata.get("data_format"):
+                parts.append(f". Format: {metadata['data_format']}")
+            if metadata.get("data_type"):
+                parts.append(f"containing {metadata['data_type']} data")
+            if metadata.get("column_headers"):
+                cols = (
+                    metadata["column_headers"][:10]
+                    if isinstance(metadata["column_headers"], list)
+                    else []
+                )  # Limit to 10 column headers
+                if cols:
+                    parts.append(f". Columns include: {', '.join(cols)}")
+
+        elif doc_type in ["tutorial", "guide", "readme", "manual", "forum"]:
+            # Educational content and other types - only add topics_covered
+            if metadata.get("topics_covered"):
+                # Accept ALL topics, no limiting
+                topics = (
+                    metadata["topics_covered"]
+                    if isinstance(metadata["topics_covered"], list)
                     else []
                 )
-                if authors:
-                    parts.append(f". By {', '.join(authors)}")
-            if metadata.get("year"):
-                parts.append(f"({metadata['year']})")
+                if topics:
+                    topics_str = ", ".join(str(t).replace("_", " ") for t in topics)
+                    parts.append(f". Covers {topics_str}")
 
-        return " ".join(parts) + "."
+        # Add parent sequence relationships for any doc_type
+        if (
+            parent_sequences
+            and isinstance(parent_sequences, list)
+            and len(parent_sequences) > 0
+        ):
+            if len(parent_sequences) == 1:
+                parts.append(f". Documents sequence ID {parent_sequences[0]}")
+            else:
+                parts.append(f". Related to {len(parent_sequences)} sequences")
+
+        # Join parts and add final period only if not already present
+        result_text = " ".join(parts)
+        if result_text and not result_text.endswith("."):
+            result_text += "."
+        return result_text
 
     # For other tables or fallback
     else:
@@ -569,9 +707,11 @@ def select_top_results(
         if "title" not in result:
             result["title"] = "Untitled"
 
-        # Create natural language content for BGE reranker
+        # Create natural language content for BGE reranker in a separate field
         # This is critical for proper reranking with complexity awareness
-        result["content"] = _create_natural_language_content(result)
+        # The reranker has a 512 token limit, so we need concise summaries
+        # Store in reranker_content field, preserving original content field
+        result["reranker_content"] = _create_natural_language_content(result)
 
         if "source" not in result:
             result["source"] = "unknown"

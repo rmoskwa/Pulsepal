@@ -492,8 +492,18 @@ class BGERerankerService:
             # Prepare input pairs
             pairs = []
             for doc in docs_to_rerank:
-                # Extract text content from document
-                content = doc.get("content", "")
+                # Extract reranker_content - this is required!
+                # reranker_content contains concise summaries (<512 tokens) for the reranker
+                # The full content field is preserved for Gemini after reranking
+                if "reranker_content" not in doc:
+                    logger.error(
+                        f"Missing reranker_content field in document: {doc.get('id', 'unknown')}"
+                    )
+                    raise ValueError(
+                        "Document missing required 'reranker_content' field for reranking"
+                    )
+
+                content = doc["reranker_content"]
                 if isinstance(content, dict):
                     content = content.get("text", "") or content.get("content", "")
                 pairs.append([query, str(content)])

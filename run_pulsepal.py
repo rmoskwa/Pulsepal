@@ -108,6 +108,15 @@ async def interactive_mode():
                 )
                 print("\n\n👋 Goodbye! Thanks for using Pulsepal!")
                 break
+            except EOFError:
+                # Handle EOF gracefully (e.g., when input is piped)
+                logger.log_conversation(
+                    session_id,
+                    "system",
+                    "Interactive session ended (EOF)",
+                )
+                print("\n\n👋 Session ended. Thanks for using Pulsepal!")
+                break
             except Exception as e:
                 print(f"\n❌ Error: {e}")
                 print("Please try again or type 'quit' to exit.")
