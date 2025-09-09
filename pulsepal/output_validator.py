@@ -17,6 +17,10 @@ from .function_index import (
     MATLAB_FUNCTIONS,
     get_correct_namespace,
 )
+from .tag_validator import (
+    get_session_whitelist,
+    should_skip_function_validation,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -119,12 +123,15 @@ def extract_pulseq_functions(text: str) -> Set[Tuple[str, str, int]]:
     return functions
 
 
-def validate_pulseq_function(function_call: str) -> Dict[str, Any]:
+def validate_pulseq_function(
+    function_call: str, session_whitelist: Set[str] = None
+) -> Dict[str, Any]:
     """
     Validate a single Pulseq function call.
 
     Args:
         function_call: Function call like "mr.makeAdc" or "seq.write"
+        session_whitelist: Set of custom functions to allow for this session
 
     Returns:
         Dictionary with validation results:
@@ -133,6 +140,14 @@ def validate_pulseq_function(function_call: str) -> Dict[str, Any]:
         - correct_form: str or None
         - explanation: str
     """
+    # Check if function is in session whitelist
+    if session_whitelist and function_call in session_whitelist:
+        return {
+            "is_valid": True,
+            "error_type": None,
+            "correct_form": function_call,
+            "explanation": "Function is whitelisted from retrieved examples.",
+        }
     # Parse the function call
     parts = function_call.split(".")
 
@@ -465,6 +480,13 @@ async def validate_pulseq_output(
         else "default"
     )
 
+    # Check if we should skip function validation (all code is retrieved examples)
+    if await should_skip_function_validation(session_id):
+        logger.info(
+            f"Skipping function validation for session {session_id} (retrieved examples only)"
+        )
+        return output
+
     # Thread-safe retry count management
     async with _retry_lock:
         # Initialize retry count for this session if needed
@@ -502,10 +524,13 @@ async def validate_pulseq_output(
         _retry_counts[session_id] = 0  # Reset counter on success
         return output
 
+    # Get session whitelist for custom functions
+    session_whitelist = await get_session_whitelist(session_id)
+
     # Validate each function
     invalid_functions = []
     for func_call, context, line_num in functions:
-        validation = validate_pulseq_function(func_call)
+        validation = validate_pulseq_function(func_call, session_whitelist)
         if not validation["is_valid"]:
             invalid_functions.append((func_call, validation))
             logger.info(
@@ -529,9 +554,12 @@ async def validate_pulseq_output(
         _retry_timestamps[session_id] = datetime.now()  # Update timestamp
 
     logger.warning(
-        f"Validation failed for session {session_id}, retry {retry_count}/{MAX_VALIDATION_RETRIES}"
+        f"🔄 VALIDATION FAILED for session {session_id}, retry {retry_count}/{MAX_VALIDATION_RETRIES}"
     )
-    logger.debug(f"Invalid functions: {[f[0] for f in invalid_functions]}")
+    logger.info(f"  ❌ Invalid functions detected: {[f[0] for f in invalid_functions]}")
+    logger.info(f"  📝 Original message preview: {output[:200]}...")
+    logger.info("  🔧 Sending correction guidance to Gemini...")
+    logger.debug(f"  Full error message:\n{error_message}")
 
     raise ModelRetry(error_message)
 

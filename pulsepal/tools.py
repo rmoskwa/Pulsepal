@@ -1412,7 +1412,11 @@ async def execute_supabase_query(
             )
 
     except Exception as e:
-        error_msg = str(e)
+        # Safely extract error message
+        error_msg = str(e) if e else "Unknown error occurred"
+
+        # Log the actual error for debugging
+        logger.error(f"Supabase query error: {error_msg}")
 
         # Parse the error
         validator = SupabaseQueryValidator()
@@ -1439,6 +1443,13 @@ async def execute_supabase_query(
 
         # Generate guidance
         guidance = validator.generate_error_guidance(parsed_error, context)
+
+        # Log the retry
+        logger.warning("🔄 QUERY FAILED - Sending retry guidance to Gemini")
+        logger.info(f"  ❌ Error type: {parsed_error.get('error_type', 'unknown')}")
+        logger.info(f"  📊 Table: {table}")
+        logger.info(f"  ⚠️ Issue: {parsed_error.get('details', {})}")
+        logger.debug(f"  Full guidance:\n{guidance}")
 
         # Raise ModelRetry with guidance
         raise ModelRetry(guidance)

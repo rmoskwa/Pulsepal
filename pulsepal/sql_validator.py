@@ -51,6 +51,18 @@ class SupabaseQueryValidator:
         Returns:
             Parsed error information with code, message, hints
         """
+        # Handle None or empty error messages
+        if not error_message:
+            return {
+                "raw_error": "No error message provided",
+                "error_code": None,
+                "error_type": "unknown",
+                "details": {},
+            }
+
+        # Convert to string if not already
+        error_message = str(error_message)
+
         parsed = {
             "raw_error": error_message,
             "error_code": None,
@@ -82,7 +94,7 @@ class SupabaseQueryValidator:
                             error_message = error_dict[
                                 "message"
                             ]  # Update to use the actual message
-                        if "hint" in error_dict:
+                        if "hint" in error_dict and error_dict["hint"]:
                             parsed["details"]["hint"] = error_dict["hint"]
             except (ValueError, SyntaxError, json.JSONDecodeError, ImportError):
                 pass  # Fall back to string parsing
@@ -131,7 +143,7 @@ class SupabaseQueryValidator:
             elif "hint" in parsed["details"]:
                 # Check if hint contains a suggestion
                 hint = parsed["details"]["hint"]
-                if "Perhaps you meant" in hint:
+                if hint and "Perhaps you meant" in hint:
                     suggestion_match = re.search(r'"([^"]+)"', hint)
                     if suggestion_match:
                         parsed["details"]["suggested_column"] = suggestion_match.group(
