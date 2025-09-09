@@ -11,7 +11,7 @@ import re
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
 
-from pydantic_ai import RunContext
+from pydantic_ai import RunContext, ModelRetry
 
 from .conversation_logger import get_conversation_logger
 from .dependencies import PulsePalDependencies
@@ -149,6 +149,174 @@ def extract_functions_from_text(text: str) -> List[str]:
     return unique_functions
 
 
+def _validate_search_relevance(
+    results: Dict, table: str, query: str, ctx: Optional[RunContext] = None
+) -> None:
+    """
+    Validate search result relevance and raise ModelRetry if scores are too low.
+
+    This validation works cooperatively with other validators in the system:
+    - Only validates RAG search relevance, not function validation or SQL errors
+    - Provides specific guidance for improving search quality
+    - Allows other validators to handle their specific domains
+
+    Args:
+        results: Search results dictionary from RAG service
+        table: The table that was searched
+        query: The original search query
+
+    Raises:
+        ModelRetry: If relevance scores are too low, prompting Gemini to search more broadly
+    """
+    # Skip validation if results indicate an error already handled elsewhere
+    if results.get("error"):
+        return  # Let other error handlers deal with this
+
+    # Define minimum acceptable relevance thresholds
+    # Based on research and empirical testing:
+    # - BM25: Unbounded scores, query-dependent. Our empirical data shows very weak matches < 0.02
+    # - Vector: We check count==0 rather than similarity scores (would be <0.3 if available)
+    # - BGE Reranker: Raw scores unbounded (can be negative), normalized [0,1] via sigmoid
+    #   When normalized, very low relevance < 0.01, very high > 0.99
+    MIN_BM25_SCORE = (
+        0.02  # Based on GE scanner case: mean 0.0153 indicated poor keyword match
+    )
+    MIN_RERANK_SCORE = (
+        1.0  # For raw BGE scores: negative=irrelevant, 0-1=weak, >1=relevant
+    )
+    # In our case (raw scores), 2.408 was considered acceptable despite other poor metrics
+
+    # Check if we have search metadata
+    metadata = results.get("search_metadata", {})
+    if not metadata:
+        return  # No metadata to validate
+
+    # Skip validation if this was already a retry from another validation
+    if metadata.get("is_retry_search", False):
+        return  # Avoid validation loops
+
+    # Also skip if we've already validated this query recently in this context
+    if ctx and hasattr(ctx, "_recent_validation_queries"):
+        query_key = f"{query[:50]}_{table}"
+        if query_key in ctx._recent_validation_queries:
+            return  # Already validated this query/table combo
+
+    # Extract performance metrics if available
+    performance = metadata.get("performance") or {}
+
+    # Check for specific indicators of poor results
+    poor_relevance_indicators = []
+
+    # 1. Check if we got 0 results from vector search
+    vector_count = performance.get("vector_count")
+    if vector_count is not None and vector_count == 0:
+        poor_relevance_indicators.append("No semantic matches found in vector search")
+
+    # 2. Check BM25 scores if available from RRF fusion stats
+    rrf_stats = performance.get("rrf_stats")
+    if rrf_stats and isinstance(rrf_stats, dict):
+        score_mean = rrf_stats.get("score_mean")
+        if score_mean is not None and score_mean < MIN_BM25_SCORE:
+            poor_relevance_indicators.append(
+                f"BM25 keyword scores very low (mean: {score_mean:.4f})"
+            )
+
+    # 3. Check reranker scores if available
+    rerank_stats = performance.get("rerank_stats")
+    if rerank_stats and isinstance(rerank_stats, dict):
+        top_score = rerank_stats.get("top_score")
+        # Note: In the GE case, top_score was 2.408 which is good
+        if top_score is not None and top_score < MIN_RERANK_SCORE:
+            poor_relevance_indicators.append(
+                f"Reranker confidence low (top score: {top_score:.2f})"
+            )
+
+    # 4. Check total results - if very few results, might be searching wrong table
+    total_results = results.get("total_results", 0)
+    if total_results < 3 and table not in ["auto", None]:
+        poor_relevance_indicators.append(
+            f"Only {total_results} results found in table '{table}'"
+        )
+
+    # Only raise ModelRetry if we have strong evidence of poor search quality
+    # Be conservative to avoid conflicting with other validators
+    should_retry = False
+
+    # Case 1: Multiple strong indicators of poor relevance (2 or more)
+    # This catches cases like the GE scanner query with 0 vector matches + low BM25
+    if len(poor_relevance_indicators) >= 2:
+        should_retry = True
+
+    # Case 2: Zero results with specific table (not auto mode)
+    elif total_results == 0 and table not in ["auto", None]:
+        should_retry = True
+
+    if should_retry:
+        retry_message = (
+            "🔍 **Low Relevance Scores Detected**\n\n"
+            "The search results have low relevance scores, suggesting the information "
+            "might be in a different location.\n\n"
+            "**Current search metrics:**\n"
+        )
+        for indicator in poor_relevance_indicators:
+            retry_message += f"  • {indicator}\n"
+
+        retry_message += "\n**Available search options to broaden your search:**\n\n"
+
+        if table not in ["auto", None]:
+            retry_message += (
+                f"📊 **Currently searching:** `{table}` table only\n\n"
+                f"**Try these alternatives:**\n"
+                f"  • `table='auto'` - Search across ALL tables comprehensively\n"
+                f"  • `table='pulseq_sequences'` - Complete sequence implementations\n"
+                f"  • `table='api_reference'` - Function documentation\n"
+                f"  • `table='sequence_chunks'` - Code patterns and snippets\n"
+                f"  • `table='crawled_code'` - Helper functions and utilities\n"
+                f"  • `table='crawled_docs'` - Documentation, guides, and tutorials\n\n"
+            )
+        else:
+            # Even in auto mode, if scores are low, suggest different query strategies
+            retry_message += (
+                "**The search covered all tables but found weak matches.**\n\n"
+                "**Consider these approaches:**\n"
+                "  • Rephrase the query with different terms\n"
+                "  • Break down complex queries into simpler parts\n"
+                "  • Search for related concepts first\n"
+            )
+
+        if total_results == 0:
+            retry_message += (
+                "\n💡 **No results found** - The information might:\n"
+                "  • Use different terminology than your query\n"
+                "  • Be in a different table than expected\n"
+                "  • Require a more general search term\n"
+            )
+        elif total_results < 3:
+            retry_message += (
+                "\n💡 **Few results found** - Try:\n"
+                "  • Broadening the search with `table='auto'`\n"
+                "  • Using more general search terms\n"
+            )
+
+        # Add brief note about validation scope
+        retry_message += (
+            "\n\n*This validation checks search relevance scores. "
+            "Other validations handle function names and SQL syntax separately.*"
+        )
+
+        # Track that we've validated this query to avoid loops
+        if ctx:
+            if not hasattr(ctx, "_recent_validation_queries"):
+                ctx._recent_validation_queries = set()
+            query_key = f"{query[:50]}_{table}"
+            ctx._recent_validation_queries.add(query_key)
+
+        logger.info(
+            f"Low relevance scores detected, suggesting broader search: {poor_relevance_indicators}"
+        )
+        raise ModelRetry(retry_message)
+
+
 async def search_pulseq_knowledge(
     ctx: RunContext[PulsePalDependencies],
     query: str,
@@ -272,6 +440,9 @@ async def search_pulseq_knowledge(
             limit=limit,
             detected_functions=detected_functions,
         )
+
+    # VALIDATION: Check relevance scores and prompt for broader search if needed
+    _validate_search_relevance(results, table, query, ctx)
 
     # Log search event if we have context and conversation_context
     if (
