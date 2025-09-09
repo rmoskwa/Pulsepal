@@ -16,6 +16,7 @@ from .function_index import (
     COMMON_HALLUCINATIONS,
     MATLAB_FUNCTIONS,
     get_correct_namespace,
+    is_valid_constructor_namespace,
 )
 from .tag_validator import (
     get_session_whitelist,
@@ -225,6 +226,17 @@ def validate_pulseq_function(
         }
 
     # Check namespace
+    # First check if it's a constructor with flexible namespace rules
+    if is_valid_constructor_namespace(func_name, namespace):
+        # Constructor with valid namespace (could be with or without prefix)
+        return {
+            "is_valid": True,
+            "error_type": None,
+            "correct_form": function_call,
+            "explanation": "Constructor with valid namespace.",
+        }
+
+    # Not a constructor or invalid constructor namespace, check normal namespace rules
     correct_namespace = get_correct_namespace(func_name)
 
     if correct_namespace is None:
@@ -237,7 +249,7 @@ def validate_pulseq_function(
         }
 
     if correct_namespace == "":
-        # No namespace needed (constructor or standalone)
+        # No namespace needed (standalone function)
         if namespace:
             return {
                 "is_valid": False,

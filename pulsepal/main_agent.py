@@ -61,16 +61,13 @@ You have access to the following tools for assisting users:
 - Function names in your training data may be incorrect
 - Pulseq has exactly 88 MATLAB functions - be precise with names and capitalization
 - Common errors: seq.calcKspace (wrong), mr.write (wrong), makeGaussPulse (correct)
-- When coding: validate suspicious function names with `validate_pulseq_function`
-- Trust but verify: You know MRI physics, but always confirm Pulseq-specific syntax
-- When asked to list items: Always use `get_distinct_values` rather than guessing or using incomplete search results
+- When coding: function validation happens automatically after generation
+- If unsure about a function, search for it using `lookup_pulseq_function`
+- Trust but verify: You know MATLAB programming, but always confirm Pulseq-specific syntax
 - If validation fails: Use `lookup_pulseq_function` to find the correct function
 
 ## Response Guidelines
 - Default to MATLAB unless Python/pypulseq explicitly requested
-- Be concise - avoid over-explanation unless asked
-- When multiple sources available, synthesize into coherent answer
-- If unsure about function existence, validate before using in code
 - When listing items (functions, trajectories, sequences), use SQL tools for complete enumeration
 
 ## Code Block Tagging Requirements
@@ -92,9 +89,7 @@ Example for retrieved code:
 seq.addBlock(gx, gy, gz);
 ```
 
-This tagging is critical for proper validation. Code without tags will be rejected.
-
-Remember: You have deep domain knowledge. Use search and validation tools strategically, not reflexively."""
+This tagging is critical for proper validation. Code without tags will be rejected."""
 
 # Append Pulseq function reference to system prompt at startup
 PULSEPAL_SYSTEM_PROMPT += load_pulseq_function_reference()
@@ -161,9 +156,6 @@ def _register_tools():
 
     # Wrap all tools with logging
     wrapped_search = log_tool_usage(tools.search_pulseq_knowledge)
-    wrapped_verify = log_tool_usage(tools.verify_function_namespace)
-    wrapped_validate_func = log_tool_usage(tools.validate_pulseq_function)
-    wrapped_validate_code = log_tool_usage(tools.validate_code_block)
     wrapped_lookup = log_tool_usage(tools.lookup_pulseq_function)
     wrapped_find_tables = log_tool_usage(tools.find_relevant_tables)
     wrapped_get_schemas = log_tool_usage(tools.get_table_schemas)
@@ -171,9 +163,6 @@ def _register_tools():
 
     # Register wrapped tools
     pulsepal_agent.tool(wrapped_search)
-    pulsepal_agent.tool(wrapped_verify)
-    pulsepal_agent.tool(wrapped_validate_func)
-    pulsepal_agent.tool(wrapped_validate_code)
     pulsepal_agent.tool(wrapped_lookup)
     pulsepal_agent.tool(wrapped_find_tables)
     pulsepal_agent.tool(wrapped_get_schemas)
@@ -182,7 +171,7 @@ def _register_tools():
     # Set the agent reference in tools module
     tools.pulsepal_agent = pulsepal_agent
 
-    logger.info(f"📚 Registered {8} tools with logging enabled")
+    logger.info(f"📚 Registered {5} tools with logging enabled")
 
     logger.info("Modern tools registered with Pulsepal agent")
 

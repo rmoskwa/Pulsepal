@@ -268,12 +268,19 @@ NAMESPACE_MAP = {
         "registerRfEvent",
         "registerLabelEvent",
     },
-    # Constructors (can be called without namespace)
+    # Constructors with optional namespace (can be called with or without prefix)
+    # Maps constructor name to its valid prefixes (empty string means no prefix allowed too)
     "constructors": {
-        "Sequence",
-        "EventLibrary",
-        "TransformFOV",
-        "SeqPlot",
+        "Sequence": ["", "mr"],  # Can be called as Sequence() or mr.Sequence()
+        "EventLibrary": [
+            "",
+            "mr",
+        ],  # Can be called as EventLibrary() or mr.EventLibrary()
+        "TransformFOV": [
+            "",
+            "mr",
+        ],  # Can be called as TransformFOV() or mr.TransformFOV()
+        "SeqPlot": ["", "mr.aux"],  # Can be called as SeqPlot() or mr.aux.SeqPlot()
     },
     # EventLibrary methods (eve. namespace)
     "eve_only": {},
@@ -318,6 +325,7 @@ def get_correct_namespace(function_name: str) -> str:
     """
     Get the correct namespace for a function.
     Returns the namespace prefix (e.g., 'mr', 'seq') or empty string if no namespace needed.
+    For constructors, returns the primary/preferred namespace.
     """
     # Check each namespace category
     if function_name in NAMESPACE_MAP["mr_only"]:
@@ -325,7 +333,13 @@ def get_correct_namespace(function_name: str) -> str:
     if function_name in NAMESPACE_MAP["seq_only"]:
         return "seq"
     if function_name in NAMESPACE_MAP["constructors"]:
-        return ""  # No namespace needed
+        # For constructors, return the preferred prefix (first non-empty one, or empty if standalone)
+        valid_prefixes = NAMESPACE_MAP["constructors"][function_name]
+        # Return the first non-empty prefix as the "preferred" one, or empty if that's the only option
+        for prefix in valid_prefixes:
+            if prefix:  # Return first non-empty prefix as preferred
+                return prefix
+        return ""  # All prefixes are empty (standalone constructor)
     if function_name in NAMESPACE_MAP["eve_only"]:
         return "eve"
     if function_name in NAMESPACE_MAP["tra_only"]:
@@ -341,6 +355,32 @@ def get_correct_namespace(function_name: str) -> str:
     if function_name in NAMESPACE_MAP["mrMusic_only"]:
         return "mrMusic"
     return None  # Function not found
+
+
+def is_valid_constructor_namespace(
+    function_name: str, provided_namespace: str = None
+) -> bool:
+    """
+    Check if a constructor is being called with a valid namespace.
+    Constructors can often be called with or without their package prefix.
+
+    Args:
+        function_name: The constructor name (e.g., 'Sequence')
+        provided_namespace: The namespace used (e.g., 'mr', None, or '')
+
+    Returns:
+        True if the namespace is valid for this constructor, False otherwise
+    """
+    if function_name not in NAMESPACE_MAP["constructors"]:
+        return False  # Not a constructor
+
+    valid_prefixes = NAMESPACE_MAP["constructors"][function_name]
+
+    # Normalize None to empty string for comparison
+    if provided_namespace is None:
+        provided_namespace = ""
+
+    return provided_namespace in valid_prefixes
 
 
 def validate_namespace(function_name: str, provided_namespace: str = None) -> dict:
