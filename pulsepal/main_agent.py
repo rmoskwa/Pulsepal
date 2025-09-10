@@ -280,9 +280,8 @@ async def create_pulsepal_session(
             else:
                 routing_decision = router.classify_query(query)
 
-                # Only use detected functions as hints, not for routing decisions
+                # Log detected functions for debugging but don't pass them
                 if routing_decision.detected_functions:
-                    deps.detected_functions = routing_decision.detected_functions
                     deps.validation_errors = routing_decision.validation_errors
 
                     logger.info(
@@ -443,9 +442,8 @@ def apply_semantic_routing(query: str, deps: PulsePalDependencies) -> None:
 
         routing_decision = router.classify_query(query)
 
-        # Only use detected functions as hints, not for routing decisions
+        # Log detected functions for debugging but don't pass them
         if routing_decision.detected_functions:
-            deps.detected_functions = routing_decision.detected_functions
             deps.validation_errors = routing_decision.validation_errors
 
             logger.info(

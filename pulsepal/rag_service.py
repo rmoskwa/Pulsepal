@@ -60,7 +60,6 @@ class ModernPulseqRAG:
         sources: Optional[List[str]] = None,
         forced: bool = False,
         source_hints: Optional[Dict] = None,
-        detected_functions: Optional[List[Dict]] = None,
         use_parallel: bool = True,  # New parameter to enable parallel search
     ) -> Dict:
         """
@@ -73,7 +72,6 @@ class ModernPulseqRAG:
             sources: Specific sources to search (LLM-specified or None for all)
             forced: Whether this search was forced by semantic routing
             source_hints: Additional hints about which sources to prioritize
-            detected_functions: Functions detected by semantic router for direct lookup
             use_parallel: Whether to use parallel BM25+vector search (default True)
 
         Returns:
@@ -104,18 +102,10 @@ class ModernPulseqRAG:
         if not settings.hybrid_search_enabled:
             logger.info("Hybrid search disabled, falling back to vector-only search")
             return await self._fallback_to_vector_search(
-                query, sources, forced, source_hints, detected_functions
+                query, sources, forced, source_hints
             )
 
-        # Log detected functions as hints (if any)
-        if detected_functions:
-            func_names = [f["name"] for f in detected_functions]
-            logger.info(
-                f"Function hints available: {len(func_names)} functions detected as context"
-            )
-            logger.debug(
-                f"Detected functions: {func_names[:5]}..."
-            )  # Log first 5 for debugging
+        # Function detection is no longer used for search hints
 
         try:
             # Use hybrid search as the primary approach
@@ -238,7 +228,6 @@ class ModernPulseqRAG:
                 "forced": forced,
                 "source_hints": source_hints,
                 "search_mode": "hybrid_reranked",
-                "detected_functions": detected_functions,
                 "performance": parallel_results.get("metadata", {}).get(
                     "performance", {}
                 ),
@@ -273,7 +262,7 @@ class ModernPulseqRAG:
                 f"Hybrid search failed completely, falling back to vector search: {e}"
             )
             return await self._fallback_to_vector_search(
-                query, sources, forced, source_hints, detected_functions
+                query, sources, forced, source_hints
             )
 
     async def _fallback_to_vector_search(
@@ -282,7 +271,6 @@ class ModernPulseqRAG:
         sources: Optional[List[str]] = None,
         forced: bool = False,
         source_hints: Optional[Dict] = None,
-        detected_functions: Optional[List[Dict]] = None,
     ) -> Dict:
         """
         Fallback to vector-only search when hybrid search fails or is disabled.
@@ -293,7 +281,6 @@ class ModernPulseqRAG:
             sources: Specific sources to search (LLM-specified or None for all)
             forced: Whether this search was forced by semantic routing
             source_hints: Additional hints about which sources to prioritize
-            detected_functions: Functions detected by semantic router for direct lookup
 
         Returns:
             Formatted results using vector-only search
@@ -341,7 +328,6 @@ class ModernPulseqRAG:
             "forced": forced,
             "source_hints": source_hints,
             "search_mode": "vector_only_fallback",
-            "detected_functions": detected_functions,  # Pass as hints, not directives
         }
 
         # Log search summary
@@ -1264,62 +1250,6 @@ class ModernPulseqRAG:
             )
             return []
 
-    async def _direct_function_lookup(
-        self, detected_functions: List[Dict]
-    ) -> List[Dict]:
-        """
-        Direct database lookup for detected functions.
-        Returns comprehensive documentation for each function.
-
-        Args:
-            detected_functions: List of detected function info from semantic router
-
-        Returns:
-            List of complete function documentation from api_reference
-        """
-        results = []
-
-        for func_info in detected_functions:
-            func_name = func_info["name"]
-
-            try:
-                # Query specific fields (not SELECT * to avoid unnecessary data)
-                response = (
-                    self.supabase_client.client.table("api_reference")
-                    .select(
-                        "name, signature, description, "
-                        "parameters, returns, usage_examples, "
-                        "function_type, class_name, is_class_method, "
-                        "calling_pattern, related_functions, "
-                        "search_terms, pulseq_version",
-                    )
-                    .ilike("name", func_name)
-                    .eq("language", "matlab")
-                    .execute()
-                )
-
-                if response.data:
-                    for item in response.data:
-                        # Add detection metadata
-                        item["_detection"] = {
-                            "confidence": func_info["confidence"],
-                            "type": func_info["type"],
-                            "namespace": func_info.get("namespace"),
-                            "original_query": func_info.get("full_match"),
-                        }
-                        item["_source"] = "direct_function_lookup"
-                        results.append(item)
-
-                        logger.info(f"Direct lookup found: {func_name}")
-                else:
-                    logger.warning(f"Direct lookup found no results for: {func_name}")
-
-            except Exception as e:
-                logger.error(f"Direct lookup failed for {func_name}: {e}")
-                # Continue with other functions even if one fails
-
-        return results
-
     async def _retrieve_all_chunks(self, url: str) -> List[Dict]:
         """
         Retrieve all chunks for a multi-chunk document.
@@ -1383,7 +1313,6 @@ class ModernPulseqRAG:
         table: str,
         query: str,
         limit: int = 10,
-        detected_functions: Optional[List[Dict]] = None,
     ) -> Dict:
         """
         Search a specific table with standardized return format.
@@ -1392,7 +1321,6 @@ class ModernPulseqRAG:
             table: Table name to search
             query: Search query
             limit: Maximum results
-            detected_functions: Optional function hints
 
         Returns:
             Standardized JSON response with relationships

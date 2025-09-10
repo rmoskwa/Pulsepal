@@ -293,10 +293,7 @@ class PulsePalDependencies:
     session_manager: Optional["SessionManager"] = None
     rag_initialized: bool = False
 
-    # Function detection fields (no routing restrictions)
-    detected_functions: Optional[List[Dict]] = (
-        None  # Detected functions for enhanced search
-    )
+    # Validation errors from semantic router (kept for logging)
     validation_errors: Optional[List[str]] = (
         None  # Namespace/function validation errors
     )

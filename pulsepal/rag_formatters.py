@@ -1006,23 +1006,7 @@ def format_unified_response(
     if "rerank_stats" in query_context:
         response["search_metadata"]["rerank_stats"] = query_context["rerank_stats"]
 
-    # Add detected functions as context hints (if any)
-    detected_functions = query_context.get("detected_functions", None)
-    if detected_functions:
-        # Only include a summary to avoid overwhelming context
-        func_names = [
-            f["name"] for f in detected_functions[:MAX_FUNCTION_HINTS]
-        ]  # Limit to first MAX_FUNCTION_HINTS
-        if len(detected_functions) > MAX_FUNCTION_HINTS:
-            func_names.append(
-                f"... and {len(detected_functions) - MAX_FUNCTION_HINTS} more"
-            )
-
-        response["search_metadata"]["function_context"] = {
-            "detected_count": len(detected_functions),
-            "sample_functions": func_names,
-            "note": "Functions detected in context - consider if documentation needed",
-        }
+    # Function detection is no longer passed to formatters
 
     # Process each source type
     for source_type, results in source_results.items():
@@ -1196,115 +1180,21 @@ def generate_synthesis_recommendations(
     return recommendations
 
 
-def format_direct_function_results(
-    results: List[Dict],
-    query: str,
-    detected_functions: List[Dict],
-) -> Dict:
-    """
-    Format direct function lookup results comprehensively.
-    Ensures all important fields are presented clearly for the LLM.
-
-    Args:
-        results: Direct lookup results from api_reference
-        query: Original user query
-        detected_functions: Function detection info from semantic router
-
-    Returns:
-        Formatted response dictionary with comprehensive function documentation
-    """
-
-    # Organize results by source
-    formatted_results = {
-        "results_by_source": {
-            "direct_function_lookup": [],
-        },
-        "search_metadata": {
-            "query": query,
-            "sources_searched": ["direct_function_lookup"],
-            "total_results": len(results),
-            "detection_info": {
-                "functions_detected": [f["name"] for f in detected_functions],
-                "detection_types": list(set(f["type"] for f in detected_functions)),
-                "confidence_levels": [f["confidence"] for f in detected_functions],
-            },
-        },
-        "synthesis_hints": [],
-    }
-
-    # Format each function's documentation
-    for result in results:
-        formatted_doc = {
-            "source_type": "DIRECT_FUNCTION_LOOKUP",
-            "relevance_score": result.get("_detection", {}).get("confidence", 1.0),
-            # Core function information
-            "function": {
-                "name": result.get("name", ""),
-                "signature": result.get("signature", ""),
-                "description": result.get("description", ""),
-                "calling_pattern": result.get("calling_pattern", ""),
-            },
-            # Parameters with full details
-            "parameters": format_parameters_comprehensive(result.get("parameters", {})),
-            # Return values
-            "returns": format_returns_comprehensive(result.get("returns", {})),
-            # Usage examples
-            "usage_examples": format_examples_comprehensive(
-                result.get("usage_examples", [])
-            ),
-            # Additional context
-            "metadata": {
-                "function_type": result.get("function_type", "main"),
-                "class_name": result.get("class_name", ""),
-                "is_class_method": result.get("is_class_method", False),
-                "related_functions": result.get("related_functions", []),
-                "search_terms": result.get("search_terms", []),
-                "pulseq_version": result.get("pulseq_version", ""),
-                "detection": result.get("_detection", {}),
-            },
-        }
-
-        formatted_results["results_by_source"]["direct_function_lookup"].append(
-            formatted_doc
-        )
-
-    # Generate synthesis hints based on query intent
-    query_lower = query.lower()
-
-    if "parameter" in query_lower or "argument" in query_lower:
-        formatted_results["synthesis_hints"].append(
-            "Focus on parameter details including types, units, defaults, and constraints",
-        )
-    elif "how" in query_lower or "example" in query_lower:
-        formatted_results["synthesis_hints"].append(
-            "Emphasize usage examples and practical implementation",
-        )
-    elif "what" in query_lower and "do" in query_lower:
-        formatted_results["synthesis_hints"].append(
-            "Explain the function's purpose and how it fits in sequence design",
-        )
-
-    formatted_results["synthesis_hints"].append(
-        f"Direct lookup successful - comprehensive documentation retrieved for {len(results)} function(s)",
-    )
-
-    return formatted_results
-
-
 def format_parameters_comprehensive(params_json: Any) -> str:
     """
     Format parameters with complete details for direct lookup results.
 
     Args:
-        params_json: Parameters in JSON format from database
+        params_json: Parameters in JSON format
 
     Returns:
-        Comprehensively formatted parameter string
+        Formatted parameter string with comprehensive details
     """
+
     if not params_json:
         return "No parameters"
 
-    # Handle string parameters (might be JSON string)
+    # Handle string parameters
     if isinstance(params_json, str):
         try:
             import json

@@ -185,10 +185,7 @@ class ConversationLogger:
                 f.write(f"  Route: {routing_info.get('route', 'unknown')}\n")
                 f.write(f"  Confidence: {routing_info.get('confidence', 0):.2f}\n")
                 f.write(f"  Trigger: {routing_info.get('trigger_type', 'unknown')}\n")
-                if routing_info.get("detected_functions"):
-                    f.write(
-                        f"  Detected Functions: {', '.join([f['name'] for f in routing_info['detected_functions']])}\n"
-                    )
+
                 f.write("-" * 50 + "\n\n")
 
         except Exception as e:

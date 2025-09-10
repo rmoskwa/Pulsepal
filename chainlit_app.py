@@ -516,10 +516,9 @@ async def main(message: cl.Message):
                     conversation_logger,
                 )
 
-                # Apply routing decision and inject context
-                # Only use function detection, no routing restrictions
+                # Apply routing decision but don't inject detected functions
+                # Only use for logging and validation errors
                 if routing_decision.detected_functions:
-                    deps.detected_functions = routing_decision.detected_functions
                     deps.validation_errors = routing_decision.validation_errors
 
                     logger.info(

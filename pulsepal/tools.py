@@ -475,13 +475,8 @@ async def search_pulseq_knowledge(
     if not hasattr(ctx.deps, "rag_v2"):
         ctx.deps.rag_v2 = ModernPulseqRAG()
 
-    # Get detected functions from function detector if available
-    detected_functions = None
-    if hasattr(ctx.deps, "detected_functions") and ctx.deps.detected_functions:
-        detected_functions = ctx.deps.detected_functions
-        logger.info(
-            f"Using detected functions for enhanced search: {[f['name'] for f in detected_functions]}"
-        )
+    # Function detection no longer passed to tools
+    # The semantic router still runs for force_rag flag but detected functions aren't used
 
     # Check for special patterns in query
     id_match = re.match(r"^ID:(.+)$", query.strip())
@@ -495,7 +490,7 @@ async def search_pulseq_knowledge(
             sources=None,  # Will use all sources
             forced=False,
             source_hints=None,
-            detected_functions=detected_functions,
+            detected_functions=None,  # No longer used
         )
     elif id_match:
         # Handle ID-based lookup
@@ -513,7 +508,7 @@ async def search_pulseq_knowledge(
             table=table,
             query=query,
             limit=limit,
-            detected_functions=detected_functions,
+            detected_functions=None,  # No longer used
         )
 
     # VALIDATION: Check relevance scores and prompt for broader search if needed
@@ -534,8 +529,6 @@ async def search_pulseq_knowledge(
                     "search_type", "unknown"
                 ),
             }
-            if detected_functions:
-                metadata["detected_functions"] = [f["name"] for f in detected_functions]
 
             conversation_logger.log_search_event(
                 ctx.deps.conversation_context.session_id,
@@ -554,8 +547,6 @@ async def search_pulseq_knowledge(
                     "total_results", 0
                 ),
             }
-            if detected_functions:
-                metadata["detected_functions"] = [f["name"] for f in detected_functions]
 
             conversation_logger.log_search_event(
                 ctx.deps.conversation_context.session_id,
