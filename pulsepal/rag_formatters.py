@@ -1000,6 +1000,12 @@ def format_unified_response(
         "citation_map": {},
     }
 
+    # Pass through performance metrics including rerank stats
+    if "performance" in query_context:
+        response["search_metadata"]["performance"] = query_context["performance"]
+    if "rerank_stats" in query_context:
+        response["search_metadata"]["rerank_stats"] = query_context["rerank_stats"]
+
     # Add detected functions as context hints (if any)
     detected_functions = query_context.get("detected_functions", None)
     if detected_functions:

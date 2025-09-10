@@ -182,6 +182,8 @@ class ModernPulseqRAG:
             )
 
             # Apply neural reranking to top results
+            relevance_scores = []
+            rerank_latency = 0
             try:
                 rerank_start = time.time()
                 (
@@ -240,6 +242,16 @@ class ModernPulseqRAG:
                 "performance": parallel_results.get("metadata", {}).get(
                     "performance", {}
                 ),
+                # Add rerank stats if available
+                "rerank_stats": {
+                    "top_score": relevance_scores[0] if relevance_scores else None,
+                    "all_scores": relevance_scores[:5]
+                    if relevance_scores
+                    else [],  # Top 5 for context
+                    "rerank_latency_ms": rerank_latency
+                    if "rerank_latency" in locals()
+                    else None,
+                },
             }
 
             # Log search summary with performance metrics

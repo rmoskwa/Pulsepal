@@ -221,19 +221,30 @@ def _validate_search_relevance(
                 f"BM25 keyword scores very low (mean: {score_mean:.4f})"
             )
 
-    # 3. Check reranker scores if available
-    rerank_stats = performance.get("rerank_stats")
+    # 3. Check reranker scores if available - now from search_metadata
+    rerank_stats = metadata.get("rerank_stats")  # Changed from performance to metadata
     if rerank_stats and isinstance(rerank_stats, dict):
         top_score = rerank_stats.get("top_score")
-        # Note: In the GE case, top_score was 2.408 which is good
-        if top_score is not None and top_score < MIN_RERANK_SCORE:
-            poor_relevance_indicators.append(
-                f"Reranker confidence low (top score: {top_score:.2f})"
-            )
+        # BGE reranker scores: negative=irrelevant, 0-1=weak, >1=relevant
+        if top_score is not None:
+            if top_score < 0:
+                # Negative scores are a strong indicator of irrelevance
+                poor_relevance_indicators.append(
+                    f"Reranker indicates irrelevant results (score: {top_score:.2f})"
+                )
+            elif top_score < MIN_RERANK_SCORE:
+                poor_relevance_indicators.append(
+                    f"Reranker confidence low (score: {top_score:.2f})"
+                )
 
     # 4. Check total results - if very few results, might be searching wrong table
     total_results = results.get("total_results", 0)
-    if total_results < 3 and table not in ["auto", None]:
+    if total_results == 0 and table not in ["auto", None]:
+        # Zero results is a strong indicator
+        poor_relevance_indicators.append(
+            f"No results found in table '{table}' (searching wrong table?)"
+        )
+    elif total_results < 3 and table not in ["auto", None]:
         poor_relevance_indicators.append(
             f"Only {total_results} results found in table '{table}'"
         )
@@ -241,23 +252,52 @@ def _validate_search_relevance(
     # Only raise ModelRetry if we have strong evidence of poor search quality
     # Be conservative to avoid conflicting with other validators
     should_retry = False
+    retry_reason = None
 
-    # Case 1: Multiple strong indicators of poor relevance (2 or more)
-    # This catches cases like the GE scanner query with 0 vector matches + low BM25
-    if len(poor_relevance_indicators) >= 2:
-        should_retry = True
+    # Check all conditions independently (not elif chain)
 
-    # Case 2: Zero results with specific table (not auto mode)
-    elif total_results == 0 and table not in ["auto", None]:
+    # Case 1: Negative reranker score (strong indicator of irrelevance)
+    if rerank_stats and isinstance(rerank_stats, dict):
+        top_score = rerank_stats.get("top_score")
+        if top_score is not None and top_score < 0:
+            should_retry = True
+            retry_reason = f"negative rerank score: {top_score}"
+            logger.info(f"Triggering retry due to {retry_reason}")
+
+    # Case 2: Zero results with specific table (strong signal, check before multiple indicators)
+    if not should_retry and total_results == 0 and table not in ["auto", None, ""]:
+        # Zero results in a specific table is a strong enough signal on its own
         should_retry = True
+        retry_reason = f"zero results in table '{table}'"
+        logger.info(f"Triggering retry due to {retry_reason}")
+
+    # Case 3: Multiple indicators of poor relevance (2 or more)
+    if not should_retry and len(poor_relevance_indicators) >= 2:
+        should_retry = True
+        retry_reason = f"{len(poor_relevance_indicators)} poor relevance indicators"
+        logger.info(f"Triggering retry due to {retry_reason}")
 
     if should_retry:
-        retry_message = (
-            "🔍 **Low Relevance Scores Detected**\n\n"
-            "The search results have low relevance scores, suggesting the information "
-            "might be in a different location.\n\n"
-            "**Current search metrics:**\n"
-        )
+        # Check if it's specifically a negative reranker score case
+        if rerank_stats and rerank_stats.get("top_score", 0) < 0:
+            retry_message = (
+                "⚠️ **Search Results Not Relevant**\n\n"
+                "The neural reranker indicates these results are not relevant to your query "
+                f"(relevance score: {rerank_stats.get('top_score', 0):.2f}).\n\n"
+                "This typically means:\n"
+                "• The information uses different terminology\n"
+                "• You're searching in the wrong table\n"
+                "• The concept may not exist in the knowledge base\n\n"
+                "**Current search metrics:**\n"
+            )
+        else:
+            retry_message = (
+                "🔍 **Low Relevance Scores Detected**\n\n"
+                "The search results have low relevance scores, suggesting the information "
+                "might be in a different location.\n\n"
+                "**Current search metrics:**\n"
+            )
+
         for indicator in poor_relevance_indicators:
             retry_message += f"  • {indicator}\n"
 
@@ -266,22 +306,45 @@ def _validate_search_relevance(
         if table not in ["auto", None]:
             retry_message += (
                 f"📊 **Currently searching:** `{table}` table only\n\n"
-                f"**Try these alternatives:**\n"
-                f"  • `table='auto'` - Search across ALL tables comprehensively\n"
-                f"  • `table='pulseq_sequences'` - Complete sequence implementations\n"
-                f"  • `table='api_reference'` - Function documentation\n"
-                f"  • `table='sequence_chunks'` - Code patterns and snippets\n"
-                f"  • `table='crawled_code'` - Helper functions and utilities\n"
-                f"  • `table='crawled_docs'` - Documentation, guides, and tutorials\n\n"
+                f"**Try these alternative tables:**\n\n"
+                f"  🌐 **`table='auto'`** - Search ALL tables comprehensively\n"
+                f"     Best for: General queries, unknown locations\n\n"
+                f"  📝 **`table='pulseq_sequences'`** - Complete MRI sequences\n"
+                f"     Contains: Full .m files, GRE, EPI, TSE, diffusion sequences\n\n"
+                f"  📖 **`table='api_reference'`** - Pulseq function documentation\n"
+                f"     Contains: mr.* and seq.* functions, parameters, usage\n\n"
+                f"  🧩 **`table='sequence_chunks'`** - Code segments by concept\n"
+                f"     Contains: RF pulses, gradients, k-space trajectories\n\n"
+                f"  🔧 **`table='crawled_code'`** - Helper functions & utilities\n"
+                f"     Contains: Custom functions, calculations, processing\n\n"
+                f"  📄 **`table='crawled_docs'`** - Guides & documentation\n"
+                f"     Contains: Tutorials, papers, troubleshooting, examples\n\n"
             )
         else:
             # Even in auto mode, if scores are low, suggest different query strategies
             retry_message += (
                 "**The search covered all tables but found weak matches.**\n\n"
                 "**Consider these approaches:**\n"
-                "  • Rephrase the query with different terms\n"
-                "  • Break down complex queries into simpler parts\n"
-                "  • Search for related concepts first\n"
+                "  🔄 **Rephrase with different terminology**\n"
+                "     Example: 'gradient' → 'makeTrapezoid', 'RF pulse' → 'makeBlockPulse'\n\n"
+                "  ✨ **Use Pulseq-specific terms**\n"
+                "     Example: Instead of 'MRI sequence', try 'seq.write' or 'mr.opts'\n\n"
+                "  🎯 **Search for specific functions**\n"
+                "     Example: 'mr.makeExtendedTrapezoid' or 'seq.addBlock'\n\n"
+                "  📦 **Break complex queries into parts**\n"
+                "     Example: Search 'diffusion' first, then 'b-value calculation'\n"
+            )
+
+        # Add specific guidance for negative rerank scores
+        if rerank_stats and rerank_stats.get("top_score", 0) < 0:
+            retry_message += (
+                "\n🔬 **Alternative Tools to Try:**\n\n"
+                "  🔍 **`lookup_pulseq_function`** - Direct function verification\n"
+                "     Use when: You know the exact function name\n\n"
+                "  🗺️ **`find_relevant_tables`** - Semantic table discovery\n"
+                "     Use when: Unsure which table contains your information\n\n"
+                "  📋 **`get_table_schemas`** - Explore table structure\n"
+                "     Use when: You need to understand what's available\n"
             )
 
         if total_results == 0:
