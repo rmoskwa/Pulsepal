@@ -31,7 +31,7 @@ def extract_result_metadata(
 
     Args:
         result: Raw result dictionary
-        source_type: Type of source (api_reference, crawled_pages, etc.)
+        source_type: Type of source (api_reference, crawled_docs, crawled_code, etc.)
 
     Returns:
         Dictionary with extracted metadata
@@ -397,13 +397,14 @@ def format_examples(
     return formatted_examples
 
 
-def format_crawled_pages(results: List[Dict]) -> List[Dict]:
+def format_crawled_content(results: List[Dict]) -> List[Dict]:
     """
-    Format crawled pages with special handling for multi-chunk documents.
+    Format crawled content (docs/code) with special handling for multi-chunk documents.
     Groups chunks from the same document together.
+    Used for both crawled_docs and crawled_code tables.
 
     Args:
-        results: Raw results from crawled pages search
+        results: Raw results from crawled docs/code search
 
     Returns:
         Formatted results with document grouping
@@ -466,7 +467,7 @@ def format_multi_chunk_document(url: str, chunks: List[Dict]) -> Dict:
 
     # Extract common metadata from first chunk using helper
     first_chunk = chunks[0]
-    metadata = extract_result_metadata(first_chunk, "crawled_pages")
+    metadata = extract_result_metadata(first_chunk, "crawled_content")
 
     return {
         "source_type": "DOCUMENTATION_MULTI_PART",
@@ -506,7 +507,7 @@ def format_single_chunk(chunk: Dict) -> Dict:
         Formatted single chunk document
     """
     # Use helper to extract metadata
-    metadata = extract_result_metadata(chunk, "crawled_pages")
+    metadata = extract_result_metadata(chunk, "crawled_content")
     url = chunk.get("url", "")
 
     return {
@@ -550,7 +551,7 @@ def is_code(chunk: Dict) -> bool:
         True if chunk is primarily code
     """
     # Use helper to extract metadata
-    metadata = extract_result_metadata(chunk, "crawled_pages")
+    metadata = extract_result_metadata(chunk, "crawled_content")
     content = chunk.get("content", "")
 
     # Check file extension
@@ -703,9 +704,10 @@ def format_official_sequence_examples(results: List[Dict]) -> List[Dict]:
             },
             # Complete Implementation
             "implementation": {
-                "full_code": result.get("content", "") or result.get("full_code", ""),
+                # Prefer full_code (enriched) over content (summary)
+                "full_code": result.get("full_code", "") or result.get("content", ""),
                 "code_length": len(
-                    result.get("content", "") or result.get("full_code", "")
+                    result.get("full_code", "") or result.get("content", "")
                 ),
                 "language": "MATLAB",  # All official examples are MATLAB
             },
@@ -1017,8 +1019,10 @@ def format_unified_response(
                 "API documentation provides authoritative function specifications",
             )
 
-        elif source_type == "crawled_pages":
-            formatted = format_crawled_pages(results)
+        elif source_type in ["crawled_docs", "crawled_code"]:
+            formatted = format_crawled_content(
+                results
+            )  # Use unified formatter for docs/code
             response["results_by_source"]["examples_and_docs"] = formatted
             response["synthesis_hints"].append(
                 "Examples show practical implementation patterns",
@@ -1045,8 +1049,10 @@ def format_unified_response(
                 if table == "api_reference":
                     formatted = format_api_reference(table_results)
                     response["results_by_source"]["api_reference"] = formatted
-                elif table in ["crawled_docs", "crawled_pages", "crawled_code"]:
-                    formatted = format_crawled_pages(table_results)
+                elif table in ["crawled_docs", "crawled_code"]:
+                    formatted = format_crawled_content(
+                        table_results
+                    )  # Use unified formatter for docs/code
                     response["results_by_source"]["examples_and_docs"] = formatted
                 elif table in ["pulseq_sequences", "sequence_chunks"]:
                     formatted = format_official_sequence_examples(table_results)
@@ -1130,7 +1136,9 @@ def generate_synthesis_recommendations(
 
     # Check what types of results we have
     has_api = "api_reference" in source_results and source_results["api_reference"]
-    has_examples = "crawled_pages" in source_results and source_results["crawled_pages"]
+    has_examples = (
+        "crawled_docs" in source_results and source_results["crawled_docs"]
+    ) or ("crawled_code" in source_results and source_results["crawled_code"])
     has_tutorials = (
         "official_sequence_examples" in source_results
         and source_results["official_sequence_examples"]

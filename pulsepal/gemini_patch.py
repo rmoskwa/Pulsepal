@@ -31,7 +31,7 @@ class PatchedGeminiModel(GeminiModel):
         """Initialize patched Gemini model."""
         super().__init__(*args, **kwargs)
 
-    def _process_response(self, response: Dict[str, Any]) -> Dict[str, Any]:
+    def _process_response(self, response: Dict[str, Any]) -> Any:
         """Process response and handle unexpected finish reasons appropriately."""
         if "candidates" in response:
             for candidate in response["candidates"]:
@@ -77,7 +77,8 @@ class PatchedGeminiModel(GeminiModel):
                             f"This needs to be handled in gemini_patch.py",
                         )
 
-        return response
+        # Call the parent's _process_response to properly create the response object
+        return super()._process_response(response)
 
     async def request(self, *args, **kwargs):
         """Override request to handle responses properly."""

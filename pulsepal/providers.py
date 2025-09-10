@@ -11,6 +11,7 @@ import os
 from pydantic_ai.models.gemini import GeminiModel
 
 from .settings import get_settings
+from .gemini_patch import PatchedGeminiModel
 
 logger = logging.getLogger(__name__)
 
@@ -31,10 +32,10 @@ def get_llm_model() -> GeminiModel:
         # Set GEMINI_API_KEY environment variable for pydantic-ai
         os.environ["GEMINI_API_KEY"] = settings.google_api_key
 
-        # Use standard GeminiModel - patching causes compatibility issues
-        model = GeminiModel(settings.llm_model)
+        # Use PatchedGeminiModel to handle RECITATION and other edge cases
+        model = PatchedGeminiModel(settings.llm_model)
 
-        logger.info(f"Initialized Gemini model: {settings.llm_model}")
+        logger.info(f"Initialized Patched Gemini model: {settings.llm_model}")
         return model
 
     except Exception as e:

@@ -18,8 +18,6 @@ VALID_TABLES = [
     "sequence_chunks",
     "crawled_code",
     "crawled_docs",
-    "sources",
-    "crawled_pages",
     "table_metadata",
 ]
 

@@ -62,7 +62,7 @@ You have access to the following tools for assisting users:
 
 - **search_pulseq_knowledge**: Search the knowledge base across 5 specialized tables
 - **lookup_pulseq_function**: Verify Pulseq function names or find functions by intent
-- **find_relevant_tables**: Discover available data when users ask what exists
+- **find_relevant_tables**: Discover database tables relevant to a query using semantic search
 - **get_table_schemas**: Understand table structure before searching
 - **execute_supabase_query**: Execute complex database queries with validation
 
@@ -170,8 +170,9 @@ def _register_tools():
     wrapped_get_schemas = log_tool_usage(tools.get_table_schemas)
     wrapped_execute_query = log_tool_usage(tools.execute_supabase_query)
 
-    # Register wrapped tools
-    pulsepal_agent.tool(wrapped_search)
+    # Register wrapped tools with max_retries configuration
+    # Allow more retries for search tool since validation may trigger retries
+    pulsepal_agent.tool(wrapped_search, max_retries=3)
     pulsepal_agent.tool(wrapped_lookup)
     pulsepal_agent.tool(wrapped_find_tables)
     pulsepal_agent.tool(wrapped_get_schemas)
@@ -328,7 +329,7 @@ async def create_pulsepal_session(
 async def run_pulsepal_query(
     query: str,
     session_id: str = None,
-    temperature: float = 0.1,
+    temperature: float = 1.0,
 ) -> tuple[str, str]:
     """
     Run a query through the Pulsepal agent.
@@ -509,7 +510,7 @@ def apply_semantic_routing(query: str, deps: PulsePalDependencies) -> None:
 async def run_pulsepal_stream(
     query: str,
     session_id: str = None,
-    temperature: float = 0.1,
+    temperature: float = 1.0,
 ):
     """
     Run a query with streaming response.

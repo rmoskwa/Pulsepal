@@ -10,13 +10,12 @@ import asyncio
 import logging
 import re
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from .rag_fusion import merge_search_results, select_top_results
 from .reranker_service import BGERerankerService
 from .rag_formatters import format_unified_response
 from .settings import get_settings
-from .source_profiles import MULTI_CHUNK_DOCUMENTS
 from .supabase_client import SupabaseRAGClient, get_supabase_client
 
 logger = logging.getLogger(__name__)
@@ -219,6 +218,9 @@ class ModernPulseqRAG:
                     result["_source"] = "hybrid_search"
                     result["_search_type"] = "hybrid_rrf_only"
 
+            # Enrich top results with full content from database
+            final_results = await self._enrich_with_full_content(final_results)
+
             # Format results for unified response
             source_results = {"hybrid_search": final_results}
 
@@ -289,7 +291,13 @@ class ModernPulseqRAG:
 
         # Default to all sources with balanced top-k approach if not specified
         if not sources:
-            sources = ["api_reference", "crawled_pages", "official_sequence_examples"]
+            # Note: crawled_pages is deprecated, using crawled_docs and crawled_code instead
+            sources = [
+                "api_reference",
+                "crawled_docs",
+                "crawled_code",
+                "official_sequence_examples",
+            ]
             logger.info(
                 f"No sources specified, using top-k from all sources: {sources}"
             )
@@ -307,10 +315,14 @@ class ModernPulseqRAG:
                 # For top-k mode, limit to 3; otherwise use default 5
                 limit = top_k_per_source if use_top_k else 5
                 results = await self._search_api_reference(query, limit=limit)
-            elif source == "crawled_pages":
+            elif source == "crawled_docs":
                 # For top-k mode, limit to 3; otherwise use default 10
                 limit = top_k_per_source if use_top_k else 10
-                results = await self._search_crawled_pages(query, limit=limit)
+                results = await self._search_crawled_docs(query, limit=limit)
+            elif source == "crawled_code":
+                # For top-k mode, limit to 3; otherwise use default 10
+                limit = top_k_per_source if use_top_k else 10
+                results = await self._search_crawled_code(query, limit=limit)
             elif source == "official_sequence_examples":
                 # For top-k mode, limit to 3; otherwise use default 5
                 # Note: sequence examples are large, so we keep conservative limits
@@ -643,7 +655,7 @@ class ModernPulseqRAG:
                 query=query, table=table, limit=limit
             )
 
-        # Otherwise, search the default tables (crawled_pages and api_reference)
+        # Otherwise, search the default tables (crawled_docs, crawled_code and api_reference)
         results = []
 
         try:
@@ -655,18 +667,41 @@ class ModernPulseqRAG:
             query_embedding = await loop.run_in_executor(None, create_embedding, query)
 
             # Execute vector searches in parallel with retry for Windows connection issues
-            async def search_crawled_pages():
+            async def search_crawled_docs():
                 max_retries = 3
                 for attempt in range(max_retries):
                     try:
                         return await loop.run_in_executor(
                             None,
                             lambda: self.supabase_client.rpc(
-                                "match_crawled_pages",
+                                "match_crawled_docs",
                                 {
                                     "query_embedding": query_embedding,
                                     "match_threshold": similarity_threshold,
-                                    "match_count": limit // 2,  # Split between sources
+                                    "match_count": limit // 3,  # Split between sources
+                                },
+                            ).execute(),
+                        )
+                    except OSError as e:
+                        if "[WinError 10035]" in str(e) and attempt < max_retries - 1:
+                            await asyncio.sleep(
+                                0.1 * (attempt + 1)
+                            )  # Exponential backoff
+                            continue
+                        raise
+
+            async def search_crawled_code():
+                max_retries = 3
+                for attempt in range(max_retries):
+                    try:
+                        return await loop.run_in_executor(
+                            None,
+                            lambda: self.supabase_client.rpc(
+                                "match_crawled_code",
+                                {
+                                    "query_embedding": query_embedding,
+                                    "match_threshold": similarity_threshold,
+                                    "match_count": limit // 3,  # Split between sources
                                 },
                             ).execute(),
                         )
@@ -689,7 +724,7 @@ class ModernPulseqRAG:
                                 {
                                     "query_embedding": query_embedding,
                                     "match_threshold": 0.5,  # Higher threshold for API reference
-                                    "match_count": limit // 2,
+                                    "match_count": limit // 3,
                                 },
                             ).execute(),
                         )
@@ -701,30 +736,47 @@ class ModernPulseqRAG:
                             continue
                         raise
 
-            # Execute both searches in parallel
-            crawled_response, api_response = await asyncio.gather(
-                search_crawled_pages(),
+            # Execute all searches in parallel
+            docs_response, code_response, api_response = await asyncio.gather(
+                search_crawled_docs(),
+                search_crawled_code(),
                 search_api_reference(),
                 return_exceptions=True,  # Don't fail if one search fails
             )
 
-            # Process crawled pages results
-            if not isinstance(crawled_response, Exception):
-                if hasattr(crawled_response, "data") and crawled_response.data:
-                    for item in crawled_response.data:
+            # Process crawled docs results
+            if not isinstance(docs_response, Exception):
+                if hasattr(docs_response, "data") and docs_response.data:
+                    for item in docs_response.data:
                         doc = {
                             "content": item.get("content", ""),
-                            "url": item.get("url", ""),
-                            "title": item.get("title", ""),
+                            "resource_uri": item.get("resource_uri", ""),
+                            "doc_type": item.get("doc_type", ""),
                             "similarity": item.get("similarity", 0),
-                            "_source": "crawled_pages",
+                            "_source": "crawled_docs",
                             "_search_type": "vector",
-                            "_type": self._detect_content_type(item.get("url", "")),
-                            "source_attribution": "Vector search from crawled_pages",
+                            "source_attribution": "Vector search from crawled_docs",
                         }
                         results.append(doc)
             else:
-                logger.error(f"Crawled pages vector search failed: {crawled_response}")
+                logger.error(f"Crawled docs vector search failed: {docs_response}")
+
+            # Process crawled code results
+            if not isinstance(code_response, Exception):
+                if hasattr(code_response, "data") and code_response.data:
+                    for item in code_response.data:
+                        doc = {
+                            "content": item.get("content", ""),
+                            "file_name": item.get("file_name", ""),
+                            "parent_sequences": item.get("parent_sequences", ""),
+                            "similarity": item.get("similarity", 0),
+                            "_source": "crawled_code",
+                            "_search_type": "vector",
+                            "source_attribution": "Vector search from crawled_code",
+                        }
+                        results.append(doc)
+            else:
+                logger.error(f"Crawled code vector search failed: {code_response}")
 
             # Process API reference results
             if not isinstance(api_response, Exception):
@@ -786,7 +838,7 @@ class ModernPulseqRAG:
             table_configs = [
                 (
                     "pulseq_sequences",
-                    "match_pulseq_sequences",
+                    "match_pulseq_sequences_summary",  # Use summary version
                     0.4,
                 ),  # Lower threshold for sequences
                 (
@@ -825,6 +877,8 @@ class ModernPulseqRAG:
                                 item["_source"] = table_name
                                 item["_search_type"] = "vector"
                                 item["source_table"] = table_name
+                                # Note: Summary RPC functions don't return full_code
+                                # Full code will be fetched after reranking for top 3 results
                                 results.append(item)
 
                         return results
@@ -900,10 +954,9 @@ class ModernPulseqRAG:
 
         return results
 
-    async def _search_crawled_pages(self, query: str, limit: int = 10) -> List[Dict]:
+    async def _search_crawled_docs(self, query: str, limit: int = 10) -> List[Dict]:
         """
-        Search crawled pages with chunk coherence.
-        Handles multi-chunk documents by retrieving all related chunks.
+        Search crawled documentation files.
         """
         results = []
 
@@ -912,53 +965,66 @@ class ModernPulseqRAG:
 
         query_embedding = create_embedding(query)
 
-        # Search crawled pages
-        crawled_response = self.supabase_client.rpc(
-            "match_crawled_pages",
+        # Search crawled docs
+        docs_response = self.supabase_client.rpc(
+            "match_crawled_docs",
             {
                 "query_embedding": query_embedding,
-                "match_threshold": 0.3,  # Lower threshold for crawled pages
+                "match_threshold": 0.3,
                 "match_count": limit,
             },
         ).execute()
 
-        if hasattr(crawled_response, "data") and crawled_response.data:
-            # Check for multi-chunk documents
-            urls_to_check = set()
-
-            for item in crawled_response.data:
-                url = item.get("url", "")
-
-                # Check if this is a known multi-chunk document
-                for doc_name in MULTI_CHUNK_DOCUMENTS:
-                    if doc_name in url:
-                        urls_to_check.add(url)
-                        break
-
-                # Add the result
+        if hasattr(docs_response, "data") and docs_response.data:
+            for item in docs_response.data:
                 results.append(
                     {
                         "content": item.get("content", ""),
-                        "url": url,
-                        "title": item.get("title", ""),
-                        "chunk_number": item.get("chunk_number", 0),
+                        "resource_uri": item.get("resource_uri", ""),
+                        "doc_type": item.get("doc_type", ""),
+                        "parent_sequences": item.get("parent_sequences", ""),
                         "similarity": item.get("similarity", 0),
                         "metadata": item.get("metadata", {}),
-                        "_source": "crawled_pages",
+                        "_source": "crawled_docs",
                     },
                 )
 
-            # Retrieve additional chunks for multi-chunk documents
-            for url in urls_to_check:
-                additional_chunks = await self._retrieve_all_chunks(url)
-                # Add chunks that aren't already in results
-                existing_chunks = {
-                    (r["url"], r.get("chunk_number", 0)) for r in results
-                }
-                for chunk in additional_chunks:
-                    chunk_id = (chunk["url"], chunk.get("chunk_number", 0))
-                    if chunk_id not in existing_chunks:
-                        results.append(chunk)
+        return results
+
+    async def _search_crawled_code(self, query: str, limit: int = 10) -> List[Dict]:
+        """
+        Search crawled code files (helpers, utilities).
+        """
+        results = []
+
+        # Get embedding for query
+        from .embeddings import create_embedding
+
+        query_embedding = create_embedding(query)
+
+        # Search crawled code
+        code_response = self.supabase_client.rpc(
+            "match_crawled_code",
+            {
+                "query_embedding": query_embedding,
+                "match_threshold": 0.3,
+                "match_count": limit,
+            },
+        ).execute()
+
+        if hasattr(code_response, "data") and code_response.data:
+            for item in code_response.data:
+                results.append(
+                    {
+                        "content": item.get("content", ""),
+                        "file_name": item.get("file_name", ""),
+                        "parent_sequences": item.get("parent_sequences", ""),
+                        "tool_metadata": item.get("tool_metadata", {}),
+                        "similarity": item.get("similarity", 0),
+                        "metadata": item.get("metadata", {}),
+                        "_source": "crawled_code",
+                    },
+                )
 
         return results
 
@@ -1250,42 +1316,43 @@ class ModernPulseqRAG:
             )
             return []
 
-    async def _retrieve_all_chunks(self, url: str) -> List[Dict]:
-        """
-        Retrieve all chunks for a multi-chunk document.
-        Critical for documents like specification.pdf (9 chunks).
-        """
-        chunks = []
-
-        try:
-            # Query all chunks with the same URL
-            response = (
-                self.supabase_client.client.table("crawled_pages")
-                .select("*")
-                .eq("url", url)
-                .execute()
-            )
-
-            if response.data:
-                for item in response.data:
-                    chunks.append(
-                        {
-                            "content": item.get("content", ""),
-                            "url": item.get("url", ""),
-                            "title": item.get("title", ""),
-                            "chunk_number": item.get("chunk_number", 0),
-                            "metadata": item.get("metadata", {}),
-                            "_source": "crawled_pages",
-                        },
-                    )
-
-                # Sort by chunk number
-                chunks.sort(key=lambda x: x.get("chunk_number", 0))
-
-        except Exception as e:
-            logger.warning(f"Failed to retrieve all chunks for {url}: {e}")
-
-        return chunks
+    # DEPRECATED: This method was specific to crawled_pages table which is now deprecated
+    # async def _retrieve_all_chunks(self, url: str) -> List[Dict]:
+    #     """
+    #     Retrieve all chunks for a multi-chunk document.
+    #     Critical for documents like specification.pdf (9 chunks).
+    #     """
+    #     chunks = []
+    #
+    #     try:
+    #         # Query all chunks with the same URL
+    #         response = (
+    #             self.supabase_client.client.table("crawled_pages")
+    #             .select("*")
+    #             .eq("url", url)
+    #             .execute()
+    #         )
+    #
+    #         if response.data:
+    #             for item in response.data:
+    #                 chunks.append(
+    #                     {
+    #                         "content": item.get("content", ""),
+    #                         "url": item.get("url", ""),
+    #                         "title": item.get("title", ""),
+    #                         "chunk_number": item.get("chunk_number", 0),
+    #                         "metadata": item.get("metadata", {}),
+    #                         "_source": "crawled_pages",
+    #                     },
+    #                 )
+    #
+    #             # Sort by chunk number
+    #             chunks.sort(key=lambda x: x.get("chunk_number", 0))
+    #
+    #     except Exception as e:
+    #         logger.warning(f"Failed to retrieve all chunks for {url}: {e}")
+    #
+    #     return chunks
 
     def _detect_content_type(self, url: str) -> str:
         """Detect content type from URL extension only."""
@@ -1373,22 +1440,61 @@ class ModernPulseqRAG:
 
         try:
             # Use hybrid search for the specific table
+            rerank_stats = None  # Initialize rerank stats
+
             if self.settings.hybrid_search_enabled:
                 results = await self._search_hybrid(
                     query=query, table=table, limit=limit
                 )
+
+                # Extract rerank scores before enrichment (they'll be lost after)
+                if results:
+                    # Get the top 3 scores for rerank_stats
+                    top_scores = []
+                    for i, result in enumerate(results[:3]):
+                        if "_rerank_score" in result:
+                            top_scores.append(result["_rerank_score"])
+
+                    # Only create rerank_stats if we have scores
+                    if top_scores:
+                        rerank_stats = {
+                            "top_score": top_scores[0] if top_scores else None,
+                            "all_scores": top_scores[:5],  # Up to 5 scores
+                            "reranked": results[0].get("_reranked", False)
+                            if results
+                            else False,
+                        }
+                        logger.debug(
+                            f"Extracted rerank_stats for table search: {rerank_stats}"
+                        )
             else:
                 # Fallback to vector search
                 results = await self._search_vector_single_table(
                     query=query, table=table, limit=limit
                 )
 
+            # Enrich results with full content before formatting
+            # Limit to top 3 results - Gemini should only see the most relevant
+            top_results = results[:3] if len(results) > 3 else results
+
+            # Add source_table field for enrichment to work
+            for result in top_results:
+                result["source_table"] = table
+
+            # Enrich with full content
+            enriched_results = await self._enrich_with_full_content(top_results)
+
+            # IMPORTANT: Only return the top 3 enriched results to Gemini
+            # This matches the auto search behavior where reranker returns top 3
+            results_to_format = enriched_results
+
             # Format results based on table type
             formatted_response = self._format_table_response(
                 table=table,
-                results=results,
+                results=results_to_format,  # Only the top 3 enriched results
                 query=query,
                 execution_time=int((time.time() - start_time) * 1000),
+                rerank_stats=rerank_stats,  # Pass rerank stats to formatter
             )
 
             return formatted_response
@@ -1458,6 +1564,15 @@ class ModernPulseqRAG:
                         "suggestion": "The referenced IDs may have been removed or updated. Try a text-based search instead.",
                     },
                 }
+
+            # Enrich results with full content before formatting
+            if results:
+                # Add source_table field for enrichment to work
+                for result in results:
+                    result["source_table"] = table
+
+                # Enrich with full content
+                results = await self._enrich_with_full_content(results)
 
             # Format with relationships
             formatted_response = self._format_table_response(
@@ -1530,6 +1645,15 @@ class ModernPulseqRAG:
 
             results = response.data if response.data else []
 
+            # Enrich results with full content before formatting
+            if results:
+                # Add source_table field for enrichment to work
+                for result in results:
+                    result["source_table"] = table
+
+                # Enrich with full content (filename search usually returns 1 result)
+                results = await self._enrich_with_full_content(results)
+
             # Format response
             formatted_response = self._format_table_response(
                 table=table,
@@ -1564,11 +1688,11 @@ class ModernPulseqRAG:
             # Map table names to RPC functions
             rpc_functions = {
                 "api_reference": "match_api_reference",
-                "pulseq_sequences": "match_pulseq_sequences",
+                "pulseq_sequences": "match_pulseq_sequences_summary",  # Use summary version
                 "sequence_chunks": "match_sequence_chunks",
                 "crawled_code": "match_crawled_code",
                 "crawled_docs": "match_crawled_docs",
-                "crawled_pages": "match_crawled_pages",
+                # "crawled_pages": "match_crawled_pages",  # Deprecated table
             }
 
             if table in rpc_functions:
@@ -1749,6 +1873,7 @@ class ModernPulseqRAG:
         query: str,
         execution_time: int,
         search_type: str = "targeted",
+        rerank_stats: Optional[Dict] = None,
     ) -> Dict:
         """
         Format results according to the standardized table return format using strategy pattern.
@@ -1759,6 +1884,7 @@ class ModernPulseqRAG:
             query: Original query
             execution_time: Time in milliseconds
             search_type: Type of search performed
+            rerank_stats: Optional reranking statistics
 
         Returns:
             Standardized response format
@@ -1771,17 +1897,27 @@ class ModernPulseqRAG:
         relationships_available = strategy["relationships"](results)
         hint = strategy["hint"](results)
 
+        # Build search metadata
+        search_metadata = {
+            "search_type": search_type,
+            "execution_time_ms": execution_time,
+            "relationships_available": relationships_available,
+            "hint": hint,
+        }
+
+        # Add rerank_stats if available (critical for validation layer)
+        if rerank_stats:
+            search_metadata["rerank_stats"] = rerank_stats
+            logger.debug(
+                f"Added rerank_stats to table response metadata: {rerank_stats}"
+            )
+
         return {
             "source_table": table,
             "query": query,
             "total_results": len(formatted_results),
             "results": formatted_results,
-            "search_metadata": {
-                "search_type": search_type,
-                "execution_time_ms": execution_time,
-                "relationships_available": relationships_available,
-                "hint": hint,
-            },
+            "search_metadata": search_metadata,
         }
 
     def _format_api_reference_results(
@@ -2057,3 +2193,555 @@ class ModernPulseqRAG:
             logger.error(f"Error parsing parameters: {e}")
 
         return result
+
+    def _is_valid_identifier(self, identifier: str, max_length: int = 100) -> bool:
+        """
+        Validate database identifiers to prevent SQL injection.
+
+        Args:
+            identifier: The identifier to validate
+            max_length: Maximum allowed length
+
+        Returns:
+            True if identifier is safe, False otherwise
+        """
+        # Check for empty or None
+        if not identifier or len(identifier) > max_length:
+            return False
+
+        # Allow alphanumeric, underscores, hyphens, dots, and spaces (for filenames)
+        # But prevent SQL keywords and special characters
+        pattern = r"^[a-zA-Z0-9_\-\. ]+$"
+        if not re.match(pattern, identifier):
+            return False
+
+        # Check against dangerous SQL keywords
+        dangerous_keywords = {
+            "select",
+            "insert",
+            "update",
+            "delete",
+            "drop",
+            "create",
+            "alter",
+            "grant",
+            "revoke",
+            "union",
+            "exec",
+            "execute",
+            "script",
+            "javascript",
+            "--",
+            "/*",
+            "*/",
+            ";",
+        }
+
+        identifier_lower = identifier.lower()
+        for keyword in dangerous_keywords:
+            if keyword in identifier_lower:
+                return False
+
+        return True
+
+    def _truncate_if_needed(
+        self, content: str, max_size: int = 50000
+    ) -> Tuple[str, bool]:
+        """
+        Truncate content if it exceeds max size.
+
+        Args:
+            content: Content to potentially truncate
+            max_size: Maximum allowed size in characters
+
+        Returns:
+            Tuple of (potentially truncated content, was_truncated flag)
+        """
+        if not content:
+            return content, False
+
+        if len(content) > max_size:
+            return content[:max_size] + "\n\n[... truncated for length ...]", True
+
+        return content, False
+
+    async def _enrich_with_full_content(self, results: List[Dict]) -> List[Dict]:
+        """
+        Enrich top results with full content from database.
+        Works for ALL tables, not just pulseq_sequences.
+
+        Args:
+            results: Top 3 reranked results
+
+        Returns:
+            Results with full content injected
+        """
+        start_time = time.time()
+        enriched_count = 0
+
+        # Debug logging to understand result structure
+        logger.info(f"Starting enrichment for {len(results)} results")
+        for i, result in enumerate(results):
+            logger.debug(
+                f"Result {i} keys: {list(result.keys())[:15]}"
+            )  # First 15 keys
+            source_table = result.get("source_table") or result.get("table_name", "")
+            logger.info(
+                f"Result {i} - source_table: '{source_table}', has metadata: {bool(result.get('metadata'))}"
+            )
+            if "metadata" in result and isinstance(result["metadata"], dict):
+                logger.debug(
+                    f"Result {i} metadata keys: {list(result.get('metadata', {}).keys())[:10]}"
+                )
+                # Check for file_name in various places
+                file_name = (
+                    result.get("file_name")
+                    or result.get("metadata", {}).get("file_name")
+                    or result.get("name")
+                    or result.get("metadata", {}).get("name")
+                )
+                logger.info(f"Result {i} - file_name found: '{file_name}'")
+
+        # Group results by table for batch fetching
+        results_by_table = {}
+        for i, result in enumerate(results):
+            source_table = result.get("source_table") or result.get("table_name", "")
+            if not source_table:
+                # Try to infer from other fields
+                if "sequence_family" in result or "trajectory_type" in result:
+                    source_table = "pulseq_sequences"
+                elif "function_name" in result or "signature" in result:
+                    source_table = "api_reference"
+                elif "chunk_type" in result:
+                    source_table = "sequence_chunks"
+                logger.warning(
+                    f"Result {i} missing source_table, inferred: '{source_table}'"
+                )
+
+            if source_table:
+                if source_table not in results_by_table:
+                    results_by_table[source_table] = []
+                results_by_table[source_table].append((i, result))
+
+        logger.info(f"Grouped results by tables: {list(results_by_table.keys())}")
+
+        # Fetch full content for each table
+        for table_name, table_results in results_by_table.items():
+            try:
+                # Define what to fetch based on table
+                if table_name == "pulseq_sequences":
+                    count = await self._enrich_pulseq_sequences(table_results)
+                    enriched_count += count
+
+                elif table_name == "sequence_chunks":
+                    count = await self._enrich_sequence_chunks(table_results)
+                    enriched_count += count
+
+                elif table_name == "api_reference":
+                    count = await self._enrich_api_reference(table_results)
+                    enriched_count += count
+
+                elif table_name == "crawled_code":
+                    count = await self._enrich_crawled_code(table_results)
+                    enriched_count += count
+
+                elif table_name == "crawled_docs":
+                    count = await self._enrich_crawled_docs(table_results)
+                    enriched_count += count
+
+                else:
+                    logger.warning(f"Unknown table for enrichment: {table_name}")
+
+            except Exception as e:
+                logger.warning(f"Failed to enrich {table_name} results: {e}")
+                # Continue without enrichment
+
+        elapsed = time.time() - start_time
+        if enriched_count > 0:
+            logger.info(
+                f"✓ Enriched {enriched_count} results with full content in {elapsed:.2f}s"
+            )
+        else:
+            logger.info(
+                f"✓ Enrichment check complete in {elapsed:.2f}s - all results already had full content"
+            )
+        return results
+
+    async def _enrich_pulseq_sequences(
+        self, table_results: List[Tuple[int, Dict]]
+    ) -> int:
+        """Enrich pulseq_sequences with full_code.
+
+        Returns:
+            Number of results enriched
+        """
+        try:
+            # Debug logging to understand structure
+            logger.info(f"Enriching {len(table_results)} pulseq_sequences results")
+
+            # Collect identifiers with validation
+            file_names = []
+            for idx, result in table_results:
+                # Debug what we're looking at
+                logger.debug(f"pulseq_sequences result {idx} - checking for file_name")
+
+                # Check all possible locations for file_name
+                direct_file = result.get("file_name")
+                meta_file = (
+                    result.get("metadata", {}).get("file_name")
+                    if isinstance(result.get("metadata"), dict)
+                    else None
+                )
+
+                logger.info(
+                    f"  Result index {idx}: direct file_name='{direct_file}', metadata file_name='{meta_file}'"
+                )
+                logger.debug(
+                    f"  Has full_code: {bool(result.get('full_code'))}, length: {len(str(result.get('full_code', '')))}"
+                )
+                logger.debug(
+                    f"  Has content: {bool(result.get('content'))}, length: {len(str(result.get('content', '')))}"
+                )
+
+                file_name = direct_file or meta_file
+
+                # Check if we need to fetch full content
+                # Both vector and BM25 results now only have content (summary)
+                # We always need to fetch full_code for top results after reranking
+                # Only skip if full_code was already enriched in a previous step
+                full_code_len = len(str(result.get("full_code", "")))
+                has_full_content = result.get("full_code") and full_code_len > 500
+
+                logger.debug(
+                    f"  Evaluation: file_name='{file_name}', full_code_len={full_code_len}, has_full_content={has_full_content}"
+                )
+
+                if file_name and not has_full_content:
+                    # Validate filename to prevent SQL injection
+                    if self._is_valid_identifier(file_name, max_length=255):
+                        file_names.append(file_name)
+                        logger.info(
+                            f"  ✓ Added '{file_name}' to fetch list for enrichment"
+                        )
+                    else:
+                        logger.warning(f"  ✗ Skipping invalid file_name: {file_name}")
+                elif has_full_content:
+                    logger.info(
+                        f"  → Result {idx} already has full content (length: {full_code_len}), skipping enrichment"
+                    )
+                else:
+                    logger.warning(f"  ✗ No file_name found for result index {idx}")
+
+            logger.info(f"Collected {len(file_names)} file_names needing enrichment")
+            if not file_names:
+                logger.info(
+                    "No enrichment needed - all results already have full content"
+                )
+                return 0
+
+            # Limit batch size for performance
+            file_names = file_names[:5]  # Max 5 files at once
+
+            # Batch fetch with async execution
+            query = (
+                self.supabase_client.client.table("pulseq_sequences")
+                .select("file_name, full_code")
+                .in_("file_name", file_names)
+                .limit(5)  # Safety limit
+            )
+
+            response = await asyncio.to_thread(self.supabase_client.safe_execute, query)
+
+            enriched_count = 0
+            if response and response.data:
+                # Create lookup map
+                full_content_map = {
+                    r["file_name"]: r["full_code"]
+                    for r in response.data
+                    if r.get("full_code")
+                }
+
+                # Inject into results with size management
+                for idx, result in table_results:
+                    file_name = result.get("file_name") or result.get(
+                        "metadata", {}
+                    ).get("file_name")
+                    if file_name in full_content_map:
+                        content = full_content_map[file_name]
+                        # Apply size limit
+                        result["full_code"], truncated = self._truncate_if_needed(
+                            content, 50000
+                        )
+                        if truncated:
+                            result["content_truncated"] = True
+                        enriched_count += 1
+                        logger.info(
+                            f"Enriched {file_name} with full_code ({len(result['full_code'])} chars)"
+                        )
+
+            return enriched_count
+
+        except Exception as e:
+            logger.warning(f"Failed to enrich pulseq_sequences: {e}")
+            return 0
+
+    async def _enrich_sequence_chunks(
+        self, table_results: List[Tuple[int, Dict]]
+    ) -> int:
+        """Enrich sequence_chunks with code_content.
+
+        Returns:
+            Number of results enriched
+        """
+        try:
+            # Collect chunk IDs with validation
+            chunk_ids = []
+            for idx, result in table_results:
+                chunk_id = result.get("id") or result.get("record_id")
+                if chunk_id and not result.get("code_content"):
+                    # Validate ID is numeric
+                    if isinstance(chunk_id, (int, str)) and str(chunk_id).isdigit():
+                        chunk_ids.append(int(chunk_id))
+                    else:
+                        logger.warning(f"Skipping invalid chunk_id: {chunk_id}")
+
+            if not chunk_ids:
+                return 0
+
+            # Limit batch size
+            chunk_ids = chunk_ids[:5]
+
+            # Batch fetch with async execution
+            query = (
+                self.supabase_client.client.table("sequence_chunks")
+                .select("id, code_content")
+                .in_("id", chunk_ids)
+                .limit(5)
+            )
+
+            response = await asyncio.to_thread(self.supabase_client.safe_execute, query)
+
+            enriched_count = 0
+            if response and response.data:
+                # Create lookup map
+                content_map = {
+                    r["id"]: r["code_content"]
+                    for r in response.data
+                    if r.get("code_content")
+                }
+
+                # Inject into results with size management
+                for idx, result in table_results:
+                    chunk_id = result.get("id") or result.get("record_id")
+                    if chunk_id in content_map:
+                        content = content_map[chunk_id]
+                        # Apply size limit
+                        result["code_content"], truncated = self._truncate_if_needed(
+                            content, 20000
+                        )
+                        result["full_content"] = result["code_content"]
+                        if truncated:
+                            result["content_truncated"] = True
+                        enriched_count += 1
+                        logger.info(f"Enriched chunk {chunk_id} with code_content")
+
+            return enriched_count
+
+        except Exception as e:
+            logger.warning(f"Failed to enrich sequence_chunks: {e}")
+            return 0
+
+    async def _enrich_api_reference(self, table_results: List[Tuple[int, Dict]]) -> int:
+        """Enrich api_reference with full details.
+
+        Returns:
+            Number of results enriched
+        """
+        try:
+            # Collect function names with validation
+            function_names = []
+            for idx, result in table_results:
+                name = (
+                    result.get("name")
+                    or result.get("function_name")
+                    or result.get("metadata", {}).get("name")
+                )
+                if name:
+                    # Validate function name
+                    if self._is_valid_identifier(name, max_length=100):
+                        function_names.append(name)
+                    else:
+                        logger.warning(f"Skipping invalid function name: {name}")
+
+            if not function_names:
+                return 0
+
+            # Limit batch size
+            function_names = function_names[:5]
+
+            # Batch fetch with async execution - get relevant documentation fields
+            # Exclude embedding and other unnecessary fields for final output
+            query = (
+                self.supabase_client.client.table("api_reference")
+                .select(
+                    "name, signature, description, parameters, returns, "
+                    "usage_examples, related_functions, calling_pattern, "
+                    "class_name, is_class_method, function_type, language"
+                )
+                .in_("name", function_names)
+                .limit(5)
+            )
+
+            response = await asyncio.to_thread(self.supabase_client.safe_execute, query)
+
+            enriched_count = 0
+            if response and response.data:
+                # Create lookup map
+                api_map = {r["name"]: r for r in response.data}
+
+                # Inject into results
+                for idx, result in table_results:
+                    name = (
+                        result.get("name")
+                        or result.get("function_name")
+                        or result.get("metadata", {}).get("name")
+                    )
+                    if name in api_map:
+                        # Update with all fields (API docs are typically small)
+                        result.update(api_map[name])
+                        enriched_count += 1
+                        logger.info(
+                            f"Enriched API function {name} with full documentation"
+                        )
+
+            return enriched_count
+
+        except Exception as e:
+            logger.warning(f"Failed to enrich api_reference: {e}")
+            return 0
+
+    async def _enrich_crawled_code(self, table_results: List[Tuple[int, Dict]]) -> int:
+        """Enrich crawled_code with full content.
+
+        Returns:
+            Number of results enriched
+        """
+        try:
+            # Collect IDs with validation
+            code_ids = []
+            for idx, result in table_results:
+                code_id = result.get("id") or result.get("record_id")
+                if code_id and not result.get("content"):
+                    # Validate ID
+                    if isinstance(code_id, (int, str)) and str(code_id).isdigit():
+                        code_ids.append(int(code_id))
+                    else:
+                        logger.warning(f"Skipping invalid code_id: {code_id}")
+
+            if not code_ids:
+                return 0
+
+            # Limit batch size
+            code_ids = code_ids[:5]
+
+            # Batch fetch with async execution
+            query = (
+                self.supabase_client.client.table("crawled_code")
+                .select("id, content, file_name")
+                .in_("id", code_ids)
+                .limit(5)
+            )
+
+            response = await asyncio.to_thread(self.supabase_client.safe_execute, query)
+
+            enriched_count = 0
+            if response and response.data:
+                # Create lookup map
+                content_map = {
+                    r["id"]: r["content"] for r in response.data if r.get("content")
+                }
+
+                # Inject into results with size management
+                for idx, result in table_results:
+                    code_id = result.get("id") or result.get("record_id")
+                    if code_id in content_map:
+                        content = content_map[code_id]
+                        # Apply size limit
+                        result["content"], truncated = self._truncate_if_needed(
+                            content, 30000
+                        )
+                        result["full_content"] = result["content"]
+                        if truncated:
+                            result["content_truncated"] = True
+                        enriched_count += 1
+                        logger.info(
+                            f"Enriched crawled_code {code_id} with full content"
+                        )
+
+            return enriched_count
+
+        except Exception as e:
+            logger.warning(f"Failed to enrich crawled_code: {e}")
+            return 0
+
+    async def _enrich_crawled_docs(self, table_results: List[Tuple[int, Dict]]) -> int:
+        """Enrich crawled_docs with full content.
+
+        Returns:
+            Number of results enriched
+        """
+        try:
+            # Collect IDs with validation
+            doc_ids = []
+            for idx, result in table_results:
+                doc_id = result.get("id") or result.get("record_id")
+                if doc_id and not result.get("content"):
+                    # Validate ID
+                    if isinstance(doc_id, (int, str)) and str(doc_id).isdigit():
+                        doc_ids.append(int(doc_id))
+                    else:
+                        logger.warning(f"Skipping invalid doc_id: {doc_id}")
+
+            if not doc_ids:
+                return 0
+
+            # Limit batch size (docs can be large)
+            doc_ids = doc_ids[:3]
+
+            # Batch fetch with async execution - but be careful with size!
+            query = (
+                self.supabase_client.client.table("crawled_docs")
+                .select("id, content")
+                .in_("id", doc_ids)
+                .limit(3)
+            )
+
+            response = await asyncio.to_thread(self.supabase_client.safe_execute, query)
+
+            enriched_count = 0
+            if response and response.data:
+                # Create lookup map
+                content_map = {
+                    r["id"]: r["content"] for r in response.data if r.get("content")
+                }
+
+                # Inject into results with aggressive size management
+                for idx, result in table_results:
+                    doc_id = result.get("id") or result.get("record_id")
+                    if doc_id in content_map:
+                        content = content_map[doc_id]
+                        # Apply size limit (docs can be 40KB+)
+                        result["content"], truncated = self._truncate_if_needed(
+                            content, 10000
+                        )
+                        result["full_content"] = result["content"]
+                        if truncated:
+                            result["content_truncated"] = True
+                        enriched_count += 1
+                        logger.info(f"Enriched crawled_doc {doc_id} with content")
+
+            return enriched_count
+
+        except Exception as e:
+            logger.warning(f"Failed to enrich crawled_docs: {e}")
+            return 0

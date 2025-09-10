@@ -125,6 +125,9 @@ conversation_logger = get_conversation_logger()
 # Initialize semantic router at startup for efficient classification
 logger.info("Initializing semantic router at startup...")
 _semantic_router = initialize_semantic_router()
+
+# Lock to prevent concurrent session initialization
+_session_init_lock = asyncio.Lock()
 logger.info("✅ Semantic router initialized successfully")
 
 # Sequence Knowledge Template
@@ -166,82 +169,91 @@ SEQUENCE_KNOWLEDGE_TEMPLATE = """# Sequence Knowledge Template
 @cl.on_chat_start
 async def start():
     """Initialize chat session with Pulsepal agent using enhanced RAG v2."""
-    try:
-        # Create new Pulsepal session with v2 enhanced components
-        session_id = str(uuid.uuid4())
-        pulsepal_session_id, deps = await create_pulsepal_session(session_id)
+    async with _session_init_lock:
+        try:
+            # Check if session already exists to prevent duplicate initialization
+            existing_session_id = cl.user_session.get("pulsepal_session_id")
+            if existing_session_id:
+                logger.warning(
+                    f"Session already exists: {existing_session_id}, skipping duplicate initialization"
+                )
+                return
 
-        # Store session info in Chainlit user session
-        cl.user_session.set("pulsepal_session_id", pulsepal_session_id)
-        cl.user_session.set("pulsepal_deps", deps)
+            # Create new Pulsepal session with v2 enhanced components
+            session_id = str(uuid.uuid4())
+            pulsepal_session_id, deps = await create_pulsepal_session(session_id)
 
-        # Log session start for debugging
-        conversation_logger.log_conversation(
-            pulsepal_session_id,
-            "system",
-            "Session started with enhanced RAG v2",
-            {"event": "session_start", "rag_version": "v2_enhanced"},
-        )
+            # Store session info in Chainlit user session
+            cl.user_session.set("pulsepal_session_id", pulsepal_session_id)
+            cl.user_session.set("pulsepal_deps", deps)
 
-        # Configure settings panel for sequence knowledge
-        template_hint = """Example format:
+            # Log session start for debugging
+            conversation_logger.log_conversation(
+                pulsepal_session_id,
+                "system",
+                "Session started with enhanced RAG v2",
+                {"event": "session_start", "rag_version": "v2_enhanced"},
+            )
+
+            # Configure settings panel for sequence knowledge
+            template_hint = """Example format:
 Sequence Type: [e.g., EPI, Gradient Echo]
 Target: [e.g., Brain imaging]
 TR/TE: [e.g., 2000ms/30ms]
 Current Focus: [What you need help with]
 (Click 'Show Template' button for full template)"""
 
-        settings = [
-            cl.input_widget.TextInput(
-                id="sequence_knowledge",
-                label="🎯 Sequence Knowledge",
-                description=f"Add your sequence-specific context. {template_hint}",
-                placeholder="Enter your sequence details here...",
-                multiline=True,
-                initial=deps.conversation_context.sequence_knowledge or "",
-                max_chars=10000,
-            ),
-            cl.input_widget.Switch(
-                id="use_sequence_context",
-                label="Enable Sequence Context",
-                initial=deps.conversation_context.use_sequence_context,
-                description="When enabled, PulsePal will consider your sequence context in all responses",
-            ),
-        ]
+            settings = [
+                cl.input_widget.TextInput(
+                    id="sequence_knowledge",
+                    label="🎯 Sequence Knowledge",
+                    description=f"Add your sequence-specific context. {template_hint}",
+                    placeholder="Enter your sequence details here...",
+                    multiline=True,
+                    initial=deps.conversation_context.sequence_knowledge or "",
+                    max_chars=10000,
+                ),
+                cl.input_widget.Switch(
+                    id="use_sequence_context",
+                    label="Enable Sequence Context",
+                    initial=deps.conversation_context.use_sequence_context,
+                    description="When enabled, PulsePal will consider your sequence context in all responses",
+                ),
+            ]
 
-        await cl.ChatSettings(settings).send()
+            await cl.ChatSettings(settings).send()
 
-        # Get supported languages for welcome message (removed unused variable)
+            # Get supported languages for welcome message (removed unused variable)
 
-        # Get user info if authenticated
-        auth_info = ""
-        if AUTH_ENABLED:
-            user = cl.user_session.get("user")
-            logger.info(f"User session in on_chat_start: {user}")
-            if user:
-                logger.info(
-                    f"User metadata: {user.metadata if hasattr(user, 'metadata') else 'No metadata'}",
-                )
-                if hasattr(user, "metadata") and user.metadata:
-                    user_name = user.metadata.get("name", "User")
-                    user_limit = user.metadata.get("limit", 100)
-                    auth_info = f"\n\n👤 **Welcome back, {user_name}!**\n📊 Rate limit: {user_limit} requests/hour"
-                    logger.info(f"Generated auth_info: {auth_info}")
+            # Get user info if authenticated
+            auth_info = ""
+            if AUTH_ENABLED:
+                user = cl.user_session.get("user")
+                logger.info(f"User session in on_chat_start: {user}")
+                if user:
+                    logger.info(
+                        f"User metadata: {user.metadata if hasattr(user, 'metadata') else 'No metadata'}",
+                    )
+                    if hasattr(user, "metadata") and user.metadata:
+                        user_name = user.metadata.get("name", "User")
+                        user_limit = user.metadata.get("limit", 100)
+                        auth_info = f"\n\n👤 **Welcome back, {user_name}!**\n📊 Rate limit: {user_limit} requests/hour"
+                        logger.info(f"Generated auth_info: {auth_info}")
+                    else:
+                        logger.warning("User found but no metadata available")
                 else:
-                    logger.warning("User found but no metadata available")
-            else:
-                logger.warning("No user found in session during on_chat_start")
+                    logger.warning("No user found in session during on_chat_start")
 
-        # Check if context is already active
-        context_status = ""
-        if (
-            deps.conversation_context.use_sequence_context
-            and deps.conversation_context.sequence_knowledge
-        ):
-            context_status = "\n\n🎯 **[Sequence Context Active]** - Your sequence-specific knowledge is being used."
+            # Check if context is already active
+            context_status = ""
+            if (
+                deps.conversation_context.use_sequence_context
+                and deps.conversation_context.sequence_knowledge
+            ):
+                context_status = "\n\n🎯 **[Sequence Context Active]** - Your sequence-specific knowledge is being used."
 
-        # Send welcome message with v2 enhanced features highlighted
-        welcome_msg = f"""🧠 **Welcome to Pulsepal - Intelligent MRI Assistant with Pulseq Expert!**{auth_info}{context_status}
+            # Send welcome message with v2 enhanced features highlighted
+            welcome_msg = f"""🧠 **Welcome to Pulsepal - Intelligent MRI Assistant with Pulseq Expert!**{auth_info}{context_status}
 
 
 
@@ -258,19 +270,19 @@ I'm an advanced AI with comprehensive MRI physics and Pulseq knowledge,
 
 What would you like to explore about MRI sequence programming today?"""
 
-        # Send welcome message
-        await cl.Message(content=welcome_msg).send()
+            # Send welcome message
+            await cl.Message(content=welcome_msg).send()
 
-        logger.info(
-            f"Started Chainlit session with enhanced Pulsepal v2 session: {pulsepal_session_id}",
-        )
+            logger.info(
+                f"Started Chainlit session with enhanced Pulsepal v2 session: {pulsepal_session_id}",
+            )
 
-    except Exception as e:
-        logger.error(f"Failed to initialize chat session: {e}")
-        await cl.Message(
-            content=f"❌ **Error**: Failed to initialize Pulsepal v2 enhanced session: {e}\n\nPlease refresh the page and try again.",
-            author="System",
-        ).send()
+        except Exception as e:
+            logger.error(f"Failed to initialize chat session: {e}")
+            await cl.Message(
+                content=f"❌ **Error**: Failed to initialize Pulsepal v2 enhanced session: {e}\n\nPlease refresh the page and try again.",
+                author="System",
+            ).send()
 
 
 @cl.on_settings_update
@@ -516,6 +528,9 @@ async def main(message: cl.Message):
                     conversation_logger,
                 )
 
+                # Store routing decision in deps
+                deps.routing_decision = routing_decision
+
                 # Apply routing decision but don't inject detected functions
                 # Only use for logging and validation errors
                 if routing_decision.detected_functions:
@@ -538,10 +553,13 @@ async def main(message: cl.Message):
                     logger.info(
                         f"Semantic router recommends RAG search (confidence: {routing_decision.confidence:.2f})"
                     )
+                    # Set the force_rag flag on deps so it's available to agent
+                    deps.force_rag = True
                     # Inject the hint into the query for this message only
                     query_for_agent = f"{query_with_context}\n\n**Knowledge base search recommended for accurate reply!**"
                     logger.info("💡 Injecting RAG search hint into Chainlit query")
                 else:
+                    deps.force_rag = False
                     query_for_agent = query_with_context
 
                 # Log the detection but don't restrict Gemini's choices
@@ -549,8 +567,10 @@ async def main(message: cl.Message):
                     f"Function detection complete. Route: {routing_decision.route.value}"
                 )
 
-                # Run agent with potentially modified query
-                result = await pulsepal_agent.run(query_for_agent, deps=deps)
+                # Run agent with potentially modified query and model settings
+                result = await pulsepal_agent.run(
+                    query_for_agent, deps=deps, model_settings={"temperature": 1.0}
+                )
 
                 # Add response to conversation history
                 # Use result.output for modern pydantic-ai

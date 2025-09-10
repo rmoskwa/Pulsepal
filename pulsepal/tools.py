@@ -29,16 +29,35 @@ _table_metadata_cache: Optional[Tuple[datetime, List[Dict]]] = None
 _TABLE_METADATA_TTL = timedelta(hours=1)
 
 
-# Pydantic model for Supabase query to avoid additionalProperties warning
+# Pydantic models for Supabase query to avoid additionalProperties warning
+class FilterCondition(BaseModel):
+    """Filter condition for Supabase queries."""
+
+    column: str = Field(..., description="Column name to filter")
+    operator: str = Field(
+        "eq", description="Operator (eq, neq, gt, lt, gte, lte, like, ilike, in)"
+    )
+    value: Any = Field(..., description="Value to compare")
+
+
+class OrderConfig(BaseModel):
+    """Ordering configuration for Supabase queries."""
+
+    column: str = Field(..., description="Column to order by")
+    ascending: bool = Field(
+        True, description="Sort order (True for ascending, False for descending)"
+    )
+
+
 class SupabaseQuery(BaseModel):
     """Structured query for Supabase operations."""
 
     table: str = Field(..., description="Table name to query")
     select: str = Field("*", description="Columns to select")
-    filters: List[Dict[str, Any]] = Field(
+    filters: List[FilterCondition] = Field(
         default_factory=list, description="Filter conditions"
     )
-    order: Optional[Dict[str, Any]] = Field(None, description="Ordering configuration")
+    order: Optional[OrderConfig] = Field(None, description="Ordering configuration")
     limit: Optional[int] = Field(None, description="Limit number of results")
     offset: Optional[int] = Field(None, description="Pagination offset")
     count: bool = Field(False, description="Return count instead of data")
@@ -273,13 +292,20 @@ def _validate_search_relevance(
 
     # Check all conditions independently (not elif chain)
 
-    # Case 1: Negative reranker score (strong indicator of irrelevance)
+    # Case 1: Poor reranker score (negative or low positive < 1.0)
     if rerank_stats and isinstance(rerank_stats, dict):
         top_score = rerank_stats.get("top_score")
-        if top_score is not None and top_score < 0:
-            should_retry = True
-            retry_reason = f"negative rerank score: {top_score}"
-            logger.info(f"Triggering retry due to {retry_reason}")
+        if top_score is not None:
+            if top_score < 0:
+                # Negative scores are irrelevant
+                should_retry = True
+                retry_reason = f"negative rerank score: {top_score}"
+                logger.info(f"Triggering retry due to {retry_reason}")
+            elif top_score < MIN_RERANK_SCORE:  # MIN_RERANK_SCORE = 1.0
+                # Scores 0-1 indicate weak relevance
+                should_retry = True
+                retry_reason = f"low rerank score: {top_score}"
+                logger.info(f"Triggering retry due to {retry_reason}")
 
     # Case 2: Zero results with specific table (strong signal, check before multiple indicators)
     if not should_retry and total_results == 0 and table not in ["auto", None, ""]:
@@ -295,18 +321,27 @@ def _validate_search_relevance(
         logger.info(f"Triggering retry due to {retry_reason}")
 
     if should_retry:
-        # Check if it's specifically a negative reranker score case
-        if rerank_stats and rerank_stats.get("top_score", 0) < 0:
-            retry_message = (
-                "⚠️ **Search Results Not Relevant**\n\n"
-                "The neural reranker indicates these results are not relevant to your query "
-                f"(relevance score: {rerank_stats.get('top_score', 0):.2f}).\n\n"
-                "This typically means:\n"
-                "• The information uses different terminology\n"
-                "• You're searching in the wrong table\n"
-                "• The concept may not exist in the knowledge base\n\n"
-                "**Current search metrics:**\n"
-            )
+        # Check if it's specifically a reranker score issue (negative or low positive)
+        if rerank_stats and rerank_stats.get("top_score") is not None:
+            top_score = rerank_stats.get("top_score", 0)
+            if (
+                top_score < MIN_RERANK_SCORE
+            ):  # Covers both negative and low positive (0-1)
+                if top_score < 0:
+                    relevance_desc = "not relevant"
+                else:
+                    relevance_desc = "weakly relevant"
+
+                retry_message = (
+                    "⚠️ **Search Results Not Relevant**\n\n"
+                    f"The neural reranker indicates these results are {relevance_desc} to your query "
+                    f"(relevance score: {top_score:.2f}).\n\n"
+                    "This typically means:\n"
+                    "• The information uses different terminology\n"
+                    "• You're searching in the wrong table\n"
+                    "• The concept may not exist in the knowledge base\n\n"
+                    "**Current search metrics:**\n"
+                )
         else:
             retry_message = (
                 "🔍 **Low Relevance Scores Detected**\n\n"
@@ -436,7 +471,7 @@ async def search_pulseq_knowledge(
 
     5. "crawled_docs" - DOCUMENTATION & DATA FILES
        - Use for: Tutorials, guides, data files, vendor documentation, troubleshooting
-       - Contains: READMEs, tutorials, CSV/MAT data, vendor guides, configuration files
+       - Contains: READMEs, tutorials, CSV/MAT data, vendor guides, configuration files, web documentation
        - Returns: Document content, metadata, related sequences
        - Example queries: "installation guide", "GE scanner setup", "trajectory data", "vendor troubleshooting"
 
@@ -507,7 +542,7 @@ async def search_pulseq_knowledge(
             sources=None,  # Will use all sources
             forced=False,
             source_hints=None,
-            detected_functions=None,  # No longer used
+            use_parallel=True,  # Use parallel search for better performance
         )
     elif id_match:
         # Handle ID-based lookup
@@ -528,7 +563,38 @@ async def search_pulseq_knowledge(
         )
 
     # VALIDATION: Check relevance scores and prompt for broader search if needed
-    _validate_search_relevance(results, table, query, ctx)
+    try:
+        _validate_search_relevance(results, table, query, ctx)
+    except ModelRetry:
+        # If this is the last retry attempt, catch it and return a message for Gemini
+        # Check if we're at max retries by looking at retry count in context
+        retry_count = getattr(ctx, "_search_retry_count", 0)
+        ctx._search_retry_count = retry_count + 1
+
+        # We set max_retries=3, so after 2 retries we're at the limit
+        if retry_count >= 2:
+            # Instead of raising, return a message that Gemini can work with
+            logger.warning(
+                f"Search validation failed after {retry_count + 1} attempts for query: {query}"
+            )
+
+            fallback_message = {
+                "search_status": "low_relevance_after_retries",
+                "message": "The knowledge base search found results but they have low relevance scores. Consider rephrasing your query or using different terminology.",
+                "search_attempts": retry_count + 1,
+                "query": query,
+                "table": table,
+                "total_results": results.get("total_results", 0),
+                "top_relevance_score": results.get("search_metadata", {})
+                .get("rerank_stats", {})
+                .get("top_score", "unknown"),
+                "suggestion": "The user's query may use terminology not present in the knowledge base, or the specific information may not be available. Consider rephrasing your query or using a different tool.",
+            }
+
+            return json.dumps(fallback_message)
+        else:
+            # Not at max retries yet, let the retry happen
+            raise
 
     # Log search event if we have context and conversation_context
     if (
@@ -1171,8 +1237,7 @@ async def get_table_schemas(
         "sequence_chunks",
         "crawled_code",
         "crawled_docs",
-        "sources",
-        "crawled_pages",
+        # "crawled_pages",  # Deprecated table - DO NOT USE
     ]
 
     invalid_tables = [t for t in tables if t not in valid_tables]
@@ -1383,15 +1448,10 @@ async def execute_supabase_query(
         # Add filters
         filters = query.filters
         for filter_config in filters:
-            if not isinstance(filter_config, dict):
-                raise ModelRetry(
-                    "Each filter must be a dictionary with 'column', 'operator', and 'value'.\n"
-                    'Example: {"column": "name", "operator": "eq", "value": "makeAdc"}'
-                )
-
-            column = filter_config.get("column")
-            operator = filter_config.get("operator", "eq")
-            value = filter_config.get("value")
+            # Now filter_config is a FilterCondition object
+            column = filter_config.column
+            operator = filter_config.operator
+            value = filter_config.value
 
             if not column:
                 raise ModelRetry("Filter missing 'column' field")
@@ -1444,9 +1504,9 @@ async def execute_supabase_query(
 
         # Add ordering with validation
         if query.order is not None:
-            order_config = query.order
-            order_column = order_config.get("column")
-            ascending = order_config.get("ascending", True)
+            # Now order_config is an OrderConfig object
+            order_column = query.order.column
+            ascending = query.order.ascending
             if order_column:
                 # Validate order column to prevent injection
                 if not validate_database_identifier(order_column, "column"):
@@ -1490,7 +1550,7 @@ async def execute_supabase_query(
                 "query_executed": {
                     "table": table,
                     "select": select_clause,
-                    "filters": filters,
+                    "filters": [f.model_dump() for f in filters],
                     "limit": query.limit,
                     "offset": query.offset,
                 },
@@ -1624,8 +1684,7 @@ async def _deprecated_get_distinct_values(
         "sequence_chunks",
         "crawled_code",
         "crawled_docs",
-        "sources",
-        "crawled_pages",
+        # "crawled_pages",  # Deprecated table - DO NOT USE
     ]
 
     if table not in valid_tables:

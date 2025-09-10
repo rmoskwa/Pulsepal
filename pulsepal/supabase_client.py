@@ -295,14 +295,14 @@ class SupabaseRAGClient:
             # Get more results for reranking if enabled
             search_count = match_count * 2 if use_reranking else match_count
 
-            # Execute the search using the match_crawled_pages function
+            # Execute the search using the match_crawled_docs function (crawled_pages is deprecated)
             params = {"query_embedding": query_embedding, "match_count": search_count}
 
             # Only add the filter if it's actually provided and not empty
             if filter_metadata:
                 params["filter"] = filter_metadata
 
-            result = self.client.rpc("match_crawled_pages", params).execute()
+            result = self.client.rpc("match_crawled_docs", params).execute()
 
             # Apply reranking if enabled
             results = result.data if result.data else []
@@ -897,7 +897,7 @@ class SupabaseRAGClient:
                     {"source": source} if source else None,
                     use_reranking=False,  # Apply reranking after fusion
                 )
-                table_name = "crawled_pages"
+                table_name = "crawled_docs"  # Use crawled_docs instead of deprecated crawled_pages
             elif search_type == "api_reference":
                 # For API reference, we need special handling
                 vector_results = self.search_api_reference(
@@ -915,9 +915,7 @@ class SupabaseRAGClient:
                     source,
                     use_reranking=False,  # Apply reranking after fusion
                 )
-                table_name = (
-                    "crawled_pages"  # Use crawled_pages instead of legacy table
-                )
+                table_name = "crawled_code"  # Use crawled_code for code examples
 
             # Enhanced keyword search with multiple strategies
             # Use override query if provided, otherwise use original query
