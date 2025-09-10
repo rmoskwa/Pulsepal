@@ -184,24 +184,44 @@ async def combined_output_validator(
         elif tag_type == "generated":
             has_generated_code = True
 
-    # If there are untagged blocks, request tagging
+    # If there are untagged blocks, request tagging (with retry limit)
     if untagged_blocks:
-        logger.warning(f"Found {len(untagged_blocks)} untagged code blocks")
+        # Check tag validation retry count
+        tag_retry_count = getattr(ctx, "tag_retry_count", 0)
+        if tag_retry_count >= MAX_VALIDATION_RETRIES:
+            logger.warning(
+                f"Exceeded tag validation retries ({MAX_VALIDATION_RETRIES}) for session {session_id}"
+            )
+            # Continue despite untagged blocks - let Phase 2 validate functions
+            logger.info("Proceeding to function validation despite untagged blocks")
+        else:
+            logger.warning(
+                f"Found {len(untagged_blocks)} untagged code blocks (retry {tag_retry_count + 1}/{MAX_VALIDATION_RETRIES})"
+            )
 
-        error_message = (
-            "⚠️ **Code blocks must be tagged with their source**\n\n"
-            "Please add one of these tags at the beginning of each code block:\n"
-            f"• `{GENERATED_TAG}` - For code you created\n"
-            f"• `{RETRIEVED_TAG}` - For code from search results\n\n"
-            "Example:\n"
-            "```matlab\n"
-            f"{GENERATED_TAG}\n"
-            "% Your code here\n"
-            "```\n\n"
-            f"Found {len(untagged_blocks)} untagged code block(s)."
-        )
+            error_message = (
+                "⚠️ **Code blocks must be tagged with their source**\n\n"
+                "Please add one of these tags at the beginning of each code block:\n"
+                f"• `{GENERATED_TAG}` - For code you created\n"
+                f"• `{RETRIEVED_TAG}` - For code from search results\n\n"
+                "Example:\n"
+                "```matlab\n"
+                f"{GENERATED_TAG}\n"
+                "% Your code here\n"
+                "```\n\n"
+                f"Found {len(untagged_blocks)} untagged code block(s).\n"
+                f"*Tag validation retry {tag_retry_count + 1} of {MAX_VALIDATION_RETRIES}*"
+            )
 
-        raise ModelRetry(error_message)
+            # Increment tag retry count for next attempt
+            ctx.tag_retry_count = tag_retry_count + 1
+
+            raise ModelRetry(error_message)
+
+    # Phase 1 successful - reset tag retry counter
+    if hasattr(ctx, "tag_retry_count"):
+        ctx.tag_retry_count = 0
+        logger.debug(f"Reset tag retry counter for session {session_id}")
 
     # Update validation state
     if retrieved_functions:
@@ -214,12 +234,18 @@ async def combined_output_validator(
     # Phase 2: Function validation (only for generated code)
     if not has_generated_code:
         logger.info("All code is retrieved examples - skipping function validation")
+        # Reset function retry counter even when skipping validation
+        if hasattr(ctx, "func_retry_count"):
+            ctx.func_retry_count = 0
         return output
 
     # Extract all Pulseq functions for validation
     functions = extract_pulseq_functions(output)
 
     if not functions:
+        # No functions to validate - reset function retry counter
+        if hasattr(ctx, "func_retry_count"):
+            ctx.func_retry_count = 0
         return output
 
     # Get whitelist from validation state
@@ -234,20 +260,31 @@ async def combined_output_validator(
             logger.info(f"Invalid function: {func_call} at line {line_num}")
 
     if invalid_functions:
-        # Check retry count (simplified - could be in validation state)
-        retry_count = getattr(ctx, "retry_count", 0)
-        if retry_count >= MAX_VALIDATION_RETRIES:
-            logger.warning(f"Exceeded validation retries for session {session_id}")
+        # Check function validation retry count (separate from tag retry count)
+        func_retry_count = getattr(ctx, "func_retry_count", 0)
+        if func_retry_count >= MAX_VALIDATION_RETRIES:
+            logger.warning(
+                f"Exceeded function validation retries ({MAX_VALIDATION_RETRIES}) for session {session_id}"
+            )
             return (
                 output + "\n\n*Note: Some functions may not be valid. Please verify.*"
             )
 
-        # Build error message
+        logger.info(
+            f"Invalid functions found (retry {func_retry_count + 1}/{MAX_VALIDATION_RETRIES})"
+        )
+
+        # Build error message (this already includes retry count in the message)
         error_message = build_validation_error_message(invalid_functions, session_id)
 
-        # Increment retry count for next attempt
-        ctx.retry_count = retry_count + 1
+        # Increment function retry count for next attempt
+        ctx.func_retry_count = func_retry_count + 1
 
         raise ModelRetry(error_message)
+
+    # Phase 2 successful - reset function retry counter
+    if hasattr(ctx, "func_retry_count"):
+        ctx.func_retry_count = 0
+        logger.debug(f"Reset function retry counter for session {session_id}")
 
     return output
