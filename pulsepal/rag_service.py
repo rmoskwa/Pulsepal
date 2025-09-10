@@ -1633,7 +1633,7 @@ class ModernPulseqRAG:
             loop = asyncio.get_event_loop()
             embedding = await loop.run_in_executor(None, create_embedding, query)
 
-            # Map table names to RPC functions (based on actual database functions)
+            # Map table names to RPC functions
             rpc_functions = {
                 "api_reference": "match_api_reference",
                 "pulseq_sequences": "match_pulseq_sequences",
