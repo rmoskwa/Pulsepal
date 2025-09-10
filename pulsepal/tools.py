@@ -11,6 +11,7 @@ import re
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
 
+from pydantic import BaseModel, Field
 from pydantic_ai import RunContext, ModelRetry
 
 from .conversation_logger import get_conversation_logger
@@ -26,6 +27,22 @@ conversation_logger = get_conversation_logger()
 # Cache for table metadata with TTL
 _table_metadata_cache: Optional[Tuple[datetime, List[Dict]]] = None
 _TABLE_METADATA_TTL = timedelta(hours=1)
+
+
+# Pydantic model for Supabase query to avoid additionalProperties warning
+class SupabaseQuery(BaseModel):
+    """Structured query for Supabase operations."""
+
+    table: str = Field(..., description="Table name to query")
+    select: str = Field("*", description="Columns to select")
+    filters: List[Dict[str, Any]] = Field(
+        default_factory=list, description="Filter conditions"
+    )
+    order: Optional[Dict[str, Any]] = Field(None, description="Ordering configuration")
+    limit: Optional[int] = Field(None, description="Limit number of results")
+    offset: Optional[int] = Field(None, description="Pagination offset")
+    count: bool = Field(False, description="Return count instead of data")
+    single: bool = Field(False, description="Expect single result")
 
 
 async def get_rag_service(ctx: RunContext[PulsePalDependencies]) -> ModernPulseqRAG:
@@ -508,7 +525,6 @@ async def search_pulseq_knowledge(
             table=table,
             query=query,
             limit=limit,
-            detected_functions=None,  # No longer used
         )
 
     # VALIDATION: Check relevance scores and prompt for broader search if needed
@@ -1237,7 +1253,7 @@ async def get_table_schemas(
 
 async def execute_supabase_query(
     ctx: RunContext[PulsePalDependencies],
-    query: Dict[str, Any],
+    query: SupabaseQuery,
 ) -> str:
     """
     Execute a flexible Supabase query with validation and error guidance.
@@ -1311,7 +1327,7 @@ async def execute_supabase_query(
     - NULL comparisons → shows correct syntax
 
     Args:
-        query: Supabase query configuration as a dictionary
+        query: Supabase query configuration
 
     Returns:
         JSON string with query results or error with guidance
@@ -1325,21 +1341,10 @@ async def execute_supabase_query(
         VALID_TABLES,
     )
 
-    # Validate query structure
-    if not isinstance(query, dict):
-        raise ModelRetry(
-            "Query must be a dictionary. Example:\n"
-            '{"table": "api_reference", "select": "*", "limit": 10}'
-        )
+    # No need to validate query structure - Pydantic does it for us
+    # The table field is required in the Pydantic model
 
-    if "table" not in query:
-        raise ModelRetry(
-            "Query must include 'table' field.\n"
-            f"Valid tables: {', '.join(VALID_TABLES)}\n"
-            "Use find_relevant_tables() to discover appropriate tables."
-        )
-
-    table = query["table"]
+    table = query.table
 
     # Validate table name
     if table not in VALID_TABLES:
@@ -1360,7 +1365,7 @@ async def execute_supabase_query(
         query_builder = supabase.table(table)
 
         # Add select clause with validation
-        select_clause = query.get("select", "*")
+        select_clause = query.select
 
         # Validate select clause to prevent injection
         if select_clause != "*":
@@ -1376,7 +1381,7 @@ async def execute_supabase_query(
         query_builder = query_builder.select(select_clause)
 
         # Add filters
-        filters = query.get("filters", [])
+        filters = query.filters
         for filter_config in filters:
             if not isinstance(filter_config, dict):
                 raise ModelRetry(
@@ -1438,8 +1443,8 @@ async def execute_supabase_query(
                 )
 
         # Add ordering with validation
-        if "order" in query:
-            order_config = query["order"]
+        if query.order is not None:
+            order_config = query.order
             order_column = order_config.get("column")
             ascending = order_config.get("ascending", True)
             if order_column:
@@ -1452,25 +1457,25 @@ async def execute_supabase_query(
                 query_builder = query_builder.order(order_column, desc=not ascending)
 
         # Add limit
-        if "limit" in query:
-            limit = query["limit"]
+        if query.limit is not None:
+            limit = query.limit
             if not isinstance(limit, int) or limit < 1:
                 raise ModelRetry("Limit must be a positive integer")
             query_builder = query_builder.limit(limit)
 
         # Add offset
-        if "offset" in query:
-            offset = query["offset"]
+        if query.offset is not None:
+            offset = query.offset
             if not isinstance(offset, int) or offset < 0:
                 raise ModelRetry("Offset must be a non-negative integer")
             query_builder = query_builder.offset(offset)
 
         # Handle count queries
-        if query.get("count", False):
+        if query.count:
             query_builder = query_builder.count()
 
         # Handle single result expectation
-        if query.get("single", False):
+        if query.single:
             query_builder = query_builder.single()
 
         # Execute query
@@ -1486,8 +1491,8 @@ async def execute_supabase_query(
                     "table": table,
                     "select": select_clause,
                     "filters": filters,
-                    "limit": query.get("limit"),
-                    "offset": query.get("offset"),
+                    "limit": query.limit,
+                    "offset": query.offset,
                 },
             }
 
