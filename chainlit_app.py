@@ -531,13 +531,26 @@ async def main(message: cl.Message):
                             f"Validation errors detected: {routing_decision.validation_errors}"
                         )
 
+                # Check if RAG search should be forced based on routing decision
+                from pulsepal.semantic_router import QueryRoute
+
+                if routing_decision.route == QueryRoute.FORCE_RAG:
+                    logger.info(
+                        f"Semantic router recommends RAG search (confidence: {routing_decision.confidence:.2f})"
+                    )
+                    # Inject the hint into the query for this message only
+                    query_for_agent = f"{query_with_context}\n\n**Knowledge base search recommended for accurate reply!**"
+                    logger.info("💡 Injecting RAG search hint into Chainlit query")
+                else:
+                    query_for_agent = query_with_context
+
                 # Log the detection but don't restrict Gemini's choices
                 logger.debug(
-                    "Function detection complete. Gemini will decide search strategy."
+                    f"Function detection complete. Route: {routing_decision.route.value}"
                 )
 
-                # Run agent with original query (not modified by routing)
-                result = await pulsepal_agent.run(query_with_context, deps=deps)
+                # Run agent with potentially modified query
+                result = await pulsepal_agent.run(query_for_agent, deps=deps)
 
                 # Add response to conversation history
                 # Use result.output for modern pydantic-ai

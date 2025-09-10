@@ -14,6 +14,7 @@ from pydantic_ai import Agent
 from .dependencies import PulsePalDependencies, get_session_manager
 from .gemini_patch import GeminiRecitationError
 from .providers import get_llm_model
+from .semantic_router import QueryRoute
 
 logger = logging.getLogger(__name__)
 
@@ -280,6 +281,9 @@ async def create_pulsepal_session(
             else:
                 routing_decision = router.classify_query(query)
 
+                # Store routing decision in deps for later use
+                deps.routing_decision = routing_decision
+
                 # Log detected functions for debugging but don't pass them
                 if routing_decision.detected_functions:
                     deps.validation_errors = routing_decision.validation_errors
@@ -294,9 +298,19 @@ async def create_pulsepal_session(
                             f"Validation errors detected: {routing_decision.validation_errors}"
                         )
 
+                # Check if RAG search should be forced
+                if routing_decision.route == QueryRoute.FORCE_RAG:
+                    logger.info(
+                        f"Semantic router recommends RAG search (confidence: {routing_decision.confidence:.2f})"
+                    )
+                    deps.force_rag = True
+                else:
+                    deps.force_rag = False
+
                 # Log the detection but don't restrict Gemini's choices
                 logger.debug(
-                    "Function detection complete. Gemini will decide search strategy."
+                    f"Function detection complete. Route: {routing_decision.route.value}, "
+                    f"Force RAG: {deps.force_rag}"
                 )
 
         except ImportError as e:
@@ -339,10 +353,20 @@ async def run_pulsepal_query(
         # Add query to conversation history
         deps.conversation_context.add_conversation("user", query)
 
+        # Inject prompt hint if semantic router recommends RAG search
+        if hasattr(deps, "force_rag") and deps.force_rag:
+            # Inject the hint into the query for this message only
+            modified_query = (
+                f"{query}\n\n**Knowledge base search recommended for accurate reply!**"
+            )
+            logger.info("  💡 Injecting RAG search hint into query")
+        else:
+            modified_query = query
+
         # Run the agent
         logger.info("  🤖 Calling Gemini agent...")
         result = await pulsepal_agent.run(
-            query,
+            modified_query,
             deps=deps,
             model_settings={"temperature": temperature},
         )
@@ -442,6 +466,9 @@ def apply_semantic_routing(query: str, deps: PulsePalDependencies) -> None:
 
         routing_decision = router.classify_query(query)
 
+        # Store routing decision in deps
+        deps.routing_decision = routing_decision
+
         # Log detected functions for debugging but don't pass them
         if routing_decision.detected_functions:
             deps.validation_errors = routing_decision.validation_errors
@@ -456,8 +483,20 @@ def apply_semantic_routing(query: str, deps: PulsePalDependencies) -> None:
                     f"Validation errors detected: {routing_decision.validation_errors}"
                 )
 
+        # Check if RAG search should be forced
+        if routing_decision.route == QueryRoute.FORCE_RAG:
+            logger.info(
+                f"Semantic router recommends RAG search (confidence: {routing_decision.confidence:.2f})"
+            )
+            deps.force_rag = True
+        else:
+            deps.force_rag = False
+
         # Log the detection but don't restrict Gemini's choices
-        logger.debug("Function detection complete. Gemini will decide search strategy.")
+        logger.debug(
+            f"Function detection complete. Route: {routing_decision.route.value}, "
+            f"Force RAG: {deps.force_rag}"
+        )
 
     except ImportError as e:
         logger.warning(f"Function detector not available: {e}")
@@ -490,9 +529,19 @@ async def run_pulsepal_stream(
         # Add query to conversation history
         deps.conversation_context.add_conversation("user", query)
 
+        # Inject prompt hint if semantic router recommends RAG search
+        if hasattr(deps, "force_rag") and deps.force_rag:
+            # Inject the hint into the query for this message only
+            modified_query = (
+                f"{query}\n\n**Knowledge base search recommended for accurate reply!**"
+            )
+            logger.info("💡 Injecting RAG search hint into streaming query")
+        else:
+            modified_query = query
+
         # Run the agent with streaming
         async with pulsepal_agent.run_stream(
-            query,
+            modified_query,
             deps=deps,
             model_settings={"temperature": temperature},
         ) as result:
