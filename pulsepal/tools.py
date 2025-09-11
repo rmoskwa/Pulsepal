@@ -563,20 +563,37 @@ async def search_pulseq_knowledge(
         )
 
     # VALIDATION: Check relevance scores and provide feedback to Gemini
-    # Instead of raising ModelRetry, include relevance info in the results
+    # When relevance is too low, withhold results but provide warning
     try:
         _validate_search_relevance(results, table, query, ctx)
     except ModelRetry as e:
-        # Don't crash - instead add relevance feedback to results
+        # Low relevance detected - withhold actual results from Gemini
         logger.warning(f"Low relevance scores for query: {query}")
-        results["relevance_warning"] = {
-            "status": "low_relevance",
-            "message": str(e),
-            "suggestion": "Consider rephrasing your query or trying different search terms",
-            "top_score": results.get("search_metadata", {})
+
+        # Get the top score for logging
+        top_score = (
+            results.get("search_metadata", {})
             .get("rerank_stats", {})
-            .get("top_score", 0),
+            .get("top_score", 0)
+        )
+
+        # Clear the actual results to prevent Gemini from using irrelevant content
+        # Keep only metadata and warning
+        cleared_results = {
+            "search_metadata": results.get("search_metadata", {}),
+            "total_results": 0,  # Set to 0 to indicate no usable results
+            "relevance_warning": {
+                "status": "low_relevance",
+                "message": str(e),
+                "suggestion": "Consider rephrasing your query or trying different search terms",
+                "top_score": top_score,
+                "original_results_withheld": True,
+                "reason": f"Results withheld due to low relevance (score: {top_score:.2f})",
+            },
         }
+
+        # Replace results with cleared version
+        results = cleared_results
 
     # Log search event if we have context and conversation_context
     if (

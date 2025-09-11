@@ -189,8 +189,9 @@ def _register_validators():
     """Register output validators with the pulsepal agent."""
     from .combined_validator import combined_output_validator
 
-    # Register the combined validator that ensures proper ordering
-    # and state management without race conditions
+    # Register the combined validator
+    # The validator tracks its own retry counts internally for tag and function validation
+    # After exhausting retries, it gracefully degrades and allows the message through
     pulsepal_agent.output_validator(combined_output_validator)
 
     logger.info("Combined output validator registered with Pulsepal agent")

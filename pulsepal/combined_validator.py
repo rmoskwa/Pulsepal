@@ -262,6 +262,8 @@ async def combined_output_validator(
             )
             # Reset counters even on graceful degradation
             validation_state.reset_retry_counters()
+
+            # Add warning about function validation only
             return (
                 output + "\n\n*Note: Some functions may not be valid. Please verify.*"
             )
