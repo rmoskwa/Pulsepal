@@ -26,7 +26,8 @@ from .tag_validator import (
 logger = logging.getLogger(__name__)
 
 # Maximum retries for validation
-MAX_VALIDATION_RETRIES = 3
+# Note: PydanticAI only allows 1 retry by default, so we must pass through after 1 retry
+MAX_VALIDATION_RETRIES = 1
 MAX_OUTPUT_LENGTH = 100000  # Maximum output length to prevent ReDoS
 
 # Track retry count per session with thread-safe access
