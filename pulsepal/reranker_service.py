@@ -6,6 +6,7 @@ with secure model downloading, Railway volume support, and graceful error handli
 
 import hashlib
 import logging
+import threading
 import time
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Any
@@ -24,6 +25,7 @@ class BGERerankerService:
     """
 
     _instance: Optional["BGERerankerService"] = None
+    _lock = threading.Lock()  # Thread-safe lock for singleton
     _model = None
     _tokenizer = None
 
@@ -47,9 +49,14 @@ class BGERerankerService:
     }
 
     def __new__(cls, *args, **kwargs):
-        """Implement singleton pattern for model instance management."""
+        """Implement thread-safe singleton pattern using double-checked locking."""
+        # First check without lock (fast path)
         if cls._instance is None:
-            cls._instance = super().__new__(cls)
+            # Acquire lock for thread safety
+            with cls._lock:
+                # Double-check after acquiring lock
+                if cls._instance is None:
+                    cls._instance = super().__new__(cls)
         return cls._instance
 
     def __init__(
@@ -58,6 +65,7 @@ class BGERerankerService:
         model_name: str = "BAAI/bge-reranker-base",
         batch_size: int = 15,
         timeout: int = 30,
+        eager_load: bool = True,  # Load model immediately by default
     ):
         """Initialize the BGE Reranker Service.
 
@@ -66,6 +74,7 @@ class BGERerankerService:
             model_name: HuggingFace model identifier
             batch_size: Maximum documents to process in batch
             timeout: Model initialization timeout in seconds
+            eager_load: If True, load model immediately on initialization
         """
         if hasattr(self, "_initialized"):
             return
@@ -89,8 +98,76 @@ class BGERerankerService:
         self._initialized = True
 
         logger.info(
-            f"BGERerankerService initialized with model_path={model_path}, model_name={model_name}"
+            f"BGERerankerService initialized with model_path={model_path}, model_name={model_name}, eager_load={eager_load}"
         )
+
+        # Load model immediately if eager_load is True
+        if eager_load:
+            logger.info("Eager loading BGE reranker model...")
+            self._start_background_loading()
+            logger.info("Scheduled BGE reranker model loading in background")
+
+    def _start_background_loading(self):
+        """Start loading the model in a background thread.
+
+        This approach avoids complex async/sync context detection by using
+        a dedicated thread for model loading. The thread runs an event loop
+        to handle the async _load_model method.
+        """
+        import threading
+        import asyncio
+
+        def load_in_background():
+            """Load model in a separate thread with its own event loop."""
+            # Create a new event loop for this thread
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                # Run the async _load_model method
+                loop.run_until_complete(self._load_model())
+                self._loading_complete = True
+                logger.info("BGE reranker model loaded successfully in background")
+            except Exception as e:
+                logger.error(f"Failed to load BGE reranker model in background: {e}")
+                self._loading_error = e
+                self._loading_complete = True
+            finally:
+                loop.close()
+
+        # Initialize loading state
+        self._loading_complete = False
+        self._loading_error = None
+
+        # Start the background thread
+        self._loading_thread = threading.Thread(
+            target=load_in_background,
+            daemon=True,  # Daemon thread will not block program exit
+            name="bge-reranker-loader",
+        )
+        self._loading_thread.start()
+
+    async def _wait_for_loading(self) -> bool:
+        """Wait for the background loading to complete.
+
+        Returns:
+            True if model loaded successfully, False otherwise
+        """
+        import asyncio
+
+        # If no loading thread exists or model already loaded, return immediately
+        if not hasattr(self, "_loading_thread"):
+            return self._model is not None
+
+        # Wait for loading to complete with periodic checks
+        while not self._loading_complete:
+            await asyncio.sleep(0.1)  # Check every 100ms
+
+        # Check if there was an error
+        if self._loading_error:
+            logger.error(f"Model loading failed: {self._loading_error}")
+            return False
+
+        return self._model is not None
 
     def _verify_url_security(self, url: str) -> bool:
         """Verify that URL is from allowed HuggingFace CDN.
@@ -482,7 +559,14 @@ class BGERerankerService:
                 documents[self.batch_size :] if len(documents) > self.batch_size else []
             )
 
-            # Load model if not already loaded
+            # Wait for background loading if in progress
+            if hasattr(self, "_loading_thread") and not self._loading_complete:
+                logger.info("Waiting for model to finish loading from startup...")
+                if not await self._wait_for_loading():
+                    logger.error("Model loading failed during startup")
+                    return ([1.0] * len(documents), documents)
+
+            # Load model if not already loaded (in case eager_load was False)
             if not await self._load_model():
                 logger.warning("Model loading failed, returning original order")
                 return ([1.0] * len(documents), documents)
@@ -576,3 +660,22 @@ class BGERerankerService:
         self._model = None
         self._tokenizer = None
         logger.info("Model cache cleared")
+
+    def load_model_sync(self) -> bool:
+        """Synchronously load the model - useful for startup initialization.
+
+        Returns:
+            True if model loaded successfully, False otherwise
+        """
+        import asyncio
+
+        try:
+            # Create new event loop for synchronous loading
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            result = loop.run_until_complete(self._load_model())
+            loop.close()
+            return result
+        except Exception as e:
+            logger.error(f"Failed to load model synchronously: {e}")
+            return False

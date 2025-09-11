@@ -24,7 +24,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from pulsepal.conversation_logger import get_conversation_logger
 from pulsepal.dependencies import get_session_manager
 from pulsepal.main_agent import create_pulsepal_session, pulsepal_agent
-from pulsepal.semantic_router import initialize_semantic_router
+from pulsepal.semantic_router import SemanticRouter
 from pulsepal.settings import get_settings
 from pulsepal.startup import initialize_all_services
 
@@ -114,6 +114,7 @@ logger.info("🚀 USING ENHANCED RAG SERVICE V2 - With Function Validation")
 logger.info("=" * 60)
 
 # Initialize all services at startup
+# This will load models in the background
 initialize_all_services()
 
 # Global settings
@@ -122,10 +123,12 @@ settings = get_settings()
 # Initialize conversation logger for debugging
 conversation_logger = get_conversation_logger()
 
-# Initialize semantic router at startup for efficient classification
-logger.info("Initializing semantic router at startup...")
-_semantic_router = initialize_semantic_router()
-logger.info("✅ Semantic router initialized successfully")
+# Semantic router is already initialized in initialize_all_services()
+# Just get the singleton instance (it won't reinitialize due to singleton pattern)
+logger.info("Getting semantic router instance...")
+
+_semantic_router = SemanticRouter()  # Will return existing singleton
+logger.info("✅ Semantic router ready")
 
 # Lock to prevent concurrent session initialization
 # Will be initialized on first use to avoid event loop issues
@@ -167,6 +170,81 @@ SEQUENCE_KNOWLEDGE_TEMPLATE = """# Sequence Knowledge Template
 """
 
 
+@cl.on_stop
+async def on_stop():
+    """Handle session stop/disconnect gracefully."""
+    pulsepal_session_id = cl.user_session.get("pulsepal_session_id")
+    if pulsepal_session_id:
+        logger.info(f"Session stopping/disconnecting: {pulsepal_session_id}")
+        # Don't clear the session - keep it for potential reconnection
+        # The session will timeout naturally after MAX_SESSION_DURATION_HOURS
+
+
+@cl.on_chat_resume
+async def on_chat_resume(thread):
+    """Resume an existing chat session after reconnection.
+
+    Note: Chainlit's session persistence is limited. This handler attempts to
+    maintain continuity but may not always have access to previous session data.
+    """
+    logger.info("=" * 60)
+    logger.info("CHAT RESUME TRIGGERED")
+    logger.info("=" * 60)
+
+    # Since Chainlit doesn't provide reliable thread persistence,
+    # we'll try to check if there's an active session in our session manager
+    session_manager = get_session_manager()
+
+    # Get the most recent active session (if any)
+    # This is a workaround since Chainlit doesn't give us the session ID directly
+    active_sessions = session_manager.get_active_sessions()
+
+    if active_sessions:
+        # Use the most recent session
+        pulsepal_session_id = active_sessions[-1]
+        deps = session_manager.get_session(pulsepal_session_id)
+
+        if deps:
+            logger.info(f"Found active session: {pulsepal_session_id}")
+            cl.user_session.set("pulsepal_session_id", pulsepal_session_id)
+            cl.user_session.set("pulsepal_deps", deps)
+
+            # Restore the chat settings
+            if deps.conversation_context:
+                settings = [
+                    cl.input_widget.TextInput(
+                        id="sequence_knowledge",
+                        label="🎯 Sequence Knowledge",
+                        description="Add your sequence-specific context.",
+                        placeholder="Enter your sequence details here...",
+                        multiline=True,
+                        initial=deps.conversation_context.sequence_knowledge or "",
+                        max_chars=10000,
+                    ),
+                    cl.input_widget.Switch(
+                        id="use_sequence_context",
+                        label="Enable Sequence Context",
+                        initial=deps.conversation_context.use_sequence_context,
+                        description="When enabled, PulsePal will consider your sequence context in all responses",
+                    ),
+                ]
+                await cl.ChatSettings(settings).send()
+
+                await cl.Message(
+                    content=f"✅ **Session resumed!** Continuing conversation with {deps.conversation_context.conversation_count} previous messages.",
+                    author="system",
+                ).send()
+
+                logger.info(
+                    f"✅ Restored session context with {deps.conversation_context.conversation_count} messages"
+                )
+                return
+
+    # If no active session found, start fresh
+    logger.info("No active session found, starting new one")
+    await start()
+
+
 @cl.on_chat_start
 async def start():
     """Initialize chat session with Pulsepal agent using enhanced RAG v2."""
@@ -191,6 +269,11 @@ async def start():
             # Store session info in Chainlit user session
             cl.user_session.set("pulsepal_session_id", pulsepal_session_id)
             cl.user_session.set("pulsepal_deps", deps)
+
+            # Store session ID for potential recovery
+            # Note: Chainlit's thread persistence is limited, so we primarily rely on
+            # the session manager's in-memory storage for session continuity
+            logger.info(f"Session initialized with ID: {pulsepal_session_id}")
 
             # Log session start for debugging
             conversation_logger.log_conversation(

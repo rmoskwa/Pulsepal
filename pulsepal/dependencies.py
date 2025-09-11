@@ -373,6 +373,27 @@ class SessionManager:
             )
             self.session_timeouts[session_id] = new_timeout
 
+    def get_active_sessions(self) -> List[str]:
+        """Get list of active (non-expired) session IDs, sorted by last activity."""
+        active = []
+        now = datetime.now()
+
+        for session_id, timeout in self.session_timeouts.items():
+            if now <= timeout:  # Session is still active
+                context = self.sessions.get(session_id)
+                if context:
+                    # Get last activity time for sorting
+                    last_time = (
+                        context.last_activity
+                        if hasattr(context, "last_activity")
+                        else context.session_start_time
+                    )
+                    active.append((session_id, last_time))
+
+        # Sort by last activity time (most recent last)
+        active.sort(key=lambda x: x[1])
+        return [session_id for session_id, _ in active]
+
     def get_expired_sessions(self) -> List[str]:
         """Get list of expired session IDs."""
         now = datetime.now()

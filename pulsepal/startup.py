@@ -79,6 +79,43 @@ def initialize_embeddings():
         # Don't raise - embeddings might still work later
 
 
+def initialize_ml_models():
+    """
+    Pre-initialize ML models (semantic router and reranker) at startup.
+    This avoids the delay when the first query needs these models.
+    """
+    logger.info("Pre-loading ML models for faster first query...")
+
+    # Initialize semantic router with eager loading
+    try:
+        logger.info("Loading semantic router (sentence transformer)...")
+        from .semantic_router import initialize_semantic_router
+
+        # Initialize with eager_load=True (default)
+        _ = initialize_semantic_router(eager_load=True)
+        logger.info("✅ Semantic router loaded successfully")
+    except Exception as e:
+        logger.error(f"❌ Failed to initialize semantic router: {e}")
+        # Continue - router can still be loaded lazily if needed
+
+    # Initialize reranker with eager loading
+    try:
+        logger.info("Loading BGE reranker model...")
+        from .reranker_service import BGERerankerService
+
+        # Initialize singleton with eager_load=True (default)
+        # The reranker will handle async/sync contexts automatically
+        _ = BGERerankerService(eager_load=True)
+
+        # Don't try to wait synchronously if we're in an async context
+        # The model will load in the background and be ready when needed
+        logger.info("✅ BGE reranker service initialized (loading in background)")
+
+    except Exception as e:
+        logger.error(f"❌ Failed to initialize reranker: {e}")
+        # Continue - reranker can still be loaded lazily if needed
+
+
 def initialize_all_services():
     """
     Initialize all services at application startup.
@@ -107,6 +144,9 @@ def initialize_all_services():
 
         # Initialize embeddings
         initialize_embeddings()
+
+        # Initialize ML models (semantic router and reranker)
+        initialize_ml_models()
 
         # Skip connection test during startup to avoid delays
         # The connection will be tested when first used

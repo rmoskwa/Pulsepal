@@ -9,6 +9,7 @@ Uses free, local embeddings (all-MiniLM-L6-v2) for classification.
 import logging
 import os
 import re
+import threading
 import time
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -87,6 +88,20 @@ class ThresholdManager:
 
 class SemanticRouter:
     """Semantic router for intelligent query classification."""
+
+    _instance = None  # Singleton instance
+    _lock = threading.Lock()  # Thread-safe lock for singleton
+
+    def __new__(cls, *args, **kwargs):
+        """Implement thread-safe singleton pattern using double-checked locking."""
+        # First check without lock (fast path)
+        if cls._instance is None:
+            # Acquire lock for thread safety
+            with cls._lock:
+                # Double-check after acquiring lock
+                if cls._instance is None:
+                    cls._instance = super().__new__(cls)
+        return cls._instance
 
     # Build comprehensive Pulseq function set from function_index (all 150 functions)
     PULSEQ_FUNCTIONS = set()
@@ -184,22 +199,29 @@ class SemanticRouter:
         "exchange",
     }
 
-    def __init__(self, lazy_load: bool = False):
+    def __init__(self, eager_load: bool = True):
         """Initialize the semantic router with embeddings model.
 
         Args:
-            lazy_load: If True, defer model loading until first use (better for startup time)
+            eager_load: If True, load model immediately on initialization (default behavior)
         """
+        # Skip initialization if already done (singleton pattern)
+        if hasattr(self, "_initialized"):
+            return
+
         self.threshold_manager = ThresholdManager()
         self.encoder = None
         self._embeddings_loaded = False
+        self._initialized = True
 
-        if not lazy_load:
+        if eager_load:
+            logger.info("Eager loading sentence transformer model...")
             self._initialize_encoder()
             self._load_concept_embeddings()
-            logger.info("Semantic router initialized successfully")
+            self._embeddings_loaded = True
+            logger.info("Semantic router initialized successfully with eager loading")
         else:
-            logger.info("Semantic router initialized (lazy loading enabled)")
+            logger.info("Semantic router initialized (lazy loading mode)")
 
     def _initialize_encoder(self):
         """Initialize the sentence transformer model."""
@@ -871,18 +893,21 @@ class SemanticRouter:
                 logger.warning(f"Failed to log to conversation logger: {e}")
 
 
-def initialize_semantic_router() -> SemanticRouter:
+def initialize_semantic_router(eager_load: bool = True) -> SemanticRouter:
     """
     Initialize the semantic router at application startup.
+
+    Args:
+        eager_load: If True, load models immediately (default)
 
     Returns:
         Initialized SemanticRouter instance
     """
-    logger.info("Initializing semantic router at startup...")
+    logger.info(f"Initializing semantic router at startup (eager_load={eager_load})...")
     start_time = time.time()
 
     try:
-        router = SemanticRouter()
+        router = SemanticRouter(eager_load=eager_load)
         elapsed = time.time() - start_time
         logger.info(f"Semantic router ready ({elapsed:.2f}s)")
         return router
