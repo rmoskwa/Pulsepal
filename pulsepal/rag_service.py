@@ -2527,10 +2527,10 @@ class ModernPulseqRAG:
             # Limit batch size
             chunk_ids = chunk_ids[:5]
 
-            # Batch fetch with async execution
+            # Batch fetch with async execution - include chunk_type for file_name field
             query = (
                 self.supabase_client.client.table("sequence_chunks")
-                .select("id, code_content")
+                .select("id, code_content, chunk_type")
                 .in_("id", chunk_ids)
                 .limit(5)
             )
@@ -2539,27 +2539,42 @@ class ModernPulseqRAG:
 
             enriched_count = 0
             if response and response.data:
-                # Create lookup map
-                content_map = {
-                    r["id"]: r["code_content"]
-                    for r in response.data
-                    if r.get("code_content")
-                }
+                # Create lookup map with chunk_type
+                content_map = {}
+                for r in response.data:
+                    if r.get("code_content"):
+                        content_map[r["id"]] = {
+                            "code_content": r["code_content"],
+                            "chunk_type": r.get("chunk_type", ""),
+                        }
 
                 # Inject into results with size management
                 for idx, result in table_results:
                     chunk_id = result.get("id") or result.get("record_id")
                     if chunk_id in content_map:
-                        content = content_map[chunk_id]
+                        chunk_data = content_map[chunk_id]
+                        content = chunk_data["code_content"]
                         # Apply size limit
                         result["code_content"], truncated = self._truncate_if_needed(
                             content, 20000
                         )
                         result["full_content"] = result["code_content"]
+
+                        # Use chunk_type as the file_name field for display
+                        if chunk_data["chunk_type"]:
+                            result["file_name"] = chunk_data["chunk_type"]
+                            logger.info(
+                                f"Enriched chunk {chunk_id} with code_content and chunk_type: {chunk_data['chunk_type']}"
+                            )
+                        else:
+                            result["file_name"] = ""
+                            logger.info(
+                                f"Enriched chunk {chunk_id} with code_content (no chunk_type)"
+                            )
+
                         if truncated:
                             result["content_truncated"] = True
                         enriched_count += 1
-                        logger.info(f"Enriched chunk {chunk_id} with code_content")
 
             return enriched_count
 

@@ -186,16 +186,18 @@ async def combined_output_validator(
 
     # If there are untagged blocks, request tagging (with retry limit)
     if untagged_blocks:
-        # Check tag validation retry count from persistent state
-        tag_retry_count = validation_state.tag_retry_count
-        if tag_retry_count >= MAX_VALIDATION_RETRIES:
+        # Check if we've already reached the maximum retries
+        if validation_state.tag_retry_count >= MAX_VALIDATION_RETRIES:
             logger.warning(
-                f"Exceeded tag validation retries ({MAX_VALIDATION_RETRIES}) for session {session_id}"
+                f"Reached tag validation retry limit ({MAX_VALIDATION_RETRIES}) for session {session_id}"
             )
             # Continue despite untagged blocks - let Phase 2 validate functions
-            logger.info("Proceeding to function validation despite untagged blocks")
+            logger.info(
+                "Proceeding to function validation despite untagged blocks - passing through"
+            )
+            # Just continue without modifying output
         else:
-            # Increment retry count in persistent state
+            # Still have retries left, increment and request tagging
             current_retry = validation_state.increment_tag_retry()
             logger.warning(
                 f"Found {len(untagged_blocks)} untagged code blocks (retry {current_retry}/{MAX_VALIDATION_RETRIES})"
@@ -254,21 +256,19 @@ async def combined_output_validator(
             logger.info(f"Invalid function: {func_call} at line {line_num}")
 
     if invalid_functions:
-        # Check function validation retry count from persistent state
-        func_retry_count = validation_state.func_retry_count
-        if func_retry_count >= MAX_VALIDATION_RETRIES:
+        # Check if we've already reached the maximum retries
+        if validation_state.func_retry_count >= MAX_VALIDATION_RETRIES:
             logger.warning(
-                f"Exceeded function validation retries ({MAX_VALIDATION_RETRIES}) for session {session_id}"
+                f"Reached function validation retry limit ({MAX_VALIDATION_RETRIES}) for session {session_id}"
             )
-            # Reset counters even on graceful degradation
+            # Reset counters and pass through without modification
             validation_state.reset_retry_counters()
+            logger.info("Passing through response despite invalid functions")
 
-            # Add warning about function validation only
-            return (
-                output + "\n\n*Note: Some functions may not be valid. Please verify.*"
-            )
+            # Return output as-is without adding any notes
+            return output
 
-        # Increment retry count in persistent state
+        # Still have retries left, increment and request correction
         current_retry = validation_state.increment_func_retry()
         logger.info(
             f"Invalid functions found (retry {current_retry}/{MAX_VALIDATION_RETRIES})"
