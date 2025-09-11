@@ -1994,11 +1994,13 @@ class ModernPulseqRAG:
         """Format sequence_chunks table results."""
         formatted = []
         for r in results:
+            chunk_type = r.get("chunk_type", "")
             formatted.append(
                 {
                     "id": r.get("id"),
                     "sequence_id": r.get("sequence_id"),
-                    "chunk_type": r.get("chunk_type", ""),
+                    "chunk_type": chunk_type,
+                    "file_name": chunk_type,  # Use chunk_type as file_name for consistency
                     "chunk_order": r.get("chunk_order", 0),
                     "code_content": r.get("code_content", ""),
                     "start_line": r.get("start_line", 0),
@@ -2304,9 +2306,14 @@ class ModernPulseqRAG:
                 )
                 # Check for file_name in various places
                 # For crawled_docs, the file name is in metadata.file_path
+                # For sequence_chunks, use chunk_type as the file_name
                 file_name = (
                     result.get("file_name")
+                    or result.get("chunk_type")  # sequence_chunks use chunk_type
                     or result.get("metadata", {}).get("file_name")
+                    or result.get("metadata", {}).get(
+                        "chunk_type"
+                    )  # Also check in metadata
                     or result.get("metadata", {}).get(
                         "file_path"
                     )  # crawled_docs uses file_path
