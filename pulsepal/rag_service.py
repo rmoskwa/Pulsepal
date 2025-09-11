@@ -2051,9 +2051,18 @@ class ModernPulseqRAG:
         """Format crawled_docs table results."""
         formatted = []
         for r in results:
+            # Extract file_name from metadata.file_path or resource_uri
+            metadata = r.get("metadata", {})
+            file_name = (
+                metadata.get("file_path")
+                or metadata.get("file_name")
+                or r.get("resource_uri", "").split("/")[-1]
+            )
+
             formatted.append(
                 {
                     "id": r.get("id"),
+                    "file_name": file_name,  # Add extracted file_name
                     "resource_uri": r.get("resource_uri", ""),
                     "chunk_number": r.get("chunk_number", 0),
                     "source_id": r.get("source_id", ""),
@@ -2294,11 +2303,18 @@ class ModernPulseqRAG:
                     f"Result {i} metadata keys: {list(result.get('metadata', {}).keys())[:10]}"
                 )
                 # Check for file_name in various places
+                # For crawled_docs, the file name is in metadata.file_path
                 file_name = (
                     result.get("file_name")
                     or result.get("metadata", {}).get("file_name")
+                    or result.get("metadata", {}).get(
+                        "file_path"
+                    )  # crawled_docs uses file_path
                     or result.get("name")
                     or result.get("metadata", {}).get("name")
+                    or result.get("resource_uri", "").split("/")[
+                        -1
+                    ]  # Extract from resource_uri as fallback
                 )
                 logger.info(f"Result {i} - file_name found: '{file_name}'")
 
@@ -2628,10 +2644,12 @@ class ModernPulseqRAG:
         """
         try:
             # Collect IDs with validation
+            # Note: Always fetch full content for crawled_code since match_crawled_code returns only summaries
             code_ids = []
             for idx, result in table_results:
                 code_id = result.get("id") or result.get("record_id")
-                if code_id and not result.get("content"):
+                # Check if we need to fetch full content (don't have full_content field yet)
+                if code_id and not result.get("full_content"):
                     # Validate ID
                     if isinstance(code_id, (int, str)) and str(code_id).isdigit():
                         code_ids.append(int(code_id))
@@ -2665,17 +2683,21 @@ class ModernPulseqRAG:
                 for idx, result in table_results:
                     code_id = result.get("id") or result.get("record_id")
                     if code_id in content_map:
-                        content = content_map[code_id]
-                        # Apply size limit
-                        result["content"], truncated = self._truncate_if_needed(
-                            content, 30000
+                        full_content = content_map[code_id]
+                        # Store summary separately if it exists
+                        if "content" in result:
+                            result["content_summary"] = result["content"]
+                        # Apply size limit to full content
+                        result["full_content"], truncated = self._truncate_if_needed(
+                            full_content, 30000
                         )
-                        result["full_content"] = result["content"]
+                        # Also update content field with full content for backward compatibility
+                        result["content"] = result["full_content"]
                         if truncated:
                             result["content_truncated"] = True
                         enriched_count += 1
                         logger.info(
-                            f"Enriched crawled_code {code_id} with full content"
+                            f"Enriched crawled_code {code_id} with full content ({len(full_content)} chars)"
                         )
 
             return enriched_count
@@ -2692,10 +2714,12 @@ class ModernPulseqRAG:
         """
         try:
             # Collect IDs with validation
+            # Note: Always fetch full content for crawled_docs since match_crawled_docs returns only summaries
             doc_ids = []
             for idx, result in table_results:
                 doc_id = result.get("id") or result.get("record_id")
-                if doc_id and not result.get("content"):
+                # Check if we need to fetch full content (don't have full_content field yet)
+                if doc_id and not result.get("full_content"):
                     # Validate ID
                     if isinstance(doc_id, (int, str)) and str(doc_id).isdigit():
                         doc_ids.append(int(doc_id))
@@ -2729,16 +2753,22 @@ class ModernPulseqRAG:
                 for idx, result in table_results:
                     doc_id = result.get("id") or result.get("record_id")
                     if doc_id in content_map:
-                        content = content_map[doc_id]
+                        full_content = content_map[doc_id]
+                        # Store summary separately if it exists
+                        if "content" in result:
+                            result["content_summary"] = result["content"]
                         # Apply size limit (docs can be 40KB+)
-                        result["content"], truncated = self._truncate_if_needed(
-                            content, 10000
+                        result["full_content"], truncated = self._truncate_if_needed(
+                            full_content, 10000
                         )
-                        result["full_content"] = result["content"]
+                        # Also update content field with full content for backward compatibility
+                        result["content"] = result["full_content"]
                         if truncated:
                             result["content_truncated"] = True
                         enriched_count += 1
-                        logger.info(f"Enriched crawled_doc {doc_id} with content")
+                        logger.info(
+                            f"Enriched crawled_doc {doc_id} with full content ({len(full_content)} chars)"
+                        )
 
             return enriched_count
 

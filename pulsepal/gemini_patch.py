@@ -35,6 +35,27 @@ class PatchedGeminiModel(GeminiModel):
         """Process response and handle unexpected finish reasons appropriately."""
         if "candidates" in response:
             for candidate in response["candidates"]:
+                # Ensure content structure exists
+                if "content" not in candidate or not candidate.get("content"):
+                    logger.warning("Candidate missing content field, adding default")
+                    candidate["content"] = {
+                        "parts": [
+                            {
+                                "text": "I encountered an issue generating the response. Please try again."
+                            }
+                        ],
+                        "role": "model",
+                    }
+                elif "parts" not in candidate["content"] or not candidate[
+                    "content"
+                ].get("parts"):
+                    logger.warning("Content missing parts field, adding default")
+                    candidate["content"]["parts"] = [
+                        {
+                            "text": "I encountered an issue generating the response. Please try again."
+                        }
+                    ]
+
                 if "finishReason" in candidate:
                     finish_reason = candidate["finishReason"]
 
@@ -99,6 +120,24 @@ class PatchedGeminiModel(GeminiModel):
                 # Convert to our specific exception
                 raise GeminiRecitationError(
                     "Gemini blocked response due to potential training data recitation",
+                ) from e
+
+            # Check for missing parts field in content (empty response)
+            if (
+                "candidates.0.content.parts" in error_str
+                and "Field required" in error_str
+            ):
+                logger.warning(
+                    "Gemini returned empty response (missing content.parts). "
+                    "This can happen when the model fails to generate content."
+                )
+                # Convert to a more informative error
+                raise ValueError(
+                    "Gemini failed to generate a response. This may happen when:\n"
+                    "1. The query is too complex or ambiguous\n"
+                    "2. Safety filters blocked the response\n"
+                    "3. The model encountered an internal error\n"
+                    "Please try rephrasing your question or simplifying your request."
                 ) from e
 
             # Check for other validation errors we should handle

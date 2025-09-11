@@ -170,9 +170,8 @@ def _register_tools():
     wrapped_get_schemas = log_tool_usage(tools.get_table_schemas)
     wrapped_execute_query = log_tool_usage(tools.execute_supabase_query)
 
-    # Register wrapped tools with max_retries configuration
-    # Allow more retries for search tool since validation may trigger retries
-    pulsepal_agent.tool(wrapped_search, max_retries=3)
+    # Register wrapped tools
+    pulsepal_agent.tool(wrapped_search)
     pulsepal_agent.tool(wrapped_lookup)
     pulsepal_agent.tool(wrapped_find_tables)
     pulsepal_agent.tool(wrapped_get_schemas)
@@ -358,18 +357,18 @@ async def run_pulsepal_query(
         if hasattr(deps, "force_rag") and deps.force_rag:
             # Inject the hint into the query for this message only
             modified_query = (
-                f"{query}\n\n**Knowledge base search recommended for accurate reply!**"
+                f"{query}\n\n⚠️ **IMPORTANT: You MUST use the search_pulseq_knowledge tool to answer this question accurately. "
+                f"The query contains Pulseq-specific functions that require searching the knowledge base. "
+                f"DO NOT rely on your training data - search the database first, then provide your answer based on the search results.**"
             )
-            logger.info("  💡 Injecting RAG search hint into query")
+            logger.info("  💡 Injecting strong RAG search directive into query")
         else:
             modified_query = query
 
         # Run the agent
         logger.info("  🤖 Calling Gemini agent...")
         result = await pulsepal_agent.run(
-            modified_query,
-            deps=deps,
-            model_settings={"temperature": temperature},
+            modified_query, deps=deps, model_settings={"temperature": temperature}
         )
 
         # Extract response - use result.output for pydantic-ai
@@ -534,17 +533,17 @@ async def run_pulsepal_stream(
         if hasattr(deps, "force_rag") and deps.force_rag:
             # Inject the hint into the query for this message only
             modified_query = (
-                f"{query}\n\n**Knowledge base search recommended for accurate reply!**"
+                f"{query}\n\n⚠️ **IMPORTANT: You MUST use the search_pulseq_knowledge tool to answer this question accurately. "
+                f"The query contains Pulseq-specific functions that require searching the knowledge base. "
+                f"DO NOT rely on your training data - search the database first, then provide your answer based on the search results.**"
             )
-            logger.info("💡 Injecting RAG search hint into streaming query")
+            logger.info("💡 Injecting strong RAG search directive into streaming query")
         else:
             modified_query = query
 
         # Run the agent with streaming
         async with pulsepal_agent.run_stream(
-            modified_query,
-            deps=deps,
-            model_settings={"temperature": temperature},
+            modified_query, deps=deps, model_settings={"temperature": temperature}
         ) as result:
             full_response = ""
             async for chunk in result.stream():

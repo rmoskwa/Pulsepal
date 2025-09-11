@@ -125,10 +125,11 @@ conversation_logger = get_conversation_logger()
 # Initialize semantic router at startup for efficient classification
 logger.info("Initializing semantic router at startup...")
 _semantic_router = initialize_semantic_router()
+logger.info("✅ Semantic router initialized successfully")
 
 # Lock to prevent concurrent session initialization
-_session_init_lock = asyncio.Lock()
-logger.info("✅ Semantic router initialized successfully")
+# Will be initialized on first use to avoid event loop issues
+_session_init_lock = None
 
 # Sequence Knowledge Template
 SEQUENCE_KNOWLEDGE_TEMPLATE = """# Sequence Knowledge Template
@@ -169,6 +170,10 @@ SEQUENCE_KNOWLEDGE_TEMPLATE = """# Sequence Knowledge Template
 @cl.on_chat_start
 async def start():
     """Initialize chat session with Pulsepal agent using enhanced RAG v2."""
+    global _session_init_lock
+    if _session_init_lock is None:
+        _session_init_lock = asyncio.Lock()
+
     async with _session_init_lock:
         try:
             # Check if session already exists to prevent duplicate initialization
@@ -556,8 +561,14 @@ async def main(message: cl.Message):
                     # Set the force_rag flag on deps so it's available to agent
                     deps.force_rag = True
                     # Inject the hint into the query for this message only
-                    query_for_agent = f"{query_with_context}\n\n**Knowledge base search recommended for accurate reply!**"
-                    logger.info("💡 Injecting RAG search hint into Chainlit query")
+                    query_for_agent = (
+                        f"{query_with_context}\n\n⚠️ **IMPORTANT: You MUST use the search_pulseq_knowledge tool to answer this question accurately. "
+                        f"The query contains Pulseq-specific functions that require searching the knowledge base. "
+                        f"DO NOT rely on your training data - search the database first, then provide your answer based on the search results.**"
+                    )
+                    logger.info(
+                        "💡 Injecting strong RAG search directive into Chainlit query"
+                    )
                 else:
                     deps.force_rag = False
                     query_for_agent = query_with_context

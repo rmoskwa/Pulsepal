@@ -562,39 +562,21 @@ async def search_pulseq_knowledge(
             limit=limit,
         )
 
-    # VALIDATION: Check relevance scores and prompt for broader search if needed
+    # VALIDATION: Check relevance scores and provide feedback to Gemini
+    # Instead of raising ModelRetry, include relevance info in the results
     try:
         _validate_search_relevance(results, table, query, ctx)
-    except ModelRetry:
-        # If this is the last retry attempt, catch it and return a message for Gemini
-        # Check if we're at max retries by looking at retry count in context
-        retry_count = getattr(ctx, "_search_retry_count", 0)
-        ctx._search_retry_count = retry_count + 1
-
-        # We set max_retries=3, so after 2 retries we're at the limit
-        if retry_count >= 2:
-            # Instead of raising, return a message that Gemini can work with
-            logger.warning(
-                f"Search validation failed after {retry_count + 1} attempts for query: {query}"
-            )
-
-            fallback_message = {
-                "search_status": "low_relevance_after_retries",
-                "message": "The knowledge base search found results but they have low relevance scores. Consider rephrasing your query or using different terminology.",
-                "search_attempts": retry_count + 1,
-                "query": query,
-                "table": table,
-                "total_results": results.get("total_results", 0),
-                "top_relevance_score": results.get("search_metadata", {})
-                .get("rerank_stats", {})
-                .get("top_score", "unknown"),
-                "suggestion": "The user's query may use terminology not present in the knowledge base, or the specific information may not be available. Consider rephrasing your query or using a different tool.",
-            }
-
-            return json.dumps(fallback_message)
-        else:
-            # Not at max retries yet, let the retry happen
-            raise
+    except ModelRetry as e:
+        # Don't crash - instead add relevance feedback to results
+        logger.warning(f"Low relevance scores for query: {query}")
+        results["relevance_warning"] = {
+            "status": "low_relevance",
+            "message": str(e),
+            "suggestion": "Consider rephrasing your query or trying different search terms",
+            "top_score": results.get("search_metadata", {})
+            .get("rerank_stats", {})
+            .get("top_score", 0),
+        }
 
     # Log search event if we have context and conversation_context
     if (
