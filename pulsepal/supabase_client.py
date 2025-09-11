@@ -5,11 +5,12 @@ This module provides direct integration with Supabase for vector similarity sear
 managing documentation and code examples stored in the vector database.
 """
 
+import asyncio
 import logging
 import os
 from typing import Any, Dict, List, Optional
 
-from supabase import Client, create_client
+from supabase import Client, create_client, acreate_client, AsyncClient
 
 # Lazy imports to avoid slow startup
 create_embedding = None
@@ -1014,8 +1015,252 @@ class SupabaseRAGClient:
         return combined_results[:match_count]
 
 
+class AsyncSupabaseRAGClient:
+    """Async client for interacting with Supabase vector database for RAG queries."""
+
+    def __init__(self, url: Optional[str] = None, key: Optional[str] = None):
+        """
+        Initialize Async Supabase client configuration.
+
+        Args:
+            url: Supabase URL (defaults to environment variable)
+            key: Supabase service key (defaults to environment variable)
+        """
+        self.url = url or os.getenv("SUPABASE_URL")
+        self.key = key or os.getenv("SUPABASE_KEY")
+
+        if not self.url or not self.key:
+            raise ValueError(
+                "Supabase URL and service key must be provided or set in environment variables "
+                "(SUPABASE_URL and SUPABASE_KEY)"
+            )
+
+        self.client: Optional[AsyncClient] = None
+        self._reranker = None  # Lazy load cross-encoder
+        self._initialized = False
+
+    async def initialize(self):
+        """Initialize the async client (must be called before using the client)."""
+        if not self._initialized:
+            self.client = await acreate_client(self.url, self.key)
+            self._initialized = True
+            logger.info("Async Supabase client initialized successfully")
+
+    async def ensure_initialized(self):
+        """Ensure the client is initialized before operations."""
+        if not self._initialized:
+            await self.initialize()
+
+    async def search_bm25(
+        self,
+        query: str,
+        table_name: Optional[str] = None,
+        match_count: int = 10,
+        rank_threshold: float = 0.01,
+        max_retries: int = 3,
+    ) -> List[Dict[str, Any]]:
+        """
+        Async search using BM25 full-text search on keyword_for_search columns.
+        Includes retry logic for transient failures.
+
+        Args:
+            query: Query text for BM25 search
+            table_name: Optional specific table to search (None for all tables)
+            match_count: Maximum number of results to return (1-100)
+            rank_threshold: Minimum rank score threshold (default 0.01)
+            max_retries: Maximum number of retry attempts (default 3)
+
+        Returns:
+            List of matching documents with BM25 ranking
+        """
+        await self.ensure_initialized()
+
+        try:
+            results = []  # Initialize results
+
+            for attempt in range(max_retries):
+                try:
+                    # Use the improved BM25 function (with OR logic for better recall)
+                    params = {
+                        "query_text": query,
+                        "match_count": match_count,
+                        "rank_threshold": rank_threshold,
+                        "use_or_logic": True,  # Use OR logic for better recall
+                    }
+
+                    # Add table name if specified
+                    if table_name:
+                        params["table_name"] = table_name
+
+                    # Native async RPC call
+                    result = await self.client.rpc(
+                        "search_bm25_improved", params
+                    ).execute()
+                    results = result.data if result.data else []
+
+                    # If we got here, the call succeeded
+                    if attempt > 0:
+                        logger.info(f"BM25 search succeeded on attempt {attempt + 1}")
+                    break
+
+                except Exception as e:
+                    if attempt < max_retries - 1:
+                        # Exponential backoff: 0.1s, 0.2s, 0.4s
+                        wait_time = 0.1 * (2**attempt)
+                        logger.warning(
+                            f"BM25 search attempt {attempt + 1} failed, retrying in {wait_time}s: {e}"
+                        )
+                        await asyncio.sleep(wait_time)
+                        continue
+                    else:
+                        # Final attempt failed, raise the error
+                        logger.error(
+                            f"BM25 search failed after {max_retries} attempts: {e}"
+                        )
+                        raise
+
+            logger.info(f"BM25 search for '{query}' returned {len(results)} results")
+
+            # Transform results to match expected format
+            formatted_results = []
+            for item in results:
+                # Parse metadata if it's a string (JSON)
+                metadata = item.get("metadata", {})
+                if isinstance(metadata, str):
+                    try:
+                        import json
+
+                        metadata = json.loads(metadata)
+                    except (json.JSONDecodeError, ValueError):
+                        metadata = {}
+
+                formatted_item = {
+                    "source_table": item.get("source_table"),
+                    "id": item.get("record_id"),  # Unified ID field
+                    "record_id": item.get(
+                        "record_id"
+                    ),  # Keep original for compatibility
+                    "content": item.get("content", item.get("content_preview", "")),
+                    "content_preview": item.get("content_preview", ""),
+                    "rank": item.get("rank", 0),  # BM25 rank score
+                    "score": item.get("rank", 0),  # Unified score field for fusion
+                    "metadata": metadata,
+                    "_source": "bm25_search",  # Mark source for tracking
+                    "_search_type": "keyword",
+                }
+
+                # Add table-specific fields based on source_table
+                source_table = item.get("source_table", "")
+                if source_table == "api_reference":
+                    formatted_item["function_name"] = metadata.get("function_name", "")
+                    formatted_item["signature"] = metadata.get("signature", "")
+                    formatted_item["parameters"] = metadata.get("parameters", {})
+                    formatted_item["returns"] = metadata.get("returns", {})
+                elif source_table == "pulseq_sequences":
+                    formatted_item["file_name"] = metadata.get("file_name", "")
+                    formatted_item["repository"] = metadata.get("repository", "")
+                    formatted_item["dependencies"] = metadata.get("dependencies", {})
+                elif source_table == "sequence_chunks":
+                    formatted_item["chunk_type"] = metadata.get("chunk_type", "")
+                    formatted_item["mri_concept"] = metadata.get("mri_concept", "")
+                    formatted_item["parent_context"] = metadata.get(
+                        "parent_context", ""
+                    )
+                elif source_table == "crawled_code":
+                    formatted_item["file_name"] = metadata.get("file_name", "")
+                    formatted_item["content_type"] = metadata.get("content_type", "")
+                    formatted_item["parent_sequences"] = metadata.get(
+                        "parent_sequences", []
+                    )
+                elif source_table == "crawled_docs":
+                    formatted_item["resource_uri"] = metadata.get("resource_uri", "")
+                    formatted_item["doc_type"] = metadata.get("doc_type", "")
+                    formatted_item["chunk_number"] = metadata.get("chunk_number")
+
+                formatted_results.append(formatted_item)
+
+            return formatted_results
+
+        except Exception as e:
+            logger.error(f"Async BM25 search failed: {e}")
+            return []
+
+    async def rpc(self, function_name: str, params: Dict[str, Any]) -> Any:
+        """
+        Execute an async RPC (Remote Procedure Call) function.
+
+        Args:
+            function_name: Name of the PostgreSQL function to call
+            params: Parameters to pass to the function
+
+        Returns:
+            Response from the RPC function
+        """
+        await self.ensure_initialized()
+
+        try:
+            result = await self.client.rpc(function_name, params).execute()
+            return result
+        except Exception as e:
+            logger.error(f"Async RPC call '{function_name}' failed: {e}")
+            raise SupabaseExecutionError(
+                f"RPC execution failed for '{function_name}': {str(e)}",
+                {"function": function_name, "params": params, "error": str(e)},
+            )
+
+    async def from_(self, table: str):
+        """
+        Access a table for async queries.
+
+        Args:
+            table: Name of the table to query
+
+        Returns:
+            Table query builder
+        """
+        await self.ensure_initialized()
+        return self.client.from_(table)
+
+    async def table(self, table_name: str):
+        """
+        Access a table for async queries (alias for from_).
+
+        Args:
+            table_name: Name of the table to query
+
+        Returns:
+            Table query builder
+        """
+        await self.ensure_initialized()
+        return self.client.table(table_name)
+
+    async def close(self):
+        """
+        Close the async client and cleanup resources.
+
+        This should be called when the client is no longer needed
+        to ensure proper cleanup of connections and resources.
+        """
+        if self.client:
+            # The AsyncClient doesn't have an explicit close method,
+            # but we should reset the state
+            self.client = None
+            self._initialized = False
+            logger.info("Async Supabase client closed")
+
+    async def __aenter__(self):
+        """Context manager entry - initialize the client."""
+        await self.initialize()
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """Context manager exit - cleanup resources."""
+        await self.close()
+
+
 # Global instance - will be managed by startup module
 _supabase_client: Optional[SupabaseRAGClient] = None
+_async_supabase_client: Optional[AsyncSupabaseRAGClient] = None
 
 
 def get_supabase_client() -> SupabaseRAGClient:
@@ -1045,3 +1290,19 @@ def get_supabase_client() -> SupabaseRAGClient:
         _supabase_client = SupabaseRAGClient()
 
     return _supabase_client
+
+
+def get_async_supabase_client() -> AsyncSupabaseRAGClient:
+    """
+    Get the global Async Supabase client instance.
+
+    Returns:
+        AsyncSupabaseRAGClient instance
+    """
+    global _async_supabase_client
+
+    if _async_supabase_client is None:
+        logger.info("Creating new Async Supabase client instance...")
+        _async_supabase_client = AsyncSupabaseRAGClient()
+
+    return _async_supabase_client

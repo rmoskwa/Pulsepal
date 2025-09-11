@@ -16,7 +16,12 @@ from .rag_fusion import merge_search_results, select_top_results
 from .reranker_service import BGERerankerService
 from .rag_formatters import format_unified_response
 from .settings import get_settings
-from .supabase_client import SupabaseRAGClient, get_supabase_client
+from .supabase_client import (
+    SupabaseRAGClient,
+    get_supabase_client,
+    AsyncSupabaseRAGClient,
+    get_async_supabase_client,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +36,7 @@ class ModernPulseqRAG:
     def __init__(self):
         """Initialize RAG service with Supabase client."""
         self._supabase_client = None
+        self._async_supabase_client = None
         self._reranker = None
         self.settings = get_settings()
 
@@ -40,6 +46,13 @@ class ModernPulseqRAG:
         if self._supabase_client is None:
             self._supabase_client = get_supabase_client()
         return self._supabase_client
+
+    @property
+    def async_supabase_client(self) -> AsyncSupabaseRAGClient:
+        """Lazy load Async Supabase client."""
+        if self._async_supabase_client is None:
+            self._async_supabase_client = get_async_supabase_client()
+        return self._async_supabase_client
 
     @property
     def reranker(self) -> BGERerankerService:
@@ -666,75 +679,42 @@ class ModernPulseqRAG:
             loop = asyncio.get_event_loop()
             query_embedding = await loop.run_in_executor(None, create_embedding, query)
 
-            # Execute vector searches in parallel with retry for Windows connection issues
+            # Execute vector searches using native async client
             async def search_crawled_docs():
-                max_retries = 3
-                for attempt in range(max_retries):
-                    try:
-                        return await loop.run_in_executor(
-                            None,
-                            lambda: self.supabase_client.rpc(
-                                "match_crawled_docs",
-                                {
-                                    "query_embedding": query_embedding,
-                                    "match_threshold": similarity_threshold,
-                                    "match_count": limit // 3,  # Split between sources
-                                },
-                            ).execute(),
-                        )
-                    except OSError as e:
-                        if "[WinError 10035]" in str(e) and attempt < max_retries - 1:
-                            await asyncio.sleep(
-                                0.1 * (attempt + 1)
-                            )  # Exponential backoff
-                            continue
-                        raise
+                # Native async RPC call - no executor or retry needed
+                result = await self.async_supabase_client.rpc(
+                    "match_crawled_docs",
+                    {
+                        "query_embedding": query_embedding,
+                        "match_threshold": similarity_threshold,
+                        "match_count": limit // 3,  # Split between sources
+                    },
+                )
+                return result
 
             async def search_crawled_code():
-                max_retries = 3
-                for attempt in range(max_retries):
-                    try:
-                        return await loop.run_in_executor(
-                            None,
-                            lambda: self.supabase_client.rpc(
-                                "match_crawled_code",
-                                {
-                                    "query_embedding": query_embedding,
-                                    "match_threshold": similarity_threshold,
-                                    "match_count": limit // 3,  # Split between sources
-                                },
-                            ).execute(),
-                        )
-                    except OSError as e:
-                        if "[WinError 10035]" in str(e) and attempt < max_retries - 1:
-                            await asyncio.sleep(
-                                0.1 * (attempt + 1)
-                            )  # Exponential backoff
-                            continue
-                        raise
+                # Native async RPC call - no executor or retry needed
+                result = await self.async_supabase_client.rpc(
+                    "match_crawled_code",
+                    {
+                        "query_embedding": query_embedding,
+                        "match_threshold": similarity_threshold,
+                        "match_count": limit // 3,  # Split between sources
+                    },
+                )
+                return result
 
             async def search_api_reference():
-                max_retries = 3
-                for attempt in range(max_retries):
-                    try:
-                        return await loop.run_in_executor(
-                            None,
-                            lambda: self.supabase_client.rpc(
-                                "match_api_reference",
-                                {
-                                    "query_embedding": query_embedding,
-                                    "match_threshold": 0.5,  # Higher threshold for API reference
-                                    "match_count": limit // 3,
-                                },
-                            ).execute(),
-                        )
-                    except OSError as e:
-                        if "[WinError 10035]" in str(e) and attempt < max_retries - 1:
-                            await asyncio.sleep(
-                                0.1 * (attempt + 1)
-                            )  # Exponential backoff
-                            continue
-                        raise
+                # Native async RPC call - no executor or retry needed
+                result = await self.async_supabase_client.rpc(
+                    "match_api_reference",
+                    {
+                        "query_embedding": query_embedding,
+                        "match_threshold": 0.5,  # Higher threshold for API reference
+                        "match_count": limit // 3,
+                    },
+                )
+                return result
 
             # Execute all searches in parallel
             docs_response, code_response, api_response = await asyncio.gather(
@@ -858,16 +838,14 @@ class ModernPulseqRAG:
             async def search_table(table_name: str, rpc_func: str, threshold: float):
                 async with semaphore:  # Limit concurrent searches
                     try:
-                        response = await loop.run_in_executor(
-                            None,
-                            lambda: self.supabase_client.client.rpc(
-                                rpc_func,
-                                {
-                                    "query_embedding": query_embedding,
-                                    "match_threshold": threshold,
-                                    "match_count": limit_per_table,
-                                },
-                            ).execute(),
+                        # Use native async RPC
+                        response = await self.async_supabase_client.rpc(
+                            rpc_func,
+                            {
+                                "query_embedding": query_embedding,
+                                "match_threshold": threshold,
+                                "match_count": limit_per_table,
+                            },
                         )
 
                         results = []
@@ -1137,6 +1115,7 @@ class ModernPulseqRAG:
     ) -> List[Dict]:
         """
         Perform async BM25 full-text search on keyword_for_search columns.
+        Now uses native async Supabase client for true async operation.
 
         Args:
             query: Query text for BM25 search
@@ -1148,28 +1127,25 @@ class ModernPulseqRAG:
             List of BM25 search results with source attribution
         """
         try:
-            # Run the synchronous BM25 search in an executor for true async
-            loop = asyncio.get_event_loop()
-
             # Preprocess query following BM25 best practices
             processed_query = self._preprocess_bm25_query(query)
 
-            # Search with processed query
-            # The improved search_bm25_improved function now handles OR logic
-            # and fallback mechanisms in the database
-            results = await loop.run_in_executor(
-                None,
-                self.supabase_client.search_bm25,
-                processed_query,
-                table_name,
-                limit,
-                rank_threshold,
+            # Use native async client for BM25 search
+            # This avoids the sync-in-async issue that was causing 0 results on first call
+            results = await self.async_supabase_client.search_bm25(
+                query=processed_query,
+                table_name=table_name,
+                match_count=limit,
+                rank_threshold=rank_threshold,
             )
 
             # Add source tracking and formatting to results
             for result in results:
-                result["_source"] = "bm25_search"
-                result["_search_type"] = "keyword"
+                # These fields are already added by the async client, but ensure consistency
+                if "_source" not in result:
+                    result["_source"] = "bm25_search"
+                if "_search_type" not in result:
+                    result["_search_type"] = "keyword"
                 # Ensure source attribution
                 if not result.get("source_attribution"):
                     result["source_attribution"] = (
@@ -1696,17 +1672,14 @@ class ModernPulseqRAG:
             }
 
             if table in rpc_functions:
-                # Use existing RPC functions for other tables
-                response = await loop.run_in_executor(
-                    None,
-                    lambda: self.supabase_client.client.rpc(
-                        rpc_functions[table],
-                        {
-                            "query_embedding": embedding,
-                            "match_threshold": 0.3,
-                            "match_count": limit,
-                        },
-                    ).execute(),
+                # Use native async RPC for other tables
+                response = await self.async_supabase_client.rpc(
+                    rpc_functions[table],
+                    {
+                        "query_embedding": embedding,
+                        "match_threshold": 0.3,
+                        "match_count": limit,
+                    },
                 )
             else:
                 logger.error(f"No search method available for table {table}")

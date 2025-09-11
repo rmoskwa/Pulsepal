@@ -1353,7 +1353,7 @@ async def execute_supabase_query(
     - `ilike`: case-insensitive pattern matching
     - `in`: value in list
     - `is`: for NULL checks (value should be "null" or "not null")
-    - `contains`: for JSONB/array contains
+    - `contains`: for JSONB/array contains (for arrays, value must be a list, e.g., [72])
     - `contained_by`: for JSONB/array contained by
 
     **Examples:**
@@ -1380,6 +1380,14 @@ async def execute_supabase_query(
         "table": "pulseq_sequences",
         "select": "sequence_type",
         "count": true
+    }
+
+    # Find code files for a specific sequence (array field query)
+    {
+        "table": "crawled_code",
+        "select": "*",
+        "filters": [{"column": "parent_sequences", "operator": "contains", "value": [72]}],
+        "limit": 10
     }
     ```
 

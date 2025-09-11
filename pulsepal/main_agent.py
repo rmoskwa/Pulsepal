@@ -224,7 +224,7 @@ def get_semantic_router():
             from .semantic_router import SemanticRouter
 
             logger.info("Initializing semantic router (one-time load)...")
-            _semantic_router_instance = SemanticRouter(lazy_load=False)
+            _semantic_router_instance = SemanticRouter(eager_load=True)
             logger.info("Semantic router initialized and cached")
         except Exception as e:
             logger.warning(f"Failed to initialize semantic router: {e}")

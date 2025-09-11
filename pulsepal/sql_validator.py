@@ -157,11 +157,36 @@ class SupabaseQueryValidator:
                 parsed["details"]["invalid_value"] = type_match.group(2)
                 parsed["error_type"] = "type_mismatch"
 
+        elif "malformed array literal" in error_message:
+            # Handle malformed array literal errors
+            value_match = re.search(
+                r'malformed array literal:\s*"(.+?)"', error_message
+            )
+            if value_match:
+                parsed["details"]["invalid_array_value"] = value_match.group(1)
+                parsed["error_type"] = "malformed_array"
+                parsed["details"]["hint"] = (
+                    "Array values must be provided as lists, not strings"
+                )
+
         elif "function" in error_message and "does not exist" in error_message:
             func_match = re.search(r"function (.+?) does not exist", error_message)
             if func_match:
                 parsed["details"]["missing_function"] = func_match.group(1)
                 parsed["error_type"] = "function_not_found"
+
+        elif "operator does not exist" in error_message:
+            # Handle array operator errors
+            operator_match = re.search(r"operator does not exist: (.+)", error_message)
+            if operator_match:
+                parsed["details"]["invalid_operator"] = operator_match.group(1)
+                parsed["error_type"] = "invalid_operator"
+                # Check if it's an array field error
+                if "[]" in operator_match.group(
+                    1
+                ) or "bigint[]" in operator_match.group(1):
+                    parsed["error_type"] = "array_operator_error"
+                    parsed["details"]["is_array_field"] = True
 
         return parsed
 
@@ -228,6 +253,39 @@ class SupabaseQueryValidator:
                 f"Expected type: **{expected}**\n"
                 f"You provided: `'{invalid}'` (string)\n\n"
                 f"{type_guidance}"
+            )
+
+        elif error_type == "malformed_array":
+            invalid_value = details.get("invalid_array_value", "unknown")
+            return (
+                f"❌ **Malformed array value**\n\n"
+                f'Invalid value: `"{invalid_value}"`\n\n'
+                f"**For array fields, provide values as Python lists:**\n"
+                f'• Single value: `[72]` not `"72"`\n'
+                f'• Multiple values: `[72, 73, 74]` not `"72,73,74"`\n\n'
+                f"**Correct filter format:**\n"
+                "```python\n"
+                '{"column": "parent_sequences", "operator": "contains", "value": [72]}\n'
+                "```\n\n"
+                f"**Note:** The `contains` operator checks if the array field contains the specified value(s)."
+            )
+
+        elif error_type == "array_operator_error":
+            operator_info = details.get("invalid_operator", "unknown")
+            return (
+                f"❌ **Invalid operator for array field**\n\n"
+                f"Error: {operator_info}\n\n"
+                f"**For array fields (like `parent_sequences`), use:**\n"
+                f"• `contains` operator with array value:\n"
+                "```python\n"
+                '{"column": "parent_sequences", "operator": "contains", "value": [72]}\n'
+                "```\n\n"
+                f"**Common array operations:**\n"
+                f"• Check if array contains a value: `contains` with `[value]`\n"
+                f"• Check if array contains multiple values: `contains` with `[val1, val2]`\n"
+                f"• Check if field is not null: `is` with `not null`\n\n"
+                f"**Note:** You cannot use text operators (like, ilike) on array fields.\n"
+                f"Array fields require array-specific operators."
             )
 
         elif error_type == "function_not_found":
