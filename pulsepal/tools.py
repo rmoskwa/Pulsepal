@@ -1450,7 +1450,11 @@ async def execute_supabase_query(
                         "Column names must contain only alphanumeric characters and underscores."
                     )
 
-        query_builder = query_builder.select(select_clause)
+        # Handle count queries - Supabase Python client uses count parameter in select
+        if query.count:
+            query_builder = query_builder.select(select_clause, count="exact")
+        else:
+            query_builder = query_builder.select(select_clause)
 
         # Add filters
         filters = query.filters
@@ -1536,10 +1540,6 @@ async def execute_supabase_query(
             if not isinstance(offset, int) or offset < 0:
                 raise ModelRetry("Offset must be a non-negative integer")
             query_builder = query_builder.offset(offset)
-
-        # Handle count queries
-        if query.count:
-            query_builder = query_builder.count()
 
         # Handle single result expectation
         if query.single:
