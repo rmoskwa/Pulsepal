@@ -18,10 +18,7 @@ from .function_index import (
     get_correct_namespace,
     is_valid_constructor_namespace,
 )
-from .tag_validator import (
-    get_session_whitelist,
-    should_skip_function_validation,
-)
+# Tag validation has been removed - only function validation is performed
 
 logger = logging.getLogger(__name__)
 
@@ -493,12 +490,7 @@ async def validate_pulseq_output(
         else "default"
     )
 
-    # Check if we should skip function validation (all code is retrieved examples)
-    if await should_skip_function_validation(session_id):
-        logger.info(
-            f"Skipping function validation for session {session_id} (retrieved examples only)"
-        )
-        return output
+    # Always validate functions (tag validation has been removed)
 
     # Thread-safe retry count management
     async with _retry_lock:
@@ -537,8 +529,8 @@ async def validate_pulseq_output(
         _retry_counts[session_id] = 0  # Reset counter on success
         return output
 
-    # Get session whitelist for custom functions
-    session_whitelist = await get_session_whitelist(session_id)
+    # Initialize empty whitelist for function validation
+    session_whitelist = None
 
     # Validate each function
     invalid_functions = []

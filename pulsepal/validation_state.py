@@ -23,8 +23,7 @@ class ValidationState:
         self.skip_function_validation: bool = False
         self.created_at = datetime.now()
         self.last_accessed = datetime.now()
-        # Retry counters for validation phases
-        self.tag_retry_count: int = 0
+        # Retry counter for function validation
         self.func_retry_count: int = 0
 
     def add_to_whitelist(self, functions: Set[str]):
@@ -55,15 +54,9 @@ class ValidationState:
         return datetime.now() - self.created_at > timedelta(hours=ttl_hours)
 
     def reset_retry_counters(self):
-        """Reset retry counters after successful validation."""
-        self.tag_retry_count = 0
+        """Reset retry counter after successful validation."""
         self.func_retry_count = 0
-        logger.debug(f"Reset retry counters for session {self.session_id}")
-
-    def increment_tag_retry(self) -> int:
-        """Increment and return tag retry count."""
-        self.tag_retry_count += 1
-        return self.tag_retry_count
+        logger.debug(f"Reset retry counter for session {self.session_id}")
 
     def increment_func_retry(self) -> int:
         """Increment and return function retry count."""
