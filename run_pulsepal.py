@@ -25,9 +25,31 @@ from pulsepal.main_agent import create_pulsepal_session, run_pulsepal_query
 from pulsepal.startup import initialize_all_services
 
 
-async def single_query(question: str):
-    """Handle a single question."""
+async def single_query(question: str, file_path: str = None):
+    """Handle a single question, optionally with a file."""
     print("🔬 Pulsepal: Processing your question...\n")
+
+    # If a file path is provided, read and include its content
+    if file_path:
+        if not os.path.exists(file_path):
+            print(f"❌ Error: File '{file_path}' not found.")
+            return
+
+        if not file_path.endswith(".m"):
+            print(
+                f"⚠️ Warning: Only .m (MATLAB) files are supported. File '{file_path}' will not be processed."
+            )
+            return
+
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                file_content = f.read()
+            file_name = os.path.basename(file_path)
+            question = f"{question}\n\n<user-provided-file: {file_name}>\n{file_content}\n</user-provided-file: {file_name}>"
+            print(f"✅ Loaded MATLAB file: {file_name}")
+        except Exception as e:
+            print(f"❌ Error reading file: {e}")
+            return
 
     try:
         session_id, response = await run_pulsepal_query(question)
@@ -144,6 +166,12 @@ async def main():
         action="store_true",
         help="Run in interactive mode",
     )
+    parser.add_argument(
+        "-f",
+        "--file",
+        type=str,
+        help="Path to a .m file to include with your question",
+    )
     parser.add_argument("--version", action="version", version="Pulsepal v1.0.0")
 
     args = parser.parse_args()
@@ -151,11 +179,12 @@ async def main():
     if args.interactive:
         await interactive_mode()
     elif args.question:
-        await single_query(args.question)
+        await single_query(args.question, args.file)
     else:
         print("🔬 Pulsepal: Multi-Agent MRI Sequence Programming Assistant")
         print("\nUsage:")
         print('  python run_pulsepal.py "How do I create a spin echo sequence?"')
+        print('  python run_pulsepal.py "Review my code" -f sequence.m')
         print("  python run_pulsepal.py --interactive")
         print("\nFor help: python run_pulsepal.py --help")
 

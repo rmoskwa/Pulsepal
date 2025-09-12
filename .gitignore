@@ -104,6 +104,7 @@ coverage.xml
 .pytest_cache/
 TEST_RESULTS.md
 dev_server.py
+.files/
 
 # Type checking
 .mypy_cache/

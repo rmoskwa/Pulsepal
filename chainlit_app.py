@@ -429,62 +429,182 @@ async def update_settings(settings: Dict[str, Any]):
 async def main(message: cl.Message):
     """Handle incoming messages and respond using Pulsepal agent with enhanced RAG v2."""
     try:
-        # Extract code from uploaded files if present
+        # Debug: Log message structure
+        logger.info(f"Message received. Has elements: {bool(message.elements)}")
+        if message.elements:
+            logger.info(f"Number of elements: {len(message.elements)}")
+            for i, elem in enumerate(message.elements):
+                logger.info(
+                    f"Element {i}: type={type(elem).__name__}, name={getattr(elem, 'name', 'N/A')}, mime={getattr(elem, 'mime', 'N/A')}"
+                )
+
+        # Extract code from uploaded .m files only
         code_context = ""
+        uploaded_files_info = []
+
         if message.elements:
             for element in message.elements:
-                # Check if it's a file element with .m or .py extension
-                if hasattr(element, "name") and element.name.endswith((".m", ".py")):
-                    try:
-                        # Get file content - handle both bytes and string content
-                        if hasattr(element, "content"):
-                            file_content = (
-                                element.content.decode("utf-8")
-                                if isinstance(element.content, bytes)
-                                else element.content
-                            )
-                        elif hasattr(element, "path"):
-                            # For local file uploads, read from path
-                            with open(element.path, encoding="utf-8") as f:
-                                file_content = f.read()
-                        else:
-                            logger.warning(
-                                f"Could not extract content from file: {element.name}",
-                            )
-                            continue
+                # Check element attributes for debugging
+                file_name = getattr(element, "name", None)
+                file_mime = getattr(element, "mime", None)
+                file_path = getattr(element, "path", None)
 
-                        # Check file size (limit to 1MB)
-                        if len(file_content) > 1024 * 1024:
+                # Debug logging
+                logger.info(f"Processing element: type={type(element).__name__}")
+                logger.info(f"  - name: {file_name}")
+                logger.info(f"  - mime: {file_mime}")
+                logger.info(f"  - path: {file_path}")
+
+                # Only accept .m files - check both name extension and MIME type
+                if file_name:
+                    file_ext = os.path.splitext(file_name)[1].lower()
+
+                    # Only process .m (MATLAB) files
+                    if file_ext == ".m":
+                        try:
+                            # Get file content - handle different element types
+                            file_content = None
+
+                            # Try different methods to extract content based on Chainlit version differences
+
+                            # Method 1: Try path first (newer Chainlit versions store files in .files directory)
+                            if file_path:
+                                logger.info(
+                                    f"Attempting to read from path: {file_path}"
+                                )
+                                paths_to_try = [
+                                    file_path,  # Direct path
+                                    os.path.join(
+                                        ".files", file_path
+                                    ),  # Relative to .files
+                                    os.path.join(
+                                        os.getcwd(), file_path
+                                    ),  # Absolute from cwd
+                                    os.path.join(
+                                        os.getcwd(), ".files", file_path
+                                    ),  # Absolute .files path
+                                ]
+
+                                for try_path in paths_to_try:
+                                    if os.path.exists(try_path):
+                                        logger.info(f"Found file at: {try_path}")
+                                        try:
+                                            with open(
+                                                try_path, "r", encoding="utf-8"
+                                            ) as f:
+                                                file_content = f.read()
+                                                logger.info(
+                                                    f"Successfully read {len(file_content)} bytes from {try_path}"
+                                                )
+                                                break
+                                        except Exception as e:
+                                            logger.error(
+                                                f"Error reading from {try_path}: {e}"
+                                            )
+
+                                if file_content is None:
+                                    logger.warning(
+                                        "Could not find file at any of the tried paths"
+                                    )
+
+                            # Method 2: Try content attribute (older versions or AskFileMessage)
+                            if file_content is None and hasattr(element, "content"):
+                                logger.info("Attempting to read from content attribute")
+                                if element.content is not None:
+                                    if isinstance(element.content, bytes):
+                                        file_content = element.content.decode("utf-8")
+                                        logger.info(
+                                            f"Successfully decoded {len(file_content)} bytes from content"
+                                        )
+                                    elif isinstance(element.content, str):
+                                        file_content = element.content
+                                        logger.info(
+                                            f"Successfully got {len(file_content)} chars from content string"
+                                        )
+
+                            # Method 3: Check if it's a cl.File object with specific attributes
+                            if file_content is None:
+                                # Log what we have for debugging
+                                logger.info(
+                                    f"Still no content. Element class: {element.__class__.__name__}"
+                                )
+                                logger.info(
+                                    f"Element dict (if available): {getattr(element, '__dict__', 'N/A')}"
+                                )
+
+                            if file_content is None:
+                                logger.warning(
+                                    f"Could not extract content from file: {file_name}. "
+                                    f"Element type: {type(element).__name__}, "
+                                    f"Has content: {hasattr(element, 'content')}, "
+                                    f"Has path: {hasattr(element, 'path')}, "
+                                    f"Path value: {getattr(element, 'path', 'N/A')}"
+                                )
+                                await cl.Message(
+                                    content=f"⚠️ Unable to read file '{file_name}'. Please try uploading again.",
+                                    author="System",
+                                ).send()
+                                continue
+
+                            # Check file size (limit to 1MB for performance)
+                            file_size = len(file_content)
+                            if file_size > 1024 * 1024:
+                                await cl.Message(
+                                    content=f"⚠️ File '{file_name}' is too large ({file_size/1024:.1f}KB > 1MB limit). Please upload a smaller file.",
+                                    author="System",
+                                ).send()
+                                continue
+
+                            # Add file content with XML tags
+                            code_context += f"\n\n<user-provided-file: {file_name}>\n{file_content}\n</user-provided-file: {file_name}>\n"
+
+                            # Track uploaded file info
+                            lines = file_content.split("\n")
+                            uploaded_files_info.append(
+                                {
+                                    "name": file_name,
+                                    "size": file_size,
+                                    "lines": len(lines),
+                                }
+                            )
+
+                            # Send confirmation to user
                             await cl.Message(
-                                content=f"⚠️ File '{element.name}' is too large (>1MB). Please reduce the file size.",
+                                content=f"✅ Loaded MATLAB file: `{file_name}` ({file_size} bytes, {len(lines)} lines)",
                                 author="System",
                             ).send()
-                            continue
 
-                        # Add code to context
-                        code_context += f"\n\n--- Code from {element.name} ---\n{file_content}\n--- End of {element.name} ---\n"
+                            logger.info(
+                                f"Successfully loaded MATLAB file: {file_name} ({file_size} bytes)"
+                            )
 
-                        # Send confirmation to user
+                        except UnicodeDecodeError as e:
+                            logger.error(
+                                f"Unicode decode error for file {file_name}: {e}"
+                            )
+                            await cl.Message(
+                                content=f"❌ File '{file_name}' contains invalid characters. Please ensure it's a valid text file.",
+                                author="System",
+                            ).send()
+                        except Exception as e:
+                            logger.error(f"Error loading file {file_name}: {e}")
+                            await cl.Message(
+                                content=f"❌ Error loading file '{file_name}': {str(e)}",
+                                author="System",
+                            ).send()
+                    else:
+                        # Unsupported file type - only .m files are accepted
                         await cl.Message(
-                            content=f"✅ Loaded file: {element.name}",
-                        ).send()
-                        logger.info(
-                            f"Successfully loaded file: {element.name} ({len(file_content)} bytes)",
-                        )
-
-                    except Exception as e:
-                        logger.error(f"Error loading file {element.name}: {e}")
-                        await cl.Message(
-                            content=f"❌ Error loading file '{element.name}': {e}",
+                            content=f"⚠️ Only .m (MATLAB) files are accepted. File '{file_name}' has extension '{file_ext}' and was not processed.",
                             author="System",
                         ).send()
 
         # Combine user query with code context
         enhanced_query = message.content
         if code_context:
-            enhanced_query = f"{message.content}\n\nHere is my code:{code_context}"
+            enhanced_query = f"{message.content}\n{code_context}"
             logger.info(
-                f"Enhanced query with {len(code_context)} bytes of code context",
+                f"Enhanced query with {len(code_context)} bytes of code from {len(uploaded_files_info)} MATLAB file(s)"
             )
 
         # Special command to check user info
