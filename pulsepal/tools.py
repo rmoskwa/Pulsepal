@@ -1533,6 +1533,10 @@ async def execute_supabase_query(
             if not isinstance(limit, int) or limit < 1:
                 raise ModelRetry("Limit must be a positive integer")
             query_builder = query_builder.limit(limit)
+        elif query.count:
+            # For count-only queries, limit to 0 to avoid returning all data
+            # This returns just the count without the actual rows
+            query_builder = query_builder.limit(0)
 
         # Add offset
         if query.offset is not None:
