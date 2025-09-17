@@ -14,7 +14,7 @@ import os
 import sys
 import uuid
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 import chainlit as cl
 
@@ -41,49 +41,23 @@ logger.info("Using enhanced RAG service v2 with hallucination prevention")
 logger.info("=" * 60)
 
 # Optional authentication for deployment
-AUTH_ENABLED = True
+AUTH_ENABLED = False
 try:
     logger.info("Attempting to import auth module...")
-    from pulsepal.auth import API_KEYS, check_rate_limit, validate_api_key
-
-    logger.info(
-        f"Auth module imported successfully. API_KEYS type: {type(API_KEYS)}, length: {len(API_KEYS)}",
+    from pulsepal.auth import (
+        check_rate_limit,
+        get_chainlit_auth_callback,
     )
-    logger.info(f"API key names: {list(API_KEYS.keys())}")
 
-    # Only enable auth if we have real API keys (not just test-key)
-    if len(API_KEYS) > 0 and not (len(API_KEYS) == 1 and "test-key" in API_KEYS):
-        AUTH_ENABLED = True
-        logger.info(f"🔐 AUTHENTICATION ENABLED with {len(API_KEYS)} API keys")
+    logger.info("Auth module imported successfully")
 
-        # CRITICAL: Register auth callback HERE, before any other Chainlit decorators
-        @cl.password_auth_callback
-        def auth_callback(username: str, password: str) -> Optional[cl.User]:
-            """Authenticate user with API key as password."""
-            logger.info(f"Auth callback called with username: {username}")
-            user_info = validate_api_key(password)
+    # Always enable auth if the module is available - let the auth module handle key validation
+    AUTH_ENABLED = True
+    logger.info("🔐 AUTHENTICATION ENABLED")
 
-            if user_info:
-                logger.info(
-                    f"✅ Successful login for: {username or user_info['email']}",
-                )
-                return cl.User(
-                    identifier=username or user_info["email"],
-                    metadata={
-                        "api_key": password,
-                        "name": user_info["name"],
-                        "limit": user_info.get("limit", 100),
-                    },
-                )
-            logger.warning(f"❌ Failed login attempt with username: {username}")
-            return None
-
-        logger.info("Auth callback registered successfully")
-    else:
-        logger.info("🔓 Authentication disabled - no valid API keys configured")
-        logger.info(
-            f"Reason: len(API_KEYS)={len(API_KEYS)}, has only test-key={len(API_KEYS) == 1 and 'test-key' in API_KEYS}",
-        )
+    # Use the auth callback from the auth module
+    auth_callback = get_chainlit_auth_callback()
+    logger.info("Auth callback registered successfully")
 
 except ImportError as e:
     # Auth module not available
@@ -792,6 +766,39 @@ async def main(message: cl.Message):
                     result.output if hasattr(result, "output") else str(result)
                 )
                 deps.conversation_context.add_conversation("assistant", response_text)
+
+                # Track usage if authenticated
+                if AUTH_ENABLED and api_key:
+                    try:
+                        from pulsepal.auth import get_auth
+
+                        auth = get_auth()
+
+                        # Track the usage (simplified - just increment counter)
+                        await auth.increment_usage(api_key)
+
+                        # Update the user metadata with new usage counts
+                        user_info = auth.validate_api_key(api_key)
+                        if user_info:
+                            user = cl.user_session.get("user")
+                            if user and hasattr(user, "metadata"):
+                                user.metadata.update(
+                                    {
+                                        "used": user_info.get("used", 0),
+                                        "remaining": user_info.get("remaining", 100),
+                                    }
+                                )
+
+                            # Show remaining messages if low
+                            remaining = user_info.get("remaining", 100)
+                            if remaining > 0 and remaining <= 10:
+                                await cl.Message(
+                                    content=f"ℹ️ You have {remaining} message{'s' if remaining != 1 else ''} remaining in your plan.",
+                                    author="System",
+                                ).send()
+
+                    except Exception as e:
+                        logger.error(f"Failed to track usage: {e}")
 
                 # Log assistant response for debugging
                 conversation_logger.log_conversation(

@@ -23,10 +23,30 @@ sys.path.insert(0, str(Path(__file__).parent))
 from pulsepal.conversation_logger import get_conversation_logger
 from pulsepal.main_agent import create_pulsepal_session, run_pulsepal_query
 from pulsepal.startup import initialize_all_services
+from pulsepal.auth import get_auth
 
 
-async def single_query(question: str, file_path: str = None):
-    """Handle a single question, optionally with a file."""
+async def single_query(question: str, file_path: str = None, api_key: str = None):
+    """Handle a single question, optionally with a file and API key."""
+    # Validate API key if provided
+    if api_key:
+        auth = get_auth()
+        user_info = auth.validate_api_key(api_key)
+        if not user_info:
+            print("❌ Error: Invalid API key.")
+            return
+
+        remaining = user_info.get("remaining", 0)
+        if remaining <= 0:
+            print(
+                f"❌ Error: API key has reached its message limit ({user_info.get('limit', 0)} messages)."
+            )
+            return
+
+        print(
+            f"✅ Authenticated as {user_info.get('name')} ({remaining} messages remaining)"
+        )
+
     print("🔬 Pulsepal: Processing your question...\n")
 
     # If a file path is provided, read and include its content
@@ -53,6 +73,23 @@ async def single_query(question: str, file_path: str = None):
 
     try:
         session_id, response = await run_pulsepal_query(question)
+
+        # Track usage if API key provided
+        if api_key:
+            try:
+                auth = get_auth()
+                await auth.increment_usage(api_key)
+
+                # Show updated usage
+                user_info = auth.validate_api_key(api_key)
+                if user_info:
+                    remaining = user_info.get("remaining", 0)
+                    if remaining > 0 and remaining <= 10:
+                        print(
+                            f"\nℹ️  {remaining} message{'s' if remaining != 1 else ''} remaining"
+                        )
+            except Exception as e:
+                print(f"\n⚠️  Warning: Failed to track usage: {e}")
 
         # Log conversation if enabled
         logger = get_conversation_logger()
@@ -172,6 +209,11 @@ async def main():
         type=str,
         help="Path to a .m file to include with your question",
     )
+    parser.add_argument(
+        "--api-key",
+        type=str,
+        help="API key for authentication (optional)",
+    )
     parser.add_argument("--version", action="version", version="Pulsepal v1.0.0")
 
     args = parser.parse_args()
@@ -179,7 +221,7 @@ async def main():
     if args.interactive:
         await interactive_mode()
     elif args.question:
-        await single_query(args.question, args.file)
+        await single_query(args.question, args.file, args.api_key)
     else:
         print("🔬 Pulsepal: Multi-Agent MRI Sequence Programming Assistant")
         print("\nUsage:")
