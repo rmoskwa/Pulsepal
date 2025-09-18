@@ -324,7 +324,7 @@ class BGERerankerService:
                 self.model_name,
                 cache_dir=str(self.model_path),  # Use parent dir for HF cache
                 local_files_only=False,
-                torch_dtype=torch.float32,  # Always use float32 for compatibility
+                dtype=torch.float32,  # Use dtype instead of deprecated torch_dtype
             )
 
             download_time = time.time() - start_time
@@ -472,7 +472,7 @@ class BGERerankerService:
                     self._model = AutoModelForSequenceClassification.from_pretrained(
                         str(self.model_dir),
                         local_files_only=True,
-                        torch_dtype=torch.float32,  # Always use float32 for compatibility
+                        dtype=torch.float32,  # Use dtype instead of deprecated torch_dtype
                     )
                     load_success = True
                 except Exception as e:
@@ -493,7 +493,7 @@ class BGERerankerService:
                         self.model_name,
                         cache_dir=str(self.model_path),
                         local_files_only=False,  # Allow downloading if needed
-                        torch_dtype=torch.float32,
+                        dtype=torch.float32,  # Use dtype instead of deprecated torch_dtype
                     )
                     load_success = True
 
