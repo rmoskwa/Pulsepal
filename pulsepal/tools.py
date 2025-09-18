@@ -5,6 +5,7 @@ Provides tools that use the simplified retrieval-only RAG service,
 leaving all intelligence to the LLM.
 """
 
+import asyncio
 import json
 import logging
 import re
@@ -208,19 +209,19 @@ def _validate_search_relevance(
     if results.get("error"):
         return  # Let other error handlers deal with this
 
-    # Define minimum acceptable relevance thresholds
-    # Based on research and empirical testing:
-    # - BM25: Unbounded scores, query-dependent. Our empirical data shows very weak matches < 0.02
-    # - Vector: We check count==0 rather than similarity scores (would be <0.3 if available)
-    # - BGE Reranker: Raw scores unbounded (can be negative), normalized [0,1] via sigmoid
-    #   When normalized, very low relevance < 0.01, very high > 0.99
-    MIN_BM25_SCORE = (
-        0.02  # Based on GE scanner case: mean 0.0153 indicated poor keyword match
-    )
-    MIN_RERANK_SCORE = (
-        1.0  # For raw BGE scores: negative=irrelevant, 0-1=weak, >1=relevant
-    )
-    # In our case (raw scores), 2.408 was considered acceptable despite other poor metrics
+    # Define minimum acceptable relevance thresholds for BGE reranker (raw scores)
+    # Based on empirical testing with BGE reranker model:
+    # - Negative scores: Irrelevant results (should retry)
+    # - 0-0.5: Very weak relevance (warn but don't retry)
+    # - 0.5-1.0: Moderate relevance (acceptable)
+    # - 1.0-2.0: Good relevance
+    # - > 2.0: Strong relevance
+    # - > 3.0: Excellent relevance
+
+    # Thresholds for different actions
+    IRRELEVANT_THRESHOLD = 0.0  # Below this = irrelevant, trigger retry
+    WEAK_THRESHOLD = 0.5  # Below this = weak, log warning only
+    MIN_BM25_SCORE = 0.02  # For BM25 keyword matching
 
     # Check if we have search metadata
     metadata = results.get("search_metadata", {})
@@ -261,16 +262,17 @@ def _validate_search_relevance(
     rerank_stats = metadata.get("rerank_stats")  # Changed from performance to metadata
     if rerank_stats and isinstance(rerank_stats, dict):
         top_score = rerank_stats.get("top_score")
-        # BGE reranker scores: negative=irrelevant, 0-1=weak, >1=relevant
+        # BGE reranker scores: negative=irrelevant, 0-0.5=weak, 0.5-1=moderate, >1=good
         if top_score is not None:
-            if top_score < 0:
+            if top_score < IRRELEVANT_THRESHOLD:  # Below 0
                 # Negative scores are a strong indicator of irrelevance
                 poor_relevance_indicators.append(
                     f"Reranker indicates irrelevant results (score: {top_score:.2f})"
                 )
-            elif top_score < MIN_RERANK_SCORE:
+            elif top_score < WEAK_THRESHOLD:  # 0-0.5
+                # Weak scores are concerning but not critical
                 poor_relevance_indicators.append(
-                    f"Reranker confidence low (score: {top_score:.2f})"
+                    f"Reranker confidence weak (score: {top_score:.2f})"
                 )
 
     # 4. Check total results - if very few results, might be searching wrong table
@@ -292,20 +294,27 @@ def _validate_search_relevance(
 
     # Check all conditions independently (not elif chain)
 
-    # Case 1: Poor reranker score (negative or low positive < 1.0)
+    # Case 1: Check reranker scores with new thresholds
     if rerank_stats and isinstance(rerank_stats, dict):
         top_score = rerank_stats.get("top_score")
         if top_score is not None:
-            if top_score < 0:
-                # Negative scores are irrelevant
+            if top_score < IRRELEVANT_THRESHOLD:  # Below 0 = irrelevant
+                # Negative scores are irrelevant, should retry
                 should_retry = True
-                retry_reason = f"negative rerank score: {top_score}"
+                retry_reason = (
+                    f"irrelevant results (negative rerank score: {top_score:.2f})"
+                )
                 logger.info(f"Triggering retry due to {retry_reason}")
-            elif top_score < MIN_RERANK_SCORE:  # MIN_RERANK_SCORE = 1.0
-                # Scores 0-1 indicate weak relevance
-                should_retry = True
-                retry_reason = f"low rerank score: {top_score}"
-                logger.info(f"Triggering retry due to {retry_reason}")
+            elif top_score < WEAK_THRESHOLD:  # 0-0.5 = weak but don't retry
+                # Weak relevance - log warning but don't retry
+                logger.warning(
+                    f"Weak relevance detected (score: {top_score:.2f}) but not triggering retry. "
+                    f"Results may be less relevant than ideal."
+                )
+                # Add to poor indicators for context but don't force retry
+                poor_relevance_indicators.append(
+                    f"Weak reranker confidence (score: {top_score:.2f})"
+                )
 
     # Case 2: Zero results with specific table (strong signal, check before multiple indicators)
     if not should_retry and total_results == 0 and table not in ["auto", None, ""]:
@@ -321,20 +330,18 @@ def _validate_search_relevance(
         logger.info(f"Triggering retry due to {retry_reason}")
 
     if should_retry:
-        # Check if it's specifically a reranker score issue (negative or low positive)
+        # Initialize retry_message first
+        retry_message = ""
+
+        # Check if it's specifically a reranker score issue (negative scores only now)
         if rerank_stats and rerank_stats.get("top_score") is not None:
             top_score = rerank_stats.get("top_score", 0)
             if (
-                top_score < MIN_RERANK_SCORE
-            ):  # Covers both negative and low positive (0-1)
-                if top_score < 0:
-                    relevance_desc = "not relevant"
-                else:
-                    relevance_desc = "weakly relevant"
-
+                top_score < IRRELEVANT_THRESHOLD
+            ):  # Only negative scores trigger retry now
                 retry_message = (
                     "⚠️ **Search Results Not Relevant**\n\n"
-                    f"The neural reranker indicates these results are {relevance_desc} to your query "
+                    f"The neural reranker indicates these results are not relevant to your query "
                     f"(relevance score: {top_score:.2f}).\n\n"
                     "This typically means:\n"
                     "• The information uses different terminology\n"
@@ -342,7 +349,9 @@ def _validate_search_relevance(
                     "• The concept may not exist in the knowledge base\n\n"
                     "**Current search metrics:**\n"
                 )
-        else:
+
+        # If retry_message wasn't set by reranker check, use default message
+        if not retry_message:
             retry_message = (
                 "🔍 **Low Relevance Scores Detected**\n\n"
                 "The search results have low relevance scores, suggesting the information "
@@ -387,8 +396,8 @@ def _validate_search_relevance(
                 "     Example: Search 'diffusion' first, then 'b-value calculation'\n"
             )
 
-        # Add specific guidance for negative rerank scores
-        if rerank_stats and rerank_stats.get("top_score", 0) < 0:
+        # Add specific guidance for irrelevant results (negative scores)
+        if rerank_stats and rerank_stats.get("top_score", 0) < IRRELEVANT_THRESHOLD:
             retry_message += (
                 "\n🔬 **Alternative Tools to Try:**\n\n"
                 "  🔍 **`lookup_pulseq_function`** - Direct function verification\n"
@@ -434,16 +443,31 @@ def _validate_search_relevance(
 
 async def search_pulseq_knowledge(
     ctx: RunContext[PulsePalDependencies],
-    query: str,
-    table: str = "auto",
-    limit: int = 5,
+    queries: List[Dict[str, Any]],
 ) -> str:
     """
-    Search Pulseq knowledge base with intelligent table selection.
+    Search the Pulseq knowledge base with intelligent table selection.
 
-    Choose the most appropriate table(s) based on the search intent:
+    Accepts 1–5 queries for efficient searching. Always use list format, even for single queries.
 
-    **TABLE SELECTION GUIDE:**
+    --------------------------------------------------------------------
+    MULTI-QUERY GUIDANCE
+    --------------------------------------------------------------------
+    - If a user question has multiple sub-questions, break it into separate queries.
+    - Each sub-question should be a separate dict in the list, specifying:
+        - "query": the search string
+        - "table": table name or "auto" (optional)
+        - "limit": number of results (optional, default 5)
+    - Example:
+        [
+            {"query": "spiral trajectory examples", "table": "pulseq_sequences"},
+            {"query": "makeBlockPulse parameters", "table": "api_reference"}
+        ]
+    - Use the TABLE SELECTION GUIDE below to assign the most appropriate table to each query.
+
+    --------------------------------------------------------------------
+    TABLE SELECTION GUIDE
+    --------------------------------------------------------------------
 
     1. "pulseq_sequences" - COMPLETE SEQUENCE IMPLEMENTATIONS
        - Use for: "show me examples", "spiral trajectory", "EPI sequence", specific sequence types
@@ -475,60 +499,199 @@ async def search_pulseq_knowledge(
        - Returns: Document content, metadata, related sequences
        - Example queries: "installation guide", "GE scanner setup", "trajectory data", "vendor troubleshooting"
 
-    **SEARCH STRATEGY:**
-    - For sequence examples: Search "pulseq_sequences" first
-    - For function help: Search "api_reference" first
-    - For implementation details: Search "sequence_chunks" or "pulseq_sequences"
-    - For unclear queries: Use "auto" to search across all tables
-
-    **RELEVANCE SCORING:**
-    - Results include relevance scores (0-1 scale)
-    - If all scores < 0.5, consider broader search or different table
-    - Top 3 most relevant results are returned by default
-
     Special patterns:
     - ID:42 - Direct ID lookup in specified table
     - FILE:writeSpiral.m - Filename-based search
 
-    Args:
-        query: User's search query
-        table: Table name from above list OR "auto" for automatic selection
-        limit: Number of results to return (minimum 5, maximum 10, default 5)
-               Note: Automatically adjusted to minimum of 5 to ensure quality results
-
     Returns:
         JSON with results, relevance scores, and search metadata
+        - Single query (1 item list): Standard response format
+        - Multiple queries (2-5 items): Batch response with results per query
     """
     import json
 
-    # Input validation
-    if not query or not isinstance(query, str):
+    # Validate input - must be a list
+    if not isinstance(queries, list):
         return json.dumps(
-            {"error": "Invalid query", "message": "Query must be a non-empty string"}
+            {
+                "error": "Invalid format",
+                "message": "Queries must be a list of dictionaries. Example: [{'query': 'your search'}]",
+            }
         )
 
-    # Log very long queries but don't reject them
-    # Gemini might generate comprehensive queries
-    if len(query) > 1000:
-        logger.info(f"Long query received: {len(query)} characters")
+    if len(queries) == 0:
+        return json.dumps(
+            {"error": "Invalid query", "message": "Query list cannot be empty"}
+        )
 
-    # Enforce minimum limit of 5 for better search quality
-    # This ensures users get multiple examples/options to choose from
-    if limit < 5:
-        logger.info(f"Limit {limit} increased to minimum of 5 for better results")
-        limit = 5
+    if len(queries) > 5:
+        return json.dumps(
+            {
+                "error": "Too many queries",
+                "message": f"Maximum 5 queries allowed, got {len(queries)}",
+            }
+        )
 
-    # Cap maximum at 10 to avoid overwhelming responses
-    if limit > 10:
-        logger.info(f"Limit {limit} capped at maximum of 10")
-        limit = 10
+    # For single query, check if we should return standard format or batch format
+    if len(queries) == 1:
+        # Single query - execute directly for backward compatibility with response format
+        result = await _execute_single_query_with_validation(ctx, queries[0])
+        return json.dumps(result, indent=2)
+
+    # Multiple queries - use batch execution
+    return await _execute_batch_queries(ctx, queries)
+
+
+async def _execute_batch_queries(
+    ctx: RunContext[PulsePalDependencies], queries: List[Dict[str, Any]]
+) -> str:
+    """
+    Execute multiple search queries in parallel with individual relevance validation.
+
+    Each query is executed independently and in parallel for optimal performance.
+    Relevance validation is applied to each query's results separately.
+
+    Args:
+        ctx: PydanticAI run context with dependencies
+        queries: List of query configurations
+
+    Returns:
+        JSON string with batch results
+    """
+    import json
+    import time
+
+    start_time = time.time()
+
+    # Validate and normalize each query
+    normalized_queries = []
+    for i, q in enumerate(queries):
+        if not isinstance(q, dict):
+            return json.dumps(
+                {
+                    "error": "Invalid query format",
+                    "message": f"Query {i} must be a dictionary with 'query' field",
+                }
+            )
+
+        if "query" not in q or not q["query"]:
+            return json.dumps(
+                {
+                    "error": "Missing query",
+                    "message": f"Query {i} missing required 'query' field",
+                }
+            )
+
+        # Normalize query with defaults
+        normalized = {
+            "query": q["query"],
+            "table": q.get("table", "auto"),
+            "limit": q.get("limit", 5),
+            "index": i,  # Track original index
+        }
+
+        # Validate and adjust limit
+        if normalized["limit"] < 5:
+            logger.info(
+                f"Batch query {i}: limit {normalized['limit']} increased to minimum of 5"
+            )
+            normalized["limit"] = 5
+        elif normalized["limit"] > 10:
+            logger.info(
+                f"Batch query {i}: limit {normalized['limit']} capped at maximum of 10"
+            )
+            normalized["limit"] = 10
+
+        normalized_queries.append(normalized)
+
+    # Execute all queries in parallel
+    tasks = [_execute_single_query_with_validation(ctx, q) for q in normalized_queries]
+
+    # Run all queries simultaneously
+    batch_results = await asyncio.gather(*tasks, return_exceptions=True)
+
+    # Process results and handle exceptions
+    final_results = []
+    queries_with_results = 0
+    queries_withheld = 0
+
+    for i, result in enumerate(batch_results):
+        query_info = normalized_queries[i]
+
+        if isinstance(result, Exception):
+            # Query failed with exception
+            final_results.append(
+                {
+                    "query_index": query_info["index"],
+                    "query": query_info["query"],
+                    "table": query_info["table"],
+                    "error": str(result),
+                    "message": "Search failed due to an error",
+                }
+            )
+        else:
+            # Add query index to result
+            result["query_index"] = query_info["index"]
+            result["query"] = query_info["query"]
+            result["table_searched"] = query_info["table"]
+
+            # Check if results were withheld due to low relevance
+            if "relevance_warning" in result:
+                queries_withheld += 1
+            elif "results" in result or "results_by_source" in result:
+                queries_with_results += 1
+
+            final_results.append(result)
+
+    execution_time_ms = int((time.time() - start_time) * 1000)
+
+    # Compile batch response
+    batch_response = {
+        "batch_results": final_results,
+        "execution_time_ms": execution_time_ms,
+        "queries_executed": len(queries),
+        "queries_with_results": queries_with_results,
+        "queries_withheld": queries_withheld,
+        "summary": f"Executed {len(queries)} queries in {execution_time_ms}ms. "
+        f"{queries_with_results} returned results, {queries_withheld} withheld due to low relevance.",
+    }
+
+    # Log batch execution
+    if (
+        ctx.deps
+        and hasattr(ctx.deps, "conversation_context")
+        and ctx.deps.conversation_context
+    ):
+        logger.info(
+            f"Batch search executed: {len(queries)} queries in {execution_time_ms}ms "
+            f"(results: {queries_with_results}, withheld: {queries_withheld})"
+        )
+
+    return json.dumps(batch_response, indent=2)
+
+
+async def _execute_single_query_with_validation(
+    ctx: RunContext[PulsePalDependencies], query_config: Dict[str, Any]
+) -> Dict[str, Any]:
+    """
+    Execute a single search query with relevance validation.
+
+    This extracts the core logic from search_pulseq_knowledge for reuse in batch mode.
+
+    Args:
+        ctx: PydanticAI run context with dependencies
+        query_config: Dictionary with 'query', 'table', and 'limit'
+
+    Returns:
+        Dictionary with search results or relevance warning
+    """
+    query = query_config["query"]
+    table = query_config.get("table", "auto")
+    limit = query_config.get("limit", 5)
 
     # Get or create RAG service
     if not hasattr(ctx.deps, "rag_v2"):
         ctx.deps.rag_v2 = ModernPulseqRAG()
-
-    # Function detection no longer passed to tools
-    # The semantic router still runs for force_rag flag but detected functions aren't used
 
     # Check for special patterns in query
     id_match = re.match(r"^ID:(.+)$", query.strip())
@@ -539,10 +702,10 @@ async def search_pulseq_knowledge(
         # Let the existing source-aware search handle it
         results = await ctx.deps.rag_v2.search_with_source_awareness(
             query=query,
-            sources=None,  # Will use all sources
+            sources=None,
             forced=False,
             source_hints=None,
-            use_parallel=True,  # Use parallel search for better performance
+            use_parallel=True,
         )
     elif id_match:
         # Handle ID-based lookup
@@ -562,7 +725,7 @@ async def search_pulseq_knowledge(
             limit=limit,
         )
 
-    # VALIDATION: Check relevance scores and provide feedback to Gemini
+    # VALIDATION: Check relevance scores and provide feedback
     # When relevance is too low, withhold results but provide warning
     try:
         _validate_search_relevance(results, table, query, ctx)
@@ -595,51 +758,7 @@ async def search_pulseq_knowledge(
         # Replace results with cleared version
         results = cleared_results
 
-    # Log search event if we have context and conversation_context
-    if (
-        ctx.deps
-        and hasattr(ctx.deps, "conversation_context")
-        and ctx.deps.conversation_context
-    ):
-        # Log for table-specific searches
-        if "source_table" in results:
-            metadata = {
-                "table": results.get("source_table", "unknown"),
-                "total_results": results.get("total_results", 0),
-                "search_type": results.get("search_metadata", {}).get(
-                    "search_type", "unknown"
-                ),
-            }
-
-            conversation_logger.log_search_event(
-                ctx.deps.conversation_context.session_id,
-                "table_specific_rag",
-                query,
-                results.get("total_results", 0),
-                metadata,
-            )
-        # Log for source-aware searches
-        elif "results_by_source" in results:
-            metadata = {
-                "sources_searched": results.get("search_metadata", {}).get(
-                    "sources_searched", []
-                ),
-                "total_results": results.get("search_metadata", {}).get(
-                    "total_results", 0
-                ),
-            }
-
-            conversation_logger.log_search_event(
-                ctx.deps.conversation_context.session_id,
-                "source_aware_rag",
-                query,
-                results.get("search_metadata", {}).get("total_results", 0),
-                metadata,
-            )
-
-    # Return raw JSON results for Gemini to process
-    # This follows the specification in docs/RAG-search-plan.md
-    return json.dumps(results, indent=2)
+    return results
 
 
 def format_sequence_result(result: Dict) -> str:

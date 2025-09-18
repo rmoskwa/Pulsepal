@@ -1,6 +1,6 @@
 # Pulseq Function Reference
 
-## Verified Pulseq Functions (88 total)
+## Verified Pulseq Functions (89 total)
 Accurate as of Pulseq v1.5.0 - MATLAB implementation
 
 ### RF Pulse Creation
@@ -55,6 +55,7 @@ Accurate as of Pulseq v1.5.0 - MATLAB implementation
 - `mr.calcRamp`: Calculates ramp time for given gradient parameters
 
 ### 3D Spatial Transformations
+- `mr.rotate`: Rotates a 3D vector by a given unit quaternion for efficient spatial transformations
 - `mr.rotate3D`: Rotates gradient objects according to a 3x3 rotation matrix
 - `mr.transform`: Applies general transformation matrix to gradients
 - `seq.modGradAxis`: Inverts or scales all gradients along specified axes

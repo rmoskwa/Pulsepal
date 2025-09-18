@@ -42,7 +42,8 @@ MATLAB_FUNCTIONS = {
         "decompressShape",
         "restoreAdditionalShapeSamples",
         # Transform and math
-        "rotate3D",
+        "rotate",  # Quaternion rotation of 3D vectors
+        "rotate3D",  # Rotation of gradient objects in blocks
         "transform",
         "traj2grad",
         # System functions
@@ -113,7 +114,6 @@ MATLAB_FUNCTIONS = {
         "fromRotMat",
         "multiply",
         "normalize",
-        "rotate",  # Quaternion rotation
         "toRotMat",
     },
     "mr_siemens_functions": {  # mr.Siemens.* functions
@@ -227,6 +227,7 @@ NAMESPACE_MAP = {
         "compressShape_mat",
         "decompressShape",
         "restoreAdditionalShapeSamples",
+        "rotate",
         "rotate3D",
         "transform",
         "traj2grad",
@@ -301,7 +302,6 @@ NAMESPACE_MAP = {
         "fromRotMat",
         "multiply",
         "normalize",
-        "rotate",
         "toRotMat",
     },
     # Standalone functions (no namespace)
