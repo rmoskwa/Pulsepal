@@ -1,6 +1,6 @@
 # ![Pulsepal Logo](pulsepal.png)
 
-**An advanced PydanticAI system with intelligent decision-making for Pulseq MRI sequence development**
+**An agent with intelligent decision-making for Pulseq MRI sequence development**
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![PydanticAI](https://img.shields.io/badge/PydanticAI-latest-green.svg)](https://ai.pydantic.dev/)
