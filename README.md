@@ -8,8 +8,6 @@
 [![Gemini 2.5 Flash](https://img.shields.io/badge/Gemini-2.5--flash-purple.svg)](https://ai.google.dev/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-### **NOTE:** Pulsepal is in alpha testing and free for users. If you are interested in using Pulsepal and providing feedback, please reach out to `rmoskwa@wisc.edu`. Pulsepal will be tailored to researcher's needs!
-### **NOTE:** While the code and framework for Pulsepal is open source, the backend database powering Pulsepal cannot be shared for security reasons. However, Pulsepal is free for anyone to try.
 ## 🚀 What is PulsePal?
 
 PulsePal is an intelligent AI assistant specifically designed for MRI sequence programming using the Pulseq framework. PulsePal combines deep MRI physics knowledge with Pulseq-specific documentation.
