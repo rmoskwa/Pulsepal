@@ -42,36 +42,44 @@ logger.info("=" * 60)
 
 # Optional authentication for deployment
 AUTH_ENABLED = False
-try:
-    logger.info("Attempting to import auth module...")
-    from pulsepal.auth import (
-        check_rate_limit,
-        get_chainlit_auth_callback,
-    )
 
-    logger.info("Auth module imported successfully")
+# Check if authentication should be disabled (for local development)
+DISABLE_AUTH = os.getenv("DISABLE_AUTH", "false").lower() == "true"
 
-    # Always enable auth if the module is available - let the auth module handle key validation
-    AUTH_ENABLED = True
-    logger.info("🔐 AUTHENTICATION ENABLED")
-
-    # Use the auth callback from the auth module
-    auth_callback = get_chainlit_auth_callback()
-    logger.info("Auth callback registered successfully")
-
-except ImportError as e:
-    # Auth module not available
-    logger.error(f"❌ Auth module import failed: {e}")
-    import traceback
-
-    logger.error(traceback.format_exc())
+if DISABLE_AUTH:
+    logger.info("🔓 AUTHENTICATION DISABLED - Running in local development mode")
     AUTH_ENABLED = False
-except Exception as e:
-    logger.error(f"❌ Unexpected error during auth setup: {e}")
-    import traceback
+else:
+    try:
+        logger.info("Attempting to import auth module...")
+        from pulsepal.auth import (
+            check_rate_limit,
+            get_chainlit_auth_callback,
+        )
 
-    logger.error(traceback.format_exc())
-    AUTH_ENABLED = False
+        logger.info("Auth module imported successfully")
+
+        # Always enable auth if the module is available - let the auth module handle key validation
+        AUTH_ENABLED = True
+        logger.info("🔐 AUTHENTICATION ENABLED")
+
+        # Use the auth callback from the auth module
+        auth_callback = get_chainlit_auth_callback()
+        logger.info("Auth callback registered successfully")
+
+    except ImportError as e:
+        # Auth module not available
+        logger.error(f"❌ Auth module import failed: {e}")
+        import traceback
+
+        logger.error(traceback.format_exc())
+        AUTH_ENABLED = False
+    except Exception as e:
+        logger.error(f"❌ Unexpected error during auth setup: {e}")
+        import traceback
+
+        logger.error(traceback.format_exc())
+        AUTH_ENABLED = False
 
 # Define fallback rate limiting if auth is disabled
 if not AUTH_ENABLED:
@@ -305,6 +313,11 @@ Current Focus: [What you need help with]
                         logger.warning("User found but no metadata available")
                 else:
                     logger.warning("No user found in session during on_chat_start")
+            else:
+                # Running in local development mode without authentication
+                auth_info = (
+                    "\n\n🔓 **Local Development Mode** - Authentication disabled"
+                )
 
             # Check if context is already active
             context_status = ""
@@ -651,171 +664,170 @@ async def main(message: cl.Message):
 
         apply_semantic_routing(enhanced_query, deps)
 
-        # Show typing indicator with intelligent status
-        async with cl.Step(
-            name="🧠 Processing with Enhanced RAG v2 (Function Validation Active)...",
-        ) as step:
-            try:
-                # Add user message to conversation context (use enhanced_query if code was uploaded)
-                deps.conversation_context.add_conversation("user", enhanced_query)
+        # Show simple thinking indicator
+        thinking_msg = cl.Message(content="Thinking...")
+        await thinking_msg.send()
 
-                # Log user message for debugging
-                conversation_logger.log_conversation(
-                    pulsepal_session_id,
-                    "user",
-                    enhanced_query,
-                    {"rag_version": "v2_enhanced"},
+        try:
+            # Add user message to conversation context (use enhanced_query if code was uploaded)
+            deps.conversation_context.add_conversation("user", enhanced_query)
+
+            # Log user message for debugging
+            conversation_logger.log_conversation(
+                pulsepal_session_id,
+                "user",
+                enhanced_query,
+                {"rag_version": "v2_enhanced"},
+            )
+
+            # Get conversation history for context
+            history_context = deps.conversation_context.get_formatted_history()
+
+            # Get sequence context if enabled
+            sequence_context = deps.conversation_context.get_active_context()
+
+            # Build query with all relevant context
+            context_parts = []
+
+            # Add sequence context first if available (highest priority)
+            if sequence_context:
+                context_parts.append(sequence_context)
+                logger.info(
+                    f"Including sequence context: {len(sequence_context)} chars",
                 )
 
-                # Get conversation history for context
-                history_context = deps.conversation_context.get_formatted_history()
+            # Add conversation history
+            if history_context:
+                context_parts.append(history_context)
 
-                # Get sequence context if enabled
-                sequence_context = deps.conversation_context.get_active_context()
-
-                # Build query with all relevant context
-                context_parts = []
-
-                # Add sequence context first if available (highest priority)
-                if sequence_context:
-                    context_parts.append(sequence_context)
-                    logger.info(
-                        f"Including sequence context: {len(sequence_context)} chars",
-                    )
-
-                # Add conversation history
-                if history_context:
-                    context_parts.append(history_context)
-
-                # Create query with context
-                if context_parts:
-                    query_with_context = (
-                        "\n\n".join(context_parts)
-                        + f"\n\nCurrent query: {enhanced_query}"
-                    )
-                else:
-                    query_with_context = enhanced_query
-
-                # Detect language preference from query
-                deps.conversation_context.detect_language_preference(enhanced_query)
-
-                # Semantic routing before Gemini (required)
-                routing_decision = _semantic_router.classify_query(enhanced_query)
-
-                # Log the routing decision
-                _semantic_router.log_routing_decision(
-                    pulsepal_session_id,
-                    enhanced_query,
-                    routing_decision,
-                    conversation_logger,
+            # Create query with context
+            if context_parts:
+                query_with_context = (
+                    "\n\n".join(context_parts) + f"\n\nCurrent query: {enhanced_query}"
                 )
-
-                # Store routing decision in deps
-                deps.routing_decision = routing_decision
-
-                # Apply routing decision but don't inject detected functions
-                # Only use for logging and validation errors
-                if routing_decision.detected_functions:
-                    deps.validation_errors = routing_decision.validation_errors
-
-                    logger.info(
-                        f"Function detector found {len(routing_decision.detected_functions)} function(s): "
-                        f"{[f['name'] for f in routing_decision.detected_functions]}",
-                    )
-
-                    if routing_decision.validation_errors:
-                        logger.warning(
-                            f"Validation errors detected: {routing_decision.validation_errors}"
-                        )
-
-                # Check if RAG search should be forced based on routing decision
-                from pulsepal.semantic_router import QueryRoute
-
-                if routing_decision.route == QueryRoute.FORCE_RAG:
-                    logger.info(
-                        f"Semantic router recommends RAG search (confidence: {routing_decision.confidence:.2f})"
-                    )
-                    # Set the force_rag flag on deps so it's available to agent
-                    deps.force_rag = True
-                    # Inject the hint into the query for this message only
-                    query_for_agent = (
-                        f"{query_with_context}\n\n⚠️ **IMPORTANT: You MUST use the search_pulseq_knowledge tool to answer this question accurately. "
-                        f"The query contains Pulseq-specific functions that require searching the knowledge base. "
-                        f"DO NOT rely on your training data - search the database first, then provide your answer based on the search results.**"
-                    )
-                    logger.info(
-                        "💡 Injecting strong RAG search directive into Chainlit query"
-                    )
-                else:
-                    deps.force_rag = False
-                    query_for_agent = query_with_context
-
-                # Log the detection but don't restrict Gemini's choices
-                logger.debug(
-                    f"Function detection complete. Route: {routing_decision.route.value}"
-                )
-
-                # Run agent with potentially modified query and model settings
-                result = await pulsepal_agent.run(
-                    query_for_agent, deps=deps, model_settings={"temperature": 1.0}
-                )
-
-                # Add response to conversation history
-                # Use result.output for modern pydantic-ai
-                response_text = (
-                    result.output if hasattr(result, "output") else str(result)
-                )
-                deps.conversation_context.add_conversation("assistant", response_text)
-
-                # Track usage if authenticated
-                if AUTH_ENABLED and api_key:
-                    try:
-                        from pulsepal.auth import get_auth
-
-                        auth = get_auth()
-
-                        # Track the usage (simplified - just increment counter)
-                        await auth.increment_usage(api_key)
-
-                        # Update the user metadata with new usage counts
-                        user_info = auth.validate_api_key(api_key)
-                        if user_info:
-                            user = cl.user_session.get("user")
-                            if user and hasattr(user, "metadata"):
-                                user.metadata.update(
-                                    {
-                                        "used": user_info.get("used", 0),
-                                        "remaining": user_info.get("remaining", 100),
-                                    }
-                                )
-
-                            # Show remaining messages if low
-                            remaining = user_info.get("remaining", 100)
-                            if remaining > 0 and remaining <= 10:
-                                await cl.Message(
-                                    content=f"ℹ️ You have {remaining} message{'s' if remaining != 1 else ''} remaining in your plan.",
-                                    author="System",
-                                ).send()
-
-                    except Exception as e:
-                        logger.error(f"Failed to track usage: {e}")
-
-                # Log assistant response for debugging
-                conversation_logger.log_conversation(
-                    pulsepal_session_id,
-                    "assistant",
-                    response_text,
-                    {"rag_version": "v2_enhanced"},
-                )
-
-                step.output = "✅ Response ready (Enhanced RAG v2 with validation)"
-
-            except Exception as e:
-                logger.error(f"Error running Pulsepal agent: {e}")
-                step.output = f"❌ Error: {e}"
-                result_output = f"I apologize, but I encountered an error: {e}\n\nPlease try rephrasing your question or check that all services are running properly."
             else:
-                result_output = response_text
+                query_with_context = enhanced_query
+
+            # Detect language preference from query
+            deps.conversation_context.detect_language_preference(enhanced_query)
+
+            # Semantic routing before Gemini (required)
+            routing_decision = _semantic_router.classify_query(enhanced_query)
+
+            # Log the routing decision
+            _semantic_router.log_routing_decision(
+                pulsepal_session_id,
+                enhanced_query,
+                routing_decision,
+                conversation_logger,
+            )
+
+            # Store routing decision in deps
+            deps.routing_decision = routing_decision
+
+            # Apply routing decision but don't inject detected functions
+            # Only use for logging and validation errors
+            if routing_decision.detected_functions:
+                deps.validation_errors = routing_decision.validation_errors
+
+                logger.info(
+                    f"Function detector found {len(routing_decision.detected_functions)} function(s): "
+                    f"{[f['name'] for f in routing_decision.detected_functions]}",
+                )
+
+                if routing_decision.validation_errors:
+                    logger.warning(
+                        f"Validation errors detected: {routing_decision.validation_errors}"
+                    )
+
+            # Check if RAG search should be forced based on routing decision
+            from pulsepal.semantic_router import QueryRoute
+
+            if routing_decision.route == QueryRoute.FORCE_RAG:
+                logger.info(
+                    f"Semantic router recommends RAG search (confidence: {routing_decision.confidence:.2f})"
+                )
+                # Set the force_rag flag on deps so it's available to agent
+                deps.force_rag = True
+                # Inject the hint into the query for this message only
+                query_for_agent = (
+                    f"{query_with_context}\n\n⚠️ **IMPORTANT: You MUST use the search_pulseq_knowledge tool to answer this question accurately. "
+                    f"The query contains Pulseq-specific functions that require searching the knowledge base. "
+                    f"DO NOT rely on your training data - search the database first, then provide your answer based on the search results.**"
+                )
+                logger.info(
+                    "💡 Injecting strong RAG search directive into Chainlit query"
+                )
+            else:
+                deps.force_rag = False
+                query_for_agent = query_with_context
+
+            # Log the detection but don't restrict Gemini's choices
+            logger.debug(
+                f"Function detection complete. Route: {routing_decision.route.value}"
+            )
+
+            # Run agent with potentially modified query and model settings
+            result = await pulsepal_agent.run(
+                query_for_agent, deps=deps, model_settings={"temperature": 1.0}
+            )
+
+            # Add response to conversation history
+            # Use result.output for modern pydantic-ai
+            response_text = result.output if hasattr(result, "output") else str(result)
+            deps.conversation_context.add_conversation("assistant", response_text)
+
+            # Track usage if authenticated
+            if AUTH_ENABLED and api_key:
+                try:
+                    from pulsepal.auth import get_auth
+
+                    auth = get_auth()
+
+                    # Track the usage (simplified - just increment counter)
+                    await auth.increment_usage(api_key)
+
+                    # Update the user metadata with new usage counts
+                    user_info = auth.validate_api_key(api_key)
+                    if user_info:
+                        user = cl.user_session.get("user")
+                        if user and hasattr(user, "metadata"):
+                            user.metadata.update(
+                                {
+                                    "used": user_info.get("used", 0),
+                                    "remaining": user_info.get("remaining", 100),
+                                }
+                            )
+
+                        # Show remaining messages if low
+                        remaining = user_info.get("remaining", 100)
+                        if remaining > 0 and remaining <= 10:
+                            await cl.Message(
+                                content=f"ℹ️ You have {remaining} message{'s' if remaining != 1 else ''} remaining in your plan.",
+                                author="System",
+                            ).send()
+
+                except Exception as e:
+                    logger.error(f"Failed to track usage: {e}")
+
+            # Log assistant response for debugging
+            conversation_logger.log_conversation(
+                pulsepal_session_id,
+                "assistant",
+                response_text,
+                {"rag_version": "v2_enhanced"},
+            )
+
+            # Remove the thinking message
+            await thinking_msg.remove()
+
+        except Exception as e:
+            logger.error(f"Error running Pulsepal agent: {e}")
+            # Remove thinking message on error
+            await thinking_msg.remove()
+            result_output = f"I apologize, but I encountered an error: {e}\n\nPlease try rephrasing your question or check that all services are running properly."
+        else:
+            result_output = response_text
 
         # Add sequence context indicator if active
         context_prefix = ""
