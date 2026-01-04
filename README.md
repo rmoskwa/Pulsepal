@@ -1,3 +1,5 @@
+# This project has halted due to newer devlopments and project direction. Further continuation of of this work will be linked when available.
+
 # ![Pulsepal Logo](pulsepal.png)
 
 **An AI agent with intelligent decision-making for Pulseq MRI sequence development**
